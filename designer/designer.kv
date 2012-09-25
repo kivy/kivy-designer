@@ -1,0 +1,78 @@
+#:kivy 1.4.1
+
+<Playground>:
+    root: root_widget
+    do_scale: False
+    do_rotation: False
+    size_hint: None, None
+    size: 640, 480
+    pos: 155, 60
+    auto_bring_to_front: False
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+        Line:
+            points: [0, 0, self.width, 0, self.width, self.height, 0, self.height]
+            width: 2.
+            close: True
+
+    FloatLayout:
+        id: root_widget
+        size: root.size
+
+<PlaygroundDragElement>:
+    size_hint: None, None
+    size: 100, 100
+    canvas:
+        Color:
+            rgb: (0.9, 0.9, 0.9) if self.can_place else (0.9, 0.1, 0.1)
+        Line:
+            points: [self.x, self.y, self.center_x - 20, self.y, self.center_x, self.y - 20, self.center_x + 20, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
+            close: True
+            width: 2.
+
+    on_target: app.focus_widget(args[1])
+
+<Toolbox>:
+    widgets_list: widgets_list
+    size_hint: None, 1
+    width: 150
+
+    canvas:
+        Color:
+            rgb: 0.1, 0.1, 0.1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    ScrollView:
+        do_scroll_x: False
+        GridLayout:
+            id: widgets_list
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+
+<ToolboxCategory>:
+    bold: True
+    size_hint_y: None
+    height: '32pt'
+
+<ToolboxButton>:
+    size_hint_y: None
+    height: '32pt'
+    on_press_and_touch: app.create_draggable_element(self.text, args[1])
+
+<StatusBar>:
+    canvas:
+        Color:
+            rgb: 0.3, 0.3, 0.3
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    size_hint_y: None
+    height: '20pt'
+
+    Label:
+        text: repr(app.widget_focused)
+        font_size: '10pt'
