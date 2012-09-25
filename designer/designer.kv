@@ -56,17 +56,17 @@
 <ToolboxCategory>:
     bold: True
     size_hint_y: None
-    height: '32pt'
+    height: '22pt'
 
 <ToolboxButton>:
     size_hint_y: None
-    height: '32pt'
+    height: '22pt'
     on_press_and_touch: app.create_draggable_element(self.text, args[1])
 
 <StatusBar>:
     canvas:
         Color:
-            rgb: 0.3, 0.3, 0.3
+            rgb: 0.1, 0.1, 0.1
         Rectangle:
             pos: self.pos
             size: self.size
@@ -76,3 +76,49 @@
     Label:
         text: repr(app.widget_focused)
         font_size: '10pt'
+
+<PropertyViewer>:
+    size_hint: None, 1
+    width: 250
+    pos_hint: {'right': 1}
+    do_scroll_x: False
+    prop_list: prop_list
+
+    canvas:
+        Color:
+            rgb: 0.1, 0.1, 0.1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        id: prop_list
+        cols: 1
+        size_hint_y: None
+        height: self.minimum_height
+
+<PropertyLabel>:
+    size_hint_y: None
+    height: '20pt'
+    font_size: '10pt'
+
+<PropertyBase>:
+    size_hint_y: None
+    height: '32pt'
+    propvalue: getattr(self.propwidget, self.propname)
+
+    canvas.after:
+        Color:
+            rgba: .9, .1, .1, (1 if self.have_error else 0)
+        Line:
+            points: [self.x, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
+            close: True
+            width: 2
+
+<PropertyTextInput>:
+    text: str(getattr(self.propwidget, self.propname))
+    on_text: self.set_value(args[1])
+
+<PropertyBoolean>:
+    active: getattr(self.propwidget, self.propname)
+    on_active: self.set_value(args[1])

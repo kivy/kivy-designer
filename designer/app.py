@@ -9,12 +9,13 @@ from kivy.properties import ObjectProperty
 from designer.playground import Playground, PlaygroundDragElement
 from designer.toolbox import Toolbox
 from designer.statusbar import StatusBar
+from designer.propertyviewer import PropertyViewer
 from designer.common import widgets
 
 
 class DesignerApp(App):
 
-    widget_focused = ObjectProperty()
+    widget_focused = ObjectProperty(allownone=True)
 
     def load_project(self, directory):
         pass
@@ -31,9 +32,12 @@ class DesignerApp(App):
         self.playground = Playground()
         self.toolbox = Toolbox()
         self.statusbar = StatusBar()
+        self.propertyviewer = PropertyViewer()
         self.root.add_widget(self.playground)
         self.root.add_widget(self.toolbox)
+        self.root.add_widget(self.propertyviewer)
         self.root.add_widget(self.statusbar)
+        self.bind(widget_focused=self.propertyviewer.setter('widget'))
 
     def create_draggable_element(self, widgetname, touch):
         # create the element, and make it draggable until the touch is released
