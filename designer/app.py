@@ -38,20 +38,8 @@ class DesignerApp(App):
         Factory.register('WidgetsTree', module='designer.nodetree')
         self._widget_focused = None
         self.root = Designer()
-        '''
-        self.playground = Playground()
-        self.toolbox = Toolbox()
-        self.statusbar = StatusBar()
-        self.propertyviewer = PropertyViewer()
-        self.widgettree = WidgetsTree(app=self, playground=self.playground)
-
-        self.root.add_widget(self.playground)
-        self.root.add_widget(self.toolbox)
-        self.root.add_widget(self.propertyviewer)
-        self.root.add_widget(self.statusbar)
-        self.root.add_widget(self.widgettree)
-        '''
         self.bind(widget_focused=self.root.propertyviewer.setter('widget'))
+        self.focus_widget(self.root.playground.root)
 
     def create_draggable_element(self, widgetname, touch):
         # create the element, and make it draggable until the touch is released
