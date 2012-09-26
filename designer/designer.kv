@@ -1,6 +1,7 @@
 #:kivy 1.4.1
 #:set bgcolor (.06, .07, .08)
 #:set bordercolor (.54, .59, .60)
+#:set titlecolor (.34, .39, .40)
 
 <Designer>:
     propertyviewer: propertyviewer
@@ -11,12 +12,48 @@
         cols: 1
 
         FloatLayout:
+			canvas:
+				Color:
+					rgb: .21, .22, .22
+				Rectangle:
+					pos: self.pos
+					size: self.size
 
             Playground:
                 id: playground
+				canvas.before:
+					Color:
+						rgb: 0, 0, 0
+					Rectangle:
+						size: self.size
 
-            Toolbox:
-                pos_hint: {'y': 0, 'x': 0}
+			GridLayout:
+				cols: 1
+				size_hint: None, 1
+				width: 150
+				pos_hint: {'y': 0, 'x': 0}
+                canvas:
+                    Color:
+                        rgb: bgcolor
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+				Label:
+					text: 'Toolbox'
+					font_size: '10pt'
+					height: '20pt'
+					size_hint_y: None
+
+					canvas.before:
+						Color:
+							rgb: titlecolor
+						Rectangle:
+							pos: self.pos
+							size: self.size
+
+
+				Toolbox
 
             GridLayout:
                 cols: 1
@@ -27,17 +64,26 @@
 
                 canvas:
                     Color:
-                        rgb: bordercolor
+                        rgb: titlecolor
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                    Rectangle:
-                        pos: self.x - 0.5, self.y
-                        size: 1, self.height
+
+				Label:
+					text: 'Widget Navigator'
+					font_size: '10pt'
+					height: '20pt'
+					size_hint_y: None
 
                 WidgetsTree:
                     id: widgettree
                     playground: playground
+
+				Label:
+					text: 'Property Navigator'
+					font_size: '10pt'
+					height: '20pt'
+					size_hint_y: None
 
                 PropertyViewer:
                     id: propertyviewer
@@ -79,15 +125,6 @@
 
 <Toolbox>:
     widgets_list: widgets_list
-    size_hint: None, 1
-    width: 150
-
-    canvas:
-        Color:
-            rgb: bgcolor
-        Rectangle:
-            pos: self.pos
-            size: self.size
 
     ScrollView:
         do_scroll_x: False
