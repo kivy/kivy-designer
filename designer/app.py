@@ -8,13 +8,14 @@ from kivy.factory import Factory
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 
-from designer.playground import Playground, PlaygroundDragElement
-from designer.toolbox import Toolbox
-from designer.statusbar import StatusBar
-from designer.propertyviewer import PropertyViewer
+from designer.playground import PlaygroundDragElement
 from designer.common import widgets
-from designer.nodetree import WidgetsTree
 
+
+class Designer(FloatLayout):
+    propertyviewer = ObjectProperty(None)
+    playground = ObjectProperty(None)
+    widgetstree = ObjectProperty(None)
 
 class DesignerApp(App):
 
@@ -30,8 +31,14 @@ class DesignerApp(App):
         pass
 
     def build(self):
+        Factory.register('Playground', module='designer.playground')
+        Factory.register('Toolbox', module='designer.toolbox')
+        Factory.register('StatusBar', module='designer.statusbar')
+        Factory.register('PropertyViewer', module='designer.propertyviewer')
+        Factory.register('WidgetsTree', module='designer.nodetree')
         self._widget_focused = None
-        self.root = FloatLayout()
+        self.root = Designer()
+        '''
         self.playground = Playground()
         self.toolbox = Toolbox()
         self.statusbar = StatusBar()
@@ -43,8 +50,8 @@ class DesignerApp(App):
         self.root.add_widget(self.propertyviewer)
         self.root.add_widget(self.statusbar)
         self.root.add_widget(self.widgettree)
-
-        self.bind(widget_focused=self.propertyviewer.setter('widget'))
+        '''
+        self.bind(widget_focused=self.root.propertyviewer.setter('widget'))
 
     def create_draggable_element(self, widgetname, touch):
         # create the element, and make it draggable until the touch is released
@@ -54,7 +61,7 @@ class DesignerApp(App):
             if len(options) > 2:
                 default_args = options[2]
         widget = getattr(Factory, widgetname)(**default_args)
-        container = PlaygroundDragElement(playground=self.playground)
+        container = PlaygroundDragElement(playground=self.root.playground)
         container.add_widget(widget)
         touch.grab(container)
         self.root.add_widget(container)
@@ -77,8 +84,8 @@ class DesignerApp(App):
         else:
             from kivy.graphics import Color, Line
             with widget.canvas.after:
-                color = Color(.3, .9, .3)
+                color = Color(.42, .62, .65)
                 line = Line(points=points, close=True, width=2.)
             self._widget_focused = [widget, color, line]
 
-        Clock.schedule_once(self.widgettree.refresh, 1)
+        Clock.schedule_once(self.root.widgettree.refresh, 1)

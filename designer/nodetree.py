@@ -1,10 +1,9 @@
-from kivy.uix.treeview import TreeViewNode
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.treeview import TreeViewLabel
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import ObjectProperty
 
 
-class TreeViewButton(BoxLayout, TreeViewNode):
+class WidgetTreeElement(TreeViewLabel):
     tree = ObjectProperty(None)
     app = ObjectProperty(None)
     node = ObjectProperty(None)
@@ -25,7 +24,7 @@ class WidgetsTree(ScrollView):
     tree = ObjectProperty(None)
 
     def recursive_insert(self, node, treenode):
-        b = TreeViewButton(tree=self, node=node, app=self.app)
+        b = WidgetTreeElement(tree=self, node=node, app=self.app)
         self.tree.add_node(b, treenode)
 
         for child in node.children:
@@ -35,4 +34,4 @@ class WidgetsTree(ScrollView):
         for node in self.tree.root.nodes:
             self.tree.remove_node(node)
 
-        self.recursive_insert(self.app.playground.root, self.tree.root)
+        self.recursive_insert(self.playground.root, self.tree.root)

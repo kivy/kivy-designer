@@ -2,6 +2,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.properties import ObjectProperty
+from kivy.clock import Clock
 from designer.common import widgets
 
 
@@ -31,9 +32,9 @@ class Toolbox(FloatLayout):
 
     def __init__(self, **kwargs):
         super(Toolbox, self).__init__(**kwargs)
-        self.discover_widgets()
+        Clock.schedule_once(self.discover_widgets, 0)
 
-    def discover_widgets(self):
+    def discover_widgets(self, *largs):
         # for now, don't do auto detection of widgets.
         # just do manual discovery, and tagging.
         categories = list(set([x[1] for x in widgets]))

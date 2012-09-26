@@ -1,4 +1,49 @@
 #:kivy 1.4.1
+#:set bgcolor (.06, .07, .08)
+#:set bordercolor (.54, .59, .60)
+
+<Designer>:
+	propertyviewer: propertyviewer
+	playground: playground
+	widgettree: widgettree
+
+	GridLayout:
+		cols: 1
+
+		FloatLayout:
+
+			Playground:
+				id: playground
+
+			Toolbox:
+				pos_hint: {'y': 0, 'x': 0}
+
+			GridLayout:
+				cols: 1
+				size_hint_x: None
+				width: 250
+				pos_hint: {'y': 0, 'right': 1}
+				spacing: .5
+
+				canvas:
+					Color:
+						rgb: bordercolor
+					Rectangle:
+						pos: self.pos
+						size: self.size
+					Rectangle:
+						pos: self.x - 0.5, self.y
+						size: 1, self.height
+
+				WidgetsTree:
+					id: widgettree
+					app: app
+					playground: playground
+
+				PropertyViewer:
+					id: propertyviewer
+
+		StatusBar
 
 <Playground>:
     root: root_widget
@@ -40,33 +85,43 @@
 
     canvas:
         Color:
-            rgb: 0.1, 0.1, 0.1
+			rgb: bgcolor
         Rectangle:
             pos: self.pos
             size: self.size
 
     ScrollView:
         do_scroll_x: False
+		pos: root.pos
         GridLayout:
             id: widgets_list
             cols: 1
+			spacing: 3
+			padding: 5
             size_hint_y: None
             height: self.minimum_height
 
 <ToolboxCategory>:
-    bold: True
     size_hint_y: None
     height: '22pt'
+    font_size: '10pt'
+	text: self.text[0].upper() + self.text[1:]
 
 <ToolboxButton>:
     size_hint_y: None
     height: '22pt'
+    font_size: '10pt'
     on_press_and_touch: app.create_draggable_element(self.text, args[1])
 
 <StatusBar>:
     canvas:
+		Color:
+			rgb: bordercolor
+		Rectangle:
+			pos: self.x, self.top - 0.5
+			size: self.width, 1
         Color:
-            rgb: 0.1, 0.1, 0.1
+			rgb: bgcolor
         Rectangle:
             pos: self.pos
             size: self.size
@@ -78,34 +133,33 @@
         font_size: '10pt'
 
 <PropertyViewer>:
-    size_hint: None, .5
-    width: 250
-    pos_hint: {'right': 1, 'y': 0}
     do_scroll_x: False
     prop_list: prop_list
 
     canvas:
         Color:
-            rgb: 0.1, 0.1, 0.1
+			rgb: bgcolor
         Rectangle:
             pos: self.pos
             size: self.size
 
     GridLayout:
         id: prop_list
-        cols: 1
+        cols: 2
+		padding: 3
         size_hint_y: None
         height: self.minimum_height
+		row_default_height: '25pt'
 
 <PropertyLabel>:
-    size_hint_y: None
-    height: '20pt'
     font_size: '10pt'
+	valign: 'middle'
+	size_hint_x: None
+	width: max(100, self.texture_size[0] + 10)
 
 <PropertyBase>:
-    size_hint_y: None
-    height: '32pt'
     propvalue: getattr(self.propwidget, self.propname)
+	padding: '6pt', '6pt'
 
     canvas.after:
         Color:
@@ -116,6 +170,7 @@
             width: 2
 
 <PropertyTextInput>:
+	border: 8, 8, 8, 8
     text: str(getattr(self.propwidget, self.propname))
     on_text: self.set_value(args[1])
 
@@ -124,14 +179,11 @@
     on_active: self.set_value(args[1])
 
 <WidgetsTree>:
-    pos_hint: {'right': 1, 'top': 1}
-    size_hint: None, .5
     do_scroll_x: False
-    width: 250
     tree: tree
     canvas:
         Color:
-            rgba: .5, .5, .5, 1
+			rgb: bgcolor
         Rectangle:
             pos: root.pos
             size: root.size
@@ -140,21 +192,10 @@
         id: tree
         height: 1000
         size_hint_y: None
+		hide_root: True
+		on_selected_node: app.focus_widget(args[1].node)
 
-<TreeViewButton>:
-    size_hint: None, 1
-    height: label.texture_size[1]
+<WidgetTreeElement>:
     is_open: True
-
-    Button:
-        id: label
-        text: str(root.node)
-        text_size: self.width, None
-        on_press: root.focus()
-
-    Button:
-        id: delete
-        text: 'x'
-        on_press: root.remove()
-        size_hint_x: None
-        width: '1em'
+	text: getattr(root.node, '__class__').__name__
+	font_size: '10pt'
