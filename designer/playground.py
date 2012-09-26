@@ -93,4 +93,3 @@ class Playground(ScatterPlane):
                 App.get_running_app().focus_widget(target)
                 return True
         return super(Playground, self).on_touch_down(touch)
-
