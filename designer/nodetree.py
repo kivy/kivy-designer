@@ -4,27 +4,14 @@ from kivy.properties import ObjectProperty
 
 
 class WidgetTreeElement(TreeViewLabel):
-    tree = ObjectProperty(None)
-    app = ObjectProperty(None)
     node = ObjectProperty(None)
-
-    def focus(self, *l):
-        self.app.focus_widget(self.node)
-
-    def remove(self, *l):
-        print "remove", self.node
-        parent = self.node.parent
-        parent.remove_widget(self.node)
-        self.tree.refresh()
-
 
 class WidgetsTree(ScrollView):
     playground = ObjectProperty(None)
-    app = ObjectProperty(None)
     tree = ObjectProperty(None)
 
     def recursive_insert(self, node, treenode):
-        b = WidgetTreeElement(tree=self, node=node, app=self.app)
+        b = WidgetTreeElement(node=node)
         self.tree.add_node(b, treenode)
 
         for child in node.children:
