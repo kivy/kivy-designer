@@ -6,11 +6,14 @@ from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty
+from kivy.clock import Clock
+
 from designer.playground import Playground, PlaygroundDragElement
 from designer.toolbox import Toolbox
 from designer.statusbar import StatusBar
 from designer.propertyviewer import PropertyViewer
 from designer.common import widgets
+from designer.nodetree import WidgetsTree
 
 
 class DesignerApp(App):
@@ -33,10 +36,14 @@ class DesignerApp(App):
         self.toolbox = Toolbox()
         self.statusbar = StatusBar()
         self.propertyviewer = PropertyViewer()
+        self.widgettree = WidgetsTree(app=self, playground=self.playground)
+
         self.root.add_widget(self.playground)
         self.root.add_widget(self.toolbox)
         self.root.add_widget(self.propertyviewer)
         self.root.add_widget(self.statusbar)
+        self.root.add_widget(self.widgettree)
+
         self.bind(widget_focused=self.propertyviewer.setter('widget'))
 
     def create_draggable_element(self, widgetname, touch):
@@ -73,3 +80,5 @@ class DesignerApp(App):
                 color = Color(.3, .9, .3)
                 line = Line(points=points, close=True, width=2.)
             self._widget_focused = [widget, color, line]
+
+        Clock.schedule_once(self.widgettree.refresh, 1)

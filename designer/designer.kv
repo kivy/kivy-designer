@@ -78,9 +78,9 @@
         font_size: '10pt'
 
 <PropertyViewer>:
-    size_hint: None, 1
+    size_hint: None, .5
     width: 250
-    pos_hint: {'right': 1}
+    pos_hint: {'right': 1, 'y': 0}
     do_scroll_x: False
     prop_list: prop_list
 
@@ -122,3 +122,39 @@
 <PropertyBoolean>:
     active: getattr(self.propwidget, self.propname)
     on_active: self.set_value(args[1])
+
+<WidgetsTree>:
+    pos_hint: {'right': 1, 'top': 1}
+    size_hint: None, .5
+    do_scroll_x: False
+    width: 250
+    tree: tree
+    canvas:
+        Color:
+            rgba: .5, .5, .5, 1
+        Rectangle:
+            pos: root.pos
+            size: root.size
+
+    TreeView:
+        id: tree
+        height: 1000
+        size_hint_y: None
+
+<TreeViewButton>:
+    size_hint: None, 1
+    height: label.texture_size[1]
+    is_open: True
+
+    Button:
+        id: label
+        text: str(root.node)
+        text_size: self.width, None
+        on_press: root.focus()
+
+    Button:
+        id: delete
+        text: 'x'
+        on_press: root.remove()
+        size_hint_x: None
+        width: '1em'
