@@ -12,26 +12,26 @@
         cols: 1
 
         FloatLayout:
-			canvas:
-				Color:
-					rgb: .21, .22, .22
-				Rectangle:
-					pos: self.pos
-					size: self.size
+            canvas:
+                Color:
+                    rgb: .21, .22, .22
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
 
             Playground:
                 id: playground
-				canvas.before:
-					Color:
-						rgb: 0, 0, 0
-					Rectangle:
-						size: self.size
+                canvas.before:
+                    Color:
+                        rgb: 0, 0, 0
+                    Rectangle:
+                        size: self.size
 
-			GridLayout:
-				cols: 1
-				size_hint: None, 1
-				width: 150
-				pos_hint: {'y': 0, 'x': 0}
+            GridLayout:
+                cols: 1
+                size_hint: None, 1
+                width: 150
+                pos_hint: {'y': 0, 'x': 0}
                 canvas:
                     Color:
                         rgb: bgcolor
@@ -39,21 +39,21 @@
                         pos: self.pos
                         size: self.size
 
-				Label:
-					text: 'Toolbox'
-					font_size: '10pt'
-					height: '20pt'
-					size_hint_y: None
+                Label:
+                    text: 'Toolbox'
+                    font_size: '10pt'
+                    height: '20pt'
+                    size_hint_y: None
 
-					canvas.before:
-						Color:
-							rgb: titlecolor
-						Rectangle:
-							pos: self.pos
-							size: self.size
+                    canvas.before:
+                        Color:
+                            rgb: titlecolor
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
 
 
-				Toolbox
+                Toolbox
 
             GridLayout:
                 cols: 1
@@ -69,21 +69,21 @@
                         pos: self.pos
                         size: self.size
 
-				Label:
-					text: 'Widget Navigator'
-					font_size: '10pt'
-					height: '20pt'
-					size_hint_y: None
+                Label:
+                    text: 'Widget Navigator'
+                    font_size: '10pt'
+                    height: '20pt'
+                    size_hint_y: None
 
                 WidgetsTree:
                     id: widgettree
                     playground: playground
 
-				Label:
-					text: 'Property Navigator'
-					font_size: '10pt'
-					height: '20pt'
-					size_hint_y: None
+                Label:
+                    text: 'Property Navigator'
+                    font_size: '10pt'
+                    height: '20pt'
+                    size_hint_y: None
 
                 PropertyViewer:
                     id: propertyviewer
