@@ -9,10 +9,10 @@ from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from kivy.uix import actionbar
 
-from designer.actioncheckbutton import ActionCheckButton
+from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
-from designer.editcontview import EditContView
+from designer.uix.editcontview import EditContView
 
 class Designer(FloatLayout):
     propertyviewer = ObjectProperty(None)
