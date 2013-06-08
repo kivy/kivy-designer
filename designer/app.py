@@ -7,28 +7,77 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
+from kivy.uix import actionbar
 
+from designer.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
-
+from designer.editcontview import EditContView
 
 class Designer(FloatLayout):
     propertyviewer = ObjectProperty(None)
     playground = ObjectProperty(None)
     widgetstree = ObjectProperty(None)
+    statusbar = ObjectProperty(None)
+    editcontview = ObjectProperty(EditContView())
+
+    def action_btn_new_pressed(self, *args):
+        pass
+
+    def action_btn_open_pressed(self, *args):
+        pass
+
+    def action_btn_save_pressed(self, *args):
+        pass
+
+    def action_btn_save_as_pressed(self, *args):
+        pass
+
+    def action_btn_recent_files_pressed(self, *args):
+        pass
+
+    def action_btn_quit_pressed(self, *args):
+        pass
+
+    def action_btn_undo_pressed(self, *args):
+        pass
+
+    def action_btn_redo_pressed(self, *args):
+        pass
+
+    def action_btn_cut_pressed(self, *args):
+        pass
+
+    def action_btn_copy_pressed(self, *args):
+        pass
+
+    def action_btn_paste_pressed(self, *args):
+        pass
+
+    def action_btn_delete_pressed(self, *args):
+        pass
+
+    def action_btn_select_all_pressed(self, *args):
+        pass
+
+    def action_chk_btn_toolbox_active(self, *args):
+        pass
+
+    def action_chk_btn_property_viewer_active(self, *args):
+        pass
+
+    def action_chk_btn_widget_tree_active(self, *args):
+        pass
+
+    def action_chk_btn_status_bar_active(self, *args):
+        pass
+
+    def action_chk_btn_kv_area_active(self, *args):
+        pass
 
 class DesignerApp(App):
 
     widget_focused = ObjectProperty(allownone=True)
-
-    def load_project(self, directory):
-        pass
-
-    def save_project(self, directory=None):
-        pass
-
-    def clear(self):
-        pass
 
     def build(self):
         Factory.register('Playground', module='designer.playground')

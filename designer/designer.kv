@@ -3,15 +3,119 @@
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
 
+<ActionCheckButton>:
+    orientation: 'horizontal'
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+    canvas.before:
+        Color:
+            rgba: 1,1,1,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: self.background_normal
+
+<EditContView>:
+    ActionPrevious:
+        title: "Edit"
+        width: 100
+        with_previous: True
+    ActionOverflow:
+        ActionButton:
+            text: 'Undo'
+            on_press: root.action_btn_undo_pressed
+        ActionButton:
+            text: 'Redo'
+            on_press: root.action_btn_redo_pressed
+        ActionButton:
+            text: 'Cut'
+            on_press: root.action_btn_cut_pressed
+        ActionButton:
+            text: 'Copy'
+            on_press: root.action_btn_copy_pressed
+        ActionButton:
+            text: 'Paste'
+            on_press: root.action_btn_paste_pressed
+        ActionButton:
+            text: 'Select All'
+            on_press: root.action_btn_delete_pressed
+        ActionButton:
+            text: 'Delete'
+            on_press: root.action_btn_select_all_pressed
+
 <Designer>:
     propertyviewer: propertyviewer
     playground: playground
     widgettree: widgettree
+    statusbar: statusbar
 
+    ActionBar:
+        id: actionbar
+        pos_hint: {'top': 1}
+        size_hint: 1, 0.08
+        ActionView:
+            ActionPrevious:
+                title: 'Kivy Designer'
+                width: 200
+                with_previous: False
+            ActionOverflow:
+            ActionGroup:
+                text: 'File'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'New'
+                    on_press: root.action_btn_new_pressed
+                ActionButton:
+                    text: 'Open'
+                    on_press: root.action_btn_open_pressed
+                ActionButton:
+                    text: 'Save'
+                    on_press: root.action_btn_save_pressed
+                ActionButton:
+                    text: 'Save As'
+                    on_press: root.action_btn_save_as_pressed
+                ActionButton:
+                    text: 'Recent Files'
+                    on_press: root.action_btn_recent_files_pressed
+                ActionButton:
+                    text: 'Quit'
+                    on_press: root.action_btn_quit_pressed
+
+            ActionGroup:
+                text: 'View'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionCheckButton:
+                    text: 'Toolbox'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_toolbox_active
+                ActionCheckButton:
+                    text: 'Property Viewer'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_property_viewer_active
+                ActionCheckButton:
+                    text: 'Widget Tree'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_widget_tree_active
+                ActionCheckButton:
+                    text: 'StatusBar'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_status_bar_active
+                ActionCheckButton:
+                    text: 'KV Area'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_kv_area_active
+                    
     GridLayout:
+        size_hint: 1, None
+        height: root.height - actionbar.height - statusbar.height
+        y: statusbar.height
         cols: 1
 
         FloatLayout:
+            size_hint: 1,1
             canvas:
                 Color:
                     rgb: .21, .22, .22
@@ -99,7 +203,11 @@
                             PropertyViewer:
                                 id: propertyviewer
 
-        StatusBar
+    StatusBar:
+        id: statusbar
+        size_hint_y: None
+        height: '20pt'
+        pos_hint: {'y': 0}
 
 <Playground>:
     root: root_widget
@@ -161,8 +269,6 @@
     on_press_and_touch: app.create_draggable_element(self.text, args[1])
 
 <StatusBar>:
-    size_hint_y: None
-    height: '20pt'
     app: app
     navbar: navbar
     canvas:

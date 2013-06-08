@@ -92,4 +92,7 @@ class Playground(ScatterPlane):
                 target = self.find_target(x, y, self.root)
                 App.get_running_app().focus_widget(target)
                 return True
-        return super(Playground, self).on_touch_down(touch)
+        if self.parent.collide_point (*touch.pos):
+            super(Playground, self).on_touch_down(touch)
+
+        return False
