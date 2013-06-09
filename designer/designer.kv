@@ -42,6 +42,178 @@
             text: 'Delete'
             on_press: root.action_btn_select_all_pressed
 
+<Playground>:
+    root: root_widget
+    do_scale: False
+    do_rotation: False
+    size_hint: None, None
+    size: 600, 400
+    pos: 300, 230
+    auto_bring_to_front: False
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+        Line:
+            points: [0, 0, self.width, 0, self.width, self.height, 0, self.height]
+            width: 2.
+            close: True
+
+    FloatLayout:
+        id: root_widget
+        size: root.size
+
+<PlaygroundDragElement>:
+    size_hint: None, None
+    size: 100, 100
+    canvas:
+        Color:
+            rgb: (0.9, 0.9, 0.9) if self.can_place else (0.9, 0.1, 0.1)
+        Line:
+            points: [self.x, self.y, self.center_x - 20, self.y, self.center_x, self.y - 20, self.center_x + 20, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
+            close: True
+            width: 2.
+
+    on_target: app.focus_widget(args[1])
+
+<Toolbox>:
+    accordion: accordion
+    ScrollView:
+        do_scroll_x: False
+        pos: root.pos
+        Accordion:
+            id: accordion
+            orientation: 'vertical'
+            pos: root.pos
+
+<ToolboxCategory>:
+    gridlayout: gridlayout
+    size_hint_y: None
+    height: '22pt'
+    title: self.title[0].upper() + self.title[1:]
+    ScrollView:
+        GridLayout:
+            id: gridlayout
+            cols: 1
+            orientation: 'vertical'
+            padding: '5sp'
+            spacing: '3sp'
+            size_hint_y: None
+    
+<ToolboxButton>:
+    size_hint_y: None
+    height: '22pt'
+    font_size: '10pt'
+    on_press_and_touch: app.create_draggable_element(self.text, args[1])
+
+<StatusBar>:
+    app: app
+    navbar: navbar
+    canvas:
+        Color:
+            rgb: bordercolor
+        Rectangle:
+            pos: self.x, self.top - 0.5
+            size: self.width, 1
+        Color:
+            rgb: bgcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        rows: 1
+        GridLayout:
+            rows: 1
+            id: navbar
+        BoxLayout:
+            size_hint_x: None
+            width: '44pt'
+            Button:
+                text: 'Delete'
+                font_size: '10pt'
+
+<StatusNavBarButton>:
+    text: getattr(root.node, '__class__').__name__
+    font_size: '10pt'
+    width: self.texture_size[0] + 20
+    size_hint_x: None
+    on_release: app.focus_widget(root.node)
+
+<StatusNavBarSeparator>:
+    text: '>'
+    font_size: '10pt'
+    width: self.texture_size[0] + 20
+    size_hint_x: None
+
+<PropertyViewer>:
+    do_scroll_x: False
+    prop_list: prop_list
+
+    canvas:
+        Color:
+            rgb: bgcolor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        id: prop_list
+        cols: 2
+        padding: 3
+        size_hint_y: None
+        height: self.minimum_height
+        row_default_height: '25pt'
+
+<PropertyLabel>:
+    font_size: '10pt'
+    valign: 'middle'
+    size_hint_x: None
+    width: max(100, self.texture_size[0] + 10)
+
+<PropertyBase>:
+    propvalue: getattr(self.propwidget, self.propname)
+    padding: '6pt', '6pt'
+
+    canvas.after:
+        Color:
+            rgba: .9, .1, .1, (1 if self.have_error else 0)
+        Line:
+            points: [self.x, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
+            close: True
+            width: 2
+
+<PropertyTextInput>:
+    border: 8, 8, 8, 8
+    text: str(getattr(self.propwidget, self.propname))
+    on_text: self.set_value(args[1])
+
+<PropertyBoolean>:
+    active: getattr(self.propwidget, self.propname)
+    on_active: self.set_value(args[1])
+
+<WidgetsTree>:
+    do_scroll_x: False
+    tree: tree
+    canvas:
+        Color:
+            rgb: bgcolor
+        Rectangle:
+            pos: root.pos
+            size: root.size
+
+    TreeView:
+        id: tree
+        height: 1000
+        size_hint_y: None
+        hide_root: True
+        on_selected_node: app.focus_widget(args[1].node)
+
+<WidgetTreeElement>:
+    is_open: True
+    text: getattr(root.node, '__class__').__name__
+    font_size: '10pt'
+
+
 <Designer>:
     propertyviewer: propertyviewer
     playground: playground
@@ -226,171 +398,3 @@
         size_hint_y: None
         height: '20pt'
         pos_hint: {'y': 0}
-
-<Playground>:
-    root: root_widget
-    do_scale: False
-    do_rotation: False
-    size_hint: None, None
-    size: 600, 400
-    pos: 300, 230
-    auto_bring_to_front: False
-    canvas:
-        Color:
-            rgb: 1, 1, 1
-        Line:
-            points: [0, 0, self.width, 0, self.width, self.height, 0, self.height]
-            width: 2.
-            close: True
-
-    FloatLayout:
-        id: root_widget
-        size: root.size
-
-<PlaygroundDragElement>:
-    size_hint: None, None
-    size: 100, 100
-    canvas:
-        Color:
-            rgb: (0.9, 0.9, 0.9) if self.can_place else (0.9, 0.1, 0.1)
-        Line:
-            points: [self.x, self.y, self.center_x - 20, self.y, self.center_x, self.y - 20, self.center_x + 20, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
-            close: True
-            width: 2.
-
-    on_target: app.focus_widget(args[1])
-
-<Toolbox>:
-    widgets_list: widgets_list
-
-    ScrollView:
-        do_scroll_x: False
-        pos: root.pos
-        GridLayout:
-            id: widgets_list
-            cols: 1
-            spacing: 3
-            padding: 5
-            size_hint_y: None
-            height: self.minimum_height
-
-<ToolboxCategory>:
-    size_hint_y: None
-    height: '22pt'
-    font_size: '10pt'
-    text: self.text[0].upper() + self.text[1:]
-
-<ToolboxButton>:
-    size_hint_y: None
-    height: '22pt'
-    font_size: '10pt'
-    on_press_and_touch: app.create_draggable_element(self.text, args[1])
-
-<StatusBar>:
-    app: app
-    navbar: navbar
-    canvas:
-        Color:
-            rgb: bordercolor
-        Rectangle:
-            pos: self.x, self.top - 0.5
-            size: self.width, 1
-        Color:
-            rgb: bgcolor
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    GridLayout:
-        rows: 1
-        GridLayout:
-            rows: 1
-            id: navbar
-        BoxLayout:
-            size_hint_x: None
-            width: '44pt'
-            Button:
-                text: 'Delete'
-                font_size: '10pt'
-
-<StatusNavBarButton>:
-    text: getattr(root.node, '__class__').__name__
-    font_size: '10pt'
-    width: self.texture_size[0] + 20
-    size_hint_x: None
-    on_release: app.focus_widget(root.node)
-
-<StatusNavBarSeparator>:
-    text: '>'
-    font_size: '10pt'
-    width: self.texture_size[0] + 20
-    size_hint_x: None
-
-<PropertyViewer>:
-    do_scroll_x: False
-    prop_list: prop_list
-
-    canvas:
-        Color:
-            rgb: bgcolor
-        Rectangle:
-            pos: self.pos
-            size: self.size
-
-    GridLayout:
-        id: prop_list
-        cols: 2
-        padding: 3
-        size_hint_y: None
-        height: self.minimum_height
-        row_default_height: '25pt'
-
-<PropertyLabel>:
-    font_size: '10pt'
-    valign: 'middle'
-    size_hint_x: None
-    width: max(100, self.texture_size[0] + 10)
-
-<PropertyBase>:
-    propvalue: getattr(self.propwidget, self.propname)
-    padding: '6pt', '6pt'
-
-    canvas.after:
-        Color:
-            rgba: .9, .1, .1, (1 if self.have_error else 0)
-        Line:
-            points: [self.x, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
-            close: True
-            width: 2
-
-<PropertyTextInput>:
-    border: 8, 8, 8, 8
-    text: str(getattr(self.propwidget, self.propname))
-    on_text: self.set_value(args[1])
-
-<PropertyBoolean>:
-    active: getattr(self.propwidget, self.propname)
-    on_active: self.set_value(args[1])
-
-<WidgetsTree>:
-    do_scroll_x: False
-    tree: tree
-    canvas:
-        Color:
-            rgb: bgcolor
-        Rectangle:
-            pos: root.pos
-            size: root.size
-
-    TreeView:
-        id: tree
-        height: 1000
-        size_hint_y: None
-        hide_root: True
-        on_selected_node: app.focus_widget(args[1].node)
-
-<WidgetTreeElement>:
-    is_open: True
-    text: getattr(root.node, '__class__').__name__
-    font_size: '10pt'
-

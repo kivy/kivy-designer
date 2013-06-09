@@ -102,6 +102,9 @@ class DesignerApp(App):
         container = PlaygroundDragElement(playground=self.root.playground)
         container.add_widget(widget)
         touch.grab(container)
+        container.center_x = touch.x
+        container.y = touch.y + 20
+
         self.root.add_widget(container)
 
     def focus_widget(self, widget, *largs):

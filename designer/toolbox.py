@@ -1,14 +1,13 @@
-from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from designer.common import widgets
+from kivy.uix.accordion import Accordion, AccordionItem
 
-
-class ToolboxCategory(Label):
-    pass
-
+class ToolboxCategory(AccordionItem):
+    gridlayout = BoxLayout(orientation = 'vertical')
 
 class ToolboxButton(Button):
 
@@ -25,9 +24,9 @@ class ToolboxButton(Button):
         pass
 
 
-class Toolbox(FloatLayout):
+class Toolbox(BoxLayout):
 
-    widgets_list = ObjectProperty()
+    accordion = ObjectProperty()
     app = ObjectProperty()
 
     def __init__(self, **kwargs):
@@ -37,11 +36,16 @@ class Toolbox(FloatLayout):
     def discover_widgets(self, *largs):
         # for now, don't do auto detection of widgets.
         # just do manual discovery, and tagging.
+
         categories = list(set([x[1] for x in widgets]))
         for category in categories:
-            self.widgets_list.add_widget(ToolboxCategory(text=category))
+            toolbox_category = ToolboxCategory(title=category)
+            self.accordion.add_widget(toolbox_category)
+
             for widget in widgets:
                 if widget[1] != category:
                     continue
-                self.widgets_list.add_widget(ToolboxButton(text=widget[0]))
+                toolbox_category.gridlayout.add_widget(
+                    ToolboxButton(text=widget[0]))
 
+        self.accordion.children[-1].collapse = False
