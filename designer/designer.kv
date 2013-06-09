@@ -47,6 +47,7 @@
     playground: playground
     widgettree: widgettree
     statusbar: statusbar
+    kv_code_input: code_input
 
     ActionBar:
         id: actionbar
@@ -113,6 +114,8 @@
         height: root.height - actionbar.height - statusbar.height
         y: statusbar.height
         cols: 1
+        splitter_toolbox: splitter_toolbox
+        splitter_widget_tree: splitter_widget_tree
 
         FloatLayout:
             size_hint: 1,1
@@ -132,6 +135,20 @@
                         size: self.size
 
             Splitter:
+                sizable_from: 'top'
+                size_hint_y: None
+                size_hint_x: None
+                height: 200
+                max_size: 500
+                x: splitter_toolbox.width
+                width: root.width - self.x - splitter_widget_tree.width
+                y: statusbar.height
+                TextInput:
+                    id: code_input
+                    height: 10
+
+            Splitter:
+                id: splitter_toolbox
                 sizable_from: 'right'
                 min_size: 150
                 size_hint: None, 1
@@ -162,6 +179,7 @@
                     Toolbox
 
             Splitter:
+                id: splitter_widget_tree
                 size_hint_x: None
                 min_size: 170
                 width: 250
@@ -214,8 +232,8 @@
     do_scale: False
     do_rotation: False
     size_hint: None, None
-    size: 640, 480
-    pos: 155, 60
+    size: 600, 400
+    pos: 300, 230
     auto_bring_to_front: False
     canvas:
         Color:
@@ -375,3 +393,4 @@
     is_open: True
     text: getattr(root.node, '__class__').__name__
     font_size: '10pt'
+

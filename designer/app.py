@@ -20,6 +20,7 @@ class Designer(FloatLayout):
     widgetstree = ObjectProperty(None)
     statusbar = ObjectProperty(None)
     editcontview = ObjectProperty(EditContView())
+    kv_code_input = ObjectProperty(None)
 
     def action_btn_new_pressed(self, *args):
         pass
@@ -126,3 +127,4 @@ class DesignerApp(App):
             self._widget_focused = [widget, color, line]
 
         Clock.schedule_once(self.root.widgettree.refresh, 1)
+
