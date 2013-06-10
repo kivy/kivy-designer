@@ -14,16 +14,22 @@ class PropertyBase(object):
     propvalue = ObjectProperty(allownone=True)
     oldvalue = ObjectProperty(allownone=True)
     have_error = BooleanProperty(False)
+    proptype = StringProperty()
 
     def set_value(self, value):
         self.have_error = False
         oldvalue = getattr(self.propwidget, self.propname)
 
         try:
-            if isinstance(self.propwidget.property(self.propname), NumericProperty):
-                value = float(value)
+            if isinstance(self.propwidget.property(self.propname),
+                          NumericProperty):
+                if value == 'None':
+                    value = None
+                else:
+                    value = float(value)
         except Exception:
             pass
+
         try:
             setattr(self.propwidget, self.propname, value)
         except Exception:
@@ -31,12 +37,21 @@ class PropertyBase(object):
             setattr(self.propwidget, self.propname, oldvalue)
 
 
-
 class PropertyTextInput(PropertyBase, TextInput):
-    pass
+
+    def insert_text(self, substring, from_undo=False):
+        if self.proptype == 'NumericProperty' and \
+           substring.isdigit() == False and\
+           (substring != '.' or '.' in self.text)\
+           and substring not in 'None':
+                return
+
+        super(PropertyTextInput, self).insert_text(substring)
+
 
 class PropertyBoolean(PropertyBase, CheckBox):
     pass
+
 
 class PropertyViewer(ScrollView):
 
@@ -65,10 +80,13 @@ class PropertyViewer(ScrollView):
     def build_for(self, name):
         prop = self.widget.property(name)
         if isinstance(prop, NumericProperty):
-            return PropertyTextInput(propwidget=self.widget, propname=name)
+            return PropertyTextInput(propwidget=self.widget, propname=name,
+                                     proptype = 'NumericProperty')
         elif isinstance(prop, StringProperty):
-            return PropertyTextInput(propwidget=self.widget, propname=name)
+            return PropertyTextInput(propwidget=self.widget, propname=name,
+                                     proptype = 'StringProperty')
         elif isinstance(prop, BooleanProperty):
-            return PropertyBoolean(propwidget=self.widget, propname=name)
+            return PropertyBoolean(propwidget=self.widget, propname=name,
+                                   proptype = 'BooleanProperty')
         return None
 
