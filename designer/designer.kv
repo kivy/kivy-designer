@@ -220,6 +220,7 @@
     widgettree: widgettree
     statusbar: statusbar
     kv_code_input: code_input
+    actionbar: actionbar
 
     ActionBar:
         id: actionbar
@@ -315,9 +316,8 @@
                 x: splitter_toolbox.width
                 width: root.width - self.x - splitter_widget_tree.width
                 y: statusbar.height
-                TextInput:
+                KVLangArea:
                     id: code_input
-                    height: 10
 
             Splitter:
                 id: splitter_toolbox

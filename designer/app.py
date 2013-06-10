@@ -13,6 +13,7 @@ from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
 from designer.uix.editcontview import EditContView
+from designer.uix.kv_lang_area import KVLangArea
 
 class Designer(FloatLayout):
     propertyviewer = ObjectProperty(None)
