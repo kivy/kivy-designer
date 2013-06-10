@@ -20,27 +20,27 @@
         width: 100
         with_previous: True
     ActionOverflow:
-        ActionButton:
-            text: 'Undo'
-            on_press: root.action_btn_undo_pressed
-        ActionButton:
-            text: 'Redo'
-            on_press: root.action_btn_redo_pressed
-        ActionButton:
-            text: 'Cut'
-            on_press: root.action_btn_cut_pressed
-        ActionButton:
-            text: 'Copy'
-            on_press: root.action_btn_copy_pressed
-        ActionButton:
-            text: 'Paste'
-            on_press: root.action_btn_paste_pressed
-        ActionButton:
-            text: 'Select All'
-            on_press: root.action_btn_delete_pressed
-        ActionButton:
-            text: 'Delete'
-            on_press: root.action_btn_select_all_pressed
+    ActionButton:
+        text: 'Undo'
+        on_press: root.dispatch('on_undo')
+    ActionButton:
+        text: 'Redo'
+        on_press: root.dispatch('on_redo')
+    ActionButton:
+        text: 'Cut'
+        on_press: root.dispatch('on_cut')
+    ActionButton:
+        text: 'Copy'
+        on_press: root.dispatch('on_copy')
+    ActionButton:
+        text: 'Paste'
+        on_press: root.dispatch('on_cut')
+    ActionButton:
+        text: 'Select All'
+        on_press: root.dispatch('on_selectall')
+    ActionButton:
+        text: 'Delete'
+        on_press: root.dispatch('on_delete')
 
 <Playground>:
     root: root_widget
