@@ -4,7 +4,9 @@ from kivy.uix.layout import Layout
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.app import App
 from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
+from kivy.uix.floatlayout import FloatLayout
 
+from designer.tree import Tree
 
 class PlaygroundDragElement(BoxLayout):
 
@@ -40,11 +42,19 @@ class Playground(ScatterPlane):
 
     root = ObjectProperty()
     selection_mode = BooleanProperty(True)
+    tree = ObjectProperty()
+
+    def __init__(self, **kwargs):
+        super(Playground, self).__init__(**kwargs)
+        self.tree = Tree()
 
     def try_place_widget(self, widget, x, y):
         x, y = self.to_local(x, y)
         return self.find_target(x, y, self.root, widget)
 
+    def on_root(self, instance, value):
+        self.tree.insert(value, None)
+        
     def place_widget(self, widget, x, y):
         x, y = self.to_local(x, y)
         target = self.find_target(x, y, self.root, widget)
@@ -52,6 +62,7 @@ class Playground(ScatterPlane):
         #widget.pos = wx, wy
         widget.pos = 0, 0
         target.add_widget(widget)
+        self.tree.insert(widget, target)
 
     def find_target(self, x, y, target, widget=None):
         if not target.collide_point(x, y):
