@@ -306,6 +306,7 @@
                         rgb: 0, 0, 0
                     Rectangle:
                         size: self.size
+                on_show_edit: root.on_show_edit()
 
             Splitter:
                 sizable_from: 'top'
@@ -318,6 +319,7 @@
                 y: statusbar.height
                 KVLangArea:
                     id: code_input
+                    on_show_edit: root.on_show_edit()
 
             Splitter:
                 id: splitter_toolbox

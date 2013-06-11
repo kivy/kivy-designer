@@ -20,8 +20,44 @@ class Designer(FloatLayout):
     playground = ObjectProperty(None)
     widgetstree = ObjectProperty(None)
     statusbar = ObjectProperty(None)
-    editcontview = ObjectProperty(EditContView())
+    editcontview = ObjectProperty(None)
     kv_code_input = ObjectProperty(None)
+    actionbar = ObjectProperty(None)
+
+    def on_show_edit(self, *args):
+        if isinstance(self.actionbar.children[0], EditContView):
+            return
+        
+        if self.editcontview == None:
+            self.editcontview = EditContView(
+                on_undo=self.action_btn_undo_pressed,
+                on_redo=self.action_btn_redo_pressed,
+                on_cut=self.action_btn_cut_pressed,
+                on_copy=self.action_btn_copy_pressed,
+                on_paste=self.action_btn_paste_pressed,
+                on_delete=self.action_btn_delete_pressed,
+                on_selectall=self.action_btn_select_all_pressed)
+
+        self.actionbar.add_widget(self.editcontview)
+
+        if self.kv_code_input.clicked:
+            self._edit_selected = 'KV'
+        else:
+            self._edit_selected = 'Play'
+
+        self.playground.clicked = False
+        self.kv_code_input.clicked = False
+
+    def on_touch_down(self, touch):
+        if not isinstance(self.actionbar.children[0], EditContView):
+            return super(FloatLayout, self).on_touch_down(touch)
+
+        self.actionbar.on_previous(self)
+        return super(FloatLayout, self).on_touch_down(touch)
+    
+    def show_edit_cont_view(self):
+        if self.editcontview is not None and self.actionbar is not None:
+            self.actionbar.add_widget(self.editcontview)
 
     def action_btn_new_pressed(self, *args):
         pass
@@ -131,4 +167,5 @@ class DesignerApp(App):
             self._widget_focused = [widget, color, line]
 
         Clock.schedule_once(self.root.widgettree.refresh, 1)
+        
 

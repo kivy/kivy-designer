@@ -43,10 +43,16 @@ class Playground(ScatterPlane):
     root = ObjectProperty()
     selection_mode = BooleanProperty(True)
     tree = ObjectProperty()
+    clicked = BooleanProperty(False)
+
+    __events__ = ('on_show_edit',)
 
     def __init__(self, **kwargs):
         super(Playground, self).__init__(**kwargs)
         self.tree = Tree()
+
+    def on_show_edit(self, *args):
+        pass
 
     def try_place_widget(self, widget, x, y):
         x, y = self.to_local(x, y)
@@ -102,6 +108,8 @@ class Playground(ScatterPlane):
                 x, y = self.to_local(*touch.pos)
                 target = self.find_target(x, y, self.root)
                 App.get_running_app().focus_widget(target)
+                self.clicked = True
+                self.dispatch('on_show_edit', Playground)
                 return True
         if self.parent.collide_point (*touch.pos):
             super(Playground, self).on_touch_down(touch)
