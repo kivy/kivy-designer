@@ -55,10 +55,6 @@ class Designer(FloatLayout):
 
         self.actionbar.on_previous(self)
         return super(FloatLayout, self).on_touch_down(touch)
-    
-    def show_edit_cont_view(self):
-        if self.editcontview is not None and self.actionbar is not None:
-            self.actionbar.add_widget(self.editcontview)
 
     def action_btn_new_pressed(self, *args):
         pass
@@ -94,7 +90,11 @@ class Designer(FloatLayout):
         pass
 
     def action_btn_delete_pressed(self, *args):
-        pass
+        if self._edit_selected == 'Play' and self.propertyviewer.widget and\
+           self.propertyviewer.widget != self.playground.root:
+            self.playground.tree.delete(self.propertyviewer.widget)
+            self.propertyviewer.widget.parent.remove_widget(
+                self.propertyviewer.widget)
 
     def action_btn_select_all_pressed(self, *args):
         pass

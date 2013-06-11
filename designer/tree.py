@@ -44,11 +44,14 @@ class Tree(object):
         if not isinstance(parent, Widget):
             TreeException('Tree only accepts parent to be a Widget')
 
-        parent_node = self.get_node_for_widget(parent)
+        parent_node = self.get_node_for_widget(parent)    
         node = TreeNode()
         node.widget = widget
         node.parent_node = parent_node
-        parent_node.list_children.append(node)
+        if parent_node == None:
+            self.list_root_nodes.append(node)
+        else:
+            parent_node.list_children.append(node)
         return node
 
     def _get_node_for_widget(self, widget, node):
@@ -90,5 +93,8 @@ class Tree(object):
             TreeException('Tree accepts only Widget to be deleted')
 
         node = self.get_node_for_widget(widget)
-        node.parent_node.list_children.remove(node)
+        if node in self.list_root_nodes:
+            self.list_root_nodes.remove(node)
+        else:
+            node.parent_node.list_children.remove(node)
         return node
