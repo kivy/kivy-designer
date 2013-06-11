@@ -96,6 +96,8 @@ class Designer(FloatLayout):
             self.propertyviewer.widget.parent.remove_widget(
                 self.propertyviewer.widget)
 
+            self.widgettree.refresh()
+
     def action_btn_select_all_pressed(self, *args):
         pass
 
@@ -167,6 +169,6 @@ class DesignerApp(App):
                 line = Line(points=points, close=True, width=2.)
             self._widget_focused = [widget, color, line]
 
-        Clock.schedule_once(self.root.widgettree.refresh, 1)
+        self.root.widgettree.refresh()
         
 

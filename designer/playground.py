@@ -70,6 +70,8 @@ class Playground(ScatterPlane):
         target.add_widget(widget)
         self.tree.insert(widget, target)
 
+        App.get_running_app().root.widgettree.refresh()
+
     def find_target(self, x, y, target, widget=None):
         if not target.collide_point(x, y):
             return None
@@ -111,6 +113,7 @@ class Playground(ScatterPlane):
                 self.clicked = True
                 self.dispatch('on_show_edit', Playground)
                 return True
+
         if self.parent.collide_point (*touch.pos):
             super(Playground, self).on_touch_down(touch)
 
