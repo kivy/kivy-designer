@@ -29,7 +29,7 @@ class PlaygroundDragElement(BoxLayout):
             self.target = self.playground.try_place_widget(
                     self.children[0], self.center_x, self.y - 20)
             self.can_place = self.target is not None
-            if self.can_place:
+            if self.can_place or self.playground.root is None:
                 child = self.children[0]
                 child.parent.remove_widget(child)
                 self.playground.place_widget(
@@ -40,7 +40,7 @@ class PlaygroundDragElement(BoxLayout):
 
 class Playground(ScatterPlane):
 
-    root = ObjectProperty()
+    root = ObjectProperty(allownone=True)
     selection_mode = BooleanProperty(True)
     tree = ObjectProperty()
     clicked = BooleanProperty(False)
@@ -67,13 +67,19 @@ class Playground(ScatterPlane):
         #wx, wy = target.to_widget(x, y)
         #widget.pos = wx, wy
         widget.pos = 0, 0
-        target.add_widget(widget)
+        if target is None:
+            self.root = widget
+            self.add_widget(widget)
+            widget.size = self.size
+        else:
+            target.add_widget(widget)
+
         self.tree.insert(widget, target)
 
         App.get_running_app().root.widgettree.refresh()
 
     def find_target(self, x, y, target, widget=None):
-        if not target.collide_point(x, y):
+        if target is None or not target.collide_point(x, y):
             return None
         x, y = target.to_local(x, y)
         for child in target.children:

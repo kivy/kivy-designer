@@ -90,13 +90,18 @@ class Designer(FloatLayout):
         pass
 
     def action_btn_delete_pressed(self, *args):
-        if self._edit_selected == 'Play' and self.propertyviewer.widget and\
-           self.propertyviewer.widget != self.playground.root:
-            self.playground.tree.delete(self.propertyviewer.widget)
-            self.propertyviewer.widget.parent.remove_widget(
-                self.propertyviewer.widget)
+        if self._edit_selected == 'Play' and self.propertyviewer.widget:
+            parent = None
+            if self.propertyviewer.widget != self.playground.root:
+                parent = self.propertyviewer.widget.parent
+                self.propertyviewer.widget.parent.remove_widget(
+                    self.propertyviewer.widget)
+            else:
+                self.playground.root.parent.remove_widget(self.playground.root)
+                self.playground.root = None
 
-            self.widgettree.refresh()
+            self.playground.tree.delete(self.propertyviewer.widget)
+            App.get_running_app().focus_widget(parent)
 
     def action_btn_select_all_pressed(self, *args):
         pass
@@ -154,6 +159,8 @@ class DesignerApp(App):
                 fwidget.canvas.after.remove(instr)
             self._widget_focused = []
         self.widget_focused = widget
+        self.root.widgettree.refresh()
+
         if not widget:
             return
         x, y = widget.pos
@@ -168,7 +175,5 @@ class DesignerApp(App):
                 color = Color(.42, .62, .65)
                 line = Line(points=points, close=True, width=2.)
             self._widget_focused = [widget, color, line]
-
-        self.root.widgettree.refresh()
         
 

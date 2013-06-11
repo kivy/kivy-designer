@@ -11,6 +11,9 @@ class WidgetsTree(ScrollView):
     tree = ObjectProperty(None)
 
     def recursive_insert(self, node, treenode):
+        if node is None:
+            return
+
         b = WidgetTreeElement(node=node)
         self.tree.add_node(b, treenode)
 
