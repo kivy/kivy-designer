@@ -67,6 +67,9 @@ class Playground(ScatterPlane):
         #wx, wy = target.to_widget(x, y)
         #widget.pos = wx, wy
         widget.pos = 0, 0
+        self.add_widget_to_parent(widget, target)
+
+    def add_widget_to_parent(self, widget, target):
         if target is None:
             self.root = widget
             self.add_widget(widget)

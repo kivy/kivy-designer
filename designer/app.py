@@ -4,10 +4,13 @@ import kivy
 kivy.require('1.4.1')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.layout import Layout
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from kivy.uix import actionbar
+
+from copy import deepcopy, copy
 
 from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
@@ -81,13 +84,38 @@ class Designer(FloatLayout):
         pass
 
     def action_btn_cut_pressed(self, *args):
-        pass
+        if self._edit_selected == 'Play':
+            base_widget = self.propertyviewer.widget
+            if base_widget:
+                self.widget_to_paste = base_widget
+                base_widget.parent.remove_widget(base_widget)
 
     def action_btn_copy_pressed(self, *args):
-        pass
+        if self._edit_selected == 'Play':
+            base_widget = self.propertyviewer.widget
+            if base_widget:
+                self.widget_to_paste = type(base_widget)()
+                props = base_widget.properties()
+                for prop in props:
+                    setattr(self.widget_to_paste, prop,
+                            getattr(base_widget, prop))
+
+                self.widget_to_paste.parent = None
 
     def action_btn_paste_pressed(self, *args):
-        pass
+        if self._edit_selected == 'Play':
+            parent = self.propertyviewer.widget
+            if parent and hasattr(self, 'widget_to_paste') and\
+               self.widget_to_paste is not None:
+
+                #find appropriate parent to add widget_to_paste
+                while not isinstance(parent, Layout):
+                    parent = parent.parent
+
+                if parent is not None:
+                    self.playground.add_widget_to_parent(self.widget_to_paste,
+                                                         parent)
+                    self.widget_to_paste = None
 
     def action_btn_delete_pressed(self, *args):
         if self._edit_selected == 'Play' and self.propertyviewer.widget:
