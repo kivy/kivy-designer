@@ -49,7 +49,8 @@ class Designer(FloatLayout):
         self.kv_code_input.clicked = False
 
     def on_touch_down(self, touch):
-        if not isinstance(self.actionbar.children[0], EditContView):
+        if not isinstance(self.actionbar.children[0], EditContView) or\
+           self.actionbar.collide_point(*touch.pos):
             return super(FloatLayout, self).on_touch_down(touch)
 
         self.actionbar.on_previous(self)
