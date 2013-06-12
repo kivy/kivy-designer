@@ -17,6 +17,7 @@ from designer.playground import PlaygroundDragElement
 from designer.common import widgets
 from designer.uix.editcontview import EditContView
 from designer.uix.kv_lang_area import KVLangArea
+from designer.undo_manager import WidgetOperation, UndoManager
 
 class Designer(FloatLayout):
     propertyviewer = ObjectProperty(None)
@@ -26,6 +27,7 @@ class Designer(FloatLayout):
     editcontview = ObjectProperty(None)
     kv_code_input = ObjectProperty(None)
     actionbar = ObjectProperty(None)
+    undo_manager = ObjectProperty(UndoManager())
 
     def on_show_edit(self, *args):
         if isinstance(self.actionbar.children[0], EditContView):
@@ -78,10 +80,12 @@ class Designer(FloatLayout):
         pass
 
     def action_btn_undo_pressed(self, *args):
-        pass
-
+        if self._edit_selected == 'Play':
+            self.undo_manager.do_undo()
+        
     def action_btn_redo_pressed(self, *args):
-        pass
+        if self._edit_selected == 'Play':
+            self.undo_manager.do_redo()
 
     def action_btn_cut_pressed(self, *args):
         if self._edit_selected == 'Play':

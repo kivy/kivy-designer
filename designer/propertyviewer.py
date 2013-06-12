@@ -4,6 +4,9 @@ from kivy.properties import ObjectProperty, NumericProperty, StringProperty, \
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
+from kivy.app import App
+
+from designer.undo_manager import PropOperation
 
 class PropertyLabel(Label):
     pass
@@ -15,11 +18,11 @@ class PropertyBase(object):
     oldvalue = ObjectProperty(allownone=True)
     have_error = BooleanProperty(False)
     proptype = StringProperty()
+    record_to_undo = BooleanProperty(False)
 
     def set_value(self, value):
         self.have_error = False
         oldvalue = getattr(self.propwidget, self.propname)
-
         try:
             if isinstance(self.propwidget.property(self.propname),
                           NumericProperty):
@@ -32,6 +35,10 @@ class PropertyBase(object):
 
         try:
             setattr(self.propwidget, self.propname, value)
+            if self.record_to_undo:
+                App.get_running_app().root.undo_manager.push_operation(
+                    PropOperation(self, oldvalue, value))
+            self.record_to_undo = True
         except Exception:
             self.have_error = True
             setattr(self.propwidget, self.propname, oldvalue)
@@ -86,7 +93,10 @@ class PropertyViewer(ScrollView):
             return PropertyTextInput(propwidget=self.widget, propname=name,
                                      proptype = 'StringProperty')
         elif isinstance(prop, BooleanProperty):
-            return PropertyBoolean(propwidget=self.widget, propname=name,
+            ip = PropertyBoolean(propwidget=self.widget, propname=name,
                                    proptype = 'BooleanProperty')
+            ip.record_to_undo = True
+            return ip
+
         return None
 

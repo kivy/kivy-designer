@@ -188,8 +188,8 @@
     on_text: self.set_value(args[1])
 
 <PropertyBoolean>:
-    active: getattr(self.propwidget, self.propname)
     on_active: self.set_value(args[1])
+    active: bool(getattr(self.propwidget, self.propname))
 
 <WidgetsTree>:
     do_scroll_x: False

@@ -7,6 +7,7 @@ from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.floatlayout import FloatLayout
 
 from designer.tree import Tree
+from designer.undo_manager import WidgetOperation
 
 class PlaygroundDragElement(BoxLayout):
 
@@ -69,17 +70,35 @@ class Playground(ScatterPlane):
         widget.pos = 0, 0
         self.add_widget_to_parent(widget, target)
 
-    def add_widget_to_parent(self, widget, target):
+    def add_widget_to_parent(self, widget, target, from_undo=False):
         if target is None:
             self.root = widget
             self.add_widget(widget)
             widget.size = self.size
         else:
             target.add_widget(widget)
-
+        
         self.tree.insert(widget, target)
-
         App.get_running_app().root.widgettree.refresh()
+
+        if not from_undo:
+            App.get_running_app().root.undo_manager.push_operation(
+                WidgetOperation('add', target, widget, self))
+
+    def remove_widget_from_parent(self, widget, from_undo=False):
+        parent = None
+        if widget != self.root:
+            parent = widget.parent
+            parent.remove_widget(widget)
+        else:
+            self.root.parent.remove_widget(self.root)
+            self.root = None
+
+        self.tree.delete(widget)
+        App.get_running_app().focus_widget(parent)
+        if not from_undo:
+            App.get_running_app().root.undo_manager.push_operation(
+                WidgetOperation('remove', widget, parent, self))
 
     def find_target(self, x, y, target, widget=None):
         if target is None or not target.collide_point(x, y):
