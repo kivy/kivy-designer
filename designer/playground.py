@@ -83,7 +83,7 @@ class Playground(ScatterPlane):
 
         if not from_undo:
             App.get_running_app().root.undo_manager.push_operation(
-                WidgetOperation('add', target, widget, self))
+                WidgetOperation('add', widget, target, self))
 
     def remove_widget_from_parent(self, widget, from_undo=False):
         parent = None
