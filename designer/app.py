@@ -92,7 +92,7 @@ class Designer(FloatLayout):
             base_widget = self.propertyviewer.widget
             if base_widget:
                 self.widget_to_paste = base_widget
-                base_widget.parent.remove_widget(base_widget)
+                self.playground.remove_widget_from_parent(base_widget)
 
     def action_btn_copy_pressed(self, *args):
         if self._edit_selected == 'Play':
@@ -123,17 +123,8 @@ class Designer(FloatLayout):
 
     def action_btn_delete_pressed(self, *args):
         if self._edit_selected == 'Play' and self.propertyviewer.widget:
-            parent = None
-            if self.propertyviewer.widget != self.playground.root:
-                parent = self.propertyviewer.widget.parent
-                self.propertyviewer.widget.parent.remove_widget(
-                    self.propertyviewer.widget)
-            else:
-                self.playground.root.parent.remove_widget(self.playground.root)
-                self.playground.root = None
-
-            self.playground.tree.delete(self.propertyviewer.widget)
-            App.get_running_app().focus_widget(parent)
+            self.playground.remove_widget_from_parent(
+                self.propertyviewer.widget)
 
     def action_btn_select_all_pressed(self, *args):
         pass
