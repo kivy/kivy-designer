@@ -221,6 +221,11 @@
     statusbar: statusbar
     kv_code_input: code_input
     actionbar: actionbar
+    splitter_toolbox: splitter_toolbox
+    splitter_kv_code_input: splitter_kv
+    grid_widget_tree: grid_widget_tree
+    splitter_property: splitter_property
+    splitter_widget_tree: splitter_widget_tree
 
     ActionBar:
         id: actionbar
@@ -264,23 +269,23 @@
                 ActionCheckButton:
                     text: 'Toolbox'
                     minimum_width: 150
-                    on_active: root.action_chk_btn_toolbox_active
+                    on_active: root.action_chk_btn_toolbox_active(self)
                 ActionCheckButton:
                     text: 'Property Viewer'
                     minimum_width: 150
-                    on_active: root.action_chk_btn_property_viewer_active
+                    on_active: root.action_chk_btn_property_viewer_active(self)
                 ActionCheckButton:
                     text: 'Widget Tree'
                     minimum_width: 150
-                    on_active: root.action_chk_btn_widget_tree_active
+                    on_active: root.action_chk_btn_widget_tree_active(self)
                 ActionCheckButton:
                     text: 'StatusBar'
                     minimum_width: 150
-                    on_active: root.action_chk_btn_status_bar_active
+                    on_active: root.action_chk_btn_status_bar_active(self)
                 ActionCheckButton:
                     text: 'KV Area'
                     minimum_width: 150
-                    on_active: root.action_chk_btn_kv_area_active
+                    on_active: root.action_chk_btn_kv_area_active(self)
                     
     GridLayout:
         size_hint: 1, None
@@ -309,6 +314,7 @@
                 on_show_edit: root.on_show_edit()
 
             Splitter:
+                id: splitter_kv
                 sizable_from: 'top'
                 size_hint_y: None
                 size_hint_x: None
@@ -369,17 +375,22 @@
                             pos: self.pos
                             size: self.size
 
-                    Label:
-                        text: 'Widget Navigator'
-                        font_size: '10pt'
-                        height: '20pt'
-                        size_hint_y: None
+                    GridLayout:
+                        id: grid_widget_tree
+                        cols: 1
+                        spacing: .5
+                        Label:
+                            text: 'Widget Navigator'
+                            font_size: '10pt'
+                            height: '20pt'
+                            size_hint_y: None
 
-                    WidgetsTree:
-                        id: widgettree
-                        playground: playground
+                        WidgetsTree:
+                            id: widgettree
+                            playground: playground
 
                     Splitter:
+                        id: splitter_property
                         sizable_from: 'top'
                         size_hint_y: None
                         height: 300

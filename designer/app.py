@@ -22,12 +22,17 @@ from designer.undo_manager import WidgetOperation, UndoManager
 class Designer(FloatLayout):
     propertyviewer = ObjectProperty(None)
     playground = ObjectProperty(None)
-    widgetstree = ObjectProperty(None)
+    widgettree = ObjectProperty(None)
     statusbar = ObjectProperty(None)
     editcontview = ObjectProperty(None)
     kv_code_input = ObjectProperty(None)
     actionbar = ObjectProperty(None)
     undo_manager = ObjectProperty(UndoManager())
+    splitter_toolbox = ObjectProperty(None)
+    splitter_kv_code_input = ObjectProperty(None)
+    grid_widget_tree = ObjectProperty(None)
+    splitter_property = ObjectProperty(None)
+    splitter_widget_tree = ObjectProperty(None)
 
     def on_show_edit(self, *args):
         if isinstance(self.actionbar.children[0], EditContView):
@@ -129,20 +134,89 @@ class Designer(FloatLayout):
     def action_btn_select_all_pressed(self, *args):
         pass
 
-    def action_chk_btn_toolbox_active(self, *args):
-        pass
+    def action_chk_btn_toolbox_active(self, chk_btn):
+        if chk_btn.checkbox.active:
+            self._toolbox_parent.add_widget(self.splitter_toolbox)
+            self.splitter_toolbox.width = self._toolbox_width
+        else:
+            self._toolbox_parent = self.splitter_toolbox.parent
+            self._toolbox_parent.remove_widget(self.splitter_toolbox)
+            self._toolbox_width = self.splitter_toolbox.width
+            self.splitter_toolbox.width = 0
 
-    def action_chk_btn_property_viewer_active(self, *args):
-        pass
+    def action_chk_btn_property_viewer_active(self, chk_btn):
+        if chk_btn.checkbox.active:
+            self._toggle_splitter_widget_tree()
+            if self.splitter_widget_tree.parent is None:
+                self._splitter_widget_tree_parent.add_widget(self.splitter_widget_tree)
+                self.splitter_widget_tree.width = self._splitter_widget_tree_width
 
-    def action_chk_btn_widget_tree_active(self, *args):
-        pass
+            add_tree = False
+            if self.grid_widget_tree.parent is not None:
+                add_tree = True
+                self.splitter_property.size_hint_y = None
+                self.splitter_property.height = 300
+            
+            self._splitter_property_parent.clear_widgets()
+            if add_tree:
+                self._splitter_property_parent.add_widget(self.grid_widget_tree)
 
-    def action_chk_btn_status_bar_active(self, *args):
-        pass
+            self._splitter_property_parent.add_widget(self.splitter_property)
+        else:
+            self._splitter_property_parent = self.splitter_property.parent
+            self._splitter_property_parent.remove_widget(self.splitter_property)
+            self._toggle_splitter_widget_tree()
 
-    def action_chk_btn_kv_area_active(self, *args):
-        pass
+    def action_chk_btn_widget_tree_active(self, chk_btn):
+        if chk_btn.checkbox.active:
+            self._toggle_splitter_widget_tree()
+            add_prop = False
+            if self.splitter_property.parent is not None:
+                add_prop = True
+    
+            self._grid_widget_tree_parent.clear_widgets()
+            self._grid_widget_tree_parent.add_widget(self.grid_widget_tree)
+            if add_prop:
+                self._grid_widget_tree_parent.add_widget(self.splitter_property)
+                self.splitter_property.size_hint_y = None
+                self.splitter_property.height = 300
+        else:
+            self._grid_widget_tree_parent = self.grid_widget_tree.parent
+            self._grid_widget_tree_parent.remove_widget(self.grid_widget_tree)
+            self.splitter_property.size_hint_y = 1
+            self._toggle_splitter_widget_tree()
+
+    def _toggle_splitter_widget_tree(self):
+
+        if self.splitter_widget_tree.parent is not None and self.splitter_property.parent is None and self.grid_widget_tree.parent is None:
+            self._splitter_widget_tree_parent = self.splitter_widget_tree.parent
+            self._splitter_widget_tree_parent.remove_widget(self.splitter_widget_tree)
+            self._splitter_widget_tree_width = self.splitter_widget_tree.width
+            self.splitter_widget_tree.width = 0
+    
+        elif self.splitter_widget_tree.parent is None:
+            self._splitter_widget_tree_parent.add_widget(self.splitter_widget_tree)
+            self.splitter_widget_tree.width = self._splitter_widget_tree_width
+            
+    def action_chk_btn_status_bar_active(self, chk_btn):
+        if chk_btn.checkbox.active:
+            self._statusbar_parent.add_widget(self.statusbar)
+            self.statusbar.height = self._statusbar_height
+        else:
+            self._statusbar_parent = self.statusbar.parent
+            self._statusbar_height = self.statusbar.height
+            self._statusbar_parent.remove_widget(self.statusbar)
+            self.statusbar.height = 0
+    
+    def action_chk_btn_kv_area_active(self, chk_btn):
+        if chk_btn.checkbox.active:
+            self.splitter_kv_code_input.height = self._kv_area_height
+            self._kv_area_parent.add_widget(self.splitter_kv_code_input)
+        else:
+            self._kv_area_parent = self.splitter_kv_code_input.parent
+            self._kv_area_height = self.splitter_kv_code_input.height
+            self.splitter_kv_code_input.height = 0
+            self._kv_area_parent.remove_widget(self.splitter_kv_code_input)
 
 class DesignerApp(App):
 

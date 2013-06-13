@@ -14,13 +14,13 @@ class ActionCheckButton(ActionItem, BoxLayout):
     def __init__(self, **kwargs):
         super(ActionCheckButton, self).__init__(**kwargs)
         self._label = Label(text=self.text)
-        self.checkbox = CheckBox()
+        self.checkbox = CheckBox(active=True)
         self.checkbox.size_hint_x = None
         self.checkbox.x = self.x + 2
         self.checkbox.width = '20sp'
         BoxLayout.add_widget(self, self.checkbox)
         BoxLayout.add_widget(self, self._label)
-        self.checkbox.bind(on_active=partial(self.dispatch, 'on_active'))
+        self.checkbox.bind(active=partial(self.dispatch, 'on_active'))
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos):
