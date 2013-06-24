@@ -107,7 +107,7 @@ class Playground(ScatterPlane):
                 widget = getattr(Factory, widgetname)(**default_args)
         
         if widget is None:
-            print 'Error cannot creating widget'
+            print 'Error cannot create widget'
             return None
 
         container = PlaygroundDragElement(playground=self)

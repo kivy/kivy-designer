@@ -108,9 +108,7 @@ class Designer(FloatLayout):
         
         with self.playground.sandbox:
             if not self.project_loader.load_project(file_path):
-                print '''Cannot Load given file, make sure that
-                    file is valid, all py files are in the same folder and
-                    this folder doesn't contain files related to other projects'''
+                self.statusbar.show_message('''Cannot Load given file, make sure that file is valid, all py files are in the same folder andis folder doesn't contain files related to other projects''')
                 return
             
             self.playground.cleanup()
@@ -326,6 +324,8 @@ class DesignerApp(App):
         container = self.root.playground.get_playground_drag_element(widgetname, touch, **default_args)
         if container:
             self.root.add_widget(container)
+        else:
+            self.root.statusbar.show_message("Cannot create %s"%widgetname)
 
     def focus_widget(self, widget, *largs):
         if self._widget_focused and (widget is None or self._widget_focused[0] != widget):

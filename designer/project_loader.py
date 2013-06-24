@@ -59,7 +59,7 @@ class ProjectLoaderException(Exception):
 class ProjectLoader(object):
     '''ProjectLoader class, used to load Project
     '''
-    
+
     def __init__(self):
         super(ProjectLoader, self).__init__()
         self._dir_list = []
