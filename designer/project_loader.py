@@ -14,6 +14,22 @@ from kivy.uix.sandbox import Sandbox
 
 KV_PROJ_FILE_NAME = 'kvproj'
 
+def get_indentation(string):
+    count = 0
+    for d in string:
+        if d == ' ':
+            count += 1
+        else:
+            break
+    return count
+
+class Comment(object):
+    
+    def __init__(self, string, path):
+        super(Comment, self).__init__()
+        self.string = string
+        self.path = path
+
 class WidgetRule(object):
     
     def __init__(self, widget, parent):
@@ -76,9 +92,10 @@ class ProjectLoader(object):
             kv_string = f.read()
             f.close()
             for app_str in re.findall(r'.+app+.+', kv_string):
-                kv_string = kv_string.replace(app_str, '#'+app_str)
-                
+                kv_string = kv_string.replace(app_str, app_str[:get_indentation(app_str)] + '#' + app_str.lstrip())
+            
             root_rule = Builder.load_string(kv_string)
+            self.load_comments(kv_string)
             self.root_rule = None
             if root_rule:
                 self.root_rule = RootRule(root_rule.__class__.__name__, root_rule)
@@ -289,7 +306,34 @@ class ProjectLoader(object):
                 fromlist=_fromlist)
 
         return module
-                                
+    
+    def load_comments(self, kv_string):
+        for searchiter in re.finditer(r'#.+', kv_string):
+            path = []
+            lines = kv_string.splitlines()
+            pos = searchiter.start()
+            lineno = 0
+            pos_lineno = kv_string.find('\n')
+            while pos_lineno < pos:
+                lineno += 1
+                pos_lineno = kv_string.find('\n', pos_lineno + 1)
+            
+            if get_indentation(lines[lineno]) == 0:
+                path.append(lineno)
+
+            while get_indentation(lines[lineno]) != 0:
+                _lineno = lineno - 1
+                while lines[_lineno] == '' or get_indentation(lines[lineno]) -\
+                    get_indentation(lines[_lineno]) <= 0:
+                    _lineno -= 1
+
+                if lines[_lineno].strip().find(':') == len(lines[_lineno].strip()) -1:
+                    path.insert(0, lines[_lineno].strip())
+
+                lineno = _lineno
+
+            self.list_comments.append(Comment(searchiter.group(0), path))
+
     def cleanup(self):
         self._app_file = None
         self._app_class = None
@@ -305,6 +349,7 @@ class ProjectLoader(object):
         self.file_list = []
         self._dir_list = []
         self.class_rules = []
+        self.list_comments = []
         
     def get_app(self):
         if not self._app_file or not self._app_class or not self._app_module:

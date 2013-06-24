@@ -74,9 +74,8 @@ class Designer(FloatLayout):
         self.actionbar.on_previous(self)
         return super(FloatLayout, self).on_touch_down(touch)  
 
-
     def action_btn_new_pressed(self, *args):
-        print self.playground.bound_events()
+        pass
 
     def action_btn_open_pressed(self, *args):
         self._fbrowser = FileBrowser(select_string='Open')
@@ -108,11 +107,10 @@ class Designer(FloatLayout):
                 widgets.remove(widget)
         
         with self.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
             if not self.project_loader.load_project(file_path):
-                print 'Cannot Load given file, make sure that \
-                    file is valid, all py files are in the same folder and \
-                    this folder doesn\'t contain files related to other projects'
+                print '''Cannot Load given file, make sure that
+                    file is valid, all py files are in the same folder and
+                    this folder doesn't contain files related to other projects'''
                 return
             
             self.playground.cleanup()
