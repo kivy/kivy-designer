@@ -4,7 +4,7 @@
 #: The first field is the name used for Factory.<name>
 #: The second field represent a category name
 
-widgets = (
+widgets = [
     ('Label', 'base', {'text': 'A label'}),
     ('Button', 'base', {'text': 'A button'}),
     ('CheckBox', 'base'),
@@ -32,4 +32,4 @@ widgets = (
     #('Scatter', 'behavior'),
     #('StencilView', 'behavior'),
     #('ScreenManager', 'screenmanager'),
-)
+]

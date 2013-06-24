@@ -3,6 +3,29 @@
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
 
+<SelectClass>:
+    select_button: select
+    cancel_button: cancel
+    orientation: 'vertical'
+    padding: '2sp'
+    
+    GridLayout:
+        rows: 1
+        orientation: 'horizontal'
+        size_hint_y: None
+        height: '25pt'
+        padding: '4sp'
+        Button:
+            id: select
+            text: 'Select Class'
+            size_hint_x: None
+            width: '90pt'
+        Button:
+            id: cancel
+            text: 'Cancel'
+            size_hint_x: None
+            width: '90pt'
+            
 <ActionCheckButton>:
     orientation: 'horizontal'
     background_normal: 'atlas://data/images/defaulttheme/action_bar'
@@ -44,6 +67,7 @@
 
 <Playground>:
     root: root_widget
+    sandbox: sandbox
     do_scale: False
     do_rotation: False
     size_hint: None, None
@@ -57,10 +81,14 @@
             points: [0, 0, self.width, 0, self.width, self.height, 0, self.height]
             width: 2.
             close: True
-
-    FloatLayout:
-        id: root_widget
+    Sandbox:
+        id: sandbox
         size: root.size
+        pos: root.pos
+
+        FloatLayout:
+            id: root_widget
+            size: root.size
 
 <PlaygroundDragElement>:
     size_hint: None, None
@@ -214,7 +242,6 @@
     text: getattr(root.node, '__class__').__name__
     font_size: '10pt'
 
-
 <Designer>:
     propertyviewer: propertyviewer
     playground: playground
@@ -222,6 +249,7 @@
     statusbar: statusbar
     kv_code_input: code_input
     actionbar: actionbar
+    toolbox: toolbox
     splitter_toolbox: splitter_toolbox
     splitter_kv_code_input: splitter_kv
     grid_widget_tree: grid_widget_tree
@@ -246,10 +274,10 @@
                 width: 90
                 ActionButton:
                     text: 'New'
-                    on_press: root.action_btn_new_pressed
+                    on_press: root.action_btn_new_pressed()
                 ActionButton:
                     text: 'Open'
-                    on_press: root.action_btn_open_pressed
+                    on_press: root.action_btn_open_pressed()
                 ActionButton:
                     text: 'Save'
                     on_press: root.action_btn_save_pressed
@@ -287,8 +315,8 @@
                 ActionCheckButton:
                     text: 'KV Area'
                     minimum_width: 150
-                    on_active: root.action_chk_btn_kv_area_active(self)
-                    
+                    on_active: root.action_chk_btn_kv_area_active(self)            
+
     GridLayout:
         size_hint: 1, None
         height: root.height - actionbar.height - statusbar.height
@@ -358,7 +386,8 @@
                                 pos: self.pos
                                 size: self.size
 
-                    Toolbox
+                    Toolbox:
+                        id: toolbox
 
             Splitter:
                 id: splitter_widget_tree

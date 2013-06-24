@@ -25,7 +25,7 @@ class StatusBar(BoxLayout):
         # get parent list, until app.root.playground.root
         children = []
         while True:
-            if wid == self.app.root.playground:
+            if wid == self.app.root.playground.sandbox:
                 break
             children.append(StatusNavBarButton(node=wid))
             wid = wid.parent

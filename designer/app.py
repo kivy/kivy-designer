@@ -1,6 +1,8 @@
 __all__ = ('DesignerApp', )
 
 import kivy
+import time
+
 kivy.require('1.4.1')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
@@ -9,6 +11,8 @@ from kivy.factory import Factory
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from kivy.uix import actionbar
+from kivy.garden.filebrowser import FileBrowser
+from kivy.uix.popup import Popup
 
 from copy import deepcopy, copy
 
@@ -18,8 +22,11 @@ from designer.common import widgets
 from designer.uix.editcontview import EditContView
 from designer.uix.kv_lang_area import KVLangArea
 from designer.undo_manager import WidgetOperation, UndoManager
+from designer.project_loader import ProjectLoader
+from designer.select_class import SelectClass
 
 class Designer(FloatLayout):
+    toolbox = ObjectProperty(None)
     propertyviewer = ObjectProperty(None)
     playground = ObjectProperty(None)
     widgettree = ObjectProperty(None)
@@ -33,6 +40,7 @@ class Designer(FloatLayout):
     grid_widget_tree = ObjectProperty(None)
     splitter_property = ObjectProperty(None)
     splitter_widget_tree = ObjectProperty(None)
+    project_loader = ObjectProperty(ProjectLoader())
 
     def on_show_edit(self, *args):
         if isinstance(self.actionbar.children[0], EditContView):
@@ -64,13 +72,89 @@ class Designer(FloatLayout):
             return super(FloatLayout, self).on_touch_down(touch)
 
         self.actionbar.on_previous(self)
-        return super(FloatLayout, self).on_touch_down(touch)
+        return super(FloatLayout, self).on_touch_down(touch)  
+
 
     def action_btn_new_pressed(self, *args):
-        pass
+        print self.playground.bound_events()
 
     def action_btn_open_pressed(self, *args):
-        pass
+        self._fbrowser = FileBrowser(select_string='Open')
+        self._fbrowser.bind(on_success=self._fbrowser_load,
+                            on_canceled=self._fbrowser_canceled)
+
+        self._popup = Popup(title="Open File", content = self._fbrowser,
+                            size_hint=(0.9, 0.9), auto_dismiss=False)
+        self._popup.open()
+    
+    def _select_class_selected(self, *args):
+        selection = self._select_class.listview.adapter.selection[0].text
+
+        with self.playground.sandbox:
+            self.playground.add_widget_to_parent(
+                self.project_loader.get_widget_of_class(selection), None)
+
+        self._select_class_popup.dismiss()
+    
+    def _select_class_cancel(self, *args):
+        self._select_class_popup.dismiss()
+
+    def _fbrowser_load(self, instance):
+        file_path = instance.selection[0]
+        self._popup.dismiss()
+        
+        for widget in widgets[:]:
+            if widget[1] == 'custom':
+                widgets.remove(widget)
+        
+        with self.playground.sandbox:
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
+            if not self.project_loader.load_project(file_path):
+                print 'Cannot Load given file, make sure that \
+                    file is valid, all py files are in the same folder and \
+                    this folder doesn\'t contain files related to other projects'
+                return
+            
+            self.playground.cleanup()
+            self.undo_manager.cleanup()
+            self.toolbox.cleanup()
+
+            for widget in widgets[:]:
+                if widget[1] == 'custom':
+                    widgets.remove(widget)
+            
+            if self.project_loader.class_rules:
+                for i, _rule in enumerate(self.project_loader.class_rules):
+                    widgets.append((_rule.name, 'custom'))
+        
+                self.toolbox.add_custom()
+
+            #to test listview
+            #root_wigdet = None
+            root_wigdet = self.project_loader.get_root_widget()            
+
+            if not root_wigdet:
+                #Show list box showing widgets
+                self._select_class = SelectClass(
+                    self.project_loader.class_rules)
+
+                self._select_class.bind(on_select=self._select_class_selected,
+                                        on_cancel=self._select_class_cancel)
+
+                self._select_class_popup = Popup(title="Select Root Widget",
+                                                 content = self._select_class,
+                                                 size_hint=(0.5, 0.5),
+                                                 auto_dismiss=False)
+                self._select_class_popup.open()
+
+            else:
+                self.playground.add_widget_to_parent(root_wigdet, None)
+            
+            #Record everything for later use
+            self.project_loader.record()
+
+    def _fbrowser_canceled(self, instance):
+        self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
         pass
@@ -240,14 +324,10 @@ class DesignerApp(App):
         for options in widgets:
             if len(options) > 2:
                 default_args = options[2]
-        widget = getattr(Factory, widgetname)(**default_args)
-        container = PlaygroundDragElement(playground=self.root.playground)
-        container.add_widget(widget)
-        touch.grab(container)
-        container.center_x = touch.x
-        container.y = touch.y + 20
-
-        self.root.add_widget(container)
+        
+        container = self.root.playground.get_playground_drag_element(widgetname, touch, **default_args)
+        if container:
+            self.root.add_widget(container)
 
     def focus_widget(self, widget, *largs):
         if self._widget_focused and (widget is None or self._widget_focused[0] != widget):

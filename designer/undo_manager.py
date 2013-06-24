@@ -92,3 +92,7 @@ class UndoManager(object):
         operation = self._redo_stack_operation.pop()
         operation.do_redo()
         self._undo_stack_operation.append(operation)
+    
+    def cleanup(self):
+        self._undo_stack_operation = []
+        self._redo_stack_operation = []

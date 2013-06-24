@@ -5,7 +5,10 @@ from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.app import App
 from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.sandbox import Sandbox
+from kivy.factory import Factory
 
+from designer.common import widgets
 from designer.tree import Tree
 from designer.undo_manager import WidgetOperation
 
@@ -45,6 +48,7 @@ class Playground(ScatterPlane):
     selection_mode = BooleanProperty(True)
     tree = ObjectProperty()
     clicked = BooleanProperty(False)
+    sandbox = ObjectProperty(None)
 
     __events__ = ('on_show_edit',)
 
@@ -60,7 +64,7 @@ class Playground(ScatterPlane):
         return self.find_target(x, y, self.root, widget)
 
     def on_root(self, instance, value):
-        self.tree.insert(value, None)
+        pass #self.tree.insert(value, None)
         
     def place_widget(self, widget, x, y):
         x, y = self.to_local(x, y)
@@ -72,18 +76,52 @@ class Playground(ScatterPlane):
 
     def add_widget_to_parent(self, widget, target, from_undo=False):
         if target is None:
-            self.root = widget
-            self.add_widget(widget)
-            widget.size = self.size
+            with self.sandbox:
+                self.root = widget
+                self.sandbox.add_widget(widget)
+                widget.size = self.sandbox.size
         else:
-            target.add_widget(widget)
+            with self.sandbox:
+                target.add_widget(widget)
+                #Added just for testing, clicking on the 
+                #playground will lead an error, but inside sandbox
+                #widget.bind(on_touch_down=widget)
         
-        self.tree.insert(widget, target)
+        #self.tree.insert(widget, target)
         App.get_running_app().root.widgettree.refresh()
 
         if not from_undo:
             App.get_running_app().root.undo_manager.push_operation(
                 WidgetOperation('add', widget, target, self))
+    
+    def get_playground_drag_element(self, widgetname, touch, **default_args):
+        widget = None
+        with self.sandbox:
+            custom = False
+            for _widget in widgets:
+                if _widget[0] == widgetname and _widget[1] == 'custom':
+                    widget = App.get_running_app().root\
+                        .project_loader.get_widget_of_class(widgetname)
+                    custom = True
+            if not custom:
+                widget = getattr(Factory, widgetname)(**default_args)
+        
+        if widget is None:
+            print 'Error cannot creating widget'
+            return None
+
+        container = PlaygroundDragElement(playground=self)
+        container.add_widget(widget)
+        touch.grab(container)
+        container.center_x = touch.x
+        container.y = touch.y + 20
+        return container
+    
+    def cleanup(self):
+        #Cleanup is called when project is created
+        #so this operation shouldn't be recorded in Undo
+        self.remove_widget_from_parent(self.root, True)
+        self.tree = Tree()
 
     def remove_widget_from_parent(self, widget, from_undo=False):
         parent = None
@@ -94,7 +132,7 @@ class Playground(ScatterPlane):
             self.root.parent.remove_widget(self.root)
             self.root = None
 
-        self.tree.delete(widget)
+        #self.tree.delete(widget)
         App.get_running_app().focus_widget(parent)
         if not from_undo:
             App.get_running_app().root.undo_manager.push_operation(
