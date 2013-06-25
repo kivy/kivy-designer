@@ -12,7 +12,7 @@ from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.uix.sandbox import Sandbox
 
-KV_PROJ_FILE_NAME = 'kvproj'
+KV_PROJ_FILE_NAME = '.designer/kvproj'
 
 def get_indentation(string):
     count = 0
@@ -399,6 +399,9 @@ class ProjectLoader(object):
         return self.root
     
     def record(self):
+        if not os.path.exists(os.path.join(self.proj_dir, os.path.dirname(KV_PROJ_FILE_NAME))):
+            os.mkdir(os.path.join(self.proj_dir, ".designer"))
+
         f = open(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME), 'w')
         f.close()
         
