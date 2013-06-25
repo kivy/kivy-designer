@@ -11,7 +11,6 @@
     
     GridLayout:
         rows: 1
-        orientation: 'horizontal'
         size_hint_y: None
         height: '25pt'
         padding: '4sp'
@@ -25,7 +24,23 @@
             text: 'Cancel'
             size_hint_x: None
             width: '90pt'
-            
+
+<ConfirmationDialog>:
+    orientation: 'vertical'
+    padding: '5sp'
+    Label:
+        text: root.message
+    
+    BoxLayout:
+        size_hint_y: None
+        height: '25pt'
+        Button:
+            text: 'Yes'
+            on_press: root.dispatch('on_ok')
+        Button:
+            text: 'No'
+            on_press: root.dispatch('on_cancel')
+    
 <ActionCheckButton>:
     orientation: 'horizontal'
     background_normal: 'atlas://data/images/defaulttheme/action_bar'

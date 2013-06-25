@@ -75,6 +75,7 @@ class UndoManager(object):
         self._redo_stack_operation = []
 
     def push_operation(self, op):
+        App.get_running_app().root._curr_proj_changed = True
         self._undo_stack_operation.append(op)
 
     def do_undo(self):

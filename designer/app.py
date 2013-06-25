@@ -2,13 +2,15 @@ __all__ = ('DesignerApp', )
 
 import kivy
 import time
+import os
+import shutil
 
 kivy.require('1.4.1')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.layout import Layout
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.clock import Clock
 from kivy.uix import actionbar
 from kivy.garden.filebrowser import FileBrowser
@@ -24,6 +26,12 @@ from designer.uix.kv_lang_area import KVLangArea
 from designer.undo_manager import WidgetOperation, UndoManager
 from designer.project_loader import ProjectLoader
 from designer.select_class import SelectClass
+from designer.confirmation_dialog import ConfirmationDialog
+
+NEW_PROJECT_DIR_NAME = 'new_proj'
+
+def get_kivy_designer_dir():
+    return os.path.join(os.path.expanduser('~'), '.kivy-designer')
 
 class Designer(FloatLayout):
     toolbox = ObjectProperty(None)
@@ -41,6 +49,7 @@ class Designer(FloatLayout):
     splitter_property = ObjectProperty(None)
     splitter_widget_tree = ObjectProperty(None)
     project_loader = ObjectProperty(ProjectLoader())
+    _curr_proj_changed = BooleanProperty(False)
 
     def on_show_edit(self, *args):
         if isinstance(self.actionbar.children[0], EditContView):
@@ -75,12 +84,50 @@ class Designer(FloatLayout):
         return super(FloatLayout, self).on_touch_down(touch)  
 
     def action_btn_new_pressed(self, *args):
-        pass
+        if not self._curr_proj_changed:
+            self._perform_new()
+            return
 
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be lost.\n Do you want to continue?')
+        self._confirm_dlg.bind(on_ok=self._perform_new,
+                               on_cancel=self._cancel_popup)
+
+        self._popup = Popup(title='New', content = self._confirm_dlg, 
+                            size_hint=(None,None),size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+    
+    def _perform_new(self, *args):
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
+
+        self.cleanup()
+        new_proj_dir = os.path.join(get_kivy_designer_dir(),
+                                    NEW_PROJECT_DIR_NAME)
+        if os.path.exists(new_proj_dir):
+            shutil.rmtree(new_proj_dir)
+
+        shutil.copytree(os.path.join(os.getcwd(), "designer/new_proj"), new_proj_dir)
+        self.project_loader.load_new_project(os.path.join(new_proj_dir, "main.kv"))
+        root_wigdet = self.project_loader.get_root_widget()
+        self.playground.add_widget_to_parent(root_wigdet, None)
+
+    def cleanup(self):
+        self.project_loader.cleanup()
+        self.playground.cleanup()
+        self.undo_manager.cleanup()
+        self.toolbox.cleanup()
+
+        for widget in widgets[:]:
+            if widget[1] == 'custom':
+                widgets.remove(widget)
+        
+        self._curr_proj_changed = False
+        
     def action_btn_open_pressed(self, *args):
         self._fbrowser = FileBrowser(select_string='Open')
         self._fbrowser.bind(on_success=self._fbrowser_load,
-                            on_canceled=self._fbrowser_canceled)
+                            on_canceled=self._cancel_popup)
 
         self._popup = Popup(title="Open File", content = self._fbrowser,
                             size_hint=(0.9, 0.9), auto_dismiss=False)
@@ -106,19 +153,13 @@ class Designer(FloatLayout):
             if widget[1] == 'custom':
                 widgets.remove(widget)
         
+        self.cleanup()
+
         with self.playground.sandbox:
             if not self.project_loader.load_project(file_path):
-                self.statusbar.show_message('''Cannot Load given file, make sure that file is valid, all py files are in the same folder andis folder doesn't contain files related to other projects''')
+                self.statusbar.show_message('''Cannot Load given file, make sure that file is valid, all py files are in the same folder and is folder doesn't contain files related to other projects''')
                 return
-            
-            self.playground.cleanup()
-            self.undo_manager.cleanup()
-            self.toolbox.cleanup()
 
-            for widget in widgets[:]:
-                if widget[1] == 'custom':
-                    widgets.remove(widget)
-            
             if self.project_loader.class_rules:
                 for i, _rule in enumerate(self.project_loader.class_rules):
                     widgets.append((_rule.name, 'custom'))
@@ -149,14 +190,14 @@ class Designer(FloatLayout):
             #Record everything for later use
             self.project_loader.record()
 
-    def _fbrowser_canceled(self, instance):
+    def _cancel_popup(self, instance):
         self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
-        pass
+        self._curr_proj_changed = False
 
     def action_btn_save_as_pressed(self, *args):
-        pass
+        self._curr_proj_changed = False
 
     def action_btn_recent_files_pressed(self, *args):
         pass
@@ -308,10 +349,15 @@ class DesignerApp(App):
         Factory.register('StatusBar', module='designer.statusbar')
         Factory.register('PropertyViewer', module='designer.propertyviewer')
         Factory.register('WidgetsTree', module='designer.nodetree')
+        self.create_kivy_designer_dir()
         self._widget_focused = None
         self.root = Designer()
         self.bind(widget_focused=self.root.propertyviewer.setter('widget'))
         self.focus_widget(self.root.playground.root)
+    
+    def create_kivy_designer_dir(self):
+        if not os.path.exists(get_kivy_designer_dir()):
+            os.mkdir(get_kivy_designer_dir())        
 
     def create_draggable_element(self, widgetname, touch):
         # create the element, and make it draggable until the touch is released

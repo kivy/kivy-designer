@@ -81,7 +81,11 @@ class ProjectLoader(object):
                         file_list.append(file_path)
 
         return file_list
-                
+    
+    def load_new_project(self, kv_path):
+        self._new_project = True
+        self.load_project(kv_path)
+
     def load_project(self, kv_path):
         try:
             self.cleanup()
@@ -116,9 +120,10 @@ class ProjectLoader(object):
                 f = open(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME), 'r')
                 proj_str = f.read()
                 f.close()
-                
+
                 projdir_time = proj_str[proj_str.find('<time>') + len('<time>'): 
                                         proj_str.find('</time>')]
+
                 projdir_time = float(projdir_time.strip())
                 if projdir_mtime <= projdir_time:
                     #Project Directory folder hasn't been modified,
