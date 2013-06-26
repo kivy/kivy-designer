@@ -106,8 +106,14 @@ class Designer(FloatLayout):
                                     NEW_PROJECT_DIR_NAME)
         if os.path.exists(new_proj_dir):
             shutil.rmtree(new_proj_dir)
+        
+        os.mkdir (new_proj_dir)
+        shutil.copy(os.path.join(os.getcwd(), "template_main_py"),
+                    os.path.join(new_proj_dir, "main.py"))
 
-        shutil.copytree(os.path.join(os.getcwd(), "designer/new_proj"), new_proj_dir)
+        shutil.copy(os.path.join(os.getcwd(), "template_main_kv"),
+                    os.path.join(new_proj_dir, "main.kv"))
+
         self.project_loader.load_new_project(os.path.join(new_proj_dir, "main.kv"))
         root_wigdet = self.project_loader.get_root_widget()
         self.playground.add_widget_to_parent(root_wigdet, None)
@@ -174,8 +180,6 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv'):
             if not self.project_loader.load_project(file_path):
                 self.statusbar.show_message('''Cannot Load given file, make sure that file is valid, all py files are in the same folder and is folder doesn't contain files related to other projects''')
                 return
