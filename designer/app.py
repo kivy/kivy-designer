@@ -24,7 +24,7 @@ from designer.common import widgets
 from designer.uix.editcontview import EditContView
 from designer.uix.kv_lang_area import KVLangArea
 from designer.undo_manager import WidgetOperation, UndoManager
-from designer.project_loader import ProjectLoader
+from designer.project_loader import ProjectLoader, ProjectLoaderException
 from designer.select_class import SelectClass
 from designer.confirmation_dialog import ConfirmationDialog
 
@@ -63,7 +63,8 @@ class Designer(FloatLayout):
                 on_copy=self.action_btn_copy_pressed,
                 on_paste=self.action_btn_paste_pressed,
                 on_delete=self.action_btn_delete_pressed,
-                on_selectall=self.action_btn_select_all_pressed)
+                on_selectall=self.action_btn_select_all_pressed,
+                on_add_custom=self.action_btn_add_custom_widget_press)
 
         self.actionbar.add_widget(self.editcontview)
 
@@ -278,6 +279,33 @@ class Designer(FloatLayout):
 
     def action_btn_select_all_pressed(self, *args):
         pass
+    
+    def action_btn_add_custom_widget_press(self, *args):
+        self._custom_browser = FileBrowser(select_string='Add')
+        self._custom_browser.bind(on_success=self._custom_browser_load,
+                                  on_canceled=self._cancel_popup)
+
+        self._popup = Popup(title="Add Custom Widget",
+                            content = self._custom_browser,
+                            size_hint=(0.9, 0.9), auto_dismiss=False)
+        self._popup.open()
+
+    def _custom_browser_load(self, instance):
+        file_path = instance.selection[0]
+        self._popup.dismiss()
+        
+        with self.playground.sandbox:
+            try:
+                self.project_loader.add_custom_widget(file_path)
+
+                self.toolbox.cleanup()
+                for _rule in (self.project_loader.custom_widgets):
+                    widgets.append((_rule.name, 'custom'))
+
+                self.toolbox.add_custom()
+
+            except ProjectLoaderException as e:
+                self.statusbar.show_message('Cannot load widget. %s'%str(e))
 
     def action_chk_btn_toolbox_active(self, chk_btn):
         if chk_btn.checkbox.active:
@@ -362,7 +390,9 @@ class Designer(FloatLayout):
             self._kv_area_height = self.splitter_kv_code_input.height
             self.splitter_kv_code_input.height = 0
             self._kv_area_parent.remove_widget(self.splitter_kv_code_input)
-
+    
+    
+    
 class DesignerApp(App):
 
     widget_focused = ObjectProperty(allownone=True)

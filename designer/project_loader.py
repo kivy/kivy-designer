@@ -46,6 +46,15 @@ class ClassRule(WidgetRule):
         super(ClassRule, self).__init__(class_name, None)
 
 
+class CustomWidgetRule(ClassRule):
+
+    def __init__(self, class_name, kv_file, py_file):
+        super(ClassRule, self).__init__(class_name, None)
+        self.class_name = class_name
+        self.kv_file = kv_file
+        self.py_file = py_file
+
+
 class RootRule(ClassRule):
     def __init__(self, class_name, widget):
         super(RootRule, self).__init__(class_name)
@@ -82,6 +91,48 @@ class ProjectLoader(object):
 
         return file_list
     
+    def add_custom_widget(self, py_path):
+        f = open(py_path, 'r')
+        py_string = f.read()
+        f.close()
+        
+        #Find path to kv. py file will have Builder.load_file('path/to/kv')
+        _r = re.findall(r'Builder\.load_file\s*\(\s*.+\s*\)', py_string)
+        if _r == []:
+            raise ProjectLoaderException('Cannot find widget\'s kv file.')
+        
+        py_string = py_string.replace(_r[0], '')
+        kv_path = _r[0][_r[0].find('(') + 1: _r[0].find(')')]
+        py_string = py_string.replace(kv_path, '')
+        kv_path = kv_path.replace("'", '').replace('"', '')
+
+        f = open(kv_path, 'r')
+        kv_string = f.read()
+        f.close()
+
+        #Remove all the 'app' lines
+        for app_str in re.findall(r'.+app+.+', kv_string):
+            kv_string = kv_string.replace(app_str, 
+                                          app_str[:get_indentation(app_str)]\
+                                          + '#' + app_str.lstrip())
+
+        Builder.load_string(kv_string)
+        
+        sys.path.insert(0, os.path.dirname(kv_path))
+        
+        _to_check = []
+
+        #Get all the class_rules
+        for class_str in re.findall(r'<+([\w_]+)>', kv_string):
+            if re.search(r'\bclass\s+%s+.+:'%class_str, py_string):
+                module = imp.new_module('CustomWidget')
+                exec py_string in module.__dict__
+                sys.modules['AppModule'] = module
+                class_rule = CustomWidgetRule(class_str, kv_path, py_path)
+                class_rule.file = py_path
+                class_rule.module = module
+                self.custom_widgets.append(class_rule)
+
     def load_new_project(self, kv_path):
         self._new_project = True
         self.load_project(kv_path)
@@ -91,10 +142,11 @@ class ProjectLoader(object):
             self.cleanup()
             self.kv_path = kv_path
             
-            #Remove all the 'app' lines
             f = open(self.kv_path, 'r')
             kv_string = f.read()
             f.close()
+
+            #Remove all the 'app' lines
             for app_str in re.findall(r'.+app+.+', kv_string):
                 kv_string = kv_string.replace(app_str, app_str[:get_indentation(app_str)] + '#' + app_str.lstrip())
             
@@ -355,7 +407,8 @@ class ProjectLoader(object):
         self._dir_list = []
         self.class_rules = []
         self.list_comments = []
-        
+        self.custom_widgets = []
+
     def get_app(self):
         if not self._app_file or not self._app_class or not self._app_module:
             return None

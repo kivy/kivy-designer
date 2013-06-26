@@ -79,6 +79,9 @@
     ActionButton:
         text: 'Delete'
         on_press: root.dispatch('on_delete')
+    ActionButton:
+        text: 'Add Custom Widget'
+        on_press: root.dispatch('on_add_custom')
 
 <Playground>:
     root: root_widget
@@ -332,7 +335,7 @@
                 ActionCheckButton:
                     text: 'KV Area'
                     minimum_width: 150
-                    on_active: root.action_chk_btn_kv_area_active(self)            
+                    on_active: root.action_chk_btn_kv_area_active(self)
 
     GridLayout:
         size_hint: 1, None

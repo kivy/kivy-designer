@@ -4,7 +4,7 @@ from kivy.uix.actionbar import ContextualActionView
 class EditContView(ContextualActionView):
 
     __events__ = ('on_undo', 'on_redo', 'on_cut', 'on_copy', 'on_paste',
-                  'on_delete', 'on_selectall',)
+                  'on_delete', 'on_selectall','on_add_custom')
     
     def on_undo(self, *args):
         pass
@@ -26,5 +26,7 @@ class EditContView(ContextualActionView):
 
     def on_selectall(self, *args):
         pass
-    
-    
+        
+    def on_add_custom(self, *args):
+        pass
+        
