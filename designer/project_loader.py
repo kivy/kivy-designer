@@ -25,10 +25,11 @@ def get_indentation(string):
 
 class Comment(object):
     
-    def __init__(self, string, path):
+    def __init__(self, string, path, _file):
         super(Comment, self).__init__()
         self.string = string
         self.path = path
+        self.kv_file = _file
 
 class WidgetRule(object):
     
@@ -37,6 +38,7 @@ class WidgetRule(object):
         self.name = widget
         self.parent = parent
         self.file = None
+        self.kv_file = None
         self.module = None
 
 
@@ -138,33 +140,42 @@ class ProjectLoader(object):
         self.load_project(kv_path)
 
     def load_project(self, kv_path):
-        try:
+        #try:
             self.cleanup()
-            self.kv_path = kv_path
-            
-            f = open(self.kv_path, 'r')
-            kv_string = f.read()
-            f.close()
 
-            #Remove all the 'app' lines
-            for app_str in re.findall(r'.+app+.+', kv_string):
-                kv_string = kv_string.replace(app_str, app_str[:get_indentation(app_str)] + '#' + app_str.lstrip())
-            
-            root_rule = Builder.load_string(kv_string)
-            self.load_comments(kv_string)
-            self.root_rule = None
-            if root_rule:
-                self.root_rule = RootRule(root_rule.__class__.__name__, root_rule)
-            
-            self.class_rules = []
-
-            #Get all the class_rules
-            for class_str in re.findall(r'<+([\w_]+)>', kv_string):
-                self.class_rules.append(ClassRule(class_str))
-            
             self.proj_dir = os.path.dirname(kv_path)
             parent_proj_dir = os.path.dirname(self.proj_dir)
             sys.path.insert(0, parent_proj_dir)
+
+            self.class_rules = []
+
+            for _file in os.listdir(self.proj_dir):
+                #Load each kv file in the directory
+                _file = os.path.join(self.proj_dir, _file)
+                if _file[_file.rfind('.'):] != '.kv':
+                    continue
+
+                f = open(_file, 'r')
+                kv_string = f.read()
+                f.close()
+        
+                #Remove all the 'app' lines
+                for app_str in re.findall(r'.+app+.+', kv_string):
+                    kv_string = kv_string.replace(app_str, 
+                                                  app_str[:get_indentation(app_str)]
+                                                  + '#' + app_str.lstrip())
+                
+                root_rule = Builder.load_string(kv_string)
+                self.load_comments(kv_string, _file)
+                self.root_rule = None
+                if root_rule:
+                    self.root_rule = RootRule(root_rule.__class__.__name__, root_rule)
+
+                #Get all the class_rules
+                for class_str in re.findall(r'<+([\w_]+)>', kv_string):
+                    class_rule = ClassRule(class_str)
+                    class_rule.kv_file = _file
+                    self.class_rules.append(class_rule)
 
             if os.path.exists(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME)):
                 projdir_mtime = os.path.getmtime(self.proj_dir)
@@ -246,10 +257,9 @@ class ProjectLoader(object):
                  self.file_list = self._get_file_list(self.proj_dir)
 
             self._get_class_files()
-            self._list_modules = []
             return True
 
-        except:
+        #except:
             return False
     
     def _app_in_string(self, s):
@@ -268,7 +278,6 @@ class ProjectLoader(object):
         return False
 
     def _get_class_files(self):
-        found_app = False
         if self._app_file == None:
             #Search for main.py
             for _file in self.file_list:
@@ -307,7 +316,7 @@ class ProjectLoader(object):
             f = open(_file, 'r')
             s = f.read()
             f.close()
-            if self._app_file and not found_app and self._app_in_string(s):
+            if not self._app_file and not found_app and self._app_in_string(s):
                 self._app_module = self._import_module(s, _file)
                 self._app_file = _file
                 found_app = True
@@ -322,17 +331,19 @@ class ProjectLoader(object):
                         _rule.file = _file
                         to_find.remove(_rule)
                         _rule.module = mod
+        
+        #print self._app_file, self._app_module
 
         #Cannot Find App, So, use default runTouchApp
-        if not found_app:
+        if not self._app_file:
             self._app_class = 'runTouchApp'
-            self._app_file = None
         
         #Root Widget may be in Factory not in file
         if self.root_rule:
             if hasattr(Factory, self.root_rule.name):
                 to_find.remove(self.root_rule)
-
+        
+        print [x.name for x in to_find]
         #to_find should be empty, if not some class's files are not detected
         if to_find != []:
             raise ProjectLoaderException(
@@ -340,8 +351,14 @@ class ProjectLoader(object):
     
     def _import_module(self, s, _file, _fromlist=[]):
         module = None
-        run_pos = s.rfind('().run()')
+        import_from_s = False
 
+        _r = re.findall(r'Builder\.load_file\s*\(\s*.+\s*\)', s)
+        if _r:
+            s = s.replace(_r[0], '')
+            import_from_s = True
+
+        run_pos = s.rfind('().run()')
         if run_pos != -1:
             run_pos -= 1
             while s[run_pos] != ' ':
@@ -351,12 +368,14 @@ class ProjectLoader(object):
             while s[i] == ' ':
                 i -= 1
 
-            if i == run_pos - 1:
+        if i == run_pos - 1 or _r != []:
+            if i == run_pos -1:
                 s = s.replace('%s().run()'%self._app_class, '')
-                module = imp.new_module('AppModule')
-                exec s in module.__dict__
-                sys.modules['AppModule'] = module
-                return module
+
+            module = imp.new_module('AppModule')
+            exec s in module.__dict__
+            sys.modules['AppModule'] = module
+            return module
 
         module = __import__(
                 _file[_file.rfind('/')+1:].replace('.py',''),
@@ -364,7 +383,7 @@ class ProjectLoader(object):
 
         return module
     
-    def load_comments(self, kv_string):
+    def load_comments(self, kv_string, kv_file):
         for searchiter in re.finditer(r'#.+', kv_string):
             path = []
             lines = kv_string.splitlines()
@@ -389,7 +408,7 @@ class ProjectLoader(object):
 
                 lineno = _lineno
 
-            self.list_comments.append(Comment(searchiter.group(0), path))
+            self.list_comments.append(Comment(searchiter.group(0), path, kv_file))
 
     def cleanup(self):
         self._app_file = None
@@ -435,7 +454,7 @@ class ProjectLoader(object):
         s = f.read()
         f.close()
 
-        current_app = App._running_app
+        current_app = App.get_running_app()
         app = self.get_app()
         root_widget = None
 
@@ -444,7 +463,7 @@ class ProjectLoader(object):
             if not root_widget:
                 root_widget = app.root
             
-            App._running_app = current_app
+        App._running_app = current_app
 
         if root_widget:
             self.root_rule = RootRule(root_widget.__class__.__name__,
@@ -486,14 +505,15 @@ class ProjectLoader(object):
 
         proj_file_str += '</classes>\n'
         
-        proj_file_str += '<app>\n'
-        proj_file_str += '    <class>\n'
-        proj_file_str += '         '+self._app_class
-        proj_file_str += '\n    </class>\n'
-        proj_file_str += '    <file>\n'
-        proj_file_str += '         '+self._app_file
-        proj_file_str += '\n    </file>\n'
-        proj_file_str += '</app>\n'
+        if self._app_class and self._app_file:
+            proj_file_str += '<app>\n'
+            proj_file_str += '    <class>\n'
+            proj_file_str += '         '+self._app_class
+            proj_file_str += '\n    </class>\n'
+            proj_file_str += '    <file>\n'
+            proj_file_str += '         '+self._app_file
+            proj_file_str += '\n    </file>\n'
+            proj_file_str += '</app>\n'
         
         f.write(proj_file_str)
 
