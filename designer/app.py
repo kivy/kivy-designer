@@ -125,6 +125,24 @@ class Designer(FloatLayout):
         self._curr_proj_changed = False
         
     def action_btn_open_pressed(self, *args):
+        if not self._curr_proj_changed:
+            self._perform_open()
+            return
+
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be lost.\n Do you want to continue?')
+
+        self._confirm_dlg.bind(on_ok=self._perform_open,
+                               on_cancel=self._cancel_popup)
+
+        self._popup = Popup(title='New', content = self._confirm_dlg, 
+                            size_hint=(None,None),size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+    
+    def _perform_open(self, *args):
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
+
         self._fbrowser = FileBrowser(select_string='Open')
         self._fbrowser.bind(on_success=self._fbrowser_load,
                             on_canceled=self._cancel_popup)
@@ -156,6 +174,8 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv'):
             if not self.project_loader.load_project(file_path):
                 self.statusbar.show_message('''Cannot Load given file, make sure that file is valid, all py files are in the same folder and is folder doesn't contain files related to other projects''')
                 return
