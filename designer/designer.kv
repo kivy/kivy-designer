@@ -3,6 +3,16 @@
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
 
+<KVLangArea>:
+    auto_indent: True
+    canvas.after:
+        Color:
+            rgba: .9, .1, .1, (1 if self.have_error else 0)
+        Line:
+            points: [self.x, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
+            close: True
+            width: 2
+
 <SelectClass>:
     select_button: select
     cancel_button: cancel
@@ -84,7 +94,6 @@
         on_press: root.dispatch('on_add_custom')
 
 <Playground>:
-    root: root_widget
     sandbox: sandbox
     do_scale: False
     do_rotation: False
@@ -103,10 +112,6 @@
         id: sandbox
         size: root.size
         pos: root.pos
-
-        FloatLayout:
-            id: root_widget
-            size: root.size
 
 <PlaygroundDragElement>:
     size_hint: None, None
@@ -373,9 +378,13 @@
                 x: splitter_toolbox.width
                 width: root.width - self.x - splitter_widget_tree.width
                 y: statusbar.height
-                KVLangArea:
-                    id: code_input
-                    on_show_edit: root.on_show_edit()
+                    
+                ScrollView:
+                    KVLangArea:
+                        id: code_input
+                        size_hint_y: None
+                        height: 1000                        
+                        on_show_edit: root.on_show_edit()
 
             Splitter:
                 id: splitter_toolbox

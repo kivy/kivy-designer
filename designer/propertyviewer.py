@@ -22,6 +22,7 @@ class PropertyBase(object):
 
     def set_value(self, value):
         self.have_error = False
+        conversion_err = False
         oldvalue = getattr(self.propwidget, self.propname)
         try:
             if isinstance(self.propwidget.property(self.propname),
@@ -31,17 +32,22 @@ class PropertyBase(object):
                 else:
                     value = float(value)
         except Exception:
-            pass
-
-        try:
-            setattr(self.propwidget, self.propname, value)
-            if self.record_to_undo:
-                App.get_running_app().root.undo_manager.push_operation(
-                    PropOperation(self, oldvalue, value))
-            self.record_to_undo = True
-        except Exception:
-            self.have_error = True
-            setattr(self.propwidget, self.propname, oldvalue)
+            conversion_err = True
+        
+        root = App.get_running_app().root
+        if not conversion_err:
+            try:
+                setattr(self.propwidget, self.propname, value)
+                root.kv_code_input.set_property_value(self.propwidget,
+                                                      self.propname, value,
+                                                      self.proptype)
+                if self.record_to_undo:
+                    root.undo_manager.push_operation(
+                        PropOperation(self, oldvalue, value))
+                self.record_to_undo = True
+            except Exception:            
+                self.have_error = True
+                setattr(self.propwidget, self.propname, oldvalue)
 
 
 class PropertyTextInput(PropertyBase, TextInput):

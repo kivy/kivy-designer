@@ -2,6 +2,7 @@ import kivy
 import re
 import os, sys, imp, inspect
 import time
+import functools
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -22,6 +23,15 @@ def get_indentation(string):
         else:
             break
     return count
+
+def get_indent_str(indentation):
+    i = 0
+    s = ''
+    while i < indentation:
+        s += ' '
+        i += 1
+    
+    return s
 
 class Comment(object):
     
@@ -134,13 +144,52 @@ class ProjectLoader(object):
                 class_rule.file = py_path
                 class_rule.module = module
                 self.custom_widgets.append(class_rule)
+    
+    def get_root_str(self):
+        f = open(self.root_rule.kv_file, 'r')
+        kv_str = f.read()
+        f.close()
 
+        #Find the start position of root_rule
+        start_pos = kv_str.find(self.root_rule.name)
+        if start_pos == -1:
+            raise ProjectLoaderException(
+                'Cannot find root rule in its file')
+
+        #Get line for start_pos
+        _line = 0
+        _line_pos = 0
+        _line_pos = kv_str.find('\n', _line_pos + 1)
+        while _line_pos != -1 and _line_pos < start_pos:
+            _line_pos = kv_str.find('\n', _line_pos + 1)
+            _line += 1
+
+        #Find the end position of root_rule, where indentation becomes 0
+        #or file ends
+        _line += 1
+        lines = kv_str.splitlines()
+        _total_lines = len(lines)
+        while _line < _total_lines and (lines[_line].strip() == '' or 
+                                        get_indentation(lines[_line]) != 0):
+            _line_pos = kv_str.find('\n', _line_pos + 1)
+            _line += 1
+
+        end_pos = _line_pos
+
+        root_old_str = kv_str[start_pos: end_pos]
+
+        for _rule in self.class_rules:
+            if _rule.name == self.root_rule.name:
+                root_old_str = "<" + root_old_str
+
+        return root_old_str
+    
     def load_new_project(self, kv_path):
         self._new_project = True
         self.load_project(kv_path)
 
     def load_project(self, kv_path):
-        #try:
+        try:
             self.cleanup()
 
             self.proj_dir = os.path.dirname(kv_path)
@@ -166,7 +215,6 @@ class ProjectLoader(object):
                                                   + '#' + app_str.lstrip())
                 
                 root_rule = Builder.load_string(kv_string)
-                self.load_comments(kv_string, _file)
                 self.root_rule = None
                 if root_rule:
                     self.root_rule = RootRule(root_rule.__class__.__name__, root_rule)
@@ -257,9 +305,10 @@ class ProjectLoader(object):
                  self.file_list = self._get_file_list(self.proj_dir)
 
             self._get_class_files()
+            self._new_project = False
             return True
 
-        #except:
+        except:
             return False
     
     def _app_in_string(self, s):
@@ -331,8 +380,6 @@ class ProjectLoader(object):
                         _rule.file = _file
                         to_find.remove(_rule)
                         _rule.module = mod
-        
-        #print self._app_file, self._app_module
 
         #Cannot Find App, So, use default runTouchApp
         if not self._app_file:
@@ -342,8 +389,7 @@ class ProjectLoader(object):
         if self.root_rule:
             if hasattr(Factory, self.root_rule.name):
                 to_find.remove(self.root_rule)
-        
-        print [x.name for x in to_find]
+
         #to_find should be empty, if not some class's files are not detected
         if to_find != []:
             raise ProjectLoaderException(
@@ -382,33 +428,6 @@ class ProjectLoader(object):
                 fromlist=_fromlist)
 
         return module
-    
-    def load_comments(self, kv_string, kv_file):
-        for searchiter in re.finditer(r'#.+', kv_string):
-            path = []
-            lines = kv_string.splitlines()
-            pos = searchiter.start()
-            lineno = 0
-            pos_lineno = kv_string.find('\n')
-            while pos_lineno < pos:
-                lineno += 1
-                pos_lineno = kv_string.find('\n', pos_lineno + 1)
-            
-            if get_indentation(lines[lineno]) == 0:
-                path.append(lineno)
-
-            while get_indentation(lines[lineno]) != 0:
-                _lineno = lineno - 1
-                while lines[_lineno] == '' or get_indentation(lines[lineno]) -\
-                    get_indentation(lines[_lineno]) <= 0:
-                    _lineno -= 1
-
-                if lines[_lineno].strip().find(':') == len(lines[_lineno].strip()) -1:
-                    path.insert(0, lines[_lineno].strip())
-
-                lineno = _lineno
-
-            self.list_comments.append(Comment(searchiter.group(0), path, kv_file))
 
     def cleanup(self):
         self._app_file = None
@@ -443,10 +462,52 @@ class ProjectLoader(object):
         #if still couldn't get app, although that shouldn't happen
         return None
     
-    def get_root_widget(self):
-        if self.root_rule:
-            return self.root_rule.widget
+    def reload_root_widget_from_str(self, string):
+        rules = []
 
+        try:
+            rules = Builder.match(self.root_rule.widget)
+            for _rule in rules:
+                for _tuple in Builder.rules[:]:
+                    if _tuple[1] == _rule:
+                        Builder.rules.remove(_tuple)
+        except:
+            pass
+        
+        if hasattr(Factory, self.root_rule.name):
+            Factory.unregister(self.root_rule.name)
+        
+        root_widget = None
+        #Remove all the 'app' lines
+        for app_str in re.findall(r'.+app+.+', string):
+            string = string.replace(app_str, 
+                                    app_str[:get_indentation(app_str)]\
+                                    + '#' + app_str.lstrip())
+    
+        root_widget = Builder.load_string(string)
+        if not root_widget:
+            root_widget = self.get_root_widget()
+        
+        if not root_widget:
+            root_name = string[:string.find('\n')]
+            root_name = root_widget.replace(':', '').replace('<','')
+            root_name = root_widget.replace('>', '')
+            root_widget = self.set_root_widget(root_name)           
+
+        return root_widget
+    
+    def set_root_widget(self, root_name):
+        root_widget = self.get_widget_of_class(root_name)
+        self.root_rule = RootRule(root_name, root_widget)
+        for _rule in self.class_rules:
+            if _rule.name == root_name:
+                self.root_rule.kv_file = _rule.kv_file
+                self.root_rule.py_file = _rule.py_file
+                break
+        
+        return root_widget
+        
+    def get_root_widget(self):
         if self._app_file == None:
             return None
 
@@ -462,12 +523,17 @@ class ProjectLoader(object):
             root_widget = app.build()
             if not root_widget:
                 root_widget = app.root
-            
+
         App._running_app = current_app
 
         if root_widget:
             self.root_rule = RootRule(root_widget.__class__.__name__,
                                       root_widget)
+            for _rule in self.class_rules:
+                if _rule.name == self.root_rule.name:
+                    self.root_rule.kv_file = _rule.kv_file
+                    self.root_rule.file = _rule.file
+                    break
 
         return root_widget
         

@@ -115,9 +115,11 @@ class Designer(FloatLayout):
         shutil.copy(os.path.join(os.getcwd(), "template_main_kv"),
                     os.path.join(new_proj_dir, "main.kv"))
 
-        self.project_loader.load_new_project(os.path.join(new_proj_dir, "main.kv"))
+        self.project_loader.load_new_project(os.path.join(new_proj_dir, 
+                                                          "main.kv"))
         root_wigdet = self.project_loader.get_root_widget()
         self.playground.add_widget_to_parent(root_wigdet, None)
+        self.kv_code_input.text = self.project_loader.get_root_str()
 
     def cleanup(self):
         self.project_loader.cleanup()
@@ -136,7 +138,9 @@ class Designer(FloatLayout):
             self._perform_open()
             return
 
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be lost.\n Do you want to continue?')
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
+                                                'lost.\n'
+                                                'Do you want to continue?')
 
         self._confirm_dlg.bind(on_ok=self._perform_open,
                                on_cancel=self._cancel_popup)
@@ -162,8 +166,9 @@ class Designer(FloatLayout):
         selection = self._select_class.listview.adapter.selection[0].text
 
         with self.playground.sandbox:
-            self.playground.add_widget_to_parent(
-                self.project_loader.get_widget_of_class(selection), None)
+            root_widget = self.project_loader.set_root_widget(selection)
+            self.playground.add_widget_to_parent(root_widget, None)
+            self.kv_code_input.text = self.project_loader.get_root_str()
 
         self._select_class_popup.dismiss()
     
@@ -181,8 +186,15 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv'):
+            #if not self.project_loader.load_project('/home/abhi/kivy_designer/test/test/main.kv'):
             if not self.project_loader.load_project(file_path):
-                self.statusbar.show_message('''Cannot Load given file, make sure that file is valid, all py files are in the same folder and is folder doesn't contain files related to other projects''')
+                self.statusbar.show_message('Cannot Load given file,'
+                                            'make sure that file is valid,'
+                                            'all py files are in the same folder '
+                                            'and is folder doesn\'t contain files '
+                                            'related to other projects')
                 return
 
             if self.project_loader.class_rules:
@@ -211,6 +223,7 @@ class Designer(FloatLayout):
 
             else:
                 self.playground.add_widget_to_parent(root_wigdet, None)
+                self.kv_code_input.text = self.project_loader.get_root_str()
             
             #Record everything for later use
             self.project_loader.record()
