@@ -65,7 +65,7 @@ class Playground(ScatterPlane):
 
     def on_root(self, instance, value):
         pass #self.tree.insert(value, None)
-        
+
     def place_widget(self, widget, x, y):
         x, y = self.to_local(x, y)
         target = self.find_target(x, y, self.root, widget)
@@ -89,19 +89,21 @@ class Playground(ScatterPlane):
                 #Added just for testing, clicking on the 
                 #playground will lead an error, but inside sandbox
                 #widget.bind(on_touch_down=widget)
-        
+
         #self.tree.insert(widget, target)
         if not added:
             return False
 
-        App.get_running_app().root.widgettree.refresh()
+        root = App.get_running_app().root
+        root.widgettree.refresh()
         if not from_kv:
-            App.get_running_app().root.kv_code_input.add_widget_to_parent(widget, target)
+            root.kv_code_input.add_widget_to_parent(widget, target)
 
         if not from_undo:
-            App.get_running_app().root.undo_manager.push_operation(
-                WidgetOperation('add', widget, target, self))
-    
+            root.undo_manager.push_operation(WidgetOperation('add', 
+                                                             widget, target,
+                                                             self))
+
     def get_widget(self, widgetname, **default_args):
         widget = None
         with self.sandbox:
@@ -116,7 +118,7 @@ class Playground(ScatterPlane):
                     widget = getattr(Factory, widgetname)(**default_args)
                 except:
                     pass
-        
+
         return widget
 
     def get_playground_drag_element(self, widgetname, touch, **default_args):
@@ -159,15 +161,48 @@ class Playground(ScatterPlane):
     def find_target(self, x, y, target, widget=None):
         if target is None or not target.collide_point(x, y):
             return None
-        x, y = target.to_local(x, y)
-        for child in target.children:
-            if not child.collide_point(x, y):
-                continue
-            if not self.allowed_target_for(child, widget):
-                continue
-            return self.find_target(x, y, child, widget)
-        return target
 
+        x, y = target.to_local(x, y)
+        class_rules = App.get_running_app().root.project_loader.class_rules
+
+        for child in target.children:
+            is_child_custom = False
+            for rule in class_rules:
+                if rule.name == type(child).__name__:
+                    is_child_custom = True
+                    break
+            
+            #if point lies in custom wigdet's child then return custom widget
+            if is_child_custom:
+                if not widget and self._custom_widget_collides(child, x, y):
+                    return child
+                elif widget:
+                    return target
+            else:
+                if not child.collide_point(x, y):
+                    continue
+    
+                if not self.allowed_target_for(child, widget):
+                    continue
+
+                return self.find_target(x, y, child, widget)
+        return target
+    
+    def _custom_widget_collides(self, widget, x, y):
+        if not widget:
+            return False
+
+        if widget.collide_point(x, y):
+            return True
+        
+        x, y = widget.to_local(x, y)
+
+        for child in widget.children:
+            if self._custom_widget_collides(child, x, y):
+                return True
+        
+        return False
+    
     def allowed_target_for(self, target, widget):
         # stop on complex widget
         t = target if widget else target.parent
@@ -175,6 +210,10 @@ class Playground(ScatterPlane):
             return False
         if isinstance(t, FileChooserIconView):
             return False
+        
+        # stop on custom widget but not root widget
+        class_rules = App.get_running_app().root.project_loader.class_rules
+        root_widget = App.get_running_app().root.project_loader.root_rule.widget
 
         # if we don't have widget, always return true
         if widget is None:
