@@ -89,7 +89,9 @@ class Designer(FloatLayout):
             self._perform_new()
             return
 
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be lost.\n Do you want to continue?')
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
+                                               ' lost.\n'
+                                               'Do you want to continue?')
         self._confirm_dlg.bind(on_ok=self._perform_new,
                                on_cancel=self._cancel_popup)
 
@@ -138,7 +140,7 @@ class Designer(FloatLayout):
             self._perform_open()
             return
 
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be '
                                                 'lost.\n'
                                                 'Do you want to continue?')
 
@@ -186,9 +188,6 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv'):
-            #if not self.project_loader.load_project('/home/abhi/kivy_designer/test/test/main.kv'):
             if not self.project_loader.load_project(file_path):
                 self.statusbar.show_message('Cannot Load given file,'
                                             'make sure that file is valid,'
@@ -232,10 +231,47 @@ class Designer(FloatLayout):
         self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
-        self._curr_proj_changed = False
+        try:        
+            if self.project_loader.new_project:
+                self.action_btn_save_as_pressed()
+            else:
+                self.project_loader.save_project()
+            
+            self._curr_proj_changed = False
+            statusbar.show_message('Project saved successfully')
+        
+        except:
+            statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
         self._curr_proj_changed = False
+        self._save_as_browser = FileBrowser(select_string='Save')
+        self._save_as_browser.bind(on_success=self._perform_save_as,
+                                   on_canceled=self._cancel_popup)
+
+        self._popup = Popup(title="Enter Folder Name",
+                            content = self._save_as_browser,
+                            size_hint=(0.9, 0.9), auto_dismiss=False)
+        self._popup.open()
+    
+    def _perform_save_as(self, instance):
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
+
+        proj_dir = ''
+        if instance.ids.tabbed_browser.current_tab.text == 'List View':
+            proj_dir = instance.ids.list_view.path
+        else:
+            proj_dir = instance.ids.icon_view.path
+
+        proj_dir = os.path.join(proj_dir, instance.filename)
+        
+        try:
+            self.project_loader.save_project(proj_dir)
+            statusbar.show_message('Project saved successfully')
+
+        except:
+            statusbar.show_message('Cannot save project')
 
     def action_btn_recent_files_pressed(self, *args):
         pass

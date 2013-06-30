@@ -3,6 +3,8 @@ import re
 import os, sys, imp, inspect
 import time
 import functools
+import shutil
+
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -185,10 +187,15 @@ class ProjectLoader(object):
         return root_old_str
     
     def load_new_project(self, kv_path):
-        self._new_project = True
-        self.load_project(kv_path)
-
+        self.new_project = True
+        self._load_project(kv_path)
+    
     def load_project(self, kv_path):
+        ret = self._load_project(kv_path)
+        self.new_project = False
+        return ret
+
+    def _load_project(self, kv_path):
         try:
             self.cleanup()
 
@@ -259,7 +266,20 @@ class ProjectLoader(object):
                             _dir = os.path.dirname(_file)
                             if _dir not in sys.path:
                                 sys.path.insert(0, _dir)
-            
+                    
+                    #Reload information for app
+                    start_pos = proj_str.find('<app>')
+                    end_pos = proj_str.find('</app>')
+                    if start_pos != -1 and end_pos != -1:
+                        self._app_class = proj_str[proj_str.find('<class>', start_pos)+len('<class>'):
+                                                   proj_str.find('</class>', start_pos)].strip()
+                        self._app_file = proj_str[proj_str.find('<file>', start_pos)+len('<file>'):
+                                                   proj_str.find('</file>', start_pos)].strip()
+                        f = open(self._app_file, 'r')
+                        self._app_module = self._import_module(f.read(),
+                                                           self._app_file)
+                        f.close()
+
                     #Reload information for the files which haven't been modified
                     start_pos = proj_str.find('<classes>')
                     end_pos = proj_str.find('</classes>')
@@ -288,29 +308,69 @@ class ProjectLoader(object):
                                 
                             start_pos = proj_str.find('<class>', start_pos)
                             end_pos1 = proj_str.find('</class>', start_pos)
-                    
-                    start_pos = proj_str.find('<app>')
-                    end_pos = proj_str.find('</app>')
-                    if start_pos != -1 and end_pos != -1:
-                        self._app_class = proj_str[proj_str.find('<class>', start_pos)+len('<class>'):
-                                                   proj_str.find('</class>', start_pos)].strip()
-                        self._app_file = proj_str[proj_str.find('<file>', start_pos)+len('<file>'):
-                                                   proj_str.find('</file>', start_pos)].strip()
-                        f = open(self._app_file, 'r')
-                        self._app_module = self._import_module(f.read(),
-                                                           self._app_file)
-                        f.close()
 
             if self.file_list == []:
                  self.file_list = self._get_file_list(self.proj_dir)
 
             self._get_class_files()
-            self._new_project = False
             return True
 
         except:
             return False
-    
+
+    def save_project(self, proj_dir = ''):
+        if self.new_project:
+            #Create dir and copy new_proj.kv and new_proj.py to new directory
+            if not os.path.exists(proj_dir):
+                os.mkdir(proj_dir)
+            
+            kivy_designer_dir = os.path.join(os.path.expanduser('~'),
+                                             '.kivy-designer')
+            kivy_designer_new_proj_dir = os.path.join(kivy_designer_dir,
+                                                      "new_proj")
+            
+            new_kv_file = os.path.join(proj_dir, "main.kv")
+            old_kv_file = os.path.join(kivy_designer_new_proj_dir, "main.kv")
+            shutil.copy(old_kv_file, new_kv_file)
+            
+            new_py_file = os.path.join(proj_dir, "main.py")
+            old_py_file = os.path.join(kivy_designer_new_proj_dir, "main.py")
+            shutil.copy(old_py_file, new_py_file)
+            
+            self.proj_dir = proj_dir
+            if self.root_rule:
+                self.root_rule.kv_file = new_kv_file
+                self.root_rule.py_file = new_py_file
+
+            if self.class_rules:
+                self.class_rules[0].py_file = new_py_file
+                self.class_rules[0].kv_file = new_kv_file
+            
+            self.new_project = False
+
+        #For custom widgets copy py and kv file to project directory
+        for widget in self.custom_widgets:
+            custom_kv = os.path.join(self.proj_dir, 
+                                     os.path.basename(self.kv_file))
+            if not os.path.exists(custom_kv):
+                shutil.copy(self.kv_file, custom_kv)
+            
+            custom_py = os.path.join(self.proj_dir, 
+                                     os.path.basename(self.py_file))
+            if not os.path.exists(custom_py):
+                shutil.copy(self.py_file, custom_py)
+        
+        #Get the kv text from KVLangArea and write it to root rule's file
+        root_str = self.get_root_str()
+        f = open(self.root_rule.kv_file, 'r')
+        _file_str = f.read()
+        f.close()
+
+        f = open(self.root_rule.kv_file, 'w')
+        _file_str = _file_str.replace(root_str, App.get_running_app().root.kv_code_input.text)
+        f.write(_file_str)
+        f.close()
+            
     def _app_in_string(self, s):
         if 'runTouchApp' in s:
             self._app_class = 'runTouchApp'
@@ -337,10 +397,9 @@ class ProjectLoader(object):
                     if self._app_in_string(s):
                         self._app_module = self._import_module(s, _file)
                         self._app_file = _file
-                        found_app = True
             
             #Search for a file with app in its name
-            if not found_app:
+            if not self._app_class:
                 for _file in self.file_list:
                     if 'app' in _file[_file.rfind('/'):]:
                         f = open(_file, 'r')
@@ -349,13 +408,11 @@ class ProjectLoader(object):
                         if self._app_in_string(s):
                             self._app_module = self._import_module(s, _file)
                             self._app_file = _file
-                            found_app = True
         
         to_find = []
         for _rule in self.class_rules:
             if _rule.file == None:
                 to_find.append(_rule)
-
 
         if self.root_rule:
             to_find.append(self.root_rule)
@@ -365,16 +422,16 @@ class ProjectLoader(object):
             f = open(_file, 'r')
             s = f.read()
             f.close()
-            if not self._app_file and not found_app and self._app_in_string(s):
+            if not self._app_file and self._app_in_string(s):
                 self._app_module = self._import_module(s, _file)
                 self._app_file = _file
-                found_app = True
 
             for _rule in to_find[:]:
                 if _rule.file != None:
                     continue
 
                 if re.search(r'\bclass\s*%s+.+:'%(_rule.name), s):
+                    print self._app_class, _rule.name
                     mod = self._import_module(s, _file, _fromlist=[_rule.name])
                     if hasattr(mod, _rule.name):
                         _rule.file = _file
@@ -384,7 +441,7 @@ class ProjectLoader(object):
         #Cannot Find App, So, use default runTouchApp
         if not self._app_file:
             self._app_class = 'runTouchApp'
-        
+
         #Root Widget may be in Factory not in file
         if self.root_rule:
             if hasattr(Factory, self.root_rule.name):
@@ -417,6 +474,8 @@ class ProjectLoader(object):
         if i == run_pos - 1 or _r != []:
             if i == run_pos -1:
                 s = s.replace('%s().run()'%self._app_class, '')
+            
+            print s, self._app_class
 
             module = imp.new_module('AppModule')
             exec s in module.__dict__
