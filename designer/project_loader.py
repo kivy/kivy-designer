@@ -1,9 +1,10 @@
 import kivy
 import re
-import os, sys, imp, inspect
+import os, sys, inspect
 import time
 import functools
 import shutil
+import imp
 
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
@@ -14,6 +15,9 @@ from kivy.factory import Factory
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.uix.sandbox import Sandbox
+from kivy.clock import Clock
+
+from designer.proj_watcher import ProjectWatcher
 
 KV_PROJ_FILE_NAME = '.designer/kvproj'
 
@@ -83,9 +87,12 @@ class ProjectLoader(object):
     '''ProjectLoader class, used to load Project
     '''
 
-    def __init__(self):
+    def __init__(self, proj_watcher):
         super(ProjectLoader, self).__init__()
         self._dir_list = []
+        self.proj_watcher = proj_watcher
+        self.class_rules = []
+        self.root_rule = None
 
     def _get_file_list(self, path):
         file_list = []
@@ -193,13 +200,21 @@ class ProjectLoader(object):
     def load_project(self, kv_path):
         ret = self._load_project(kv_path)
         self.new_project = False
+        if ret:
+            #Add project_dir to watch
+            self.proj_watcher.start_watching(self.proj_dir)
+
         return ret
 
     def _load_project(self, kv_path):
         try:
             self.cleanup()
+            
+            if os.path.isdir(kv_path):
+                self.proj_dir = kv_path
+            else:
+                self.proj_dir = os.path.dirname(kv_path)
 
-            self.proj_dir = os.path.dirname(kv_path)
             parent_proj_dir = os.path.dirname(self.proj_dir)
             sys.path.insert(0, parent_proj_dir)
 
@@ -312,13 +327,18 @@ class ProjectLoader(object):
             if self.file_list == []:
                  self.file_list = self._get_file_list(self.proj_dir)
 
+            #Get all files corresponding to each class
             self._get_class_files()
+
             return True
 
         except:
             return False
 
     def save_project(self, proj_dir = ''):
+        #To block ProjectWatcher from emitting event when project is saved
+        self.proj_watcher.can_dispatch = False
+
         if self.new_project:
             #Create dir and copy new_proj.kv and new_proj.py to new directory
             if not os.path.exists(proj_dir):
@@ -370,7 +390,13 @@ class ProjectLoader(object):
         _file_str = _file_str.replace(root_str, App.get_running_app().root.kv_code_input.text)
         f.write(_file_str)
         f.close()
-            
+        
+        #Allow Project Watcher to emit events
+        Clock.schedule_once(self._allow_proj_watcher_dispatch, 1)
+    
+    def _allow_proj_watcher_dispatch(self, *args):
+        self.proj_watcher.can_dispatch = True
+
     def _app_in_string(self, s):
         if 'runTouchApp' in s:
             self._app_class = 'runTouchApp'
@@ -431,7 +457,6 @@ class ProjectLoader(object):
                     continue
 
                 if re.search(r'\bclass\s*%s+.+:'%(_rule.name), s):
-                    print self._app_class, _rule.name
                     mod = self._import_module(s, _file, _fromlist=[_rule.name])
                     if hasattr(mod, _rule.name):
                         _rule.file = _file
@@ -474,8 +499,6 @@ class ProjectLoader(object):
         if i == run_pos - 1 or _r != []:
             if i == run_pos -1:
                 s = s.replace('%s().run()'%self._app_class, '')
-            
-            print s, self._app_class
 
             module = imp.new_module('AppModule')
             exec s in module.__dict__
@@ -489,6 +512,26 @@ class ProjectLoader(object):
         return module
 
     def cleanup(self):
+        self.proj_watcher.stop_current_watching()
+        rules = []
+
+        try:
+            rules = Builder.match(self.root_rule.widget)
+            for _rule in rules:
+                for _tuple in Builder.rules[:]:
+                    if _tuple[1] == _rule:
+                        Builder.rules.remove(_tuple)
+        except:
+            pass
+
+        for _tuple in Builder.rules[:]:
+            for _rule in self.class_rules:
+                if "<" + _rule.name + ">" == _tuple[1].name:
+                    Builder.rules.remove(_tuple)
+    
+        if self.root_rule and hasattr(Factory, self.root_rule.name):
+            Factory.unregister(self.root_rule.name)
+
         self._app_file = None
         self._app_class = None
         self._app_module = None

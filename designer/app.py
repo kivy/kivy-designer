@@ -16,8 +16,6 @@ from kivy.uix import actionbar
 from kivy.garden.filebrowser import FileBrowser
 from kivy.uix.popup import Popup
 
-from copy import deepcopy, copy
-
 from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
@@ -27,6 +25,7 @@ from designer.undo_manager import WidgetOperation, UndoManager
 from designer.project_loader import ProjectLoader, ProjectLoaderException
 from designer.select_class import SelectClass
 from designer.confirmation_dialog import ConfirmationDialog
+from designer.proj_watcher import ProjectWatcher
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 
@@ -48,8 +47,40 @@ class Designer(FloatLayout):
     grid_widget_tree = ObjectProperty(None)
     splitter_property = ObjectProperty(None)
     splitter_widget_tree = ObjectProperty(None)
-    project_loader = ObjectProperty(ProjectLoader())
+    project_watcher = ObjectProperty(None)
+    project_loader = ObjectProperty(None)
     _curr_proj_changed = BooleanProperty(False)
+    _proj_modified_outside = BooleanProperty(False)
+
+    def __init__(self, **kwargs):
+        super(Designer, self).__init__(**kwargs)
+        self.project_watcher = ProjectWatcher(self.project_modified)
+        self.project_loader = ProjectLoader(self.project_watcher)
+
+    def project_modified(self, *args):
+        #To dispatch modified event only once for all files/folders of proj_dir
+        if self._proj_modified_outside:
+            return
+
+        self._confirm_dlg = ConfirmationDialog(message="Current Project has "
+                                               "been modified\n"
+                                               "outside the Kivy Designer.\n"
+                                               "Do you want to reload project?")
+        self._confirm_dlg.bind(on_ok=self._perform_reload,
+                               on_cancel=self._cancel_popup)
+        self._popup = Popup(title='Kivy Designer', content=self._confirm_dlg,
+                            size_hint=(None, None),size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+
+        self._proj_modified_outside = True
+    
+    def _perform_reload(self, *args):
+        #Perform reload of project after it is modified
+        self._popup.dismiss()
+        self.project_watcher.stop_current_watching()
+        self._perform_open(self.project_loader.proj_dir)
+        self._proj_modified_outside = False
 
     def on_show_edit(self, *args):
         if isinstance(self.actionbar.children[0], EditContView):
@@ -120,7 +151,7 @@ class Designer(FloatLayout):
         self.project_loader.load_new_project(os.path.join(new_proj_dir, 
                                                           "main.kv"))
         root_wigdet = self.project_loader.get_root_widget()
-        self.playground.add_widget_to_parent(root_wigdet, None)
+        self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
         self.kv_code_input.text = self.project_loader.get_root_str()
 
     def cleanup(self):
@@ -134,25 +165,26 @@ class Designer(FloatLayout):
                 widgets.remove(widget)
         
         self._curr_proj_changed = False
-        
+        self.kv_code_input.text = ""
+
     def action_btn_open_pressed(self, *args):
         if not self._curr_proj_changed:
-            self._perform_open()
+            self._show_open_dialog()
             return
 
         self._confirm_dlg = ConfirmationDialog('All unsaved changes will be '
                                                 'lost.\n'
                                                 'Do you want to continue?')
 
-        self._confirm_dlg.bind(on_ok=self._perform_open,
+        self._confirm_dlg.bind(on_ok=self._show_open_dialog,
                                on_cancel=self._cancel_popup)
 
         self._popup = Popup(title='New', content = self._confirm_dlg, 
                             size_hint=(None,None),size=('200pt', '150pt'),
                             auto_dismiss=False)
         self._popup.open()
-    
-    def _perform_open(self, *args):
+
+    def _show_open_dialog(self, *args):
         if hasattr(self, '_popup'):
             self._popup.dismiss()
 
@@ -169,7 +201,7 @@ class Designer(FloatLayout):
 
         with self.playground.sandbox:
             root_widget = self.project_loader.set_root_widget(selection)
-            self.playground.add_widget_to_parent(root_widget, None)
+            self.playground.add_widget_to_parent(root_widget, None, from_undo=True)
             self.kv_code_input.text = self.project_loader.get_root_str()
 
         self._select_class_popup.dismiss()
@@ -180,7 +212,9 @@ class Designer(FloatLayout):
     def _fbrowser_load(self, instance):
         file_path = instance.selection[0]
         self._popup.dismiss()
-        
+        self._perform_open(file_path)
+
+    def _perform_open(self, file_path):
         for widget in widgets[:]:
             if widget[1] == 'custom':
                 widgets.remove(widget)
@@ -221,13 +255,14 @@ class Designer(FloatLayout):
                 self._select_class_popup.open()
 
             else:
-                self.playground.add_widget_to_parent(root_wigdet, None)
+                self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
                 self.kv_code_input.text = self.project_loader.get_root_str()
             
             #Record everything for later use
             self.project_loader.record()
 
     def _cancel_popup(self, instance):
+        self._proj_modified_outside = False
         self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
@@ -238,10 +273,10 @@ class Designer(FloatLayout):
                 self.project_loader.save_project()
             
             self._curr_proj_changed = False
-            statusbar.show_message('Project saved successfully')
+            self.statusbar.show_message('Project saved successfully')
         
         except:
-            statusbar.show_message('Cannot save project')
+            self.statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
         self._curr_proj_changed = False
