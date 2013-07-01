@@ -222,10 +222,7 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv'):
-            if not self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv'):
-            #if not self.project_loader.load_project(file_path):
+            if not self.project_loader.load_project(file_path):
                 self.statusbar.show_message('Cannot Load given file,'
                                             'make sure that file is valid,'
                                             'all py files are in the same folder '
