@@ -17,27 +17,10 @@ from kivy.lang import Builder
 from kivy.uix.sandbox import Sandbox
 from kivy.clock import Clock
 
+from designer.helper_functions import get_indentation, get_indent_str
 from designer.proj_watcher import ProjectWatcher
 
 KV_PROJ_FILE_NAME = '.designer/kvproj'
-
-def get_indentation(string):
-    count = 0
-    for d in string:
-        if d == ' ':
-            count += 1
-        else:
-            break
-    return count
-
-def get_indent_str(indentation):
-    i = 0
-    s = ''
-    while i < indentation:
-        s += ' '
-        i += 1
-    
-    return s
 
 class Comment(object):
     
