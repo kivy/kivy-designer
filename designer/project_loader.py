@@ -191,9 +191,7 @@ class ProjectLoader(object):
         return ret
 
     def _load_project(self, kv_path):
-        try:
-            #self.cleanup()
-            
+        try:            
             if os.path.isdir(kv_path):
                 self.proj_dir = kv_path
             else:
@@ -213,7 +211,7 @@ class ProjectLoader(object):
                 f = open(_file, 'r')
                 kv_string = f.read()
                 f.close()
-        
+
                 #Remove all the 'app' lines
                 for app_str in re.findall(r'.+app+.+', kv_string):
                     kv_string = kv_string.replace(app_str, 
@@ -224,6 +222,7 @@ class ProjectLoader(object):
                 self.root_rule = None
                 if root_rule:
                     self.root_rule = RootRule(root_rule.__class__.__name__, root_rule)
+                    self.root_rule.kv_file = _file
 
                 #Get all the class_rules
                 for class_str in re.findall(r'<+([\w_]+)>', kv_string):
@@ -238,7 +237,7 @@ class ProjectLoader(object):
                 proj_str = f.read()
                 f.close()
 
-                projdir_time = proj_str[proj_str.find('<time>') + len('<time>'): 
+                projdir_time = proj_str[proj_str.find('<time>') + len('<time>'):
                                         proj_str.find('</time>')]
 
                 projdir_time = float(projdir_time.strip())
@@ -318,7 +317,58 @@ class ProjectLoader(object):
 
         except:
             return False
+    
+    def perform_auto_save(self, *args):
+        if not self.root_rule:
+            return
+
+        auto_save_dir = os.path.join(self.proj_dir, '.designer')
+        auto_save_dir = os.path.join(auto_save_dir, 'auto_save')
+
+        if not os.path.exists(auto_save_dir):
+            os.makedirs(auto_save_dir)
+
+        else:
+            shutil.rmtree(auto_save_dir)
+            os.mkdir(auto_save_dir)
+
+        for _file in os.listdir(self.proj_dir):
+            if '.designer' in _file:
+                continue
+
+            old_file = os.path.join(self.proj_dir, _file)
+            new_file = os.path.join(auto_save_dir, _file)
+            if os.path.isdir(old_file):
+                shutil.copytree(old_file, new_file)
+            else:
+                shutil.copy(old_file, new_file)
         
+        root_rule_file = os.path.join(auto_save_dir,
+                                      os.path.basename(self.root_rule.kv_file))
+        f = open(root_rule_file, 'r')
+        _file_str = f.read()
+        f.close()
+        
+        text = App.get_running_app().root.kv_code_input.text
+
+        root_str = self.get_root_str()
+        f = open(root_rule_file, 'w')
+        _file_str = _file_str.replace(root_str, text)
+        f.write(_file_str)
+        f.close()
+        
+        #For custom widgets copy py and kv file
+        for widget in self.custom_widgets:
+            custom_kv = os.path.join(auto_save_dir, 
+                                     os.path.basename(widget.kv_file))
+            if not os.path.exists(custom_kv):
+                shutil.copy(widget.kv_file, custom_kv)
+            
+            custom_py = os.path.join(auto_save_dir, 
+                                     os.path.basename(widget.py_file))
+            if not os.path.exists(custom_py):
+                shutil.copy(widget.py_file, custom_py)
+
     def save_project(self, proj_dir = ''):
         #To stop ProjectWatcher from emitting event when project is saved
         self.proj_watcher.stop()
@@ -418,14 +468,14 @@ class ProjectLoader(object):
         #For custom widgets copy py and kv file to project directory
         for widget in self.custom_widgets:
             custom_kv = os.path.join(self.proj_dir, 
-                                     os.path.basename(self.kv_file))
+                                     os.path.basename(widget.kv_file))
             if not os.path.exists(custom_kv):
-                shutil.copy(self.kv_file, custom_kv)
+                shutil.copy(widget.kv_file, custom_kv)
             
             custom_py = os.path.join(self.proj_dir, 
-                                     os.path.basename(self.py_file))
+                                     os.path.basename(widget.py_file))
             if not os.path.exists(custom_py):
-                shutil.copy(self.py_file, custom_py)
+                shutil.copy(widget.py_file, custom_py)
         
         #Get the kv text from KVLangArea and write it to root rule's file
         root_str = self.get_root_str()
@@ -681,7 +731,9 @@ class ProjectLoader(object):
         if root_widget:
             self.root_rule = RootRule(root_widget.__class__.__name__,
                                       root_widget)
+            print self.root_rule.name
             for _rule in self.class_rules:
+                print _rule.name
                 if _rule.name == self.root_rule.name:
                     self.root_rule.kv_file = _rule.kv_file
                     self.root_rule.file = _rule.file

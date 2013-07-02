@@ -28,6 +28,7 @@ from designer.confirmation_dialog import ConfirmationDialog
 from designer.proj_watcher import ProjectWatcher
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
+AUTO_SAVE_TIME_OUT = 300 #300 secs i.e. 5 mins
 
 def get_kivy_designer_dir():
     return os.path.join(os.path.expanduser('~'), '.kivy-designer')
@@ -56,6 +57,8 @@ class Designer(FloatLayout):
         super(Designer, self).__init__(**kwargs)
         self.project_watcher = ProjectWatcher(self.project_modified)
         self.project_loader = ProjectLoader(self.project_watcher)
+        Clock.schedule_interval(self.project_loader.perform_auto_save,
+                                AUTO_SAVE_TIMEOUT)
 
     def project_modified(self, *args):
         #To dispatch modified event only once for all files/folders of proj_dir
