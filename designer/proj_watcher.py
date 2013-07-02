@@ -48,8 +48,12 @@ class ProjectWatcher(object):
         self._observer.start()
     
     def stop(self):
-        self._observer.stop()
-    
+        try:
+            self._observer.stop()
+            self.join()
+        except:
+            pass
+
     def join(self):
         self._observer.join()
         

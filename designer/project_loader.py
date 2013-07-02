@@ -76,6 +76,7 @@ class ProjectLoader(object):
         self.proj_watcher = proj_watcher
         self.class_rules = []
         self.root_rule = None
+        self.new_project = None
 
     def _get_file_list(self, path):
         file_list = []
@@ -191,7 +192,7 @@ class ProjectLoader(object):
 
     def _load_project(self, kv_path):
         try:
-            self.cleanup()
+            #self.cleanup()
             
             if os.path.isdir(kv_path):
                 self.proj_dir = kv_path
@@ -317,29 +318,30 @@ class ProjectLoader(object):
 
         except:
             return False
-
+        
     def save_project(self, proj_dir = ''):
-        #To block ProjectWatcher from emitting event when project is saved
-        self.proj_watcher.can_dispatch = False
+        #To stop ProjectWatcher from emitting event when project is saved
+        self.proj_watcher.stop()
+        proj_dir_changed = False
 
         if self.new_project:
             #Create dir and copy new_proj.kv and new_proj.py to new directory
             if not os.path.exists(proj_dir):
                 os.mkdir(proj_dir)
-            
+
             kivy_designer_dir = os.path.join(os.path.expanduser('~'),
                                              '.kivy-designer')
             kivy_designer_new_proj_dir = os.path.join(kivy_designer_dir,
                                                       "new_proj")
-            
+
             new_kv_file = os.path.join(proj_dir, "main.kv")
             old_kv_file = os.path.join(kivy_designer_new_proj_dir, "main.kv")
             shutil.copy(old_kv_file, new_kv_file)
-            
+
             new_py_file = os.path.join(proj_dir, "main.py")
             old_py_file = os.path.join(kivy_designer_new_proj_dir, "main.py")
             shutil.copy(old_py_file, new_py_file)
-            
+
             self.proj_dir = proj_dir
             if self.root_rule:
                 self.root_rule.kv_file = new_kv_file
@@ -350,6 +352,68 @@ class ProjectLoader(object):
                 self.class_rules[0].kv_file = new_kv_file
             
             self.new_project = False
+        
+        else:
+            if proj_dir != '' and proj_dir != self.proj_dir:
+                proj_dir_changed = True
+                
+                #Remove previous project directories from sys.path
+                for _dir in self._dir_list:
+                    try:
+                        sys.path.remove(_dir)
+                    except:
+                        pass
+                
+                #if proj_dir and self.proj_dir differs then user wants to save
+                #already open project somewhere else
+                #Copy all the files
+                if not os.path.exists(proj_dir):
+                    os.mkdir(proj_dir)
+                
+                for _file in os.listdir(self.proj_dir):
+                    old_file = os.path.join(self.proj_dir, _file)
+                    new_file = os.path.join(proj_dir, _file)
+                    if os.path.isdir(old_file):
+                        shutil.copytree(old_file, new_file)
+                    else:
+                        shutil.copy(old_file, new_file)
+                
+                self.file_list = self._get_file_list(proj_dir)
+
+                #Change the path of all files in the class rules,
+                #root rule and app
+                relative_path = self._app_file[
+                    self._app_file.find(self.proj_dir):]
+                self._app_file = os.path.join(proj_dir, relative_path)
+                
+                f = open(self._app_file, 'r')
+                s = f.read()
+                f.close()
+
+                self._import_module(s, self._app_file, _fromlist=[self._app_class])
+
+                for _rule in self.class_rules:
+                    relative_path = _rule.kv_file[_rule.kv_file.find(self.proj_dir):]
+                    _rule.kv_file = os.path.join(proj_dir, relative_path)
+
+                    relative_path = _rule.file[_rule.file.find(self.proj_dir):]
+                    _rule.file = os.path.join(proj_dir, relative_path)
+                    
+                    f = open(_rule.file, 'r')
+                    s = f.read()
+                    f.close()
+    
+                    self._import_module(s, _rule.file, _fromlist=[_rule.name])
+    
+                relative_path = self.root_rule.kv_file[
+                    self.root_rule.kv_file.find(self.proj_dir):]
+                self.root_rule.kv_file = os.path.join(proj_dir, relative_path)
+
+                relative_path = self.root_rule.file[
+                    self.root_rule.file.find(self.proj_dir):]
+                self.root_rule.file = os.path.join(proj_dir, relative_path)
+
+                self.proj_dir = proj_dir
 
         #For custom widgets copy py and kv file to project directory
         for widget in self.custom_widgets:
@@ -373,12 +437,12 @@ class ProjectLoader(object):
         _file_str = _file_str.replace(root_str, App.get_running_app().root.kv_code_input.text)
         f.write(_file_str)
         f.close()
-        
+
         #Allow Project Watcher to emit events
         Clock.schedule_once(self._allow_proj_watcher_dispatch, 1)
     
     def _allow_proj_watcher_dispatch(self, *args):
-        self.proj_watcher.can_dispatch = True
+        self.proj_watcher.start_watching(self.proj_dir)
 
     def _app_in_string(self, s):
         if 'runTouchApp' in s:
@@ -496,6 +560,8 @@ class ProjectLoader(object):
 
     def cleanup(self):
         self.proj_watcher.stop_current_watching()
+        
+        #Remove all class rules and root rules of previous project
         rules = []
 
         try:
@@ -519,7 +585,8 @@ class ProjectLoader(object):
         self._app_class = None
         self._app_module = None
         self._app = None
-
+        
+        #Remove previous project directories 
         for _dir in self._dir_list:
             try:
                 sys.path.remove(_dir)

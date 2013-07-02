@@ -266,29 +266,31 @@ class Designer(FloatLayout):
         self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
-        try:        
-            if self.project_loader.new_project:
-                self.action_btn_save_as_pressed()
-            else:
-                self.project_loader.save_project()
+        if self.project_loader.root_rule:
+            try:
+                if self.project_loader.new_project:
+                    self.action_btn_save_as_pressed()
+                else:
+                    self.project_loader.save_project()
+                
+                self._curr_proj_changed = False
+                self.statusbar.show_message('Project saved successfully')
             
-            self._curr_proj_changed = False
-            self.statusbar.show_message('Project saved successfully')
-        
-        except:
-            self.statusbar.show_message('Cannot save project')
+            except:
+                self.statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
-        self._curr_proj_changed = False
-        self._save_as_browser = FileBrowser(select_string='Save')
-        self._save_as_browser.bind(on_success=self._perform_save_as,
-                                   on_canceled=self._cancel_popup)
-
-        self._popup = Popup(title="Enter Folder Name",
-                            content = self._save_as_browser,
-                            size_hint=(0.9, 0.9), auto_dismiss=False)
-        self._popup.open()
+        if self.project_loader.root_rule:
+            self._curr_proj_changed = False
+            self._save_as_browser = FileBrowser(select_string='Save')
+            self._save_as_browser.bind(on_success=self._perform_save_as,
+                                       on_canceled=self._cancel_popup)
     
+            self._popup = Popup(title="Enter Folder Name",
+                                content = self._save_as_browser,
+                                size_hint=(0.9, 0.9), auto_dismiss=False)
+            self._popup.open()
+
     def _perform_save_as(self, instance):
         if hasattr(self, '_popup'):
             self._popup.dismiss()
@@ -300,13 +302,13 @@ class Designer(FloatLayout):
             proj_dir = instance.ids.icon_view.path
 
         proj_dir = os.path.join(proj_dir, instance.filename)
-        
+
         try:
             self.project_loader.save_project(proj_dir)
-            statusbar.show_message('Project saved successfully')
+            self.statusbar.show_message('Project saved successfully')
 
         except:
-            statusbar.show_message('Cannot save project')
+            self.statusbar.show_message('Cannot save project')
 
     def action_btn_recent_files_pressed(self, *args):
         pass
