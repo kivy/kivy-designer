@@ -191,132 +191,144 @@ class ProjectLoader(object):
         return ret
 
     def _load_project(self, kv_path):
-        try:            
-            if os.path.isdir(kv_path):
-                self.proj_dir = kv_path
-            else:
-                self.proj_dir = os.path.dirname(kv_path)
+        if os.path.isdir(kv_path):
+            self.proj_dir = kv_path
+        else:
+            self.proj_dir = os.path.dirname(kv_path)
 
-            parent_proj_dir = os.path.dirname(self.proj_dir)
-            sys.path.insert(0, parent_proj_dir)
+        parent_proj_dir = os.path.dirname(self.proj_dir)
+        sys.path.insert(0, parent_proj_dir)
 
-            self.class_rules = []
+        self.class_rules = []
+        all_files_loaded = True
+        _file = None
 
-            for _file in os.listdir(self.proj_dir):
-                #Load each kv file in the directory
-                _file = os.path.join(self.proj_dir, _file)
-                if _file[_file.rfind('.'):] != '.kv':
-                    continue
+        for _file in os.listdir(self.proj_dir):
+            #Load each kv file in the directory
+            _file = os.path.join(self.proj_dir, _file)
+            if _file[_file.rfind('.'):] != '.kv':
+                continue
 
-                f = open(_file, 'r')
-                kv_string = f.read()
-                f.close()
+            f = open(_file, 'r')
+            kv_string = f.read()
+            f.close()
 
-                #Remove all the 'app' lines
-                for app_str in re.findall(r'.+app+.+', kv_string):
-                    kv_string = kv_string.replace(app_str, 
-                                                  app_str[:get_indentation(app_str)]
-                                                  + '#' + app_str.lstrip())
-                
+            #Remove all the 'app' lines
+            for app_str in re.findall(r'.+app+.+', kv_string):
+                kv_string = kv_string.replace(app_str, 
+                                              app_str[:get_indentation(app_str)]
+                                              + '#' + app_str.lstrip())
+            try:
                 root_rule = Builder.load_string(kv_string)
                 self.root_rule = None
                 if root_rule:
-                    self.root_rule = RootRule(root_rule.__class__.__name__, root_rule)
+                    self.root_rule = RootRule(root_rule.__class__.__name__,
+                                              root_rule)
                     self.root_rule.kv_file = _file
-
+    
                 #Get all the class_rules
                 for class_str in re.findall(r'<+([\w_]+)>', kv_string):
                     class_rule = ClassRule(class_str)
                     class_rule.kv_file = _file
                     self.class_rules.append(class_rule)
+            except:
+                all_files_loaded = False
+        
+        if not all_files_loaded:
+            raise ProjectLoaderException('Cannot load file "%s"'%(_file))
 
-            if os.path.exists(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME)):
-                projdir_mtime = os.path.getmtime(self.proj_dir)
+        if os.path.exists(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME)):
+            projdir_mtime = os.path.getmtime(self.proj_dir)
 
-                f = open(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME), 'r')
-                proj_str = f.read()
-                f.close()
-
+            f = open(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME), 'r')
+            proj_str = f.read()
+            f.close()
+            
+            _file_is_valid = True
+            #Checking if the file is valid
+            if proj_str == '' or\
+                proj_str.count('<files>') != proj_str.count('</files>') or\
+                proj_str.count('<file>') != proj_str.count('</file>') or\
+                proj_str.count('<class>') != proj_str.count('</class>'):
+                _file_is_valid = False
+            
+            if _file_is_valid:
                 projdir_time = proj_str[proj_str.find('<time>') + len('<time>'):
                                         proj_str.find('</time>')]
-
+    
                 projdir_time = float(projdir_time.strip())
-                if projdir_mtime <= projdir_time:
-                    #Project Directory folder hasn't been modified,
-                    #file list will remain same
-                    self.file_list = []
-                    un_modified_files = []
-                    start_pos = proj_str.find('<files>')
-                    end_pos = proj_str.find('</files>')
-                    if start_pos != -1 and end_pos != -1:
-                        start_pos = proj_str.find('<file>', start_pos)
-                        end_pos1 = proj_str.find('</file>', start_pos)
-                        while start_pos < end_pos and start_pos != -1:
-                            _file = proj_str[start_pos + len('<file>'):end_pos1].strip()
-                            self.file_list.append(_file)
-                            if os.path.getmtime(_file) <= projdir_time:
-                                un_modified_files.append(_file)
-                            
-                            start_pos = proj_str.find('<file>', end_pos1)
-                            end_pos1 = proj_str.find('</file>', start_pos)
+
+            if _file_is_valid and projdir_mtime <= projdir_time:                    
+                #Project Directory folder hasn't been modified,
+                #file list will remain same
+                self.file_list = []
+                un_modified_files = []
+                start_pos = proj_str.find('<files>')
+                end_pos = proj_str.find('</files>')
+                if start_pos != -1 and end_pos != -1:
+                    start_pos = proj_str.find('<file>', start_pos)
+                    end_pos1 = proj_str.find('</file>', start_pos)
+                    while start_pos < end_pos and start_pos != -1:
+                        _file = proj_str[start_pos + len('<file>'):end_pos1].strip()
+                        self.file_list.append(_file)
+                        if os.path.getmtime(_file) <= projdir_time:
+                            un_modified_files.append(_file)
                         
-                        for _file in self.file_list:
-                            _dir = os.path.dirname(_file)
-                            if _dir not in sys.path:
-                                sys.path.insert(0, _dir)
+                        start_pos = proj_str.find('<file>', end_pos1)
+                        end_pos1 = proj_str.find('</file>', start_pos)
                     
-                    #Reload information for app
-                    start_pos = proj_str.find('<app>')
-                    end_pos = proj_str.find('</app>')
-                    if start_pos != -1 and end_pos != -1:
-                        self._app_class = proj_str[proj_str.find('<class>', start_pos)+len('<class>'):
-                                                   proj_str.find('</class>', start_pos)].strip()
-                        self._app_file = proj_str[proj_str.find('<file>', start_pos)+len('<file>'):
-                                                   proj_str.find('</file>', start_pos)].strip()
-                        f = open(self._app_file, 'r')
-                        self._app_module = self._import_module(f.read(),
-                                                           self._app_file)
-                        f.close()
+                    for _file in self.file_list:
+                        _dir = os.path.dirname(_file)
+                        if _dir not in sys.path:
+                            sys.path.insert(0, _dir)
+                
+                #Reload information for app
+                start_pos = proj_str.find('<app>')
+                end_pos = proj_str.find('</app>')
+                if start_pos != -1 and end_pos != -1:
+                    self._app_class = proj_str[proj_str.find('<class>', start_pos)+len('<class>'):
+                                               proj_str.find('</class>', start_pos)].strip()
+                    self._app_file = proj_str[proj_str.find('<file>', start_pos)+len('<file>'):
+                                               proj_str.find('</file>', start_pos)].strip()
+                    f = open(self._app_file, 'r')
+                    self._app_module = self._import_module(f.read(),
+                                                       self._app_file)
+                    f.close()
 
-                    #Reload information for the files which haven't been modified
-                    start_pos = proj_str.find('<classes>')
-                    end_pos = proj_str.find('</classes>')
+                #Reload information for the files which haven't been modified
+                start_pos = proj_str.find('<classes>')
+                end_pos = proj_str.find('</classes>')
 
-                    if start_pos != -1 and end_pos != -1:
-                        while start_pos < end_pos and start_pos != -1:
-                            start_pos = proj_str.find('<class>', start_pos) + len('<class>')
-                            end_pos1 = proj_str.find('</class>', start_pos)
-                            _file = proj_str[proj_str.find('<file>', start_pos) + len('<file>')
-                                             :proj_str.find('</file>', start_pos)].strip()
+                if start_pos != -1 and end_pos != -1:
+                    while start_pos < end_pos and start_pos != -1:
+                        start_pos = proj_str.find('<class>', start_pos) + len('<class>')
+                        end_pos1 = proj_str.find('</class>', start_pos)
+                        _file = proj_str[proj_str.find('<file>', start_pos) + len('<file>')
+                                         :proj_str.find('</file>', start_pos)].strip()
 
-                            if _file in un_modified_files:
-                                #If _file is un modified then assign it to 
-                                #class rule with _name
-                                _name = proj_str[proj_str.find('<name>', start_pos) + len('<name>')
-                                             :proj_str.find('</name>', start_pos)].strip()
-                                
-                                for _rule in self.class_rules:
-                                    if _name == _rule.name:
-                                        _rule.file = _file
-                                        f = open(_file, 'r')
-                                        _rule.module = self._import_module(f.read(),
-                                                                           _file,
-                                                                           _fromlist=[_name])
-                                        f.close()
-                                
-                            start_pos = proj_str.find('<class>', start_pos)
-                            end_pos1 = proj_str.find('</class>', start_pos)
+                        if _file in un_modified_files:
+                            #If _file is un modified then assign it to 
+                            #class rule with _name
+                            _name = proj_str[proj_str.find('<name>', start_pos) + len('<name>')
+                                         :proj_str.find('</name>', start_pos)].strip()
+                            
+                            for _rule in self.class_rules:
+                                if _name == _rule.name:
+                                    _rule.file = _file
+                                    f = open(_file, 'r')
+                                    _rule.module = self._import_module(f.read(),
+                                                                       _file,
+                                                                       _fromlist=[_name])
+                                    f.close()
+                            
+                        start_pos = proj_str.find('<class>', start_pos)
+                        end_pos1 = proj_str.find('</class>', start_pos)
 
-            if self.file_list == []:
-                 self.file_list = self._get_file_list(self.proj_dir)
+        if self.file_list == []:
+             self.file_list = self._get_file_list(self.proj_dir)
 
-            #Get all files corresponding to each class
-            self._get_class_files()
-
-            return True
-
-        except:
-            return False
+        #Get all files corresponding to each class
+        self._get_class_files()
     
     def perform_auto_save(self, *args):
         if not self.root_rule:
@@ -736,6 +748,9 @@ class ProjectLoader(object):
                     self.root_rule.kv_file = _rule.kv_file
                     self.root_rule.file = _rule.file
                     break
+        
+        if not self.root_rule.kv_file:
+            raise ProjectLoaderException("Cannot find root widget's kv file")
 
         return root_widget
         

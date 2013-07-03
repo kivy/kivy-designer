@@ -229,45 +229,46 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
-            if not self.project_loader.load_project(file_path):
-                self.statusbar.show_message('Cannot Load given file,'
-                                            'make sure that file is valid,'
-                                            'all py files are in the same folder '
-                                            'and is folder doesn\'t contain files '
-                                            'related to other projects')
-                return
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
+            try:
+                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
+                #self.project_loader.load_project(file_path)
 
-            if self.project_loader.class_rules:
-                for i, _rule in enumerate(self.project_loader.class_rules):
-                    widgets.append((_rule.name, 'custom'))
-        
-                self.toolbox.add_custom()
-
-            #to test listview
-            #root_wigdet = None
-            root_wigdet = self.project_loader.get_root_widget()            
-
-            if not root_wigdet:
-                #Show list box showing widgets
-                self._select_class = SelectClass(
-                    self.project_loader.class_rules)
-
-                self._select_class.bind(on_select=self._select_class_selected,
-                                        on_cancel=self._select_class_cancel)
-
-                self._select_class_popup = Popup(title="Select Root Widget",
-                                                 content = self._select_class,
-                                                 size_hint=(0.5, 0.5),
-                                                 auto_dismiss=False)
-                self._select_class_popup.open()
-
-            else:
-                self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
-                self.kv_code_input.text = self.project_loader.get_root_str()
+                if self.project_loader.class_rules:
+                    for i, _rule in enumerate(self.project_loader.class_rules):
+                        widgets.append((_rule.name, 'custom'))
             
-            self.recent_manager.add_file(file_path)
-            #Record everything for later use
-            self.project_loader.record()
+                    self.toolbox.add_custom()
+    
+                #to test listview
+                #root_wigdet = None
+                root_wigdet = self.project_loader.get_root_widget()            
+    
+                if not root_wigdet:
+                    #Show list box showing widgets
+                    self._select_class = SelectClass(
+                        self.project_loader.class_rules)
+    
+                    self._select_class.bind(on_select=self._select_class_selected,
+                                            on_cancel=self._select_class_cancel)
+    
+                    self._select_class_popup = Popup(title="Select Root Widget",
+                                                     content = self._select_class,
+                                                     size_hint=(0.5, 0.5),
+                                                     auto_dismiss=False)
+                    self._select_class_popup.open()
+    
+                else:
+                    self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
+                    self.kv_code_input.text = self.project_loader.get_root_str()
+                
+                self.recent_manager.add_file(file_path)
+                #Record everything for later use
+                self.project_loader.record()
+            
+            except Exception as e:
+                self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
 
     def _cancel_popup(self, *args):
         self._proj_modified_outside = False
