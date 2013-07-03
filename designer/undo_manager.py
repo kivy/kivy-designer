@@ -21,26 +21,33 @@ class WidgetOperation(OperationBase):
     '''WidgetOperation class for widget operations of add and remove
     '''
 
-    def __init__(self, widget_op_type, widget, parent, playground):
+    def __init__(self, widget_op_type, widget, parent, playground, kv_str):
         super(WidgetOperation, self).__init__('widget')
         self.widget_op_type  = widget_op_type
         self.parent = parent
         self.widget = widget
         self.playground = playground
+        self.kv_str = kv_str
 
     def do_undo(self):
         if self.widget_op_type == 'add':
             self.playground.remove_widget_from_parent(self.widget, True)
+
         else:
             self.widget.parent = None
-            self.playground.add_widget_to_parent(self.widget, self.parent, True)
+            self.playground.add_widget_to_parent(self.widget, self.parent,
+                                                 from_undo=True,
+                                                 kv_str=self.kv_str)
 
     def do_redo(self):
         if self.widget_op_type == 'remove':
             self.playground.remove_widget_from_parent(self.widget, True)
+
         else:
             self.widget.parent = None
-            self.playground.add_widget_to_parent(self.widget, self.parent, True)
+            self.playground.add_widget_to_parent(self.widget, self.parent,
+                                                 from_undo=True,
+                                                 kv_str=self.kv_str)
 
 class PropOperation(OperationBase):
     '''PropOperation class for Property Operations of changing property value
@@ -81,7 +88,7 @@ class UndoManager(object):
     def do_undo(self):
         if self._undo_stack_operation == []:
             return
-        
+
         operation = self._undo_stack_operation.pop()
         operation.do_undo()
         self._redo_stack_operation.append(operation)

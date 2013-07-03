@@ -74,7 +74,7 @@ class Playground(ScatterPlane):
         widget.pos = 0, 0
         self.add_widget_to_parent(widget, target)
 
-    def add_widget_to_parent(self, widget, target, from_undo=False, from_kv=False):
+    def add_widget_to_parent(self, widget, target, from_undo=False, from_kv=False, kv_str=''):
         added = False
         if target is None:
             with self.sandbox:
@@ -96,13 +96,18 @@ class Playground(ScatterPlane):
 
         root = App.get_running_app().root
         root.widgettree.refresh()
+
         if not from_kv:
-            root.kv_code_input.add_widget_to_parent(widget, target)
+            if from_undo:
+                root.kv_code_input.add_widget_to_parent(widget, target,
+                                                        kv_str=kv_str)
+            else:
+                root.kv_code_input.add_widget_to_parent(widget, target)
 
         if not from_undo:
             root.undo_manager.push_operation(WidgetOperation('add', 
                                                              widget, target,
-                                                             self))
+                                                             self, ''))
 
     def get_widget(self, widgetname, **default_args):
         widget = None
@@ -142,8 +147,10 @@ class Playground(ScatterPlane):
         if not widget:
             return
         
+        removed_str = ''
         if not from_kv:
-            root.kv_code_input.remove_widget_from_parent(widget, parent)
+            removed_str = root.kv_code_input.remove_widget_from_parent(widget,
+                                                                       parent)
 
         if widget != self.root:
             parent = widget.parent
@@ -156,7 +163,7 @@ class Playground(ScatterPlane):
         root.widgettree.refresh()
         if not from_undo:
             root.undo_manager.push_operation(
-                WidgetOperation('remove', widget, parent, self))
+                WidgetOperation('remove', widget, parent, self, removed_str))
 
     def find_target(self, x, y, target, widget=None):
         if target is None or not target.collide_point(x, y):

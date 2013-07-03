@@ -228,9 +228,6 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv'):
-            #if not self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv'):
             if not self.project_loader.load_project(file_path):
                 self.statusbar.show_message('Cannot Load given file,'
                                             'make sure that file is valid,'
@@ -343,7 +340,7 @@ class Designer(FloatLayout):
             self._perform_open(selection)
 
     def action_btn_quit_pressed(self, *args):
-        pass
+        App.get_running_app().stop()
 
     def action_btn_undo_pressed(self, *args):
         if self._edit_selected == 'Play':
@@ -505,7 +502,6 @@ class Designer(FloatLayout):
             self._kv_area_height = self.splitter_kv_code_input.height
             self.splitter_kv_code_input.height = 0
             self._kv_area_parent.remove_widget(self.splitter_kv_code_input)
-    
     
     
 class DesignerApp(App):

@@ -45,7 +45,7 @@ class KVLangArea(TextInput):
 
         return path_to_widget
 
-    def add_widget_to_parent(self, widget, target):
+    def add_widget_to_parent(self, widget, target, kv_str=''):
         '''This function is called when widget is added to target.
            It will search for line where parent is defined in text and will add
            widget there.
@@ -98,16 +98,22 @@ class KVLangArea(TextInput):
             while line.strip() == '':
                 insert_after_line -= 1
                 line = lines[insert_after_line]
+        
+        to_insert = ''
+        if kv_str == '':
+            to_insert = type(widget).__name__ + ':'
+        else:
+            to_insert = kv_str.strip()
 
         if insert_after_line == total_lines - 1:
             #if inserting at the last line
             _line_pos = len(self.text) - 1
             self.text = self.text[:_line_pos + 1] + '\n' + \
-                get_indent_str(indent + 4) + type(widget).__name__ + ':'
+                get_indent_str(indent + 4) + to_insert
         else:
             #inserting somewhere else
             insert_after_line -= 1
-            _line = 0         
+            _line = 0
             _line_pos = -1
             _line_pos = self.text.find('\n', _line_pos + 1)
             while _line <= insert_after_line:
@@ -115,7 +121,7 @@ class KVLangArea(TextInput):
                 _line += 1
 
             self.text = self.text[:_line_pos] + '\n' + \
-                get_indent_str(indent + 4) + type(widget).__name__ + ':' + \
+                get_indent_str(indent + 4) + to_insert + \
                 self.text[_line_pos:]
     
     def remove_widget_from_parent(self, widget, parent):
@@ -125,7 +131,7 @@ class KVLangArea(TextInput):
 
         path_to_widget = self._get_widget_path(widget)
         path_to_widget.reverse()
-        
+
         #Go to widget's rule's line and determines all its rule's
         #and it's child if any. Then delete them
         text = re.sub(r'#.+', '', self.text)
@@ -154,8 +160,11 @@ class KVLangArea(TextInput):
         delete_until_line_pos = get_line_end_pos(self.text, delete_until_line)
         
         self._reload = False
+        text = self.text[widget_line_pos:delete_until_line_pos]
         self.text = self.text[:widget_line_pos] + self.text[delete_until_line_pos:]
-    
+        
+        return text
+
     def _get_widget_from_path(self, path):
         '''This function is used to get widget given its path
         '''
@@ -172,7 +181,12 @@ class KVLangArea(TextInput):
         path_length = len(path)
 
         while path_index < path_length:
-            widget = widget.children[len(widget.children) - 1 - path[path_index]]
+            try:
+                widget = widget.children[len(widget.children) -
+                                         1 - path[path_index]]
+            except IndexError:
+                widget = widget.children[0]
+
             path_index += 1
         
         return widget
@@ -341,32 +355,39 @@ class KVLangArea(TextInput):
         else:
             #Else find if property has already been declared with a value
             lineno = widget_lineno + 1
-            line = lines[lineno]
-            _indent = get_indentation(line)
-            colon_pos = -1
-            while lineno < total_lines and (line.strip() == '' or _indent > indent):
+            #But if widget line is the last line in the text
+            if lineno < total_lines:
                 line = lines[lineno]
                 _indent = get_indentation(line)
-                if line.strip() != '':
-                    colon_pos = line.find(':')
-                    if colon_pos == -1:
-                        break
-                    
-                    if colon_pos == len(line.rstrip()) - 1:
-                        break
-                    
-                    if prop == line[:colon_pos].strip():
-                        prop_found = True
-                        break
-
-                lineno += 1
+                colon_pos = -1
+                while lineno < total_lines and (line.strip() == '' or _indent > indent):
+                    line = lines[lineno]
+                    _indent = get_indentation(line)
+                    if line.strip() != '':
+                        colon_pos = line.find(':')
+                        if colon_pos == -1:
+                            break
+                        
+                        if colon_pos == len(line.rstrip()) - 1:
+                            break
+                        
+                        if prop == line[:colon_pos].strip():
+                            prop_found = True
+                            break
+    
+                    lineno += 1
         
         if prop_found:
             #if property found then change its value
             _pos_prop_value = get_line_start_pos(self.text, lineno) + colon_pos + 2
-            _line_end_pos = get_line_end_pos(self.text, lineno)
+            if lineno == total_lines - 1:
+                _line_end_pos = len(self.text)
+            else:
+                _line_end_pos = get_line_end_pos(self.text, lineno)
+
             if proptype == 'StringProperty':
                 value = "'"+value+"'"
+
             self.text = self.text[:_pos_prop_value] + ' ' + str(value) + \
                 self.text[_line_end_pos:]
 
@@ -378,10 +399,11 @@ class KVLangArea(TextInput):
             _line_end_pos = get_line_end_pos(self.text, widget_lineno)
             if proptype == 'StringProperty':
                 value = "'"+value+"'"
+
             indent_str = '\n'
             for i in range(indent + 4):
                 indent_str += ' '
-            
+
             self.cursor = (len(lines[widget_lineno]), widget_lineno)
             self.insert_text(indent_str + prop+ ': ' + str(value))
 

@@ -36,7 +36,7 @@ class PropertyBase(object):
         
         root = App.get_running_app().root
         if not conversion_err:
-            try:
+            #try:
                 setattr(self.propwidget, self.propname, value)
                 root.kv_code_input.set_property_value(self.propwidget,
                                                       self.propname, value,
@@ -45,9 +45,9 @@ class PropertyBase(object):
                     root.undo_manager.push_operation(
                         PropOperation(self, oldvalue, value))
                 self.record_to_undo = True
-            except Exception:            
-                self.have_error = True
-                setattr(self.propwidget, self.propname, oldvalue)
+            #except Exception:            
+            #    self.have_error = True
+            #    setattr(self.propwidget, self.propname, oldvalue)
 
 
 class PropertyTextInput(PropertyBase, TextInput):

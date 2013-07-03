@@ -731,9 +731,7 @@ class ProjectLoader(object):
         if root_widget:
             self.root_rule = RootRule(root_widget.__class__.__name__,
                                       root_widget)
-            print self.root_rule.name
             for _rule in self.class_rules:
-                print _rule.name
                 if _rule.name == self.root_rule.name:
                     self.root_rule.kv_file = _rule.kv_file
                     self.root_rule.file = _rule.file
