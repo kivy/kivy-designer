@@ -26,9 +26,10 @@ from designer.project_loader import ProjectLoader, ProjectLoaderException
 from designer.select_class import SelectClass
 from designer.confirmation_dialog import ConfirmationDialog
 from designer.proj_watcher import ProjectWatcher
+from designer.recent_manager import RecentManager, RecentDialog
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
-AUTO_SAVE_TIME_OUT = 300 #300 secs i.e. 5 mins
+AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
 
 def get_kivy_designer_dir():
     return os.path.join(os.path.expanduser('~'), '.kivy-designer')
@@ -57,6 +58,8 @@ class Designer(FloatLayout):
         super(Designer, self).__init__(**kwargs)
         self.project_watcher = ProjectWatcher(self.project_modified)
         self.project_loader = ProjectLoader(self.project_watcher)
+        self.recent_manager = RecentManager()
+        
         Clock.schedule_interval(self.project_loader.perform_auto_save,
                                 AUTO_SAVE_TIMEOUT)
 
@@ -225,6 +228,9 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv'):
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv'):
+            #if not self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv'):
             if not self.project_loader.load_project(file_path):
                 self.statusbar.show_message('Cannot Load given file,'
                                             'make sure that file is valid,'
@@ -261,10 +267,11 @@ class Designer(FloatLayout):
                 self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
                 self.kv_code_input.text = self.project_loader.get_root_str()
             
+            self.recent_manager.add_file(file_path)
             #Record everything for later use
             self.project_loader.record()
 
-    def _cancel_popup(self, instance):
+    def _cancel_popup(self, *args):
         self._proj_modified_outside = False
         self._popup.dismiss()
 
@@ -309,12 +316,31 @@ class Designer(FloatLayout):
         try:
             self.project_loader.save_project(proj_dir)
             self.statusbar.show_message('Project saved successfully')
+            self.recent_manager.add_file(proj_dir)
 
         except:
             self.statusbar.show_message('Cannot save project')
 
     def action_btn_recent_files_pressed(self, *args):
-        pass
+        self._recent_dlg = RecentDialog(self.recent_manager.list_files)
+        self._recent_dlg.bind(on_select=self._recent_dlg_selected,
+                              on_cancel=self._cancel_popup)
+        
+        self._popup = Popup(title='Recent Files', content=self._recent_dlg,
+                            size_hint=(0.5, 0.5), auto_dismiss=False)
+        
+        self._popup.open()
+    
+    def _recent_dlg_selected(self, *args):
+        self._popup.dismiss()
+        selection = ''
+        try:
+            selection = self._recent_dlg.listview.adapter.selection[0].text
+        except:
+            pass
+
+        if selection != '':
+            self._perform_open(selection)
 
     def action_btn_quit_pressed(self, *args):
         pass

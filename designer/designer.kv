@@ -35,6 +35,28 @@
             size_hint_x: None
             width: '90pt'
 
+<RecentDialog>:
+    select_button: select
+    cancel_button: cancel
+    orientation: 'vertical'
+    padding: '2sp'
+    
+    GridLayout:
+        rows: 1
+        size_hint_y: None
+        height: '25pt'
+        padding: '4sp'
+        Button:
+            id: select
+            text: 'Open'
+            size_hint_x: None
+            width: '90pt'
+        Button:
+            id: cancel
+            text: 'Cancel'
+            size_hint_x: None
+            width: '90pt'
+
 <ConfirmationDialog>:
     orientation: 'vertical'
     padding: '5sp'
@@ -311,7 +333,7 @@
                     on_press: root.action_btn_save_as_pressed()
                 ActionButton:
                     text: 'Recent Files'
-                    on_press: root.action_btn_recent_files_pressed
+                    on_press: root.action_btn_recent_files_pressed()
                 ActionButton:
                     text: 'Quit'
                     on_press: root.action_btn_quit_pressed
