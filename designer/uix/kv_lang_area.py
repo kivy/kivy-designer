@@ -79,12 +79,12 @@ class KVLangArea(TextInput):
                 _line += 1
 
             self.text = self.text[:_line_pos] + ':' + self.text[_line_pos:]
-                
+
         else:
             #If ':' in parent_line then, find a place to insert widget's rule
             indent = len(parent_line) - len(parent_line.lstrip())
             lineno = parent_lineno
-            _indent = indent +1
+            _indent = indent + 1
             line = parent_line
             while (line.strip() == '' or _indent > indent):
                 lineno += 1
@@ -124,11 +124,7 @@ class KVLangArea(TextInput):
                 get_indent_str(indent + 4) + to_insert + \
                 self.text[_line_pos:]
     
-    def remove_widget_from_parent(self, widget, parent):
-        '''This function is called when widget is removed from parent.
-           It will delete widget's rule from parent's rule
-        '''
-
+    def get_widget_text_pos_from_kv(self, widget, parent):
         path_to_widget = self._get_widget_path(widget)
         path_to_widget.reverse()
 
@@ -157,12 +153,32 @@ class KVLangArea(TextInput):
             line = lines[delete_until_line]
 
         widget_line_pos = get_line_start_pos(self.text, widget_lineno)
-        delete_until_line_pos = get_line_end_pos(self.text, delete_until_line)
+        delete_until_line_pos = -1
+        if delete_until_line == total_lines - 1:
+            delete_until_line_pos = len(self.text)
+        else:
+            delete_until_line_pos = get_line_end_pos(self.text,
+                                                     delete_until_line)
         
         self._reload = False
-        text = self.text[widget_line_pos:delete_until_line_pos]
-        self.text = self.text[:widget_line_pos] + self.text[delete_until_line_pos:]
-        
+
+        return widget_line_pos, delete_until_line_pos
+    
+    def get_widget_text_from_kv(self, widget, parent): 
+        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent)
+        text = self.text[start_pos:end_pos]
+
+        return text
+
+    def remove_widget_from_parent(self, widget, parent):
+        '''This function is called when widget is removed from parent.
+           It will delete widget's rule from parent's rule
+        '''
+
+        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent)
+        text = self.text[start_pos:end_pos]
+        self.text = self.text[:start_pos] + self.text[end_pos:]
+
         return text
 
     def _get_widget_from_path(self, path):

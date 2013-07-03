@@ -59,7 +59,8 @@ class Designer(FloatLayout):
         self.project_watcher = ProjectWatcher(self.project_modified)
         self.project_loader = ProjectLoader(self.project_watcher)
         self.recent_manager = RecentManager()
-        
+        self.widget_to_paste = None
+
         Clock.schedule_interval(self.project_loader.perform_auto_save,
                                 AUTO_SAVE_TIMEOUT)
 
@@ -355,43 +356,48 @@ class Designer(FloatLayout):
             base_widget = self.propertyviewer.widget
             if base_widget:
                 self.widget_to_paste = base_widget
+                self._widget_str_to_paste = self.kv_code_input.\
+                    get_widget_text_from_kv(base_widget, None)
+
                 self.playground.remove_widget_from_parent(base_widget)
 
     def action_btn_copy_pressed(self, *args):
-        if self._edit_selected == 'Play':
-            base_widget = self.propertyviewer.widget
-            if base_widget:
-                self.widget_to_paste = type(base_widget)()
-                props = base_widget.properties()
-                for prop in props:
-                    setattr(self.widget_to_paste, prop,
-                            getattr(base_widget, prop))
+        base_widget = self.propertyviewer.widget
+        if base_widget:
+            self.widget_to_paste = type(base_widget)()
+            props = base_widget.properties()
+            for prop in props:
+                setattr(self.widget_to_paste, prop,
+                        getattr(base_widget, prop))
 
-                self.widget_to_paste.parent = None
+            self.widget_to_paste.parent = None
+            self._widget_str_to_paste = self.kv_code_input.\
+                get_widget_text_from_kv(base_widget, None)
 
     def action_btn_paste_pressed(self, *args):
-        if self._edit_selected == 'Play':
-            parent = self.propertyviewer.widget
-            if parent and hasattr(self, 'widget_to_paste') and\
-               self.widget_to_paste is not None:
+        parent = self.propertyviewer.widget
+        if parent and self.widget_to_paste:
 
-                #find appropriate parent to add widget_to_paste
-                while not isinstance(parent, Layout):
-                    parent = parent.parent
+            #find appropriate parent to add widget_to_paste
+            while not isinstance(parent, Layout):
+                parent = parent.parent
 
-                if parent is not None:
-                    self.playground.add_widget_to_parent(self.widget_to_paste,
-                                                         parent)
-                    self.widget_to_paste = None
+            if parent is not None:
+                self.playground.add_widget_to_parent(self.widget_to_paste,
+                                                     parent,
+                                                     kv_str=\
+                                                     self.\
+                                                     _widget_str_to_paste)
+                self.widget_to_paste = None
 
     def action_btn_delete_pressed(self, *args):
-        if self._edit_selected == 'Play' and self.propertyviewer.widget:
+        if self.propertyviewer.widget:
             self.playground.remove_widget_from_parent(
                 self.propertyviewer.widget)
 
     def action_btn_select_all_pressed(self, *args):
         pass
-    
+
     def action_btn_add_custom_widget_press(self, *args):
         self._custom_browser = FileBrowser(select_string='Add')
         self._custom_browser.bind(on_success=self._custom_browser_load,

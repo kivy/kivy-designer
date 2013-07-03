@@ -98,11 +98,8 @@ class Playground(ScatterPlane):
         root.widgettree.refresh()
 
         if not from_kv:
-            if from_undo:
                 root.kv_code_input.add_widget_to_parent(widget, target,
                                                         kv_str=kv_str)
-            else:
-                root.kv_code_input.add_widget_to_parent(widget, target)
 
         if not from_undo:
             root.undo_manager.push_operation(WidgetOperation('add', 
