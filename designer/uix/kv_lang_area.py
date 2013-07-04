@@ -125,6 +125,9 @@ class KVLangArea(TextInput):
                 self.text[_line_pos:]
     
     def get_widget_text_pos_from_kv(self, widget, parent):
+        '''To get start and end pos of widget's rule in kv text
+        '''
+
         path_to_widget = self._get_widget_path(widget)
         path_to_widget.reverse()
 
@@ -230,6 +233,9 @@ class KVLangArea(TextInput):
 
         line = lines[self.cursor[1]]
         colon_pos = line.find(':')
+        
+        reload_kv_str = False
+
         #if ':' in line, then either property is modified or added or
         #widget's class is modified
         if colon_pos != -1:
@@ -269,8 +275,18 @@ class KVLangArea(TextInput):
                 except:
                     self.have_error = True
                     statusbar.show_message("Cannot set '%s' to '%s'"%(value, prop))
+            
+            else:
+                #':' at the end of line means, a widget has been 
+                #added or changed
+                #Reload only if cursors current position is not deleting spaces
+                if self.cursor[0] <= len(line.rstrip()):
+                    reload_kv_str = True
 
         else:
+            reload_kv_str = True
+
+        if reload_kv_str:
             #A widget is added or removed
             playground = App.get_running_app().root.playground
             project_loader = App.get_running_app().root.project_loader
