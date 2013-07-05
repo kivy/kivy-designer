@@ -27,6 +27,7 @@ from designer.select_class import SelectClass
 from designer.confirmation_dialog import ConfirmationDialog
 from designer.proj_watcher import ProjectWatcher
 from designer.recent_manager import RecentManager, RecentDialog
+from designer.add_file import AddFileDialog
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
@@ -229,11 +230,8 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
             try:
-                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
-                #self.project_loader.load_project(file_path)
+                self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -510,7 +508,27 @@ class Designer(FloatLayout):
             self.splitter_kv_code_input.height = 0
             self._kv_area_parent.remove_widget(self.splitter_kv_code_input)
     
+    def _error_adding_file(self, *args):
+        self.statusbar.show_message('Error while adding file to project')
+        self._popup.dismiss()
     
+    def _added_file(self, *args):
+        self.statusbar.show_message('File successfully added to project')
+        self._popup.dismiss()
+    
+    def action_btn_add_file_pressed(self, *args):
+        self._add_file_dlg = AddFileDialog(self.project_loader)
+        self._add_file_dlg.bind(on_added=self._added_file,
+                                on_error=self._error_adding_file,
+                                on_cancel=self._cancel_popup)
+
+        self._popup = Popup(title="Add File",
+                            content = self._add_file_dlg,
+                            size_hint=(None, None), 
+                            size=(400, 300), auto_dismiss=False)
+
+        self._popup.open()
+
 class DesignerApp(App):
 
     widget_focused = ObjectProperty(allownone=True)

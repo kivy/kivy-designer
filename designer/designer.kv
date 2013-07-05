@@ -3,6 +3,64 @@
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
 
+<AddFileDialog>:
+    text_file: text_file
+    text_folder: text_folder
+    always_check: always_check
+    orientation: 'vertical'
+
+    Label:
+        text: 'File:'
+        size_hint_x: None
+        width: '20pt'
+
+    BoxLayout:
+        size_hint_y: None
+        height: '24pt'
+        TextInput:
+            id: text_file
+            multiline: False
+            on_text: root.update_from_file()
+        Button:
+            size_hint_x: None
+            text: 'Open File'
+            on_press: root.open_file_btn_pressed()
+            
+    Label:
+        text: 'Add File to:'
+        size_hint_x: None
+        width: '55pt'
+
+    BoxLayout:
+        size_hint_y: None
+        height: '24pt'
+        TextInput:
+            id: text_folder
+            multiline: False
+        Button:
+            size_hint_x: None
+            text: 'Open Folder'
+            on_press: root.open_folder_btn_pressed()
+
+    BoxLayout:
+        CheckBox:
+            id: always_check
+            width: '20sp'
+            size_hint_x: None
+        Label:
+            width: '120pt'
+            size_hint_x: None
+            text: 'Always use this folder'
+
+    BoxLayout:
+        padding: '2sp'
+        Button:
+            text: 'Add'
+            on_press: root._perform_add_file()
+        Button:
+            text: 'Cancel'
+            on_press: root.dispatch('on_cancel')
+        
 <KVLangArea>:
     auto_indent: True
     canvas.after:
@@ -363,6 +421,16 @@
                     text: 'KV Area'
                     minimum_width: 150
                     on_active: root.action_chk_btn_kv_area_active(self)
+            
+            ActionGroup:
+                text: 'Project'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'Add File'
+                    minimum_width: 90
+                    on_press: root.action_btn_add_file_pressed()
 
     GridLayout:
         size_hint: 1, None

@@ -20,7 +20,9 @@ from kivy.clock import Clock
 from designer.helper_functions import get_indentation, get_indent_str
 from designer.proj_watcher import ProjectWatcher
 
-KV_PROJ_FILE_NAME = '.designer/kvproj'
+PROJ_DESIGNER = '.designer'
+KV_PROJ_FILE_NAME = os.path.join(PROJ_DESIGNER, 'kvproj')
+PROJ_CONFIG = os.path.join(PROJ_DESIGNER, 'config.ini')
 
 class Comment(object):
     
@@ -77,6 +79,7 @@ class ProjectLoader(object):
         self.class_rules = []
         self.root_rule = None
         self.new_project = None
+        self.dict_file_type_and_path = {}
 
     def _get_file_list(self, path):
         file_list = []
@@ -329,7 +332,55 @@ class ProjectLoader(object):
 
         #Get all files corresponding to each class
         self._get_class_files()
-    
+        self.load_proj_config()
+
+    def load_proj_config(self):
+        try:
+            f = open(os.path.join(self.proj_dir, PROJ_CONFIG), 'r')
+            s = f.read()
+            f.close()
+            
+            start_pos = -1
+            end_pos = -1
+            
+            start_pos = s.find('<file_type_and_dirs>\n')
+            end_pos = s.find('</file_type_and_dirs>\n')
+
+            if start_pos != -1 and end_pos != -1:
+                for searchiter in re.finditer(r'<file_type=.+', s):
+                    if searchiter.start() < start_pos:
+                        continue
+
+                    if searchiter.start() > end_pos:
+                        break
+                    
+                    found_str = searchiter.group(0)
+                    file_type = found_str[found_str.find('"') + 1:
+                                          found_str.find('"', found_str.find('"') + 1)]
+                    folder = found_str[
+                        found_str.find('"', found_str.find('dir=') + 1) + 1:
+                        found_str.rfind('"')]
+
+                    self.dict_file_type_and_path[file_type]=folder
+
+        except IOError:
+            pass
+
+    def save_proj_config(self):
+        string = '<file_type_and_dirs>\n'
+        for file_type in self.dict_file_type_and_path.keys():
+            string += '    <file_type="' + file_type + '"' + ' dir="' + \
+                self.dict_file_type_and_path[file_type] + '">\n'
+        string += '</file_type_and_dirs>\n'
+
+        f = open(os.path.join(self.proj_dir, PROJ_CONFIG), 'w')
+        f.write(string)
+        f.close()
+
+    def add_dir_for_file_type(self, file_type, folder):
+        self.dict_file_type_and_path[file_type]=folder
+        self.save_proj_config()
+
     def perform_auto_save(self, *args):
         if not self.root_rule:
             return
@@ -395,14 +446,16 @@ class ProjectLoader(object):
                                              '.kivy-designer')
             kivy_designer_new_proj_dir = os.path.join(kivy_designer_dir,
                                                       "new_proj")
-
+            for _file in os.listdir(kivy_designer_new_proj_dir):
+                old_file = os.path.join(kivy_designer_new_proj_dir, _file)
+                new_file = os.path.join(proj_dir, _file)
+                if os.path.isdir(old_file):
+                    shutil.copytree(old_file, new_file)
+                else:
+                    shutil.copy(old_file, new_file)
+            
             new_kv_file = os.path.join(proj_dir, "main.kv")
-            old_kv_file = os.path.join(kivy_designer_new_proj_dir, "main.kv")
-            shutil.copy(old_kv_file, new_kv_file)
-
             new_py_file = os.path.join(proj_dir, "main.py")
-            old_py_file = os.path.join(kivy_designer_new_proj_dir, "main.py")
-            shutil.copy(old_py_file, new_py_file)
 
             self.proj_dir = proj_dir
             if self.root_rule:
@@ -427,7 +480,7 @@ class ProjectLoader(object):
                         pass
                 
                 #if proj_dir and self.proj_dir differs then user wants to save
-                #already open project somewhere else
+                #an already opened project to somewhere else
                 #Copy all the files
                 if not os.path.exists(proj_dir):
                     os.mkdir(proj_dir)
@@ -660,6 +713,7 @@ class ProjectLoader(object):
         self.class_rules = []
         self.list_comments = []
         self.custom_widgets = []
+        self.dict_file_type_and_path = {}
 
     def get_app(self):
         if not self._app_file or not self._app_class or not self._app_module:
