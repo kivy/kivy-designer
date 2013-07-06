@@ -58,12 +58,20 @@ class KVLangArea(TextInput):
 
         lines = text.splitlines()
         total_lines = len(lines)
+        root_lineno = 0
+        root_name = App.get_running_app().root.project_loader.root_rule.name
+        for lineno, line in enumerate(lines):
+            pos = line.find(root_name)
+            if pos != -1 and get_indentation(line) == 0:
+                root_lineno = lineno
+                break
+
         parent_lineno = self._find_widget_place(path_to_widget, lines,
-                                                total_lines, 1)
+                                                total_lines, root_lineno + 1)
 
         if parent_lineno >= total_lines:
             return
-        
+
         #Get text of parents line
         parent_line = lines[parent_lineno]
         insert_after_line = -1
@@ -136,7 +144,16 @@ class KVLangArea(TextInput):
         text = re.sub(r'#.+', '', self.text)
         lines = text.splitlines()
         total_lines = len(lines)
-        widget_lineno = self._find_widget_place(path_to_widget, lines, total_lines, 1)
+        root_lineno = 0
+        root_name = App.get_running_app().root.project_loader.root_rule.name
+        for lineno, line in enumerate(lines):
+            pos = line.find(root_name)
+            if pos != -1 and get_indentation(line) == 0:
+                root_lineno = lineno
+                break
+
+        widget_lineno = self._find_widget_place(path_to_widget, lines,
+                                                total_lines, root_lineno + 1)
         widget_line = lines[widget_lineno]
         indent = len(widget_line) - len(widget_line.lstrip())
         lineno = widget_lineno
@@ -220,25 +237,45 @@ class KVLangArea(TextInput):
         lines = re.sub(r'#.+', '', self.text).splitlines()
         if self.cursor[1] < 0 or self.cursor[1] >= len(lines):
             return
-        
+
         if not self._reload:
             self._reload = True
             return
 
         statusbar = App.get_running_app().root.statusbar
+
+        reload_kv_str = False
+
+        root_name = App.get_running_app().root.project_loader.root_rule.name
+        total_lines = len(lines)
+        root_lineno = 0
+        for lineno, line in enumerate(lines):
+            pos = line.find(root_name)
+            if pos != -1 and get_indentation(line) == 0:
+                root_lineno = lineno
+                break
         
+        #Find whether cursor is in custom class or root widget
+        curr_lineno = self.cursor[1]
+        while curr_lineno >= 0 and \
+            get_indentation(lines[curr_lineno]) != 0:
+            curr_lineno -= 1
+
+        if root_name not in lines[curr_lineno]:
+            #Another class rule has been modified, so reload
+            reload_kv_str = True
+
         #Determine the widget inside which cursor is present
-        path_to_widget = self._get_widget_path_at_line(self.cursor[1])
+        path_to_widget = self._get_widget_path_at_line(self.cursor[1],
+                                                       root_lineno)
         widget = self._get_widget_from_path(path_to_widget)
 
         line = lines[self.cursor[1]]
         colon_pos = line.find(':')
-        
-        reload_kv_str = False
 
         #if ':' in line, then either property is modified or added or
         #widget's class is modified
-        if colon_pos != -1:
+        if not reload_kv_str and colon_pos != -1:
             if colon_pos != len(line.rstrip()) - 1:
                 #A property is modified or added
                 value = line[colon_pos+1:].strip()
@@ -267,7 +304,7 @@ class KVLangArea(TextInput):
 
                     else:
                         return
-    
+
                     setattr(widget, prop, value)
                     self.have_error = False
                     statusbar.show_message("")
@@ -275,7 +312,7 @@ class KVLangArea(TextInput):
                 except:
                     self.have_error = True
                     statusbar.show_message("Cannot set '%s' to '%s'"%(value, prop))
-            
+
             else:
                 #':' at the end of line means, a widget has been 
                 #added or changed
@@ -290,10 +327,37 @@ class KVLangArea(TextInput):
             #A widget is added or removed
             playground = App.get_running_app().root.playground
             project_loader = App.get_running_app().root.project_loader
+
+            #Find which class rule has been modified
+            changed_class_str = ''
+            changed_class_rule = ''
+            if root_name not in lines[curr_lineno]:
+                changed_class_rule = lines[curr_lineno].replace('<','')
+                changed_class_rule = changed_class_rule.replace('>','')
+                changed_class_rule = changed_class_rule.replace(':','')
+                
+                changed_class_str = lines[curr_lineno] + '\n'
+                end_line = curr_lineno + 1
+                while end_line < total_lines and (lines[end_line].strip() == '' or
+                                        get_indentation(lines[end_line]) != 0):
+                    changed_class_str += lines[end_line] + '\n'
+                    end_line += 1
+
+            root_str = lines[root_lineno] + '\n'
+            end_line = root_lineno + 1
+            while end_line < total_lines and (lines[end_line].strip() == '' or
+                                    get_indentation(lines[end_line]) != 0):
+                root_str += lines[end_line] + '\n'
+                end_line += 1
+
             try:
-                widget = project_loader.reload_root_widget_from_str(self.text)
+                widget = project_loader.reload_from_str(root_str,
+                                                        changed_class_str,
+                                                        changed_class_rule)
+
                 if widget:
-                    playground.remove_widget_from_parent(playground.root, None, from_kv=True)
+                    playground.remove_widget_from_parent(playground.root,
+                                                         None, from_kv=True)
                     playground.add_widget_to_parent(widget, None, from_kv=True)
                 statusbar.show_message("")
                 self.have_error = False
@@ -302,7 +366,7 @@ class KVLangArea(TextInput):
                 self.have_error = True
                 statusbar.show_message("Cannot reload from text")
 
-    def _get_widget_path_at_line(self, lineno):
+    def _get_widget_path_at_line(self, lineno, root_lineno=0):
         '''To get widget path of widget at line
         '''
 
@@ -315,7 +379,7 @@ class KVLangArea(TextInput):
 
         lines = text.splitlines()
         line = lines[lineno]
-        
+
         #Search for the line containing widget's name
         _lineno = lineno
 
@@ -327,17 +391,19 @@ class KVLangArea(TextInput):
         child_count = 0
         #From current line go above and 
         #fill number of children above widget's rule
-        while _lineno >= 0 and lines[_lineno].strip() != "" and get_indentation(lines[lineno]) != 0:
+        while _lineno >= root_lineno and lines[_lineno].strip() != "" and \
+            get_indentation(lines[lineno]) != 0:
             _lineno = lineno - 1
             diff_indent = get_indentation(lines[lineno]) - \
                           get_indentation(lines[_lineno])
 
-            while _lineno >= 0 and (lines[_lineno].strip() == '' \
+            while _lineno >= root_lineno and (lines[_lineno].strip() == '' \
                                     or diff_indent <= 0):
                 if lines[_lineno].strip() != '' and diff_indent == 0 and \
                     'canvas' not in lines[_lineno] and \
                         (lines[_lineno].find(':') == -1 or 
-                         lines[_lineno].find(':') == len(lines[_lineno].rstrip())- 1):
+                         lines[_lineno].find(':') == 
+                         len(lines[_lineno].rstrip())- 1):
                     child_count += 1
 
                 _lineno -= 1
@@ -346,13 +412,14 @@ class KVLangArea(TextInput):
 
             lineno = _lineno
             
-            if _lineno > 0:
+            if _lineno > root_lineno:
                 _lineno += 1
 
             if 'canvas' not in lines[_lineno] and \
                 lines[_lineno].strip().find(':') == len(lines[_lineno].strip()) -1:
 
                 path.insert(0, child_count)
+                print path, 'adding'
                 child_count = 0
 
         return path

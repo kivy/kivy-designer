@@ -80,6 +80,7 @@ class ProjectLoader(object):
         self.root_rule = None
         self.new_project = None
         self.dict_file_type_and_path = {}
+        self.kv_file_list = [] 
 
     def _get_file_list(self, path):
         file_list = []
@@ -90,12 +91,12 @@ class ProjectLoader(object):
             if os.path.isdir(file_path):
                 file_list += self._get_file_list(file_path)
             else:
-                #Consider only py files
+                #Consider only kv and py files
                 if file_path[file_path.rfind('.'):] == '.py':
                     if os.path.dirname(file_path) == self.proj_dir:
                         file_list.insert(0, file_path)
                     else:
-                        file_list.append(file_path)
+                        file_list.append(file_path)                    
 
         return file_list
     
@@ -141,10 +142,11 @@ class ProjectLoader(object):
                 class_rule.module = module
                 self.custom_widgets.append(class_rule)
     
-    def get_root_str(self):
-        f = open(self.root_rule.kv_file, 'r')
-        kv_str = f.read()
-        f.close()
+    def get_root_str(self, kv_str=''):
+        if kv_str == '':
+            f = open(self.root_rule.kv_file, 'r')
+            kv_str = f.read()
+            f.close()
 
         #Find the start position of root_rule
         start_pos = kv_str.find(self.root_rule.name)
@@ -179,7 +181,16 @@ class ProjectLoader(object):
                 root_old_str = "<" + root_old_str
 
         return root_old_str
-    
+
+    def get_full_str(self):
+        text = ''
+        for _file in self.kv_file_list:
+            f = open(_file, 'r')
+            text += f.read() + '\n'
+            f.close()
+
+        return text                
+                
     def load_new_project(self, kv_path):
         self.new_project = True
         self._load_project(kv_path)
@@ -211,6 +222,8 @@ class ProjectLoader(object):
             _file = os.path.join(self.proj_dir, _file)
             if _file[_file.rfind('.'):] != '.kv':
                 continue
+            
+            self.kv_file_list.append(_file)
 
             f = open(_file, 'r')
             kv_string = f.read()
@@ -453,7 +466,7 @@ class ProjectLoader(object):
                     shutil.copytree(old_file, new_file)
                 else:
                     shutil.copy(old_file, new_file)
-            
+
             new_kv_file = os.path.join(proj_dir, "main.kv")
             new_py_file = os.path.join(proj_dir, "main.py")
 
@@ -542,20 +555,72 @@ class ProjectLoader(object):
             if not os.path.exists(custom_py):
                 shutil.copy(widget.py_file, custom_py)
         
-        #Get the kv text from KVLangArea and write it to root rule's file
-        root_str = self.get_root_str()
-        f = open(self.root_rule.kv_file, 'r')
-        _file_str = f.read()
-        f.close()
+        #Save all class rules
+        text = App.get_running_app().root.kv_code_input.text
+        for _rule in self.class_rules:
+            #Get the kv text from KVLangArea and write it to class rule's file
+            f = open(_rule.kv_file, 'r')
+            _file_str = f.read()
+            f.close()
+            
+            old_str = self.get_class_str_from_text(_rule.name, _file_str)
+            new_str = self.get_class_str_from_text(_rule.name, text)
 
-        f = open(self.root_rule.kv_file, 'w')
-        _file_str = _file_str.replace(root_str, App.get_running_app().root.kv_code_input.text)
-        f.write(_file_str)
-        f.close()
+            f = open(_rule.kv_file, 'w')
+            _file_str = _file_str.replace(old_str, new_str)
+            f.write(_file_str)
+            f.close()
+        
+        #Save root widget's rule
+        is_root_class = False
+        for _rule in self.class_rules:
+            if _rule.name == self.root_rule.name:
+                is_root_class = True
+                break
+
+        if not is_root_class:
+            f = open(self.root_rule.kv_file, 'r')
+            _file_str = f.read()
+            f.close()
+            
+            old_str = self.get_class_str_from_text(self.root_rule.name,
+                                                   _file_str)
+            new_str = self.get_class_str_from_text(self.root_rule.name, text)
+
+            f = open(self.root_rule.kv_file, 'w')
+            _file_str = _file_str.replace(old_str, new_str)
+            f.write(_file_str)
+            f.close()
 
         #Allow Project Watcher to emit events
         Clock.schedule_once(self._allow_proj_watcher_dispatch, 1)
     
+    def get_class_str_from_text(self, class_name, _file_str):
+        #Find the start position of class_name
+        start_pos = _file_str.find('<'+class_name+'>:')
+
+        _line = 0
+        _line_pos = 0
+        _line_pos = _file_str.find('\n', _line_pos + 1)
+        while _line_pos != -1 and _line_pos < start_pos:
+            _line_pos = _file_str.find('\n', _line_pos + 1)
+            _line += 1
+
+        #Find the end position of class_name, where indentation becomes 0
+        #or file ends
+        _line += 1
+        lines = _file_str.splitlines()
+        _total_lines = len(lines)
+        while _line < _total_lines and (lines[_line].strip() == '' or 
+                                        get_indentation(lines[_line]) != 0):
+            _line_pos = _file_str.find('\n', _line_pos + 1)
+            _line += 1
+
+        end_pos = _line_pos
+
+        old_str = _file_str[start_pos: end_pos]
+        return old_str
+
     def _allow_proj_watcher_dispatch(self, *args):
         self.proj_watcher.start_watching(self.proj_dir)
 
@@ -707,7 +772,8 @@ class ProjectLoader(object):
                 sys.path.remove(_dir)
             except:
                 pass
-
+        
+        self.kv_file_list = []
         self.file_list = []
         self._dir_list = []
         self.class_rules = []
@@ -730,9 +796,9 @@ class ProjectLoader(object):
         #if still couldn't get app, although that shouldn't happen
         return None
     
-    def reload_root_widget_from_str(self, string):
+    def reload_from_str(self, root_str, class_str='', class_name=''):
         rules = []
-
+        #Cleaning root rules
         try:
             rules = Builder.match(self.root_rule.widget)
             for _rule in rules:
@@ -741,25 +807,47 @@ class ProjectLoader(object):
                         Builder.rules.remove(_tuple)
         except:
             pass
-        
+
         if hasattr(Factory, self.root_rule.name):
             Factory.unregister(self.root_rule.name)
-        
+
+        if class_name != '' and class_str != '':
+            #Cleaning class rule
+            for rule in Builder.rules[:]:
+                if rule[1].name == '<'+class_name+'>':
+                    Builder.rules.remove(rule)
+                    break
+            
+            #loading class rule
+            class_str = re.sub(r'.+app+.+', '', class_str).strip()
+            Builder.load_string(class_str)
+            
+            #Checking if class rule has been created
+            class_rule_found = False
+            for rule in Builder.rules[:]:
+                if rule[1].name == '<'+class_name+'>':
+                    class_rule_found = True
+                    break
+
+            if not class_rule_found:
+                #If not then there is some error in class rule,
+                #donot reload
+                return None
+
         root_widget = None
         #Remove all the 'app' lines
-        for app_str in re.findall(r'.+app+.+', string):
-            string = string.replace(app_str, 
-                                    app_str[:get_indentation(app_str)]\
-                                    + '#' + app_str.lstrip())
-    
-        root_widget = Builder.load_string(string)
+        root_str = re.sub(r'.+app+.+', '', root_str)
+
+        root_widget = Builder.load_string(root_str)
+        #print root_str, 'rooot str'
         if not root_widget:
             root_widget = self.get_root_widget()
-        
+
         if not root_widget:
-            root_name = string[:string.find('\n')]
+            root_name = root_str[:root_str.find('\n')]
             root_name = root_widget.replace(':', '').replace('<','')
             root_name = root_widget.replace('>', '')
+            print root_name
             root_widget = self.set_root_widget(root_name)           
 
         return root_widget

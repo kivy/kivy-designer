@@ -231,7 +231,7 @@ class Designer(FloatLayout):
 
         with self.playground.sandbox:
             try:
-                self.project_loader.load_project(file_path)
+                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -256,10 +256,10 @@ class Designer(FloatLayout):
                                                      size_hint=(0.5, 0.5),
                                                      auto_dismiss=False)
                     self._select_class_popup.open()
-    
+
                 else:
                     self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
-                    self.kv_code_input.text = self.project_loader.get_root_str()
+                    self.kv_code_input.text = self.project_loader.get_full_str()
                 
                 self.recent_manager.add_file(file_path)
                 #Record everything for later use
