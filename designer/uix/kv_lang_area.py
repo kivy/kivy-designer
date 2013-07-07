@@ -1,7 +1,8 @@
 import re
 
-from kivy.uix.textinput import TextInput
-from kivy.properties import BooleanProperty, StringProperty, NumericProperty, OptionProperty
+from kivy.uix.codeinput import CodeInput
+from kivy.properties import BooleanProperty, StringProperty,\
+    NumericProperty, OptionProperty
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.factory import Factory
@@ -9,7 +10,7 @@ from kivy.factory import Factory
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
 
-class KVLangArea(TextInput):
+class KVLangArea(CodeInput):
     clicked  = BooleanProperty(False)
     have_error = BooleanProperty(False)
     _reload = BooleanProperty(False)
@@ -419,7 +420,6 @@ class KVLangArea(TextInput):
                 lines[_lineno].strip().find(':') == len(lines[_lineno].strip()) -1:
 
                 path.insert(0, child_count)
-                print path, 'adding'
                 child_count = 0
 
         return path

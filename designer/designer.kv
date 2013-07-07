@@ -2,6 +2,7 @@
 #:set bgcolor (.06, .07, .08)
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
+#:import KivyLexer kivy.extras.highlight.KivyLexer
 
 <AddFileDialog>:
     text_file: text_file
@@ -63,6 +64,7 @@
         
 <KVLangArea>:
     auto_indent: True
+    lexer: KivyLexer()
     canvas.after:
         Color:
             rgba: .9, .1, .1, (1 if self.have_error else 0)
@@ -470,10 +472,11 @@
                 y: statusbar.height
                     
                 ScrollView:
+                    id: scroll
                     KVLangArea:
                         id: code_input
                         size_hint_y: None
-                        height: 1000                        
+                        height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
                         on_show_edit: root.on_show_edit()
 
             Splitter:
