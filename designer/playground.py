@@ -143,7 +143,7 @@ class Playground(ScatterPlane):
         root = App.get_running_app().root
         if not widget:
             return
-        
+
         removed_str = ''
         if not from_kv:
             removed_str = root.kv_code_input.remove_widget_from_parent(widget,

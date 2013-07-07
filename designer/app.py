@@ -155,12 +155,13 @@ class Designer(FloatLayout):
 
         shutil.copy(os.path.join(os.getcwd(), "template_main_kv"),
                     os.path.join(new_proj_dir, "main.kv"))
-
-        self.project_loader.load_new_project(os.path.join(new_proj_dir, 
-                                                          "main.kv"))
-        root_wigdet = self.project_loader.get_root_widget()
-        self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
-        self.kv_code_input.text = self.project_loader.get_root_str()
+        
+        with self.playground.sandbox:
+            self.project_loader.load_new_project(os.path.join(new_proj_dir, 
+                                                              "main.kv"))
+            root_wigdet = self.project_loader.get_root_widget()
+            self.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
+            self.kv_code_input.text = self.project_loader.get_root_str()
 
     def cleanup(self):
         self.project_loader.cleanup()
@@ -230,11 +231,8 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
             try:
-                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
-                #self.project_loader.load_project(file_path)
+                self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -398,7 +396,7 @@ class Designer(FloatLayout):
                 self.propertyviewer.widget)
 
     def action_btn_select_all_pressed(self, *args):
-        pass
+        App.get_running_app().focus_widget(self.playground.root)
 
     def action_btn_add_custom_widget_press(self, *args):
         self._custom_browser = FileBrowser(select_string='Add')

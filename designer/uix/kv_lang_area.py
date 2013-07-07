@@ -25,7 +25,7 @@ class KVLangArea(CodeInput):
             self.dispatch('on_show_edit')
 
         return super(KVLangArea, self).on_touch_down(touch)
-    
+
     def _get_widget_path(self, widget):
         '''To get path of a widget, path of a widget is a list containing 
            the index of it in its parent's children list. For example,
