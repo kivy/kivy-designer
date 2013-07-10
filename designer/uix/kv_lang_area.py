@@ -11,9 +11,20 @@ from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
 
 class KVLangArea(CodeInput):
+    '''KVLangArea is the CodeInput for editing kv lang. It emits on_show_edit
+       event, when clicked.
+    '''
+
     clicked  = BooleanProperty(False)
+    '''This property specifies whether KVLangArea has been clicked or not.
+    '''
     have_error = BooleanProperty(False)
+    '''This property specifies whether KVLangArea has encountered an error
+       in reload in the edited text by user or not.
+    '''
+
     _reload = BooleanProperty(False)
+
     __events__=('on_show_edit',)
 
     def on_show_edit(self, *args):
@@ -185,7 +196,10 @@ class KVLangArea(CodeInput):
 
         return widget_line_pos, delete_until_line_pos
     
-    def get_widget_text_from_kv(self, widget, parent): 
+    def get_widget_text_from_kv(self, widget, parent):
+        '''This function will get a widget's text from KVLangArea's text given
+           its parent.
+        '''
         start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent)
         text = self.text[start_pos:end_pos]
 
