@@ -13,12 +13,19 @@ from designer.tree import Tree
 from designer.undo_manager import WidgetOperation
 
 class PlaygroundDragElement(BoxLayout):
+    '''An instance of this class is the drag element shown when user tries to
+       add a widget to Playground by dragging from Toolbox to Playground.
+    '''
 
     playground = ObjectProperty()
     target = ObjectProperty(allownone=True)
     can_place = BooleanProperty(False)
 
     def on_touch_move(self, touch):
+        '''This is responsible for moving the drag element and showing where
+           the widget it contains will be added.
+        '''
+
         if touch.grab_current is self:
             self.center_x = touch.x
             self.y = touch.y + 20
@@ -28,6 +35,8 @@ class PlaygroundDragElement(BoxLayout):
             return True
 
     def on_touch_up(self, touch):
+        '''This is responsible for adding the widget to the parent
+        '''
         if touch.grab_current is self:
             touch.ungrab(self)
             self.target = self.playground.try_place_widget(
@@ -43,12 +52,35 @@ class PlaygroundDragElement(BoxLayout):
 
 
 class Playground(ScatterPlane):
+    '''Playground represents the actual area where user will add and delete
+       the widgets. It has event on_show_edit, which is emitted whenever 
+       Playground is clicked.
+    '''
 
     root = ObjectProperty(allownone=True)
+    '''This property represents the root widget.
+    '''
+
     selection_mode = BooleanProperty(True)
+
     tree = ObjectProperty()
+
     clicked = BooleanProperty(False)
+    '''This property represents whether Playground has been clicked or not
+    '''
+
     sandbox = ObjectProperty(None)
+    '''This property represents the sandbox widget which is added to
+       Playground.
+    '''
+
+    kv_code_input = ObjectProperty()
+    '''This property refers to the UICreator's KVLangArea.
+    '''
+
+    widgettree = ObjectProperty()
+    '''This property refers to the UICreator's WidgetTree.
+    '''
 
     __events__ = ('on_show_edit',)
 
@@ -60,6 +92,9 @@ class Playground(ScatterPlane):
         pass
 
     def try_place_widget(self, widget, x, y):
+        '''This function is used to determine where to add the widget
+        '''
+
         x, y = self.to_local(x, y)
         return self.find_target(x, y, self.root, widget)
 
@@ -67,6 +102,10 @@ class Playground(ScatterPlane):
         pass #self.tree.insert(value, None)
 
     def place_widget(self, widget, x, y):
+        '''This function is used to first determine the target where to add 
+           the widget. Then it add that widget.
+        '''
+
         x, y = self.to_local(x, y)
         target = self.find_target(x, y, self.root, widget)
         #wx, wy = target.to_widget(x, y)
@@ -75,6 +114,9 @@ class Playground(ScatterPlane):
         self.add_widget_to_parent(widget, target)
 
     def add_widget_to_parent(self, widget, target, from_undo=False, from_kv=False, kv_str=''):
+        '''This function is used to add the widget to the target.
+        '''
+
         added = False
         if target is None:
             with self.sandbox:
@@ -93,20 +135,24 @@ class Playground(ScatterPlane):
         #self.tree.insert(widget, target)
         if not added:
             return False
-
-        root = App.get_running_app().root
-        root.widgettree.refresh()
+        
+        self.widgettree.refresh()
 
         if not from_kv:
-                root.kv_code_input.add_widget_to_parent(widget, target,
-                                                        kv_str=kv_str)
+            self.kv_code_input.add_widget_to_parent(widget, target,
+                                                    kv_str=kv_str)
 
         if not from_undo:
+            root = App.get_running_app().root
             root.undo_manager.push_operation(WidgetOperation('add', 
                                                              widget, target,
                                                              self, ''))
 
     def get_widget(self, widgetname, **default_args):
+        '''This function is used to get the instance of class of name,
+           widgetname.
+        '''
+
         widget = None
         with self.sandbox:
             custom = False
@@ -124,6 +170,10 @@ class Playground(ScatterPlane):
         return widget
 
     def get_playground_drag_element(self, widgetname, touch, **default_args):
+        '''This function will return the desired playground element
+           for widgetname.
+        '''
+
         widget = self.get_widget(widgetname, **default_args)
         container = PlaygroundDragElement(playground=self)
         container.add_widget(widget)
@@ -133,12 +183,19 @@ class Playground(ScatterPlane):
         return container
     
     def cleanup(self):
-        #Cleanup is called when project is created
+        '''This function is used to clean the state of Playground, cleaning
+           the changes done by currently opened project.
+        '''
+
+        #Cleanup is called when project is created or loaded
         #so this operation shouldn't be recorded in Undo
         self.remove_widget_from_parent(self.root, True)
         self.tree = Tree()
 
     def remove_widget_from_parent(self, widget, from_undo=False, from_kv=False):
+        '''This function is used to remove widget its parent.
+        '''
+
         parent = None
         root = App.get_running_app().root
         if not widget:
@@ -146,9 +203,8 @@ class Playground(ScatterPlane):
 
         removed_str = ''
         if not from_kv:
-            removed_str = root.kv_code_input.remove_widget_from_parent(widget,
+            removed_str = self.kv_code_input.remove_widget_from_parent(widget,
                                                                        parent)
-
         if widget != self.root:
             parent = widget.parent
             parent.remove_widget(widget)
@@ -157,12 +213,14 @@ class Playground(ScatterPlane):
             self.root = None
 
         #self.tree.delete(widget)
-        root.widgettree.refresh()
+        root.ui_creator.widgettree.refresh()
         if not from_undo:
             root.undo_manager.push_operation(
                 WidgetOperation('remove', widget, parent, self, removed_str))
 
     def find_target(self, x, y, target, widget=None):
+        '''This widget is used to find the widget which collides with x,y
+        '''
         if target is None or not target.collide_point(x, y):
             return None
 
@@ -193,6 +251,8 @@ class Playground(ScatterPlane):
         return target
     
     def _custom_widget_collides(self, widget, x, y):
+        '''This widget is used to find which custom widget collides with x,y
+        '''
         if not widget:
             return False
 
@@ -208,6 +268,9 @@ class Playground(ScatterPlane):
         return False
     
     def allowed_target_for(self, target, widget):
+        '''This function is used to determine if widget could be added to 
+           target.
+        '''
         # stop on complex widget
         t = target if widget else target.parent
         if isinstance(t, FileChooserListView):
@@ -232,6 +295,10 @@ class Playground(ScatterPlane):
         return False
 
     def on_touch_down(self, touch):
+        '''An override of ScatterPlane's on_touch_down.
+           Used to determine the current selected widget and also emits,
+           on_show_edit event.
+        '''
         if self.selection_mode:
             if super(ScatterPlane, self).collide_point(*touch.pos):
                 x, y = self.to_local(*touch.pos)
