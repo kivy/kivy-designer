@@ -4,17 +4,38 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 
 class StatusNavBarButton(Button):
+    '''StatusNavBarButton is a button representing the Widgets in the 
+       Widget heirarchy of currently selected widget.
+    '''
+
     node = ObjectProperty()
 
 class StatusNavBarSeparator(Label):
+    '''Used to separate two Widgets by '>'
+    '''
     pass
 
 class StatusBar(BoxLayout):
+    '''StatusBar used to display Widget heirarchy of currently selected
+       widget and to display messages.
+    '''
+
     app = ObjectProperty()
+    '''Reference to current app instance.
+    '''
+
     navbar = ObjectProperty()
+    '''To be used as parent of StatusNavBarButton and StatusNavBarSeparator.
+    '''
+
     gridlayout = ObjectProperty()
-    
+    '''Parent of navbar
+    '''
+   
     def show_message(self, message):
+        '''To show a message in StatusBar
+        '''
+
         self.app.widget_focused = None
         self.clear_widgets()
         label = Label(text=message)
@@ -24,6 +45,8 @@ class StatusBar(BoxLayout):
         app.bind(widget_focused=self.update_navbar)
 
     def update_navbar(self, *largs):
+        '''To update navbar with the parents of currently selected Widget.
+        '''
         self.clear_widgets()
         self.add_widget(self.gridlayout)
         self.navbar.clear_widgets()

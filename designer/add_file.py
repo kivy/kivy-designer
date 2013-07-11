@@ -9,9 +9,24 @@ from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
 
 class AddFileDialog(BoxLayout):
+    '''AddFileDialog is a dialog for adding files to current project. It emits
+       'on_added' event if file has been added successfully, 'on_error' if 
+       there has been some error in adding file and 'on_cancel' when user
+       wishes to cancel the operation.
+    '''
+
     text_file = ObjectProperty()
+    '''An instance to TextInput showing file path to be added.
+    '''
+
     text_folder = ObjectProperty()
+    '''An instance to TextInput showing folder where file has to be added.
+    '''
+
     always_check = ObjectProperty()
+    '''An instance to CheckBox, which will determine whether same folder will
+       be used for all files of same type or not.
+    '''
 
     __events__ = ('on_cancel', 'on_added', 'on_error')
 
@@ -29,6 +44,9 @@ class AddFileDialog(BoxLayout):
         pass
 
     def _perform_add_file(self):
+        '''To copy file from its original path to new path
+        '''
+
         if self.text_file.text == '' or self.text_folder.text == '':
             return
         
@@ -55,6 +73,9 @@ class AddFileDialog(BoxLayout):
             self.dispatch('on_error')
 
     def update_from_file(self, *args):
+        '''To determine the folder associated with current file type.
+        '''
+
         curr_type = self.text_file.text
         curr_type = curr_type[curr_type.find('.') + 1:]
         if curr_type == '':
@@ -69,14 +90,23 @@ class AddFileDialog(BoxLayout):
             pass
 
     def _cancel_popup(self, *args):
+        '''To dismiss popup when cancel is pressed.
+        '''
+
         self._popup.dismiss()
 
     def _file_load(self, instance):
+        '''To set the text of text_file, to the file selected.
+        '''
+
         self._popup.dismiss()
         if instance.selection != []:
             self.text_file.text = instance.selection[0]
 
     def open_file_btn_pressed(self, *args):
+        '''To load File Browser for selected file when 'Open File' is clicked
+        '''
+
         self._fbrowser = FileBrowser(select_string='Open')
         self._fbrowser.bind(on_success=self._file_load,
                             on_canceled=self._cancel_popup)
@@ -87,6 +117,9 @@ class AddFileDialog(BoxLayout):
         self._popup.open()
 
     def _folder_load(self, instance):
+        '''To set the text of text_folder, to the folder selected.
+        '''
+
         if hasattr(self, '_popup'):
             self._popup.dismiss()
 
@@ -105,6 +138,10 @@ class AddFileDialog(BoxLayout):
             self.text_folder.text = proj_dir
         
     def open_folder_btn_pressed(self, *args):
+        '''To load File Browser for selected folder when 'Open Folder'
+           is clicked
+        '''
+
         self._fbrowser = FileBrowser(select_string='Open')
         self._fbrowser.ids.list_view.path = self.proj_loader.proj_dir
         self._fbrowser.bind(on_success=self._folder_load,

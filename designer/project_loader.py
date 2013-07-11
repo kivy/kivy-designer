@@ -33,7 +33,9 @@ class Comment(object):
         self.kv_file = _file
 
 class WidgetRule(object):
-    
+    '''WidgetRule is an Abstract class for representing a rule of Widget.
+    '''
+
     def __init__(self, widget, parent):
         super(WidgetRule, self).__init__()
         self.name = widget
@@ -44,12 +46,15 @@ class WidgetRule(object):
 
 
 class ClassRule(WidgetRule):
-    
+    '''ClassRule is a class for representing a class rule in kv
+    '''
     def __init__(self, class_name):
         super(ClassRule, self).__init__(class_name, None)
 
 
 class CustomWidgetRule(ClassRule):
+    '''CustomWidgetRule is a class for representing a custom widgets rule in kv
+    '''
 
     def __init__(self, class_name, kv_file, py_file):
         super(ClassRule, self).__init__(class_name, None)
@@ -59,6 +64,8 @@ class CustomWidgetRule(ClassRule):
 
 
 class RootRule(ClassRule):
+    '''RootRule is a class for representing root rule in kv.
+    '''
     def __init__(self, class_name, widget):
         super(RootRule, self).__init__(class_name)
         self.widget = widget
@@ -83,6 +90,10 @@ class ProjectLoader(object):
         self.kv_file_list = [] 
 
     def _get_file_list(self, path):
+        '''This function is recursively called for loading all py file files
+           in the current directory.
+        '''
+
         file_list = []
         sys.path.insert(0, path)
         self._dir_list.append(path)
@@ -101,6 +112,10 @@ class ProjectLoader(object):
         return file_list
     
     def add_custom_widget(self, py_path):
+        '''This function is used to add a custom widget given path to its 
+           py file.
+        '''
+
         f = open(py_path, 'r')
         py_string = f.read()
         f.close()
@@ -143,6 +158,10 @@ class ProjectLoader(object):
                 self.custom_widgets.append(class_rule)
     
     def get_root_str(self, kv_str=''):
+        '''This function will get the root widgets rule from either kv_str
+           or if it is empty string then from the kv file of root widget
+        '''
+
         if kv_str == '':
             f = open(self.root_rule.kv_file, 'r')
             kv_str = f.read()
@@ -183,6 +202,9 @@ class ProjectLoader(object):
         return root_old_str
 
     def get_full_str(self):
+        '''This function will give the full string of all detected kv files.
+        '''
+
         text = ''
         for _file in self.kv_file_list:
             f = open(_file, 'r')
@@ -192,10 +214,16 @@ class ProjectLoader(object):
         return text                
                 
     def load_new_project(self, kv_path):
+        '''To load a new project given by kv_path
+        '''
+
         self.new_project = True
         self._load_project(kv_path)
     
     def load_project(self, kv_path):
+        '''To load a project given by kv_path
+        '''
+
         ret = self._load_project(kv_path)
         self.new_project = False
         if ret:
@@ -205,6 +233,9 @@ class ProjectLoader(object):
         return ret
 
     def _load_project(self, kv_path):
+        '''Pivate function to load any project given by kv_path
+        '''
+
         if os.path.isdir(kv_path):
             self.proj_dir = kv_path
         else:
@@ -348,6 +379,10 @@ class ProjectLoader(object):
         self.load_proj_config()
 
     def load_proj_config(self):
+        '''To load project's config file. Project's config file is stored in
+           .designer directory in project's directory. 
+        '''
+
         try:
             f = open(os.path.join(self.proj_dir, PROJ_CONFIG), 'r')
             s = f.read()
@@ -380,6 +415,9 @@ class ProjectLoader(object):
             pass
 
     def save_proj_config(self):
+        '''To save project's config file.
+        '''
+
         string = '<file_type_and_dirs>\n'
         for file_type in self.dict_file_type_and_path.keys():
             string += '    <file_type="' + file_type + '"' + ' dir="' + \
@@ -391,10 +429,17 @@ class ProjectLoader(object):
         f.close()
 
     def add_dir_for_file_type(self, file_type, folder):
+        '''To add directory for specified file_type. More information in
+           add_file.py
+        '''
+
         self.dict_file_type_and_path[file_type]=folder
         self.save_proj_config()
 
     def perform_auto_save(self, *args):
+        '''To perform auto save. Auto Save is done after every 5 min.
+        '''
+
         if not self.root_rule:
             return
 
@@ -446,6 +491,11 @@ class ProjectLoader(object):
                 shutil.copy(widget.py_file, custom_py)
 
     def save_project(self, proj_dir = ''):
+        '''To save project to proj_dir. If proj_dir is not empty string then
+           project is saved to a new directory other than its current directory.
+           and otherwise it is saved to the current directory.
+        '''
+
         #To stop ProjectWatcher from emitting event when project is saved
         self.proj_watcher.stop()
         proj_dir_changed = False
@@ -596,6 +646,9 @@ class ProjectLoader(object):
         Clock.schedule_once(self._allow_proj_watcher_dispatch, 1)
     
     def get_class_str_from_text(self, class_name, _file_str):
+        '''To return the full class rule of class_name from _file_str
+        '''
+
         #Find the start position of class_name
         start_pos = _file_str.find('<'+class_name+'>:')
 
@@ -622,9 +675,16 @@ class ProjectLoader(object):
         return old_str
 
     def _allow_proj_watcher_dispatch(self, *args):
+        '''To start project_watcher to start watching self.proj_dir
+        '''
+
         self.proj_watcher.start_watching(self.proj_dir)
 
     def _app_in_string(self, s):
+        '''To determine if there is an App class or runTouchApp
+           defined/used in string s.
+        '''
+
         if 'runTouchApp' in s:
             self._app_class = 'runTouchApp'
             return True
@@ -640,6 +700,10 @@ class ProjectLoader(object):
         return False
 
     def _get_class_files(self):
+        '''To search through all detected class rules and find
+           their python files and to search for app.
+        '''
+
         if self._app_file == None:
             #Search for main.py
             for _file in self.file_list:
@@ -739,6 +803,9 @@ class ProjectLoader(object):
         return module
 
     def cleanup(self):
+        '''To cleanup everything loaded by previous project.
+        '''
+
         self.proj_watcher.stop_current_watching()
         
         #Remove all class rules and root rules of previous project
@@ -782,6 +849,9 @@ class ProjectLoader(object):
         self.dict_file_type_and_path = {}
 
     def get_app(self):
+        '''To get the applications app class instance
+        '''
+
         if not self._app_file or not self._app_class or not self._app_module:
             return None
         
@@ -797,6 +867,10 @@ class ProjectLoader(object):
         return None
     
     def reload_from_str(self, root_str, class_str='', class_name=''):
+        '''To reload root widget from root_str and if present then class_name's
+           rule from class_str
+        '''
+
         rules = []
         #Cleaning root rules
         try:
@@ -853,6 +927,9 @@ class ProjectLoader(object):
         return root_widget
     
     def set_root_widget(self, root_name):
+        '''To set root_name as the root rule.
+        '''
+
         root_widget = self.get_widget_of_class(root_name)
         self.root_rule = RootRule(root_name, root_widget)
         for _rule in self.class_rules:
@@ -864,6 +941,9 @@ class ProjectLoader(object):
         return root_widget
         
     def get_root_widget(self):
+        '''To get the root widget of the current project.
+        '''
+
         if self._app_file == None:
             return None
 
@@ -897,10 +977,18 @@ class ProjectLoader(object):
         return root_widget
         
     def get_widget_of_class(self, class_name):
+        '''To get instance of the class_name
+        '''
+
         self.root = getattr(Factory, class_name)()
         return self.root
     
     def record(self):
+        '''To record all the findings in ./designer/kvproj. These will
+           be loaded again if project hasn't been modified
+           outside Kivy Designer
+        '''
+
         if not os.path.exists(os.path.join(self.proj_dir, os.path.dirname(KV_PROJ_FILE_NAME))):
             os.mkdir(os.path.join(self.proj_dir, ".designer"))
 

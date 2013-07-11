@@ -36,24 +36,82 @@ def get_kivy_designer_dir():
     return os.path.join(os.path.expanduser('~'), '.kivy-designer')
 
 class Designer(FloatLayout):
+    '''Designer is the Main Window class of Kivy Designer
+    '''
+
     toolbox = ObjectProperty(None)
+    '''Reference to the Toolbox instance.
+    '''
+
     propertyviewer = ObjectProperty(None)
+    '''Reference to the PropertyViewer instance.
+    '''
+
     playground = ObjectProperty(None)
+    '''Reference to the Playground instance.
+    '''
+
     widgettree = ObjectProperty(None)
+    '''Reference to the WidgetsTree instance.
+    '''
+
     statusbar = ObjectProperty(None)
+    '''Reference to the StatusBar instance.
+    '''
+
     editcontview = ObjectProperty(None)
+    '''Reference to the EditContView instance.
+    '''
+
     kv_code_input = ObjectProperty(None)
+    '''Reference to the KVLangArea instance.
+    '''
+
     actionbar = ObjectProperty(None)
+    '''Reference to the ActionBar instance. ActionBar is used as a ManuBar to
+       display bunch of menu items.
+    '''
+
     undo_manager = ObjectProperty(UndoManager())
+    '''Reference to the UndoManager instance.
+    '''
+
     splitter_toolbox = ObjectProperty(None)
+    '''Reference to the splitter parent of toolbox.
+    '''
+
     splitter_kv_code_input = ObjectProperty(None)
+    '''Reference to the splitter parent of kv_code_input.
+    '''
+
     grid_widget_tree = ObjectProperty(None)
+    '''Reference to the grid parent of widgettree.
+    '''
+
     splitter_property = ObjectProperty(None)
+    '''Reference to the splitter parent of propertyviewer.
+    '''
+
     splitter_widget_tree = ObjectProperty(None)
+    '''Reference to the splitter parent of widgettree.
+    '''
+
     project_watcher = ObjectProperty(None)
+    '''Reference to the ProjectWatcher.
+    '''
+
     project_loader = ObjectProperty(None)
+    '''Reference to the ProjectLoader.
+    '''
+
     _curr_proj_changed = BooleanProperty(False)
+    '''Specifies whether current project has been changed inside Kivy Designer
+    '''
+
     _proj_modified_outside = BooleanProperty(False)
+    '''Specifies whether current project has been changed outside Kivy Designer
+    '''
+
 
     def __init__(self, **kwargs):
         super(Designer, self).__init__(**kwargs)
@@ -66,6 +124,8 @@ class Designer(FloatLayout):
                                 AUTO_SAVE_TIMEOUT)
 
     def project_modified(self, *args):
+        '''Event Handler called when Project is modified outside Kivy Designer
+        '''
         #To dispatch modified event only once for all files/folders of proj_dir
         if self._proj_modified_outside:
             return
@@ -84,13 +144,19 @@ class Designer(FloatLayout):
         self._proj_modified_outside = True
     
     def _perform_reload(self, *args):
-        #Perform reload of project after it is modified
+        '''Perform reload of project after it is modified
+        '''
+
         self._popup.dismiss()
         self.project_watcher.stop_current_watching()
         self._perform_open(self.project_loader.proj_dir)
         self._proj_modified_outside = False
 
     def on_show_edit(self, *args):
+        '''Event Handler of 'on_show_edit' event. This will show EditContView
+           in ActionBar
+        '''
+
         if isinstance(self.actionbar.children[0], EditContView):
             return
         
@@ -116,6 +182,10 @@ class Designer(FloatLayout):
         self.kv_code_input.clicked = False
 
     def on_touch_down(self, touch):
+        '''Override of FloatLayout.on_touch_down. Used to determine where
+           touch is down and to call self.actionbar.on_previous
+        '''
+
         if not isinstance(self.actionbar.children[0], EditContView) or\
            self.actionbar.collide_point(*touch.pos):
             return super(FloatLayout, self).on_touch_down(touch)
@@ -124,6 +194,9 @@ class Designer(FloatLayout):
         return super(FloatLayout, self).on_touch_down(touch)  
 
     def action_btn_new_pressed(self, *args):
+        '''Event Handler when ActionButton "New" is pressed.
+        '''
+
         if not self._curr_proj_changed:
             self._perform_new()
             return
@@ -140,6 +213,9 @@ class Designer(FloatLayout):
         self._popup.open()
     
     def _perform_new(self, *args):
+        '''To load new project
+        '''
+
         if hasattr(self, '_popup'):
             self._popup.dismiss()
 
@@ -164,6 +240,10 @@ class Designer(FloatLayout):
             self.kv_code_input.text = self.project_loader.get_root_str()
 
     def cleanup(self):
+        '''To cleanup everything loaded by the current project before loading
+           another project.
+        '''
+
         self.project_loader.cleanup()
         self.playground.cleanup()
         self.undo_manager.cleanup()
@@ -177,6 +257,9 @@ class Designer(FloatLayout):
         self.kv_code_input.text = ""
 
     def action_btn_open_pressed(self, *args):
+        '''Event Handler when ActionButton "Open" is pressed.
+        '''
+
         if not self._curr_proj_changed:
             self._show_open_dialog()
             return
@@ -194,6 +277,9 @@ class Designer(FloatLayout):
         self._popup.open()
 
     def _show_open_dialog(self, *args):
+        '''To show FileBrowser to "Open" a project
+        '''
+
         if hasattr(self, '_popup'):
             self._popup.dismiss()
 
@@ -206,6 +292,9 @@ class Designer(FloatLayout):
         self._popup.open()
     
     def _select_class_selected(self, *args):
+        '''Event Handler for 'on_select' event of self._select_class
+        '''
+
         selection = self._select_class.listview.adapter.selection[0].text
 
         with self.playground.sandbox:
@@ -216,14 +305,23 @@ class Designer(FloatLayout):
         self._select_class_popup.dismiss()
     
     def _select_class_cancel(self, *args):
+        '''Event Handler for 'on_cancel' event of self._select_class
+        '''
+
         self._select_class_popup.dismiss()
 
     def _fbrowser_load(self, instance):
+        '''Event Handler for 'on_load' event of self._fbrowser
+        '''
+
         file_path = instance.selection[0]
         self._popup.dismiss()
         self._perform_open(file_path)
 
     def _perform_open(self, file_path):
+        '''To open a project given by file_path
+        '''
+
         for widget in widgets[:]:
             if widget[1] == 'custom':
                 widgets.remove(widget)
@@ -270,10 +368,17 @@ class Designer(FloatLayout):
                 self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
 
     def _cancel_popup(self, *args):
+        '''EventHandler for all self._popup when self._popup.content
+           emits 'on_cancel' or equivalent.
+        '''
+
         self._proj_modified_outside = False
         self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
+        '''Event Handler when ActionButton "Save" is pressed.
+        '''
+
         if self.project_loader.root_rule:
             try:
                 if self.project_loader.new_project:
@@ -288,6 +393,9 @@ class Designer(FloatLayout):
                 self.statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
+        '''Event Handler when ActionButton "Save As" is pressed.
+        '''
+
         if self.project_loader.root_rule:
             self._curr_proj_changed = False
             self._save_as_browser = FileBrowser(select_string='Save')
@@ -300,6 +408,9 @@ class Designer(FloatLayout):
             self._popup.open()
 
     def _perform_save_as(self, instance):
+        '''Event handler for 'on_success' event of self._save_as_browser
+        '''
+
         if hasattr(self, '_popup'):
             self._popup.dismiss()
 
@@ -320,6 +431,9 @@ class Designer(FloatLayout):
             self.statusbar.show_message('Cannot save project')
 
     def action_btn_recent_files_pressed(self, *args):
+        '''Event Handler when ActionButton "Recent Files" is pressed.
+        '''
+
         self._recent_dlg = RecentDialog(self.recent_manager.list_files)
         self._recent_dlg.bind(on_select=self._recent_dlg_selected,
                               on_cancel=self._cancel_popup)
@@ -330,6 +444,9 @@ class Designer(FloatLayout):
         self._popup.open()
     
     def _recent_dlg_selected(self, *args):
+        '''Event Handler for 'on_select' event of self._recent_dlg.
+        '''
+
         self._popup.dismiss()
         selection = ''
         try:
@@ -341,17 +458,29 @@ class Designer(FloatLayout):
             self._perform_open(selection)
 
     def action_btn_quit_pressed(self, *args):
+        '''Event Handler when ActionButton "Quit" is pressed.
+        '''
+
         App.get_running_app().stop()
 
     def action_btn_undo_pressed(self, *args):
+        '''Event Handler when ActionButton "Undo" is pressed.
+        '''
+
         if self._edit_selected == 'Play':
             self.undo_manager.do_undo()
         
     def action_btn_redo_pressed(self, *args):
+        '''Event Handler when ActionButton "Redo" is pressed.
+        '''
+
         if self._edit_selected == 'Play':
             self.undo_manager.do_redo()
 
     def action_btn_cut_pressed(self, *args):
+        '''Event Handler when ActionButton "Cut" is pressed.
+        '''
+
         if self._edit_selected == 'Play':
             base_widget = self.propertyviewer.widget
             if base_widget:
@@ -362,6 +491,9 @@ class Designer(FloatLayout):
                 self.playground.remove_widget_from_parent(base_widget)
 
     def action_btn_copy_pressed(self, *args):
+        '''Event Handler when ActionButton "Copy" is pressed.
+        '''
+
         base_widget = self.propertyviewer.widget
         if base_widget:
             self.widget_to_paste = type(base_widget)()
@@ -375,6 +507,9 @@ class Designer(FloatLayout):
                 get_widget_text_from_kv(base_widget, None)
 
     def action_btn_paste_pressed(self, *args):
+        '''Event Handler when ActionButton "Paste" is pressed.
+        '''
+
         parent = self.propertyviewer.widget
         if parent and self.widget_to_paste:
 
@@ -391,14 +526,23 @@ class Designer(FloatLayout):
                 self.widget_to_paste = None
 
     def action_btn_delete_pressed(self, *args):
+        '''Event Handler when ActionButton "Delete" is pressed.
+        '''
+
         if self.propertyviewer.widget:
             self.playground.remove_widget_from_parent(
                 self.propertyviewer.widget)
 
     def action_btn_select_all_pressed(self, *args):
+        '''Event Handler when ActionButton "Select All" is pressed.
+        '''
+
         App.get_running_app().focus_widget(self.playground.root)
 
     def action_btn_add_custom_widget_press(self, *args):
+        '''Event Handler when ActionButton "Add Custom Widget" is pressed.
+        '''
+
         self._custom_browser = FileBrowser(select_string='Add')
         self._custom_browser.bind(on_success=self._custom_browser_load,
                                   on_canceled=self._cancel_popup)
@@ -409,6 +553,9 @@ class Designer(FloatLayout):
         self._popup.open()
 
     def _custom_browser_load(self, instance):
+        '''Event Handler for 'on_success' event of self._custom_browser
+        '''
+
         file_path = instance.selection[0]
         self._popup.dismiss()
         
@@ -426,6 +573,9 @@ class Designer(FloatLayout):
                 self.statusbar.show_message('Cannot load widget. %s'%str(e))
 
     def action_chk_btn_toolbox_active(self, chk_btn):
+        '''Event Handler when ActionCheckButton "Toolbox" is activated.
+        '''
+
         if chk_btn.checkbox.active:
             self._toolbox_parent.add_widget(self.splitter_toolbox)
             self.splitter_toolbox.width = self._toolbox_width
@@ -436,6 +586,9 @@ class Designer(FloatLayout):
             self.splitter_toolbox.width = 0
 
     def action_chk_btn_property_viewer_active(self, chk_btn):
+        '''Event Handler when ActionCheckButton "Property Viewer" is activated.
+        '''
+
         if chk_btn.checkbox.active:
             self._toggle_splitter_widget_tree()
             if self.splitter_widget_tree.parent is None:
@@ -459,6 +612,9 @@ class Designer(FloatLayout):
             self._toggle_splitter_widget_tree()
 
     def action_chk_btn_widget_tree_active(self, chk_btn):
+        '''Event Handler when ActionCheckButton "Widget Tree" is activated.
+        '''
+
         if chk_btn.checkbox.active:
             self._toggle_splitter_widget_tree()
             add_prop = False
@@ -478,6 +634,8 @@ class Designer(FloatLayout):
             self._toggle_splitter_widget_tree()
 
     def _toggle_splitter_widget_tree(self):
+        '''To show/hide splitter_widget_tree
+        '''
 
         if self.splitter_widget_tree.parent is not None and self.splitter_property.parent is None and self.grid_widget_tree.parent is None:
             self._splitter_widget_tree_parent = self.splitter_widget_tree.parent
@@ -490,6 +648,9 @@ class Designer(FloatLayout):
             self.splitter_widget_tree.width = self._splitter_widget_tree_width
             
     def action_chk_btn_status_bar_active(self, chk_btn):
+        '''Event Handler when ActionCheckButton "StatusBar" is activated.
+        '''
+
         if chk_btn.checkbox.active:
             self._statusbar_parent.add_widget(self.statusbar)
             self.statusbar.height = self._statusbar_height
@@ -500,6 +661,9 @@ class Designer(FloatLayout):
             self.statusbar.height = 0
     
     def action_chk_btn_kv_area_active(self, chk_btn):
+        '''Event Handler when ActionCheckButton "KVLangArea" is activated.
+        '''
+
         if chk_btn.checkbox.active:
             self.splitter_kv_code_input.height = self._kv_area_height
             self._kv_area_parent.add_widget(self.splitter_kv_code_input)
@@ -510,14 +674,23 @@ class Designer(FloatLayout):
             self._kv_area_parent.remove_widget(self.splitter_kv_code_input)
     
     def _error_adding_file(self, *args):
+        '''Event Handler for 'on_error' event of self._add_file_dlg
+        '''
+
         self.statusbar.show_message('Error while adding file to project')
         self._popup.dismiss()
     
     def _added_file(self, *args):
+        '''Event Handler for 'on_added' event of self._add_file_dlg
+        '''
+
         self.statusbar.show_message('File successfully added to project')
         self._popup.dismiss()
     
     def action_btn_add_file_pressed(self, *args):
+        '''Event Handler when ActionButton "Add File" is pressed.
+        '''
+
         self._add_file_dlg = AddFileDialog(self.project_loader)
         self._add_file_dlg.bind(on_added=self._added_file,
                                 on_error=self._error_adding_file,
@@ -547,17 +720,22 @@ class DesignerApp(App):
         self.focus_widget(self.root.playground.root)
     
     def create_kivy_designer_dir(self):
+        '''To create the ~/.kivy-designer dir
+        '''
+
         if not os.path.exists(get_kivy_designer_dir()):
             os.mkdir(get_kivy_designer_dir())        
 
     def create_draggable_element(self, widgetname, touch):
-        # create the element, and make it draggable until the touch is released
-        # search default args if exist
+        '''Create PlagrounfDragElement and make it draggable 
+           until the touch is released also search default args if exist
+        '''
+
         default_args = {}
         for options in widgets:
             if len(options) > 2:
                 default_args = options[2]
-        
+
         container = self.root.playground.get_playground_drag_element(widgetname, touch, **default_args)
         if container:
             self.root.add_widget(container)
@@ -565,6 +743,10 @@ class DesignerApp(App):
             self.root.statusbar.show_message("Cannot create %s"%widgetname)
 
     def focus_widget(self, widget, *largs):
+        '''Called when a widget is select in Playground. It will also draw
+           lines around focussed widget.
+        '''
+
         if self._widget_focused and (widget is None or self._widget_focused[0] != widget):
             fwidget = self._widget_focused[0]
             for instr in self._widget_focused[1:]:
@@ -587,5 +769,3 @@ class DesignerApp(App):
                 color = Color(.42, .62, .65)
                 line = Line(points=points, close=True, width=2.)
             self._widget_focused = [widget, color, line]
-        
-
