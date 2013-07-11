@@ -8,10 +8,19 @@ from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.metrics import pt
 
 class ToolboxCategory(AccordionItem):
+    '''ToolboxCategory is responsible for grouping and showing ToolboxButton
+       of same class into one category.
+    '''
+
     gridlayout = ObjectProperty(None)
+    '''An instance of GridLayout.
+    '''
 
 
 class ToolboxButton(Button):
+    '''ToolboxButton is a subclass of Button, to display class of Widgets in
+       ToolboxCategory.
+    '''
 
     def __init__(self, **kwargs):
         self.register_event_type('on_press_and_touch')
@@ -27,9 +36,17 @@ class ToolboxButton(Button):
 
 
 class Toolbox(BoxLayout):
+    '''Toolbox is used to display all the widgets in designer.common.widgets 
+       in their respective classes.
+    '''
 
     accordion = ObjectProperty()
+    '''An instance to Accordion, used to show Widgets in their groups.
+    '''
+
     app = ObjectProperty()
+    '''An instance to the current running app.
+    '''
 
     def __init__(self, **kwargs):
         super(Toolbox, self).__init__(**kwargs)
@@ -37,6 +54,9 @@ class Toolbox(BoxLayout):
         self.custom_category = None
 
     def discover_widgets(self, *largs):
+        '''To create and add ToolboxCategory and ToolboxButton for widgets in
+           designer.common.widgets
+        '''
         # for now, don't do auto detection of widgets.
         # just do manual discovery, and tagging.
 
@@ -55,10 +75,15 @@ class Toolbox(BoxLayout):
         self.accordion.children[-1].collapse = False
     
     def cleanup(self):
+        '''To clean all the children in self.custom_category.
+        '''
         if self.custom_category:
             self.custom_category.gridlayout.clear_widgets()
 
     def add_custom(self):
+        '''To add/update self.custom_category with new custom classes loaded
+           by project.
+        '''
         if not self.custom_category:
             self.custom_category = ToolboxCategory(title='custom')
             
