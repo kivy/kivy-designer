@@ -16,13 +16,19 @@ MAX_RECENT_FILES = 10
 recent_file_path = os.path.join(get_kivy_designer_dir(), RECENT_FILES_NAME)
 
 class RecentManager(object):
-    
+    '''RecentManager is responsible for retrieving/storing the list of recently
+       opened/saved projects.
+    '''
+
     def __init__(self):
         super(RecentManager, self).__init__()
         self.list_files = []
         self.load_files()
 
     def add_file(self, _file):
+        '''To add file to RecentManager.
+        '''
+
         _file_index = 0
         try:
             _file_index = self.list_files.index(_file)
@@ -42,6 +48,9 @@ class RecentManager(object):
         self.store_files()
 
     def store_files(self):
+        '''To store the list of files on disk.
+        '''
+
         _string = ''
         for _file in self.list_files:
             _string += _file + '\n'
@@ -51,6 +60,9 @@ class RecentManager(object):
         f.close()
     
     def load_files(self):
+        '''To load the list of files from disk
+        '''
+
         if not os.path.exists(recent_file_path):
             return
 
@@ -65,11 +77,26 @@ class RecentManager(object):
 
 
 class RecentDialog(BoxLayout):
-    
+    '''RecentDialog shows the list of recent files retrieved from RecentManager
+       It emits, 'on_select' event when a file is selected and select_button is
+       clicked and 'on_cancel' when cancel_button is pressed.
+    '''
+
     listview = ObjectProperty(None)
+    '''The ListView used for showing file paths.
+    '''
+
     select_button = ObjectProperty(None)
+    '''Button used to select the list item.
+    '''
+
     cancel_button = ObjectProperty(None)
+    '''Button to cancel the dialog.
+    '''
+
     adapter = ObjectProperty(None)
+    '''ListAdapter used for selecting files.
+    '''
 
     __events__=('on_select', 'on_cancel')
 

@@ -4,13 +4,28 @@ from kivy.properties import ObjectProperty
 from kivy.app import App
 
 class WidgetTreeElement(TreeViewLabel):
+    '''WidgetTreeElement represents each node in WidgetsTree
+    '''
     node = ObjectProperty(None)
 
 class WidgetsTree(ScrollView):
+    '''WidgetsTree class is used to display the Root Widget's Tree in a 
+       Tree hierarchy.
+    '''
     playground = ObjectProperty(None)
+    '''This property is an instance of Playground
+    '''
+
     tree = ObjectProperty(None)
+    '''This property is an instance of TreeView. This TreeView is responsible
+       for showing Root Widget's Tree.
+    '''
 
     def recursive_insert(self, node, treenode):
+        '''This function will add a node to TreeView, by recursively travelling
+           through the Root Widget's Tree.
+        '''
+
         if node is None:
             return
 
@@ -30,6 +45,9 @@ class WidgetsTree(ScrollView):
                 self.recursive_insert(child, b)
 
     def refresh(self, *l):
+        '''This function will refresh the tree. It will first remove all nodes
+           and then insert them using recursive_insert
+        '''
         for node in self.tree.root.nodes:
             self.tree.remove_node(node)
 
