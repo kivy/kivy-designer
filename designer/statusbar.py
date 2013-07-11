@@ -13,6 +13,7 @@ class StatusNavBarButton(Button):
 class StatusNavBarSeparator(Label):
     '''Used to separate two Widgets by '>'
     '''
+
     pass
 
 class StatusBar(BoxLayout):
@@ -31,7 +32,9 @@ class StatusBar(BoxLayout):
     gridlayout = ObjectProperty()
     '''Parent of navbar
     '''
-   
+
+    playground = ObjectProperty()
+
     def show_message(self, message):
         '''To show a message in StatusBar
         '''
@@ -47,6 +50,7 @@ class StatusBar(BoxLayout):
     def update_navbar(self, *largs):
         '''To update navbar with the parents of currently selected Widget.
         '''
+
         self.clear_widgets()
         self.add_widget(self.gridlayout)
         self.navbar.clear_widgets()
@@ -58,7 +62,7 @@ class StatusBar(BoxLayout):
         # get parent list, until app.root.playground.root
         children = []
         while True:
-            if wid == self.app.root.playground.sandbox:
+            if wid == self.playground.sandbox:
                 break
             children.append(StatusNavBarButton(node=wid))
             wid = wid.parent

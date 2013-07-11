@@ -2,40 +2,29 @@ import re
 
 from kivy.uix.codeinput import CodeInput
 from kivy.properties import BooleanProperty, StringProperty,\
-    NumericProperty, OptionProperty
+    NumericProperty, OptionProperty, ObjectProperty
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.factory import Factory
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
+from designer.uix.designer_code_input import DesignerCodeInput
 
-class KVLangArea(CodeInput):
+class KVLangArea(DesignerCodeInput):
     '''KVLangArea is the CodeInput for editing kv lang. It emits on_show_edit
        event, when clicked.
     '''
 
-    clicked  = BooleanProperty(False)
-    '''This property specifies whether KVLangArea has been clicked or not.
-    '''
     have_error = BooleanProperty(False)
     '''This property specifies whether KVLangArea has encountered an error
        in reload in the edited text by user or not.
     '''
 
     _reload = BooleanProperty(False)
-
-    __events__=('on_show_edit',)
-
-    def on_show_edit(self, *args):
-        pass
-
-    def on_touch_down(self, touch):
-        if self.collide_point(*touch.pos):
-            self.clicked = True
-            self.dispatch('on_show_edit')
-
-        return super(KVLangArea, self).on_touch_down(touch)
+    playground = ObjectProperty()
+    '''Reference to Playground
+    '''
 
     def _get_widget_path(self, widget):
         '''To get path of a widget, path of a widget is a list containing 
@@ -50,7 +39,7 @@ class KVLangArea(CodeInput):
 
         path_to_widget = []
         _widget = widget
-        while _widget != App.get_running_app().root.playground.sandbox:
+        while _widget != self.playground.sandbox:
             place = len(_widget.parent.children) - _widget.parent.children.index(_widget) - 1
             path_to_widget.append(place)
             _widget = _widget.parent
@@ -91,7 +80,7 @@ class KVLangArea(CodeInput):
             #If parent_line doesn't contain ':' then insert it
             #Also insert widget's rule after its properties
             insert_after_line = parent_line
-            _line = 0         
+            _line = 0
             _line_pos = -1
             _line_pos = self.text.find('\n', _line_pos + 1)
             while _line <= insert_after_line:
@@ -196,10 +185,11 @@ class KVLangArea(CodeInput):
 
         return widget_line_pos, delete_until_line_pos
     
-    def get_widget_text_from_kv(self, widget, parent):
+    def get_widget_text_from_kv(self, widget, parent): 
         '''This function will get a widget's text from KVLangArea's text given
            its parent.
         '''
+
         start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent)
         text = self.text[start_pos:end_pos]
 
@@ -220,13 +210,13 @@ class KVLangArea(CodeInput):
         '''This function is used to get widget given its path
         '''
 
-        if not App.get_running_app().root.playground.root:
+        if not self.playground.root:
             return None
 
         if len(path) == 0:
             return None
 
-        root = App.get_running_app().root.playground.root
+        root = self.playground.root
         path_index = 0
         widget = root
         path_length = len(path)
@@ -340,7 +330,7 @@ class KVLangArea(CodeInput):
 
         if reload_kv_str:
             #A widget is added or removed
-            playground = App.get_running_app().root.playground
+            playground = self.playground
             project_loader = App.get_running_app().root.project_loader
 
             #Find which class rule has been modified
@@ -454,7 +444,18 @@ class KVLangArea(CodeInput):
         #Go to the line where widget is declared
         lines = re.sub(r'#.+', '', self.text).splitlines()
         total_lines = len(lines)
-        widget_lineno = self._find_widget_place(path_to_widget, lines, total_lines, 1)
+
+        root_name = App.get_running_app().root.project_loader.root_rule.name
+        total_lines = len(lines)
+        root_lineno = 0
+        for lineno, line in enumerate(lines):
+            pos = line.find(root_name)
+            if pos != -1 and get_indentation(line) == 0:
+                root_lineno = lineno
+                break
+
+        widget_lineno = self._find_widget_place(path_to_widget, lines,
+                                                total_lines, root_lineno+1)
         widget_line = lines[widget_lineno]
         indent = get_indentation(widget_line)
         prop_found = False

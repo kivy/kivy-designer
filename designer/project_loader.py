@@ -35,7 +35,6 @@ class Comment(object):
 class WidgetRule(object):
     '''WidgetRule is an Abstract class for representing a rule of Widget.
     '''
-
     def __init__(self, widget, parent):
         super(WidgetRule, self).__init__()
         self.name = widget
@@ -55,7 +54,6 @@ class ClassRule(WidgetRule):
 class CustomWidgetRule(ClassRule):
     '''CustomWidgetRule is a class for representing a custom widgets rule in kv
     '''
-
     def __init__(self, class_name, kv_file, py_file):
         super(ClassRule, self).__init__(class_name, None)
         self.class_name = class_name
@@ -88,6 +86,8 @@ class ProjectLoader(object):
         self.new_project = None
         self.dict_file_type_and_path = {}
         self.kv_file_list = [] 
+        self.kv_code_input = None
+        self.tab_pannel = None
 
     def _get_file_list(self, path):
         '''This function is recursively called for loading all py file files
@@ -95,6 +95,9 @@ class ProjectLoader(object):
         '''
 
         file_list = []
+        if '.designer' in path:
+            return []
+
         sys.path.insert(0, path)
         self._dir_list.append(path)
         for _file in os.listdir(path):
@@ -226,9 +229,8 @@ class ProjectLoader(object):
 
         ret = self._load_project(kv_path)
         self.new_project = False
-        if ret:
-            #Add project_dir to watch
-            self.proj_watcher.start_watching(self.proj_dir)
+        #Add project_dir to watch
+        self.proj_watcher.start_watching(self.proj_dir)
 
         return ret
 
@@ -280,7 +282,7 @@ class ProjectLoader(object):
                     self.class_rules.append(class_rule)
             except:
                 all_files_loaded = False
-        
+
         if not all_files_loaded:
             raise ProjectLoaderException('Cannot load file "%s"'%(_file))
 
@@ -470,7 +472,7 @@ class ProjectLoader(object):
         _file_str = f.read()
         f.close()
         
-        text = App.get_running_app().root.kv_code_input.text
+        text = self.kv_code_input.text
 
         root_str = self.get_root_str()
         f = open(root_rule_file, 'w')
@@ -517,6 +519,8 @@ class ProjectLoader(object):
                 else:
                     shutil.copy(old_file, new_file)
 
+            self.file_list = self._get_file_list(proj_dir)
+
             new_kv_file = os.path.join(proj_dir, "main.kv")
             new_py_file = os.path.join(proj_dir, "main.py")
 
@@ -529,7 +533,7 @@ class ProjectLoader(object):
                 self.class_rules[0].py_file = new_py_file
                 self.class_rules[0].kv_file = new_kv_file
             
-            self.new_project = False
+            self.new_project = False   
         
         else:
             if proj_dir != '' and proj_dir != self.proj_dir:
@@ -555,7 +559,7 @@ class ProjectLoader(object):
                         shutil.copytree(old_file, new_file)
                     else:
                         shutil.copy(old_file, new_file)
-                
+
                 self.file_list = self._get_file_list(proj_dir)
 
                 #Change the path of all files in the class rules,
@@ -605,8 +609,15 @@ class ProjectLoader(object):
             if not os.path.exists(custom_py):
                 shutil.copy(widget.py_file, custom_py)
         
+        #Saving all opened py files
+        for _code_input in self.tab_pannel.list_py_code_inputs:
+            path = os.path.join(self.proj_dir, _code_input.rel_file_path)
+            f = open(path, 'w')
+            f.write(_code_input.text)
+            f.close()
+
         #Save all class rules
-        text = App.get_running_app().root.kv_code_input.text
+        text = self.kv_code_input.text
         for _rule in self.class_rules:
             #Get the kv text from KVLangArea and write it to class rule's file
             f = open(_rule.kv_file, 'r')

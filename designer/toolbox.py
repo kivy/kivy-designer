@@ -16,7 +16,6 @@ class ToolboxCategory(AccordionItem):
     '''An instance of GridLayout.
     '''
 
-
 class ToolboxButton(Button):
     '''ToolboxButton is a subclass of Button, to display class of Widgets in
        ToolboxCategory.

@@ -4,6 +4,14 @@
 #:set titlecolor (.34, .39, .40)
 #:import KivyLexer kivy.extras.highlight.KivyLexer
 
+<PyScrollView>:
+    id: scroll
+    code_input: code_input
+    PyCodeInput:
+        id: code_input
+        size_hint_y: None
+        height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
+
 <AddFileDialog>:
     text_file: text_file
     text_folder: text_folder
@@ -61,7 +69,7 @@
         Button:
             text: 'Cancel'
             on_press: root.dispatch('on_cancel')
-        
+
 <KVLangArea>:
     auto_indent: True
     lexer: KivyLexer()
@@ -180,7 +188,7 @@
     do_scale: False
     do_rotation: False
     size_hint: None, None
-    size: 600, 400
+    size: 550, 350
     pos: 300, 230
     auto_bring_to_front: False
     canvas:
@@ -264,9 +272,6 @@
         BoxLayout:
             size_hint_x: None
             width: '44pt'
-            Button:
-                text: 'Delete'
-                font_size: '10pt'
 
 <StatusNavBarButton>:
     text: getattr(root.node, '__class__').__name__
@@ -349,95 +354,21 @@
     text: getattr(root.node, '__class__').__name__
     font_size: '10pt'
 
-<Designer>:
-    propertyviewer: propertyviewer
-    playground: playground
-    widgettree: widgettree
-    statusbar: statusbar
+<UICreator>:
     kv_code_input: code_input
-    actionbar: actionbar
     toolbox: toolbox
     splitter_toolbox: splitter_toolbox
     splitter_kv_code_input: splitter_kv
     grid_widget_tree: grid_widget_tree
     splitter_property: splitter_property
     splitter_widget_tree: splitter_widget_tree
-
-    ActionBar:
-        id: actionbar
-        pos_hint: {'top': 1}
-        size_hint: 1, None
-        height: '55sp'
-        ActionView:
-            ActionPrevious:
-                title: 'Kivy Designer'
-                width: 200
-                with_previous: False
-            ActionOverflow:
-            ActionGroup:
-                text: 'File'
-                mode: 'spinner'
-                size_hint_x: None
-                width: 90
-                ActionButton:
-                    text: 'New'
-                    on_press: root.action_btn_new_pressed()
-                ActionButton:
-                    text: 'Open'
-                    on_press: root.action_btn_open_pressed()
-                ActionButton:
-                    text: 'Save'
-                    on_press: root.action_btn_save_pressed()
-                ActionButton:
-                    text: 'Save As'
-                    on_press: root.action_btn_save_as_pressed()
-                ActionButton:
-                    text: 'Recent Files'
-                    on_press: root.action_btn_recent_files_pressed()
-                ActionButton:
-                    text: 'Quit'
-                    on_press: root.action_btn_quit_pressed()
-
-            ActionGroup:
-                text: 'View'
-                mode: 'spinner'
-                size_hint_x: None
-                width: 90
-                ActionCheckButton:
-                    text: 'Toolbox'
-                    minimum_width: 150
-                    on_active: root.action_chk_btn_toolbox_active(self)
-                ActionCheckButton:
-                    text: 'Property Viewer'
-                    minimum_width: 150
-                    on_active: root.action_chk_btn_property_viewer_active(self)
-                ActionCheckButton:
-                    text: 'Widget Tree'
-                    minimum_width: 150
-                    on_active: root.action_chk_btn_widget_tree_active(self)
-                ActionCheckButton:
-                    text: 'StatusBar'
-                    minimum_width: 150
-                    on_active: root.action_chk_btn_status_bar_active(self)
-                ActionCheckButton:
-                    text: 'KV Area'
-                    minimum_width: 150
-                    on_active: root.action_chk_btn_kv_area_active(self)
-            
-            ActionGroup:
-                text: 'Project'
-                mode: 'spinner'
-                size_hint_x: None
-                width: 90
-                ActionButton:
-                    text: 'Add File'
-                    minimum_width: 90
-                    on_press: root.action_btn_add_file_pressed()
+    propertyviewer: propertyviewer
+    playground: playground
+    widgettree: widgettree
 
     GridLayout:
-        size_hint: 1, None
-        height: root.height - actionbar.height - statusbar.height
-        y: statusbar.height
+        height: root.height
+        pos: root.pos
         cols: 1
         splitter_toolbox: splitter_toolbox
         splitter_widget_tree: splitter_widget_tree
@@ -467,9 +398,9 @@
                 size_hint_x: None
                 height: 200
                 max_size: 500
-                x: splitter_toolbox.width
-                width: root.width - self.x - splitter_widget_tree.width
-                y: statusbar.height
+                x: root.x + splitter_toolbox.width
+                width: root.width - splitter_toolbox.width - splitter_widget_tree.width
+                y: root.y
                     
                 ScrollView:
                     id: scroll
@@ -559,8 +490,129 @@
                             PropertyViewer:
                                 id: propertyviewer
 
+<DesignerContent>:
+    ui_creator: ui_creator
+    tree_view: tree_view
+    tab_pannel: tab_panel
+
+    Splitter:
+        id: splitter_tree
+        pos: root.pos
+        size_hint_x: None
+        sizable_from: 'right'
+        min_size: 170
+        width: 170
+        GridLayout:
+            cols: 1
+            spacing: .5
+            Label:
+                canvas.before:
+                    Color:
+                        rgb: titlecolor
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                text: 'Project Tree'
+                font_size: '10pt'
+                height: '20pt'
+                size_hint_y: None
+            TreeView:
+                id: tree_view
+                size_hint: 1, 1
+
+    DesignerTabbedPanel:
+        id: tab_panel
+        size_hint: None, None
+        height: root.height
+        y: root.y
+        x: splitter_tree.width
+        width: root.width - splitter_tree.width
+        do_default_tab: False
+
+        DesignerTabbedPanelItem:
+            text: 'UI Creator'
+            UICreator:
+                id: ui_creator
+
+<Designer>:
+    statusbar: statusbar
+    actionbar: actionbar
+
+    ActionBar:
+        id: actionbar
+        pos_hint: {'top': 1}
+        on_height: root.on_actionbar_height()
+        size_hint: 1, None
+        height: '55sp'
+        ActionView:
+            ActionPrevious:
+                title: 'Kivy Designer'
+                width: 200
+                with_previous: False
+            ActionOverflow:
+            ActionGroup:
+                text: 'File'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'New'
+                    on_press: root.action_btn_new_pressed()
+                ActionButton:
+                    text: 'Open'
+                    on_press: root.action_btn_open_pressed()
+                ActionButton:
+                    text: 'Save'
+                    on_press: root.action_btn_save_pressed()
+                ActionButton:
+                    text: 'Save As'
+                    on_press: root.action_btn_save_as_pressed()
+                ActionButton:
+                    text: 'Recent Files'
+                    on_press: root.action_btn_recent_files_pressed()
+                ActionButton:
+                    text: 'Quit'
+                    on_press: root.action_btn_quit_pressed()
+
+            ActionGroup:
+                text: 'View'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionCheckButton:
+                    text: 'Toolbox'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_toolbox_active(self)
+                ActionCheckButton:
+                    text: 'Property Viewer'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_property_viewer_active(self)
+                ActionCheckButton:
+                    text: 'Widget Tree'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_widget_tree_active(self)
+                ActionCheckButton:
+                    text: 'StatusBar'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_status_bar_active(self)
+                ActionCheckButton:
+                    text: 'KV Area'
+                    minimum_width: 150
+                    on_active: root.action_chk_btn_kv_area_active(self)
+
+            ActionGroup:
+                text: 'Project'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'Add File'
+                    minimum_width: 90
+                    on_press: root.action_btn_add_file_pressed()
+
     StatusBar:
         id: statusbar
         size_hint_y: None
+        on_height: root.on_statusbar_height()
         height: '20pt'
         pos_hint: {'y': 0}

@@ -49,6 +49,10 @@ class PropertyBase(object):
        It is used when UndoManager undoes or redoes the property change.
     '''
 
+    kv_code_input = ObjectProperty()
+    '''It is a reference to the KVLangArea.
+    '''
+
     def set_value(self, value):
         '''This function first converts the value of the propwidget, then sets 
            the new value. If there is some error in setting new value, then it
@@ -72,7 +76,7 @@ class PropertyBase(object):
         if not conversion_err:
             try:
                 setattr(self.propwidget, self.propname, value)
-                root.kv_code_input.set_property_value(self.propwidget,
+                self.kv_code_input.set_property_value(self.propwidget,
                                                       self.propname, value,
                                                       self.proptype)
                 if self.record_to_undo:
@@ -125,6 +129,10 @@ class PropertyViewer(ScrollView):
        GridLayout.
     '''
 
+    kv_code_input = ObjectProperty()
+    '''It is a reference to the KVLangArea.
+    '''
+
     def on_widget(self, instance, value):
         self.clear()
         if value is not None:
@@ -157,14 +165,18 @@ class PropertyViewer(ScrollView):
         prop = self.widget.property(name)
         if isinstance(prop, NumericProperty):
             return PropertyTextInput(propwidget=self.widget, propname=name,
-                                     proptype = 'NumericProperty')
+                                     proptype = 'NumericProperty',
+                                     kv_code_input=self.kv_code_input)
         elif isinstance(prop, StringProperty):
             return PropertyTextInput(propwidget=self.widget, propname=name,
-                                     proptype = 'StringProperty')
+                                     proptype = 'StringProperty',
+                                     kv_code_input=self.kv_code_input)
         elif isinstance(prop, BooleanProperty):
             ip = PropertyBoolean(propwidget=self.widget, propname=name,
-                                 proptype = 'BooleanProperty')
+                                 proptype = 'BooleanProperty',
+                                 kv_code_input=self.kv_code_input)
             ip.record_to_undo = True
             return ip
 
         return None
+

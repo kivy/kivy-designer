@@ -66,7 +66,6 @@ class ProjectWatcher(object):
         '''To stop watching currently watched directory. This will also call
            join() on the thread created by Observer.
         '''
-
         try:
             self._observer.stop()
             self.join()
