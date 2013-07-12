@@ -203,6 +203,7 @@ class Designer(FloatLayout):
             return super(FloatLayout, self).on_touch_down(touch)
 
         self.actionbar.on_previous(self)
+        
         return super(FloatLayout, self).on_touch_down(touch)  
 
     def action_btn_new_pressed(self, *args):
@@ -519,14 +520,7 @@ class Designer(FloatLayout):
         '''
 
         if self._edit_selected == 'Play':
-            base_widget = self.ui_creator.propertyviewer.widget
-
-            if base_widget:
-                self.widget_to_paste = base_widget
-                self._widget_str_to_paste = self.ui_creator.kv_code_input.\
-                    get_widget_text_from_kv(base_widget, None)
-
-                self.ui_creator.playground.remove_widget_from_parent(base_widget)
+            self.ui_creator.playground.do_cut()
 
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_cut()
@@ -542,17 +536,7 @@ class Designer(FloatLayout):
         '''
 
         if self._edit_selected == 'Play':
-            base_widget = self.ui_creator.propertyviewer.widget
-            if base_widget:
-                self.widget_to_paste = type(base_widget)()
-                props = base_widget.properties()
-                for prop in props:
-                    setattr(self.widget_to_paste, prop,
-                            getattr(base_widget, prop))
-    
-                self.widget_to_paste.parent = None
-                self._widget_str_to_paste = self.ui_creator.kv_code_input.\
-                    get_widget_text_from_kv(base_widget, None)
+            self.ui_creator.playground.do_copy()
          
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_copy()
@@ -568,20 +552,7 @@ class Designer(FloatLayout):
         '''
 
         if self._edit_selected == 'Play':
-            parent = self.ui_creator.propertyviewer.widget
-            if parent and self.widget_to_paste:
-    
-                #find appropriate parent to add widget_to_paste
-                while parent and not isinstance(parent, Layout):
-                    parent = parent.parent
-    
-                if parent is not None:
-                    self.ui_creator.playground.add_widget_to_parent(self.widget_to_paste,
-                                                                    parent,
-                                                                    kv_str=\
-                                                                    self.\
-                                                                    _widget_str_to_paste)
-                    self.widget_to_paste = None
+            self.ui_creator.playground.do_paste()
          
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_paste()
@@ -597,9 +568,7 @@ class Designer(FloatLayout):
         '''
 
         if self._edit_selected == 'Play':
-            if self.ui_creator.propertyviewer.widget:
-                self.ui_creator.playground.remove_widget_from_parent(
-                    self.ui_creator.propertyviewer.widget)
+            self.playground.do_delete()
         
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_delete()
@@ -615,7 +584,7 @@ class Designer(FloatLayout):
         '''
 
         if self._edit_selected == 'Play':
-            App.get_running_app().focus_widget(self.ui_creator.playground.root)
+            self.ui_creator.playground.do_select_all()
 
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_select_all()
@@ -826,6 +795,7 @@ class DesignerApp(App):
         self.root.project_loader.tab_pannel = self.root.designer_content.tab_pannel
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)
+        self.root.ui_creator.playground.undo_manager = self.root.undo_manager
 
         self.bind(widget_focused=
                   self.root.ui_creator.propertyviewer.setter('widget'))

@@ -7,6 +7,7 @@ from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.sandbox import Sandbox
 from kivy.factory import Factory
+from kivy.base import EventLoop
 
 from designer.common import widgets
 from designer.tree import Tree
@@ -87,6 +88,9 @@ class Playground(ScatterPlane):
     def __init__(self, **kwargs):
         super(Playground, self).__init__(**kwargs)
         self.tree = Tree()
+        self.keyboard = None
+        self.selected_widget = None
+        self.undo_manager = None
 
     def on_show_edit(self, *args):
         pass
@@ -293,22 +297,108 @@ class Playground(ScatterPlane):
         if is_target_layout:
             return True
         return False
+    
+    def _keyboard_released(self, *args):
+        self.keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self.keyboard = None
+    
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        if modifiers != [] and modifiers[-1] == 'ctrl':
+            if keycode[1] == 'c':
+                self.do_copy()
+
+            elif keycode[1] == 'v':
+                self.do_paste()
+
+            elif keycode[1] == 'x':
+                self.do_cut()
+            
+            elif keycode[1] == 'a':
+                self.do_select_all()
+
+            elif keycode[1] == 'z':
+                self.do_undo()
+            
+            elif modifiers [0] == 'shift' and keycode[1] == 'z':
+                self.do_redo()
+            
+        elif keycode[1] == 'delete':
+            self.do_delete()
+    
+    def do_undo(self):
+        self.undo_manager.do_undo()
+    
+    def do_redo(self):
+        self.undo_manager.do_redo()
+
+    def do_copy(self):
+        base_widget = self.selected_widget
+        if base_widget:
+            self.widget_to_paste = type(base_widget)()
+            props = base_widget.properties()
+            for prop in props:
+                setattr(self.widget_to_paste, prop,
+                        getattr(base_widget, prop))
+
+            self.widget_to_paste.parent = None
+            self._widget_str_to_paste = self.kv_code_input.\
+                get_widget_text_from_kv(base_widget, None)
+    
+    def do_paste(self):
+        parent = self.selected_widget
+        if parent and self.widget_to_paste:
+
+            #find appropriate parent to add widget_to_paste
+            while parent and not isinstance(parent, Layout):
+                parent = parent.parent
+
+            if parent is not None:
+                self.add_widget_to_parent(self.widget_to_paste,
+                                          parent,
+                                          kv_str=self._widget_str_to_paste)
+                self.widget_to_paste = None
+    
+    def do_cut(self):
+        base_widget = self.selected_widget
+
+        if base_widget:
+            self.widget_to_paste = base_widget
+            self._widget_str_to_paste = self.kv_code_input.\
+                get_widget_text_from_kv(base_widget, None)
+
+            self.remove_widget_from_parent(base_widget)
+    
+    def do_select_all(self):
+        self.selected_widget = self.root
+        App.get_running_app().focus_widget(self.root)
+    
+    def do_delete(self):
+        if self.selected_widget:
+            self.remove_widget_from_parent(self.selected_widget)
 
     def on_touch_down(self, touch):
         '''An override of ScatterPlane's on_touch_down.
            Used to determine the current selected widget and also emits,
            on_show_edit event.
         '''
+        
+        if super(ScatterPlane, self).collide_point(*touch.pos) and \
+            not self.keyboard:
+            win = EventLoop.window
+            self.keyboard = win.request_keyboard(self._keyboard_released, self)
+            self.keyboard.bind(on_key_down=self._on_keyboard_down)
+            
         if self.selection_mode:
             if super(ScatterPlane, self).collide_point(*touch.pos):
                 x, y = self.to_local(*touch.pos)
                 target = self.find_target(x, y, self.root)
+                self.selected_widget = target
                 App.get_running_app().focus_widget(target)
                 self.clicked = True
                 self.dispatch('on_show_edit', Playground)
                 return True
 
-        if self.parent.collide_point (*touch.pos):
+        if self.parent.collide_point(*touch.pos):
             super(Playground, self).on_touch_down(touch)
 
         return False

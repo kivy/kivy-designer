@@ -50,6 +50,12 @@ class UICreator(FloatLayout):
     def __init__(self, **kwargs):
         super(UICreator, self).__init__(**kwargs)
         Clock.schedule_once(self._setup_everything)
+    
+    def on_touch_down(self, *args):
+        if self.playground and self.playground.keyboard:
+            self.playground.keyboard.release()
+  
+        return super(UICreator, self).on_touch_down(*args)
 
     def on_show_edit(self, *args):
         App.get_running_app().root.on_show_edit(*args)
@@ -57,7 +63,7 @@ class UICreator(FloatLayout):
     def _setup_everything(self, *args):
         '''To setup all the references in between widget
         '''
-
+        
         self.kv_code_input.playground = self.playground
         self.playground.kv_code_input = self.kv_code_input
         self.playground.widgettree = self.widgettree
