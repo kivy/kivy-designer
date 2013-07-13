@@ -128,6 +128,7 @@ class Playground(ScatterPlane):
                 self.sandbox.add_widget(widget)
                 widget.size = self.sandbox.size
                 added = True
+
         else:
             with self.sandbox:
                 target.add_widget(widget)
@@ -193,7 +194,9 @@ class Playground(ScatterPlane):
 
         #Cleanup is called when project is created or loaded
         #so this operation shouldn't be recorded in Undo
-        self.remove_widget_from_parent(self.root, True)
+        if self.root:
+            self.remove_widget_from_parent(self.root, True)
+
         self.tree = Tree()
 
     def remove_widget_from_parent(self, widget, from_undo=False, from_kv=False):
@@ -213,6 +216,7 @@ class Playground(ScatterPlane):
             parent = widget.parent
             parent.remove_widget(widget)
         else:
+            print 'parent removed'
             self.root.parent.remove_widget(self.root)
             self.root = None
 
@@ -381,7 +385,7 @@ class Playground(ScatterPlane):
            Used to determine the current selected widget and also emits,
            on_show_edit event.
         '''
-        
+
         if super(ScatterPlane, self).collide_point(*touch.pos) and \
             not self.keyboard:
             win = EventLoop.window

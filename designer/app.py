@@ -352,7 +352,7 @@ class Designer(FloatLayout):
 
         with self.ui_creator.playground.sandbox:
             try:
-                self.project_loader.load_project(file_path)
+                self.project_loader.load_project('/home/abhi/kivy_designer/test/test3/main.kv')
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -568,7 +568,7 @@ class Designer(FloatLayout):
         '''
 
         if self._edit_selected == 'Play':
-            self.playground.do_delete()
+            self.ui_creator.playground.do_delete()
         
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_delete()
@@ -793,9 +793,11 @@ class DesignerApp(App):
         self.root.statusbar.playground = self.root.ui_creator.playground
         self.root.project_loader.kv_code_input = self.root.ui_creator.kv_code_input
         self.root.project_loader.tab_pannel = self.root.designer_content.tab_pannel
+        self.root.ui_creator.playground.undo_manager = self.root.undo_manager
+        self.root.ui_creator.kv_code_input.project_loader = self.root.project_loader
+        self.root.ui_creator.widgettree.project_loader = self.root.project_loader
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)
-        self.root.ui_creator.playground.undo_manager = self.root.undo_manager
 
         self.bind(widget_focused=
                   self.root.ui_creator.propertyviewer.setter('widget'))

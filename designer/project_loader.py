@@ -17,7 +17,7 @@ from kivy.lang import Builder
 from kivy.uix.sandbox import Sandbox
 from kivy.clock import Clock
 
-from designer.helper_functions import get_indentation, get_indent_str
+from designer.helper_functions import get_indentation, get_indent_str, get_line_start_pos
 from designer.proj_watcher import ProjectWatcher
 
 PROJ_DESIGNER = '.designer'
@@ -88,6 +88,7 @@ class ProjectLoader(object):
         self.kv_file_list = [] 
         self.kv_code_input = None
         self.tab_pannel = None
+        self._root_rule = None
 
     def _get_file_list(self, path):
         '''This function is recursively called for loading all py file files
@@ -269,7 +270,6 @@ class ProjectLoader(object):
                                               + '#' + app_str.lstrip())
             try:
                 root_rule = Builder.load_string(kv_string)
-                self.root_rule = None
                 if root_rule:
                     self.root_rule = RootRule(root_rule.__class__.__name__,
                                               root_rule)
@@ -280,7 +280,8 @@ class ProjectLoader(object):
                     class_rule = ClassRule(class_str)
                     class_rule.kv_file = _file
                     self.class_rules.append(class_rule)
-            except:
+
+            except Exception as e:
                 all_files_loaded = False
 
         if not all_files_loaded:
@@ -580,7 +581,7 @@ class ProjectLoader(object):
 
                     relative_path = _rule.file[_rule.file.find(self.proj_dir):]
                     _rule.file = os.path.join(proj_dir, relative_path)
-                    
+
                     f = open(_rule.file, 'r')
                     s = f.read()
                     f.close()
@@ -632,36 +633,155 @@ class ProjectLoader(object):
             f.write(_file_str)
             f.close()
         
-        #Save root widget's rule
-        is_root_class = False
-        for _rule in self.class_rules:
-            if _rule.name == self.root_rule.name:
-                is_root_class = True
-                break
+        #If root widget is not changed
+        if self._root_rule.name == self.root_rule.name:
+            #Save root widget's rule
+            is_root_class = False
+            for _rule in self.class_rules:
+                if _rule.name == self.root_rule.name:
+                    is_root_class = True
+                    break
 
-        if not is_root_class:
-            f = open(self.root_rule.kv_file, 'r')
-            _file_str = f.read()
-            f.close()
-            
-            old_str = self.get_class_str_from_text(self.root_rule.name,
-                                                   _file_str)
-            new_str = self.get_class_str_from_text(self.root_rule.name, text)
+            if not is_root_class:
+                f = open(self.root_rule.kv_file, 'r')
+                _file_str = f.read()
+                f.close()
+                
+                old_str = self.get_class_str_from_text(self.root_rule.name,
+                                                       _file_str)
+                new_str = self.get_class_str_from_text(self.root_rule.name, text)
+    
+                f = open(self.root_rule.kv_file, 'w')
+                _file_str = _file_str.replace(old_str, new_str)
+                f.write(_file_str)
+                f.close()
 
-            f = open(self.root_rule.kv_file, 'w')
-            _file_str = _file_str.replace(old_str, new_str)
-            f.write(_file_str)
+        else:
+            #If root widget is changed
+            #Root Widget changes, there can be these cases:
+            root_name = self.root_rule.name
+            f = open(self._app_file, 'r')
+            file_str = f.read()
             f.close()
+            self._root_rule = self.root_rule
+
+            if self.is_root_a_class_rule() and self._app_file:
+                #Root Widget's class rule is a custom class 
+                #and its rule is class rule. So, it already have been saved
+                #the string of App's build() function will be changed to 
+                #return new root widget's class
+
+                if self._app_class != 'runTouchApp':
+                    s = re.search(r'class\s+%s.+:'%self._app_class, file_str)
+                    if s:
+                        build_searchiter = None
+                        for searchiter in re.finditer(
+                            r'[ \ \t]+def\s+build\s*\(\s*self.+\s*:',
+                            file_str):
+                            if searchiter.start() > s.start():
+                                build_searchiter = searchiter
+                                break
+
+                        if build_searchiter:
+                            indent = get_indentation(build_searchiter.group(0))
+                            file_str = file_str[:build_searchiter.end()]+'\n'+\
+                                get_indent_str(2*indent) + "return " +\
+                                root_name + "()\n" + file_str[build_searchiter.end():]
+
+                        else:
+                            file_str = file_str[:s.end()] + \
+                                "\n    def build(self):\n        return "+ \
+                                root_name + '()\n' + file_str[s.end():]
+
+                else:
+                    file_str = re.sub(r'runTouchApp\s*\(.+\)',
+                                      'runTouchApp('+root_name+'())', file_str)
+
+                f = open(self._app_file, 'w')
+                f.write(file_str)
+                f.close()
+
+            else:
+                #Root Widget's rule is not a custom class
+                #and its rule is root rule
+                #Its kv_file should be of App's class name
+                #and App's build() function should be cleared
+                if not self.root_rule.kv_file:
+                    s = self._app_class.replace('App', '').lower()
+                    root_file = None
+                    for _file in self.kv_file_list:
+                        if os.path.basename(_file).find(s) == 0:
+                            self.root_rule.kv_file = _file
+                            break
+
+                f = open(self.root_rule.kv_file, 'r')
+                _file_str = f.read()
+                f.close()
+
+                new_str = self.get_class_str_from_text(self.root_rule.name, text, False)
+
+                f = open(self.root_rule.kv_file, 'a')
+                f.write(new_str)
+                f.close()
+
+                if self._app_class != 'runTouchApp':
+                    s = re.search(r'class\s+%s.+:'%self._app_class, file_str)
+                    if s:
+                        build_searchiter = None
+                        for searchiter in re.finditer(
+                            r'[ \ \t]+def\s+build\s*\(\s*self.+\s*:',
+                            file_str):
+                            if searchiter.start() > s.start():
+                                build_searchiter = searchiter
+                                break
+
+                        if build_searchiter:
+                            lines = file_str.splitlines()
+                            total_lines = len(lines)
+                            indent = get_indentation(build_searchiter.group(0))
+
+                            _line = 0
+                            _line_pos = -1
+                            _line_pos = file_str.find('\n', _line_pos + 1)
+                            while _line_pos <= build_searchiter.start():
+                                _line_pos = file_str.find('\n', _line_pos + 1)
+                                _line += 1
+                            
+                            _line += 1
+
+                            while _line < total_lines:
+                                if lines[_line].strip() != '' and\
+                                    get_indentation(lines[_line]) <= indent:
+                                    break
+
+                                _line += 1
+
+                            _line -= 1
+                            end = get_line_start_pos(file_str, _line)
+                            start = build_searchiter.start()
+                            file_str = file_str.replace(file_str[start:end], '    pass')
+
+                            f = open(self._app_file, 'w')
+                            f.write(file_str)
+                            f.close()
 
         #Allow Project Watcher to emit events
         Clock.schedule_once(self._allow_proj_watcher_dispatch, 1)
-    
-    def get_class_str_from_text(self, class_name, _file_str):
+
+    def get_class_str_from_text(self, class_name, _file_str, is_class=True):
         '''To return the full class rule of class_name from _file_str
         '''
-
+        
+        start_pos = -1
         #Find the start position of class_name
-        start_pos = _file_str.find('<'+class_name+'>:')
+        if is_class:
+            start_pos = _file_str.find('<'+class_name+'>:')
+        else:
+            while True:
+                start_pos = _file_str.find(class_name, start_pos+1)
+                if start_pos == 0 or not (_file_str[start_pos-1].isalnum() and
+                                          _file_str[start_pos-1] != ''):
+                    break
 
         _line = 0
         _line_pos = 0
@@ -893,9 +1013,6 @@ class ProjectLoader(object):
         except:
             pass
 
-        if hasattr(Factory, self.root_rule.name):
-            Factory.unregister(self.root_rule.name)
-
         if class_name != '' and class_str != '':
             #Cleaning class rule
             for rule in Builder.rules[:]:
@@ -924,7 +1041,7 @@ class ProjectLoader(object):
         root_str = re.sub(r'.+app+.+', '', root_str)
 
         root_widget = Builder.load_string(root_str)
-        #print root_str, 'rooot str'
+
         if not root_widget:
             root_widget = self.get_root_widget()
 
@@ -932,28 +1049,48 @@ class ProjectLoader(object):
             root_name = root_str[:root_str.find('\n')]
             root_name = root_widget.replace(':', '').replace('<','')
             root_name = root_widget.replace('>', '')
-            print root_name
             root_widget = self.set_root_widget(root_name)           
 
         return root_widget
     
-    def set_root_widget(self, root_name):
+    def is_root_a_class_rule(self):
+        '''Returns True if root rule is a class rule
+        '''
+
+        for _rule in self.class_rules:
+            if _rule.name == self.root_rule.name:
+                return True
+        
+        return False
+
+    def set_root_widget(self, root_name, widget=None):
         '''To set root_name as the root rule.
         '''
 
-        root_widget = self.get_widget_of_class(root_name)
+        root_widget = None
+        if not widget:
+            root_widget = self.get_widget_of_class(root_name)
+        else:
+            root_widget = widget
+
         self.root_rule = RootRule(root_name, root_widget)
         for _rule in self.class_rules:
             if _rule.name == root_name:
                 self.root_rule.kv_file = _rule.kv_file
-                self.root_rule.py_file = _rule.py_file
+                self.root_rule.py_file = _rule.file
                 break
-        
+
+        if not self._root_rule:
+            self._root_rule = self.root_rule
+
         return root_widget
         
     def get_root_widget(self):
         '''To get the root widget of the current project.
         '''
+        
+        if self.root_rule and self.root_rule.name != '':
+            return self.get_widget_of_class(self.root_rule.name)
 
         if self._app_file == None:
             return None
@@ -981,7 +1118,10 @@ class ProjectLoader(object):
                     self.root_rule.kv_file = _rule.kv_file
                     self.root_rule.file = _rule.file
                     break
-        
+            
+            if not self._root_rule:
+                self._root_rule = self.root_rule
+
         if not self.root_rule.kv_file:
             raise ProjectLoaderException("Cannot find root widget's kv file")
 

@@ -20,6 +20,10 @@ class WidgetsTree(ScrollView):
     '''This property is an instance of TreeView. This TreeView is responsible
        for showing Root Widget's Tree.
     '''
+    
+    project_loader = ObjectProperty()
+    '''Reference to ProjectLoader instance.
+    '''
 
     def recursive_insert(self, node, treenode):
         '''This function will add a node to TreeView, by recursively travelling
@@ -31,13 +35,14 @@ class WidgetsTree(ScrollView):
 
         b = WidgetTreeElement(node=node)
         self.tree.add_node(b, treenode)
-        class_rules = App.get_running_app().root.project_loader.class_rules
-        root_widget = App.get_running_app().root.project_loader.root_rule.widget
+        class_rules = self.project_loader.class_rules
+        root_widget = self.project_loader.root_rule.widget
 
         is_child_custom = False
         for rule in class_rules:
             if rule.name == type(node).__name__:
                 is_child_custom = True
+                print rule.name, 'is custom'
                 break
 
         if root_widget == node or not is_child_custom:

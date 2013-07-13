@@ -25,6 +25,10 @@ class KVLangArea(DesignerCodeInput):
     playground = ObjectProperty()
     '''Reference to Playground
     '''
+    
+    project_loader = ObjectProperty()
+    '''Reference to ProjectLoader
+    '''
 
     def _get_widget_path(self, widget):
         '''To get path of a widget, path of a widget is a list containing 
@@ -52,87 +56,112 @@ class KVLangArea(DesignerCodeInput):
            widget there.
         '''
 
-        path_to_widget = self._get_widget_path(widget.parent)
-        path_to_widget.reverse()
-        
         text = re.sub(r'#.+', '', self.text)
-
         lines = text.splitlines()
         total_lines = len(lines)
-        root_lineno = 0
-        root_name = App.get_running_app().root.project_loader.root_rule.name
-        for lineno, line in enumerate(lines):
-            pos = line.find(root_name)
-            if pos != -1 and get_indentation(line) == 0:
-                root_lineno = lineno
-                break
-
-        parent_lineno = self._find_widget_place(path_to_widget, lines,
-                                                total_lines, root_lineno + 1)
-
-        if parent_lineno >= total_lines:
+        if total_lines == 0:
             return
-
-        #Get text of parents line
-        parent_line = lines[parent_lineno]
-        insert_after_line = -1
-        if parent_line.find(':') == -1:
-            #If parent_line doesn't contain ':' then insert it
-            #Also insert widget's rule after its properties
-            insert_after_line = parent_line
-            _line = 0
-            _line_pos = -1
-            _line_pos = self.text.find('\n', _line_pos + 1)
-            while _line <= insert_after_line:
-                _line_pos = self.text.find('\n', _line_pos + 1)
-                _line += 1
-
-            self.text = self.text[:_line_pos] + ':' + self.text[_line_pos:]
-
-        else:
-            #If ':' in parent_line then, find a place to insert widget's rule
-            indent = len(parent_line) - len(parent_line.lstrip())
-            lineno = parent_lineno
-            _indent = indent + 1
-            line = parent_line
-            while (line.strip() == '' or _indent > indent):
-                lineno += 1
-                if lineno >= total_lines:
-                    break
-                line = lines[lineno]
-                _indent = len(line) - len(line.lstrip())
-
-            insert_after_line = lineno - 1
-            line = lines[insert_after_line]
-            while line.strip() == '':
-                insert_after_line -= 1
-                line = lines[insert_after_line]
         
-        to_insert = ''
-        if kv_str == '':
-            to_insert = type(widget).__name__ + ':'
-        else:
-            to_insert = kv_str.strip()
+        self._reload = False
 
-        if insert_after_line == total_lines - 1:
-            #if inserting at the last line
-            _line_pos = len(self.text) - 1
-            self.text = self.text[:_line_pos + 1] + '\n' + \
-                get_indent_str(indent + 4) + to_insert
-        else:
-            #inserting somewhere else
-            insert_after_line -= 1
-            _line = 0
-            _line_pos = -1
-            _line_pos = self.text.find('\n', _line_pos + 1)
-            while _line <= insert_after_line:
-                _line_pos = self.text.find('\n', _line_pos + 1)
-                _line += 1
+        #If target is not none then widget is not root widget
+        if target:
+            path_to_widget = self._get_widget_path(widget.parent)
+            path_to_widget.reverse()
+            
 
-            self.text = self.text[:_line_pos] + '\n' + \
-                get_indent_str(indent + 4) + to_insert + \
-                self.text[_line_pos:]
+            root_lineno = 0
+            root_name = self.project_loader.root_rule.name
+            for lineno, line in enumerate(lines):
+                pos = line.find(root_name)
+                if pos != -1 and get_indentation(line) == 0:
+                    root_lineno = lineno
+                    break
+        
+            parent_lineno = self._find_widget_place(path_to_widget, lines,
+                                                    total_lines,
+                                                    root_lineno + 1)
+            
+            if parent_lineno >= total_lines:
+                return
     
+            #Get text of parents line
+            parent_line = lines[parent_lineno]
+            insert_after_line = -1
+            if parent_line.find(':') == -1:
+                #If parent_line doesn't contain ':' then insert it
+                #Also insert widget's rule after its properties
+                insert_after_line = parent_line
+                _line = 0
+                _line_pos = -1
+                _line_pos = self.text.find('\n', _line_pos + 1)
+                while _line <= insert_after_line:
+                    _line_pos = self.text.find('\n', _line_pos + 1)
+                    _line += 1
+    
+                self.text = self.text[:_line_pos] + ':' + self.text[_line_pos:]
+    
+            else:
+                #If ':' in parent_line then, find a place to insert widget's rule
+                indent = len(parent_line) - len(parent_line.lstrip())
+                lineno = parent_lineno
+                _indent = indent + 1
+                line = parent_line
+                while (line.strip() == '' or _indent > indent):
+                    lineno += 1
+                    if lineno >= total_lines:
+                        break
+                    line = lines[lineno]
+                    _indent = len(line) - len(line.lstrip())
+    
+                insert_after_line = lineno - 1
+                line = lines[insert_after_line]
+                while line.strip() == '':
+                    insert_after_line -= 1
+                    line = lines[insert_after_line]
+            
+            to_insert = ''
+            if kv_str == '':
+                to_insert = type(widget).__name__ + ':'
+            else:
+                to_insert = kv_str.strip()
+    
+            if insert_after_line == total_lines - 1:
+                #if inserting at the last line
+                _line_pos = len(self.text) - 1
+                self.text = self.text[:_line_pos + 1] + '\n' + \
+                    get_indent_str(indent + 4) + to_insert
+            else:
+                #inserting somewhere else
+                insert_after_line -= 1
+                _line = 0
+                _line_pos = -1
+                _line_pos = self.text.find('\n', _line_pos + 1)
+                while _line <= insert_after_line:
+                    _line_pos = self.text.find('\n', _line_pos + 1)
+                    _line += 1
+    
+                self.text = self.text[:_line_pos] + '\n' + \
+                    get_indent_str(indent + 4) + to_insert + \
+                    self.text[_line_pos:]
+
+        else:
+            #widget is a root widget
+            print 'adding', type(widget).__name__
+            parent_lineno = 0
+            self.cursor = (0, 0)
+            type_name = type(widget).__name__
+            is_class = False
+            for rule in self.project_loader.class_rules:
+                if rule.name == type_name:
+                    is_class = True
+                    break
+
+            if not is_class:
+                self.insert_text(type_name+':\n')
+
+            self.project_loader.set_root_widget(type_name, widget)
+
     def get_widget_text_pos_from_kv(self, widget, parent):
         '''To get start and end pos of widget's rule in kv text
         '''
@@ -146,7 +175,7 @@ class KVLangArea(DesignerCodeInput):
         lines = text.splitlines()
         total_lines = len(lines)
         root_lineno = 0
-        root_name = App.get_running_app().root.project_loader.root_rule.name
+        root_name = self.project_loader.root_rule.name
         for lineno, line in enumerate(lines):
             pos = line.find(root_name)
             if pos != -1 and get_indentation(line) == 0:
@@ -199,12 +228,24 @@ class KVLangArea(DesignerCodeInput):
         '''This function is called when widget is removed from parent.
            It will delete widget's rule from parent's rule
         '''
+        self._reload = False
 
-        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent)
-        text = self.text[start_pos:end_pos]
-        self.text = self.text[:start_pos] + self.text[end_pos:]
+        delete_from_kv = False
+        if type(widget).__name__ == self.project_loader.root_rule.name:
+            #If root widget is being deleted then delete its rule only if 
+            #it is not in class rules.
 
-        return text
+            if not self.project_loader.is_root_a_class_rule():
+                delete_from_kv = True
+
+        else:
+            delete_from_kv = True
+
+        if delete_from_kv:
+            start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent)
+            text = self.text[start_pos:end_pos]
+            self.text = self.text[:start_pos] + self.text[end_pos:]
+            return text
 
     def _get_widget_from_path(self, path):
         '''This function is used to get widget given its path
@@ -221,7 +262,7 @@ class KVLangArea(DesignerCodeInput):
         widget = root
         path_length = len(path)
 
-        while path_index < path_length:
+        while widget.children != [] and path_index < path_length:
             try:
                 widget = widget.children[len(widget.children) -
                                          1 - path[path_index]]
@@ -246,12 +287,15 @@ class KVLangArea(DesignerCodeInput):
         if not self._reload:
             self._reload = True
             return
+        
+        print 'on_text'
+        return
 
         statusbar = App.get_running_app().root.statusbar
 
         reload_kv_str = False
 
-        root_name = App.get_running_app().root.project_loader.root_rule.name
+        root_name = self.project_loader.root_rule.name
         total_lines = len(lines)
         root_lineno = 0
         for lineno, line in enumerate(lines):
@@ -331,7 +375,7 @@ class KVLangArea(DesignerCodeInput):
         if reload_kv_str:
             #A widget is added or removed
             playground = self.playground
-            project_loader = App.get_running_app().root.project_loader
+            project_loader = self.project_loader
 
             #Find which class rule has been modified
             changed_class_str = ''
@@ -355,7 +399,8 @@ class KVLangArea(DesignerCodeInput):
                 root_str += lines[end_line] + '\n'
                 end_line += 1
 
-            try:
+            #try:
+            if True:
                 widget = project_loader.reload_from_str(root_str,
                                                         changed_class_str,
                                                         changed_class_rule)
@@ -364,10 +409,12 @@ class KVLangArea(DesignerCodeInput):
                     playground.remove_widget_from_parent(playground.root,
                                                          None, from_kv=True)
                     playground.add_widget_to_parent(widget, None, from_kv=True)
+
                 statusbar.show_message("")
                 self.have_error = False
 
-            except:
+            #except:
+            else:
                 self.have_error = True
                 statusbar.show_message("Cannot reload from text")
 
@@ -434,6 +481,8 @@ class KVLangArea(DesignerCodeInput):
         
         #Do not add property if value is empty and 
         #property is not a string property
+        
+        self._reload = False
         if not isinstance(widget.properties()[prop], StringProperty) and\
             value == '':
             return
@@ -445,7 +494,7 @@ class KVLangArea(DesignerCodeInput):
         lines = re.sub(r'#.+', '', self.text).splitlines()
         total_lines = len(lines)
 
-        root_name = App.get_running_app().root.project_loader.root_rule.name
+        root_name = self.project_loader.root_rule.name
         total_lines = len(lines)
         root_lineno = 0
         for lineno, line in enumerate(lines):
