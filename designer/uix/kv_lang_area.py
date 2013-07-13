@@ -287,9 +287,6 @@ class KVLangArea(DesignerCodeInput):
         if not self._reload:
             self._reload = True
             return
-        
-        print 'on_text'
-        return
 
         statusbar = App.get_running_app().root.statusbar
 

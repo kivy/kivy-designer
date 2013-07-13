@@ -1043,7 +1043,7 @@ class ProjectLoader(object):
         root_widget = Builder.load_string(root_str)
 
         if not root_widget:
-            root_widget = self.get_root_widget()
+            root_widget = self.get_widget_of_class(self.root_rule.name)
 
         if not root_widget:
             root_name = root_str[:root_str.find('\n')]
@@ -1090,7 +1090,7 @@ class ProjectLoader(object):
         '''
         
         if self.root_rule and self.root_rule.name != '':
-            return self.get_widget_of_class(self.root_rule.name)
+            return self.root_rule.widget
 
         if self._app_file == None:
             return None

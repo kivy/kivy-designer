@@ -352,7 +352,7 @@ class Designer(FloatLayout):
 
         with self.ui_creator.playground.sandbox:
             try:
-                self.project_loader.load_project('/home/abhi/kivy_designer/test/test3/main.kv')
+                self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -389,6 +389,7 @@ class Designer(FloatLayout):
                 self.project_loader.record()
                 self.designer_content.update_tree_view(self.project_loader)
                 self._add_designer_content()
+
             except Exception as e:
                 self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
 
