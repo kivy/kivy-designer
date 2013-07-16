@@ -89,6 +89,7 @@ class ProjectLoader(object):
         self.kv_code_input = None
         self.tab_pannel = None
         self._root_rule = None
+        self.file_list = []
 
     def _get_file_list(self, path):
         '''This function is recursively called for loading all py file files

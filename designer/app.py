@@ -31,6 +31,7 @@ from designer.recent_manager import RecentManager, RecentDialog
 from designer.add_file import AddFileDialog
 from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
+from designer.kivy_console import KivyConsole
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
@@ -766,6 +767,31 @@ class Designer(FloatLayout):
 
         self._popup.open()
 
+    def action_btn_console_pressed(self, *args):
+        if not hasattr(self, '_kivy_console'):
+            self._kivy_console = KivyConsole()
+        
+        if self._kivy_console.parent:
+            self._kivy_console.parent = None
+
+        self._popup = Popup(title='Kivy Console', content=self._kivy_console,
+                            size_hint=(0.5, 0.5))
+        
+        self._popup.open()
+
+    def action_btn_run_project_pressed(self, *args):
+        if self.project_loader.file_list == []:
+            return
+
+        self.action_btn_console_pressed()
+        for _file in self.project_loader.file_list:
+            if 'main.py' in os.path.basename(_file):
+                self._kivy_console.stdin.write('python %s'%_file)
+                return
+
+        self._kivy_console.stdin.write('python %s'%
+                                       self.project_loader._app_file)
+
 
 class DesignerApp(App):
 
@@ -812,7 +838,7 @@ class DesignerApp(App):
             os.mkdir(get_kivy_designer_dir())        
 
     def create_draggable_element(self, widgetname, touch):
-        '''Create PlagrounfDragElement and make it draggable 
+        '''Create PlagroundDragElement and make it draggable 
            until the touch is released also search default args if exist
         '''
 

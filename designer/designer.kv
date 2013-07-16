@@ -609,7 +609,21 @@
                     text: 'Add File'
                     minimum_width: 90
                     on_press: root.action_btn_add_file_pressed()
+            
+            ActionGroup:
+                text: 'Run'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'Open Console'
+                    minimum_width: 150
+                    on_press: root.action_btn_console_pressed()
 
+                ActionButton:
+                    text: 'Run Project'
+                    minimum_width: 150
+                    on_press: root.action_btn_run_project_pressed()
     StatusBar:
         id: statusbar
         size_hint_y: None
