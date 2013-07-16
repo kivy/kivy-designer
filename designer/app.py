@@ -31,7 +31,7 @@ from designer.recent_manager import RecentManager, RecentDialog
 from designer.add_file import AddFileDialog
 from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
-from designer.kivy_console import KivyConsole
+from designer.uix.kivy_console import KivyConsole
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
