@@ -31,7 +31,7 @@ from designer.recent_manager import RecentManager, RecentDialog
 from designer.add_file import AddFileDialog
 from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
-from designer.uix.kivy_console import KivyConsole
+from designer.kivy_console import KivyConsole
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
@@ -41,51 +41,63 @@ def get_kivy_designer_dir():
 
 class Designer(FloatLayout):
     '''Designer is the Main Window class of Kivy Designer
+       :data:`message` is a :class:`~kivy.properties.StringProperty`
     '''
 
     statusbar = ObjectProperty(None)
-    '''Reference to the StatusBar instance.
+    '''Reference to the :class:`~designer.statusbar.StatusBar` instance.
+       :data:`statusbar` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     editcontview = ObjectProperty(None)
-    '''Reference to the EditContView instance.
+    '''Reference to the :class:`~designer.uix.EditContView` instance.
+       :data:`v` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     actionbar = ObjectProperty(None)
-    '''Reference to the ActionBar instance. ActionBar is used as a ManuBar to
-       display bunch of menu items.
+    '''Reference to the :class:`~kivy.actionbar.ActionBar` instance. 
+       ActionBar is used as a MenuBar to display bunch of menu items.
+       :data:`actionbar` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     undo_manager = ObjectProperty(UndoManager())
-    '''Reference to the UndoManager instance.
+    '''Reference to the :class:`~designer.UndoManager` instance.
+       :data:`undo_manager` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     project_watcher = ObjectProperty(None)
-    '''Reference to the ProjectWatcher.
+    '''Reference to the :class:`~designer.project_watcher.ProjectWatcher`.
+       :data:`project_watcher` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     project_loader = ObjectProperty(None)
-    '''Reference to the ProjectLoader.
+    '''Reference to the :class:`~designer.project_loader.ProjectLoader`.
+       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     _curr_proj_changed = BooleanProperty(False)
     '''Specifies whether current project has been changed inside Kivy Designer
+       :data:`_curr_proj_changed` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     _proj_modified_outside = BooleanProperty(False)
     '''Specifies whether current project has been changed outside Kivy Designer
+       :data:`_proj_modified_outside` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     ui_creator = ObjectProperty(None)
-    '''Reference to UICreator instance.
+    '''Reference to :class:`~designer.ui_creator.UICreator` instance.
+       :data:`ui_creator` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     designer_content = ObjectProperty(None)
-    '''Reference to DesignerContent instance.
+    '''Reference to :class:`~designer.designer_content.DesignerContent` instance.
+       :data:`designer_content` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     proj_tree_view = ObjectProperty(None)
     '''Reference to Project Tree instance
+       :data:`proj_tree_view` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     def __init__(self, **kwargs):

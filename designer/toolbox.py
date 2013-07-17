@@ -8,17 +8,21 @@ from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.metrics import pt
 
 class ToolboxCategory(AccordionItem):
-    '''ToolboxCategory is responsible for grouping and showing ToolboxButton
+    '''ToolboxCategory is responsible for grouping and showing 
+       :class:`~designer.toolbox.ToolboxButton`
        of same class into one category.
     '''
 
     gridlayout = ObjectProperty(None)
-    '''An instance of GridLayout.
+    '''An instance of :class:`~kivy.uix.gridlayout.GridLayout`.
+       :data:`gridlayout` is an
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
 class ToolboxButton(Button):
-    '''ToolboxButton is a subclass of Button, to display class of Widgets in
-       ToolboxCategory.
+    '''ToolboxButton is a subclass of :class:`~kivy.uix.button.Button`, 
+       to display class of Widgets in
+       :class:`~designer.toolbox.ToolboxCategory`.
     '''
 
     def __init__(self, **kwargs):
@@ -40,11 +44,16 @@ class Toolbox(BoxLayout):
     '''
 
     accordion = ObjectProperty()
-    '''An instance to Accordion, used to show Widgets in their groups.
+    '''An instance to :class:`~kivy.uix.accordion.Accordion`, 
+       used to show Widgets in their groups.
+       :data:`accordion` is an
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     app = ObjectProperty()
     '''An instance to the current running app.
+       :data:`app` is an
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     def __init__(self, **kwargs):

@@ -15,6 +15,7 @@ class DesignerCodeInput(CodeInput):
     clicked  = BooleanProperty(False)
     '''If clicked is True, then it confirms that this widget has been clicked.
        The one checking this property, should set it to False.
+       :data:`clicked` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     def on_show_edit(self, *args):

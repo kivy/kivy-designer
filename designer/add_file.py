@@ -17,15 +17,19 @@ class AddFileDialog(BoxLayout):
 
     text_file = ObjectProperty()
     '''An instance to TextInput showing file path to be added.
+       :data:`text_file` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     text_folder = ObjectProperty()
     '''An instance to TextInput showing folder where file has to be added.
+       :data:`text_folder` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     always_check = ObjectProperty()
-    '''An instance to CheckBox, which will determine whether same folder will
-       be used for all files of same type or not.
+    '''An instance to :class:`~kivy.uix.checkbox.CheckBox`, which will 
+       determine whether same folder will be used for all files of 
+       same type or not.
+       :data:`always_check` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     __events__ = ('on_cancel', 'on_added', 'on_error')

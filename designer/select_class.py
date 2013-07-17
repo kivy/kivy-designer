@@ -13,19 +13,23 @@ class SelectClass(BoxLayout):
     '''
 
     listview = ObjectProperty(None)
-    '''The ListView used for showing file paths.
+    ''':class:`~kivy.uix.listview.ListView` used for showing file paths.
+       :data:`listview` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     select_button = ObjectProperty(None)
-    '''Button used to select the list item.
+    ''':class:`~kivy.uix.button.Button` used to select the list item.
+       :data:`select_button` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     cancel_button = ObjectProperty(None)
-    '''Button to cancel the dialog.
+    ''':class:`~kivy.uix.button.Button` to cancel the dialog.
+       :data:`cancel_button` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     adapter = ObjectProperty(None)
-    '''ListAdapter used for selecting files.
+    ''':class:`~kivy.uix.listview.ListAdapter` used for selecting files.
+       :data:`adapter` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     __events__=('on_select', 'on_cancel')

@@ -13,16 +13,19 @@ class WidgetsTree(ScrollView):
        Tree hierarchy.
     '''
     playground = ObjectProperty(None)
-    '''This property is an instance of Playground
+    '''This property is an instance of :class:`~designer.playground.Playground`
+       :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     tree = ObjectProperty(None)
-    '''This property is an instance of TreeView. This TreeView is responsible
-       for showing Root Widget's Tree.
+    '''This property is an instance of :class:`~kivy.uix.treeview.TreeView`.
+       This TreeView is responsible for showing Root Widget's Tree.
+       :data:`tree` is a :class:`~kivy.properties.ObjectProperty`
     '''
     
     project_loader = ObjectProperty()
-    '''Reference to ProjectLoader instance.
+    '''Reference to :class:`~designer.project_loader.ProjectLoader` instance.
+       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     def recursive_insert(self, node, treenode):

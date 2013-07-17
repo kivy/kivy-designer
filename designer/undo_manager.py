@@ -30,7 +30,8 @@ class WidgetOperation(OperationBase):
         self.kv_str = kv_str
 
     def do_undo(self):
-        '''Override of OperationBase.do_undo. This will undo a WidgetOperation.
+        '''Override of :class:`OperationBase`.do_undo.
+           This will undo a WidgetOperation.
         '''
         if self.widget_op_type == 'add':
             self.playground.remove_widget_from_parent(self.widget, True)
@@ -42,7 +43,8 @@ class WidgetOperation(OperationBase):
                                                  kv_str=self.kv_str)
 
     def do_redo(self):
-        '''Override of OperationBase.do_redo. This will redo a WidgetOperation.
+        '''Override of :class:`OperationBase`.do_redo.
+           This will redo a WidgetOperation.
         '''
 
         if self.widget_op_type == 'remove':
@@ -65,7 +67,8 @@ class PropOperation(OperationBase):
         self.newvalue = newvalue
 
     def do_undo(self):
-        '''Override of OperationBase.do_undo. This will undo a PropOperation.
+        '''Override of :class:`OperationBase`.do_undo.
+           This will undo a PropOperation.
         '''
 
         setattr(self.prop.propwidget, self.prop.propname, self.oldvalue)
@@ -82,7 +85,8 @@ class PropOperation(OperationBase):
             self.prop.active = value
 
     def do_redo(self):
-        '''Override of OperationBase.do_redo. This will redo a PropOperation.
+        '''Override of :class:`OperationBase`.do_redo.
+           This will redo a PropOperation.
         '''
 
         setattr(self.prop.propwidget, self.prop.propname, self.newvalue)

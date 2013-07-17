@@ -12,6 +12,7 @@ class ConfirmationDialog(BoxLayout):
 
     message = StringProperty('')
     '''It is the message to be shown
+       :data:`message` is a :class:`~kivy.properties.StringProperty`
     '''
 
     __events__ = ('on_ok', 'on_cancel')

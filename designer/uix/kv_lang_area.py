@@ -19,15 +19,22 @@ class KVLangArea(DesignerCodeInput):
     have_error = BooleanProperty(False)
     '''This property specifies whether KVLangArea has encountered an error
        in reload in the edited text by user or not.
+       :data:`can_place` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     _reload = BooleanProperty(False)
+    '''Specifies whether to reload kv or not.
+       :data:`_reload` is a :class:`~kivy.properties.BooleanProperty`
+    '''
+
     playground = ObjectProperty()
-    '''Reference to Playground
+    '''Reference to :class:`~designer.playground.Playground`
+       :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
     '''
     
     project_loader = ObjectProperty()
-    '''Reference to ProjectLoader
+    '''Reference to :class:`~designer.project_loader.ProjectLoader`
+       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     def _get_widget_path(self, widget):

@@ -9,10 +9,12 @@ class ActionCheckButton(ActionItem, BoxLayout):
     '''ActionCheckButton is a check button displaying text with a checkbox
     '''
     checkbox = ObjectProperty(None)
-    '''Instance of CheckBox.
+    '''Instance of :class:`~kivy.uix.checkbox.CheckBox`.
+       :data:`checkbox` is a :class:`~kivy.properties.StringProperty`
     '''
     text = StringProperty('Check Button')
     '''text which is displayed by ActionCheckButton.
+       :data:`text` is a :class:`~kivy.properties.StringProperty`
     '''
 
     __events__ = ('on_active',)

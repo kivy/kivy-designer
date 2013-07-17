@@ -14,17 +14,22 @@ class DesignerContent(FloatLayout):
     '''
 
     ui_creator = ObjectProperty(None)
-    '''This property refers to the UICreator instance. As there can only be one
+    '''This property refers to the :class:`~designer.ui_creator.UICreator`
+       instance. As there can only be one
+       :data:`ui_creator` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     tree_view = ObjectProperty(None)
     '''This property refers to Project Tree. Project Tree displays project's 
        py files under its parent directories. Clicking on any of the file will
        open it up for editing.
+       :data:`tree_view` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     tab_pannel = ObjectProperty(None)
-    '''This property refers to the instance of DesignerTabbedPanel.
+    '''This property refers to the instance of 
+       :class:`~designer.designer_content.DesignerTabbedPanel`.
+       :data:`tab_pannel` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     def update_tree_view(self, proj_loader):
@@ -114,11 +119,13 @@ class DesignerContent(FloatLayout):
 
 class DesignerTabbedPanel(TabbedPanel):
     '''DesignerTabbedPanel is used to display files opened up in tabs with 
-       UICreator Tab as a special one containing all features to edit the UI.
+       :class:`~designer.ui_creator.UICreator`
+       Tab as a special one containing all features to edit the UI.
     '''
 
     list_py_code_inputs = ListProperty([])
     '''This list contains reference to all the PyCodeInput's opened till now
+       :data:`list_py_code_inputs` is a :class:`~kivy.properties.ListProperty`
     '''
     
     def open_file(self, path, rel_path):

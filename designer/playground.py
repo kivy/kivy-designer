@@ -15,12 +15,24 @@ from designer.undo_manager import WidgetOperation
 
 class PlaygroundDragElement(BoxLayout):
     '''An instance of this class is the drag element shown when user tries to
-       add a widget to Playground by dragging from Toolbox to Playground.
+       add a widget to :class:`~designer.playground.Playground` by dragging
+       from :class:`~designer.toolbox.Toolbox` to 
+       :class:`~designer.playground.Playground`.
     '''
 
     playground = ObjectProperty()
+    '''Reference to the :class:`~designer.playground.Playground`
+       :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
     target = ObjectProperty(allownone=True)
+    '''Widget where widget is to be added.
+       :data:`target` a :class:`~kivy.properties.ObjectProperty`
+    '''
     can_place = BooleanProperty(False)
+    '''Whether widget can be added or not.
+       :data:`can_place` is a :class:`~kivy.properties.BooleanProperty`
+    '''
 
     def on_touch_move(self, touch):
         '''This is responsible for moving the drag element and showing where
@@ -60,27 +72,38 @@ class Playground(ScatterPlane):
 
     root = ObjectProperty(allownone=True)
     '''This property represents the root widget.
+       :data:`root` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     selection_mode = BooleanProperty(True)
+    '''
+       :data:`can_place` is a :class:`~kivy.properties.BooleanProperty`
+    '''
 
     tree = ObjectProperty()
 
     clicked = BooleanProperty(False)
-    '''This property represents whether Playground has been clicked or not
+    '''This property represents whether 
+       :class:`~designer.playground.Playground` has been clicked or not
+       :data:`clicked` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     sandbox = ObjectProperty(None)
     '''This property represents the sandbox widget which is added to
-       Playground.
+       :class:`~designer.playground.Playground`.
+       :data:`sandbox` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     kv_code_input = ObjectProperty()
-    '''This property refers to the UICreator's KVLangArea.
+    '''This property refers to the 
+       :class:`~designer.ui_creator.UICreator`'s KVLangArea.
+       :data:`kv_code_input` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     widgettree = ObjectProperty()
-    '''This property refers to the UICreator's WidgetTree.
+    '''This property refers to the
+       :class:`~designer.ui_creator.UICreator`'s WidgetTree.
+       :data:`widgettree` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     __events__ = ('on_show_edit',)
@@ -303,10 +326,14 @@ class Playground(ScatterPlane):
         return False
     
     def _keyboard_released(self, *args):
+        '''Called when self.keyboard is released
+        '''
         self.keyboard.unbind(on_key_down=self._on_keyboard_down)
         self.keyboard = None
     
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        '''Called when a key on keyboard is pressed
+        '''
         if modifiers != [] and modifiers[-1] == 'ctrl':
             if keycode[1] == 'c':
                 self.do_copy()
@@ -330,12 +357,18 @@ class Playground(ScatterPlane):
             self.do_delete()
     
     def do_undo(self):
+        '''Undoes the last operation
+        '''
         self.undo_manager.do_undo()
     
     def do_redo(self):
+        '''Undoes the last operation
+        '''
         self.undo_manager.do_redo()
 
     def do_copy(self):
+        '''Copy the selected widget
+        '''
         base_widget = self.selected_widget
         if base_widget:
             self.widget_to_paste = type(base_widget)()
@@ -349,6 +382,8 @@ class Playground(ScatterPlane):
                 get_widget_text_from_kv(base_widget, None)
     
     def do_paste(self):
+        '''Paste the selected widget to the current widget
+        '''
         parent = self.selected_widget
         if parent and self.widget_to_paste:
 
@@ -363,6 +398,8 @@ class Playground(ScatterPlane):
                 self.widget_to_paste = None
     
     def do_cut(self):
+        '''Cuts the selected widget
+        '''
         base_widget = self.selected_widget
 
         if base_widget:
@@ -373,10 +410,14 @@ class Playground(ScatterPlane):
             self.remove_widget_from_parent(base_widget)
     
     def do_select_all(self):
+        '''Select All widgets which basically means selecting root widget
+        '''
         self.selected_widget = self.root
         App.get_running_app().focus_widget(self.root)
     
     def do_delete(self):
+        '''Delete the selected widget
+        '''
         if self.selected_widget:
             self.remove_widget_from_parent(self.selected_widget)
 

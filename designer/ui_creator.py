@@ -8,43 +8,59 @@ class UICreator(FloatLayout):
     '''
 
     toolbox = ObjectProperty(None)
-    '''Reference to the Toolbox instance.
+    '''Reference to the :class:`~designer.toolbox.Toolbox` instance.
+       :data:`toolbox` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     propertyviewer = ObjectProperty(None)
-    '''Reference to the PropertyViewer instance.
+    '''Reference to the :class:`~designer.propertyviewer.PropertyViewer` instance.
+       :data:`propertyviewer` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     playground = ObjectProperty(None)
-    '''Reference to the Playground instance.
+    '''Reference to the :class:`~designer.playground.Playground` instance.
+       :data:`playground` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     widgettree = ObjectProperty(None)
-    '''Reference to the WidgetsTree instance.
+    '''Reference to the :class:`~designer.nodetree.WidgetsTree` instance.
+       :data:`widgettree` is an :class:`~kivy.properties.ObjectProperty`
     '''
    
     kv_code_input = ObjectProperty(None)
-    '''Reference to the KVLangArea instance.
+    '''Reference to the :class:`~designer.uix.KVLangArea` instance.
+       :data:`kv_code_input` is an 
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     splitter_toolbox = ObjectProperty(None)
     '''Reference to the splitter parent of toolbox.
+       :data:`splitter_toolbox` is an 
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     splitter_kv_code_input = ObjectProperty(None)
     '''Reference to the splitter parent of kv_code_input.
+       :data:`splitter_kv_code_input` is an 
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     grid_widget_tree = ObjectProperty(None)
     '''Reference to the grid parent of widgettree.
+       :data:`grid_widget_tree` is an 
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     splitter_property = ObjectProperty(None)
     '''Reference to the splitter parent of propertyviewer.
+       :data:`splitter_property` is an 
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     splitter_widget_tree = ObjectProperty(None)
     '''Reference to the splitter parent of widgettree.
+       :data:`splitter_widget_tree` is an
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     def __init__(self, **kwargs):

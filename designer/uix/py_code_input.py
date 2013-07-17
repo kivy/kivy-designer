@@ -13,12 +13,15 @@ class PyCodeInput(DesignerCodeInput):
     rel_file_path = StringProperty('')
     '''Path of file relative to the Project Directory.
        To get full path of file, use os.path.join
+       :data:`rel_file_path` is a :class:`~kivy.properties.StringProperty`
     '''
 
 class PyScrollView(ScrollView):
-    '''PyScrollView used as a ScrollView for adding PyCodeInput.
+    '''PyScrollView used as a :class:`~kivy.scrollview.ScrollView`
+       for adding :class:`~designer.uix.py_code_input.PyCodeInput`.
     '''
 
     code_input = ObjectProperty()
-    '''Reference to the PyCodeInput
+    '''Reference to the :class:`~designer.uix.py_code_input.PyCodeInput`.
+       :data:`code_input` is a :class:`~kivy.properties.ObjectProperty`
     '''
