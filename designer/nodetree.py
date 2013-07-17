@@ -45,7 +45,6 @@ class WidgetsTree(ScrollView):
         for rule in class_rules:
             if rule.name == type(node).__name__:
                 is_child_custom = True
-                print rule.name, 'is custom'
                 break
 
         if root_widget == node or not is_child_custom:

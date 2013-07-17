@@ -11,7 +11,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
 from kivy.base import runTouchApp
-from kivy.factory import Factory
+from kivy.factory import Factory, FactoryException
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
 from kivy.uix.sandbox import Sandbox
@@ -251,7 +251,7 @@ class ProjectLoader(object):
         self.class_rules = []
         all_files_loaded = True
         _file = None
-
+        
         for _file in os.listdir(self.proj_dir):
             #Load each kv file in the directory
             _file = os.path.join(self.proj_dir, _file)
@@ -269,18 +269,32 @@ class ProjectLoader(object):
                 kv_string = kv_string.replace(app_str, 
                                               app_str[:get_indentation(app_str)]
                                               + '#' + app_str.lstrip())
+            
+            #Get all the class_rules
+            for class_str in re.findall(r'<+([\w_]+)>', kv_string):
+                class_rule = ClassRule(class_str)
+                class_rule.kv_file = _file
+                self.class_rules.append(class_rule)
+
             try:
+                root_name = re.findall(r'^([\w\d_]+)\:', kv_string,
+                                        re.MULTILINE)
+                if root_name != []:
+                    #It will occur when there is a root rule and it can't
+                    #be loaded by Builder because the its file has been imported
+                    root_name = root_name[0]
+                    if not hasattr(Factory, root_name):
+                        match = re.search(r'^([\w\d_]+)\:', kv_string,
+                                          re.MULTILINE)
+                        kv_string = kv_string[:match.start()]+'<'+root_name+'>:'+kv_string[match.end():]
+                        self.root_rule = RootRule(root_name, None)
+                        self.root_rule.kv_file = _file
+
                 root_rule = Builder.load_string(kv_string)
                 if root_rule:
                     self.root_rule = RootRule(root_rule.__class__.__name__,
                                               root_rule)
                     self.root_rule.kv_file = _file
-    
-                #Get all the class_rules
-                for class_str in re.findall(r'<+([\w_]+)>', kv_string):
-                    class_rule = ClassRule(class_str)
-                    class_rule.kv_file = _file
-                    self.class_rules.append(class_rule)
 
             except Exception as e:
                 all_files_loaded = False
@@ -377,9 +391,16 @@ class ProjectLoader(object):
 
         if self.file_list == []:
              self.file_list = self._get_file_list(self.proj_dir)
-
+        
         #Get all files corresponding to each class
         self._get_class_files()
+        
+        #If root widget is not created but root class is known 
+        #then create widget
+        if self.root_rule and not self.root_rule.widget and self.root_rule.name:
+            self.root_rule.widget = self.get_widget_of_class(
+                self.root_rule.name)
+
         self.load_proj_config()
 
     def load_proj_config(self):
@@ -876,7 +897,7 @@ class ProjectLoader(object):
                 self._app_file = _file
 
             for _rule in to_find[:]:
-                if _rule.file != None:
+                if _rule.file:
                     continue
 
                 if re.search(r'\bclass\s*%s+.+:'%(_rule.name), s):
@@ -892,7 +913,8 @@ class ProjectLoader(object):
 
         #Root Widget may be in Factory not in file
         if self.root_rule:
-            if hasattr(Factory, self.root_rule.name):
+            if not self.root_rule.file and\
+                hasattr(Factory, self.root_rule.name):
                 to_find.remove(self.root_rule)
 
         #to_find should be empty, if not some class's files are not detected
