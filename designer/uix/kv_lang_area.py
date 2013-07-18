@@ -6,6 +6,7 @@ from kivy.properties import BooleanProperty, StringProperty,\
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.factory import Factory
+from kivy.clock import Clock
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
@@ -36,6 +37,11 @@ class KVLangArea(DesignerCodeInput):
     '''Reference to :class:`~designer.project_loader.ProjectLoader`
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    def __init__(self, **kwargs):
+        super(KVLangArea, self).__init__(**kwargs)
+        self._reload_trigger = Clock.create_trigger(self.reload_kv, 1)
+        self.bind(text=self._reload_trigger)
 
     def _get_widget_path(self, widget):
         '''To get path of a widget, path of a widget is a list containing 
@@ -154,7 +160,6 @@ class KVLangArea(DesignerCodeInput):
 
         else:
             #widget is a root widget
-            print 'adding', type(widget).__name__
             parent_lineno = 0
             self.cursor = (0, 0)
             type_name = type(widget).__name__
@@ -280,10 +285,7 @@ class KVLangArea(DesignerCodeInput):
         
         return widget
 
-    def on_text(self, *args):
-        '''This function is called whenever text changes
-        '''
-
+    def reload_kv(self, *args):
         if self.text == '':
             return
         
