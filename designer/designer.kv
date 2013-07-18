@@ -240,6 +240,7 @@
             spacing: '3sp'
             size_hint_y: None
             size: root.size
+            height: self.minimum_height
     
 <ToolboxButton>:
     size_hint_y: None
@@ -344,7 +345,7 @@
 
     TreeView:
         id: tree
-        height: 1000
+        height: self.minimum_height
         size_hint_y: None
         hide_root: True
         on_selected_node: app.focus_widget(args[1].node)
