@@ -33,12 +33,6 @@ class UICreator(FloatLayout):
        :class:`~kivy.properties.ObjectProperty`
     '''
 
-    splitter_toolbox = ObjectProperty(None)
-    '''Reference to the splitter parent of toolbox.
-       :data:`splitter_toolbox` is an 
-       :class:`~kivy.properties.ObjectProperty`
-    '''
-
     splitter_kv_code_input = ObjectProperty(None)
     '''Reference to the splitter parent of kv_code_input.
        :data:`splitter_kv_code_input` is an 

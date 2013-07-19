@@ -18,6 +18,22 @@ class DesignerContent(FloatLayout):
        instance. As there can only be one
        :data:`ui_creator` is a :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    tree_toolbox_tab_panel = ObjectProperty(None)
+    '''TabbedPanel containing Toolbox and Project Tree. Instance of 
+       :class: `~designer.designer_content.DesignerTabbedPanel`
+    '''
+
+    splitter_tree = ObjectProperty(None)
+    '''Reference to the splitter parent of tree_toolbox_tab_panel.
+       :data:`splitter_toolbox` is an 
+       :class:`~kivy.properties.ObjectProperty`
+    '''
+    
+    toolbox = ObjectProperty(None)
+    '''Reference to the :class:`~designer.toolbox.Toolbox` instance.
+       :data:`toolbox` is an :class:`~kivy.properties.ObjectProperty`
+    '''
 
     tree_view = ObjectProperty(None)
     '''This property refers to Project Tree. Project Tree displays project's 

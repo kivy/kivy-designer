@@ -357,8 +357,6 @@
 
 <UICreator>:
     kv_code_input: code_input
-    toolbox: toolbox
-    splitter_toolbox: splitter_toolbox
     splitter_kv_code_input: splitter_kv
     grid_widget_tree: grid_widget_tree
     splitter_property: splitter_property
@@ -371,7 +369,6 @@
         height: root.height
         pos: root.pos
         cols: 1
-        splitter_toolbox: splitter_toolbox
         splitter_widget_tree: splitter_widget_tree
 
         FloatLayout:
@@ -399,8 +396,8 @@
                 size_hint_x: None
                 height: 200
                 max_size: 500
-                x: root.x + splitter_toolbox.width
-                width: root.width - splitter_toolbox.width - splitter_widget_tree.width
+                x: root.x
+                width: root.width - splitter_widget_tree.width
                 y: root.y
                     
                 ScrollView:
@@ -409,39 +406,7 @@
                         id: code_input
                         size_hint_y: None
                         height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
-                        on_show_edit: root.on_show_edit()
-
-            Splitter:
-                id: splitter_toolbox
-                sizable_from: 'right'
-                min_size: 150
-                size_hint: None, 1
-                width: 150
-                pos_hint: {'y': 0, 'x': 0}
-                GridLayout:
-                    cols: 1
-                    canvas:
-                        Color:
-                            rgb: bgcolor
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-
-                    Label:
-                        text: 'Toolbox'
-                        font_size: '10pt'
-                        height: '20pt'
-                        size_hint_y: None
-
-                        canvas.before:
-                            Color:
-                                rgb: titlecolor
-                            Rectangle:
-                                pos: self.pos
-                                size: self.size
-
-                    Toolbox:
-                        id: toolbox
+                        on_show_edit: root.on_show_edit()                
 
             Splitter:
                 id: splitter_widget_tree
@@ -495,31 +460,9 @@
     ui_creator: ui_creator
     tree_view: tree_view
     tab_pannel: tab_panel
-
-    Splitter:
-        id: splitter_tree
-        pos: root.pos
-        size_hint_x: None
-        sizable_from: 'right'
-        min_size: 170
-        width: 170
-        GridLayout:
-            cols: 1
-            spacing: .5
-            Label:
-                canvas.before:
-                    Color:
-                        rgb: titlecolor
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
-                text: 'Project Tree'
-                font_size: '10pt'
-                height: '20pt'
-                size_hint_y: None
-            TreeView:
-                id: tree_view
-                size_hint: 1, 1
+    toolbox: toolbox
+    splitter_tree: splitter_tree
+    tree_toolbox_tab_panel: tree_toolbox_tab_panel
 
     DesignerTabbedPanel:
         id: tab_panel
@@ -534,6 +477,27 @@
             text: 'UI Creator'
             UICreator:
                 id: ui_creator
+
+    Splitter:
+        id: splitter_tree
+        pos: root.pos
+        size_hint_x: None
+        sizable_from: 'right'
+        min_size: 170
+        width: 170
+        DesignerTabbedPanel:
+            id: tree_toolbox_tab_panel
+            do_default_tab: False
+            DesignerTabbedPanelItem:
+                text: 'Project Tree'
+                TreeView:
+                    id: tree_view
+                    size_hint: 1, 1
+            
+            DesignerTabbedPanelItem:
+                text: 'Toolbox'
+                Toolbox:
+                    id: toolbox
 
 <Designer>:
     statusbar: statusbar
@@ -581,8 +545,8 @@
                 size_hint_x: None
                 width: 90
                 ActionCheckButton:
-                    text: 'Toolbox'
-                    minimum_width: 150
+                    text: 'Project Tree and Toolbox'
+                    minimum_width: 200
                     on_active: root.action_chk_btn_toolbox_active(self)
                 ActionCheckButton:
                     text: 'Property Viewer'

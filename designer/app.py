@@ -275,7 +275,7 @@ class Designer(FloatLayout):
         self.project_loader.cleanup()
         self.ui_creator.playground.cleanup()
         self.undo_manager.cleanup()
-        self.ui_creator.toolbox.cleanup()
+        self.designer_content.toolbox.cleanup()
 
         for node in self.proj_tree_view.root.nodes[:]:
             self.proj_tree_view.remove_node(node)
@@ -371,7 +371,7 @@ class Designer(FloatLayout):
                     for i, _rule in enumerate(self.project_loader.class_rules):
                         widgets.append((_rule.name, 'custom'))
             
-                    self.ui_creator.toolbox.add_custom()
+                    self.designer_content.toolbox.add_custom()
 
                 #to test listview
                 #root_wigdet = None
@@ -633,11 +633,11 @@ class Designer(FloatLayout):
             try:
                 self.project_loader.add_custom_widget(file_path)
 
-                self.ui_creator.toolbox.cleanup()
+                self.designer_content.toolbox.cleanup()
                 for _rule in (self.project_loader.custom_widgets):
                     widgets.append((_rule.name, 'custom'))
 
-                self.ui_creator.toolbox.add_custom()
+                self.designer_content.toolbox.add_custom()
 
             except ProjectLoaderException as e:
                 self.statusbar.show_message('Cannot load widget. %s'%str(e))
@@ -647,13 +647,14 @@ class Designer(FloatLayout):
         '''
 
         if chk_btn.checkbox.active:
-            self._toolbox_parent.add_widget(self.ui_creator.splitter_toolbox)
-            self.ui_creator.splitter_toolbox.width = self._toolbox_width
+            self._toolbox_parent.add_widget(self.designer_content.splitter_tree)
+            self.designer_content.splitter_tree.width = self._toolbox_width
+
         else:
-            self._toolbox_parent = self.ui_creator.splitter_toolbox.parent
-            self._toolbox_parent.remove_widget(self.ui_creator.splitter_toolbox)
-            self._toolbox_width = self.ui_creator.splitter_toolbox.width
-            self.ui_creator.splitter_toolbox.width = 0
+            self._toolbox_parent = self.designer_content.splitter_tree.parent
+            self._toolbox_parent.remove_widget(self.designer_content.splitter_tree)
+            self._toolbox_width = self.designer_content.splitter_tree.width
+            self.designer_content.splitter_tree.width = 0
 
     def action_chk_btn_property_viewer_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Property Viewer" is activated.
