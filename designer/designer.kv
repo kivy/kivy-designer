@@ -4,6 +4,27 @@
 #:set titlecolor (.34, .39, .40)
 #:import KivyLexer kivy.extras.highlight.KivyLexer
 
+<ConsoleDialog>:
+    error_console: error_console
+    kivy_console: kivy_console
+    DesignerTabbedPanel:
+        id: tab_panel
+        do_default_tab: False
+        DesignerTabbedPanelItem:
+            text: 'Kivy Console'
+            KivyConsole:
+                id: kivy_console
+
+        DesignerTabbedPanelItem:
+            text: 'Error Console'
+            ScrollView:
+                id: scroll
+                CodeInput:
+                    id: error_console
+                    size_hint_y: None
+                    height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
+                    text: ''
+    
 <PyScrollView>:
     id: scroll
     code_input: code_input
@@ -198,7 +219,8 @@
             points: [0, 0, self.width, 0, self.width, self.height, 0, self.height]
             width: 2.
             close: True
-    Sandbox:
+
+    DesignerSandbox:
         id: sandbox
         size: root.size
         pos: root.pos

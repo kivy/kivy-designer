@@ -4,6 +4,7 @@ import kivy
 import time
 import os
 import shutil
+import traceback
 
 kivy.require('1.4.1')
 from kivy.app import App
@@ -31,7 +32,8 @@ from designer.recent_manager import RecentManager, RecentDialog
 from designer.add_file import AddFileDialog
 from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
-from designer.uix.kivy_console import KivyConsole
+from designer.uix.designer_sandbox import DesignerSandbox
+from designer.designer_console import ConsoleDialog
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
@@ -42,6 +44,10 @@ def get_kivy_designer_dir():
 class Designer(FloatLayout):
     '''Designer is the Main Window class of Kivy Designer
        :data:`message` is a :class:`~kivy.properties.StringProperty`
+    '''
+    
+    designer_console = ObjectProperty(None)
+    '''Instance of :class:`designer.designer_console.ConsoleDialog`
     '''
 
     statusbar = ObjectProperty(None)
@@ -107,6 +113,7 @@ class Designer(FloatLayout):
         self.recent_manager = RecentManager()
         self.widget_to_paste = None
         self.designer_content = DesignerContent(size_hint=(1, None))
+        self.designer_console = ConsoleDialog()
 
         Clock.schedule_interval(self.project_loader.perform_auto_save,
                                 AUTO_SAVE_TIMEOUT)
@@ -364,8 +371,11 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.ui_creator.playground.sandbox:
-            try:
-                self.project_loader.load_project(file_path)
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
+            #try:
+                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
+                #self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -403,8 +413,8 @@ class Designer(FloatLayout):
                 self.designer_content.update_tree_view(self.project_loader)
                 self._add_designer_content()
 
-            except Exception as e:
-                self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
+            #except Exception as e:
+            #    self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content
@@ -781,29 +791,44 @@ class Designer(FloatLayout):
         self._popup.open()
 
     def action_btn_console_pressed(self, *args):
-        if not hasattr(self, '_kivy_console'):
-            self._kivy_console = KivyConsole()
-        
-        if self._kivy_console.parent:
-            self._kivy_console.parent = None
+        '''Event Handler when ActionButton "Open Console" is pressed.
+        '''
+        if self.designer_console.parent:
+            self.designer_console.parent = None
 
-        self._popup = Popup(title='Kivy Console', content=self._kivy_console,
+        self._popup = Popup(title='Console', content=self.designer_console,
                             size_hint=(0.5, 0.5))
-        
+
         self._popup.open()
 
     def action_btn_run_project_pressed(self, *args):
+        '''Event Handler when ActionButton "Run" is pressed.
+        '''
         if self.project_loader.file_list == []:
             return
 
         self.action_btn_console_pressed()
         for _file in self.project_loader.file_list:
             if 'main.py' in os.path.basename(_file):
-                self._kivy_console.stdin.write('python %s'%_file)
+                self.designer_console.kivy_console.stdin.write('python %s'%_file)
                 return
 
-        self._kivy_console.stdin.write('python %s'%
-                                       self.project_loader._app_file)
+        self.designer_console.kivy_console.stdin.write('python %s'%
+                                                       self.project_loader._app_file)
+    
+    def on_sandbox_getting_exception(self, *args):
+        '''Event Handler for 
+           :class:`~designer.uix.designer_sandbox.DesignerSandbox`
+           on_getting_exception event. This function will add exception 
+           string in error_console.
+        '''
+        s = traceback.format_list(traceback.extract_tb(
+            self.ui_creator.playground.sandbox.tb))
+        s = '\n'.join(s)
+        to_insert = "Exception:\n" + s + '\n' + \
+            "{!r}".format(self.ui_creator.playground.sandbox.exception)
+        text = self.designer_console.error_console.text + to_insert + '\n\n'
+        self.designer_console.error_console.text = text
 
 
 class DesignerApp(App):
@@ -817,7 +842,8 @@ class DesignerApp(App):
         Factory.register('PropertyViewer', module='designer.propertyviewer')
         Factory.register('WidgetsTree', module='designer.nodetree')
         Factory.register('UICreator', module='designer.ui_creator')
-        Factory.register('DesignerContent', module='designer.designer_content') 
+        Factory.register('DesignerContent', module='designer.designer_content')
+        Factory.register('KivyConsole', module='designer.uix.kivy_console')
 
         self.create_kivy_designer_dir()
         self._widget_focused = None
@@ -838,6 +864,9 @@ class DesignerApp(App):
         self.root.ui_creator.widgettree.project_loader = self.root.project_loader
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)
+        
+        self.root.ui_creator.playground.sandbox.bind(on_getting_exception=
+            self.root.on_sandbox_getting_exception)
 
         self.bind(widget_focused=
                   self.root.ui_creator.propertyviewer.setter('widget'))

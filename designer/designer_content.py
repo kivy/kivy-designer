@@ -21,7 +21,7 @@ class DesignerContent(FloatLayout):
     
     tree_toolbox_tab_panel = ObjectProperty(None)
     '''TabbedPanel containing Toolbox and Project Tree. Instance of 
-       :class: `~designer.designer_content.DesignerTabbedPanel`
+       :class:`~designer.designer_content.DesignerTabbedPanel`
     '''
 
     splitter_tree = ObjectProperty(None)
