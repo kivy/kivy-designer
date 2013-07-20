@@ -371,11 +371,8 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.ui_creator.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
-            #try:
-                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
-                #self.project_loader.load_project(file_path)
+            try:
+                self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -413,8 +410,8 @@ class Designer(FloatLayout):
                 self.designer_content.update_tree_view(self.project_loader)
                 self._add_designer_content()
 
-            #except Exception as e:
-            #    self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
+            except Exception as e:
+                self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content
@@ -891,7 +888,7 @@ class DesignerApp(App):
         
         container = self.root.ui_creator.playground.get_playground_drag_element(widgetname, touch, **default_args)
         if container:
-            self.root.ui_creator.add_widget(container)
+            self.root.add_widget(container)
         else:
             self.root.statusbar.show_message("Cannot create %s"%widgetname)
 
