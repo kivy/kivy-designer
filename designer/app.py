@@ -790,6 +790,13 @@ class Designer(FloatLayout):
     def action_btn_console_pressed(self, *args):
         '''Event Handler when ActionButton "Open Console" is pressed.
         '''
+        self._open_console()
+        self.designer_console.tab_pannel.switch_to(
+            self.designer_console.tab_pannel.tab_list[1])
+    
+    def _open_console(self):
+        '''To open designer_console
+        '''
         if self.designer_console.parent:
             self.designer_console.parent = None
 
@@ -813,6 +820,13 @@ class Designer(FloatLayout):
         self.designer_console.kivy_console.stdin.write('python %s'%
                                                        self.project_loader._app_file)
     
+    def action_btn_error_console_pressed(self, *args):
+        '''Event Handler when ActionButton "Open Error Console" is pressed.
+        '''
+        self._open_console()
+        self.designer_console.tab_pannel.switch_to(
+            self.designer_console.tab_pannel.tab_list[0])
+
     def on_sandbox_getting_exception(self, *args):
         '''Event Handler for 
            :class:`~designer.uix.designer_sandbox.DesignerSandbox`

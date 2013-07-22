@@ -7,8 +7,9 @@
 <ConsoleDialog>:
     error_console: error_console
     kivy_console: kivy_console
+    tab_pannel: tab_pannel
     DesignerTabbedPanel:
-        id: tab_panel
+        id: tab_pannel
         do_default_tab: False
         DesignerTabbedPanelItem:
             text: 'Kivy Console'
@@ -611,6 +612,12 @@
                     text: 'Run Project'
                     minimum_width: 150
                     on_press: root.action_btn_run_project_pressed()
+                
+                ActionButton:
+                    text: 'Open Error Console'
+                    minimum_width: 150
+                    on_press: root.action_btn_error_console_pressed()
+
     StatusBar:
         id: statusbar
         size_hint_y: None
