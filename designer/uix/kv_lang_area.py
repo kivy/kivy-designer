@@ -142,6 +142,7 @@ class KVLangArea(DesignerCodeInput):
             if insert_after_line == total_lines - 1:
                 #if inserting at the last line
                 _line_pos = len(self.text) - 1
+                
                 self.text = self.text[:_line_pos + 1] + '\n' + \
                     get_indent_str(indent + 4) + to_insert
             else:
@@ -153,7 +154,7 @@ class KVLangArea(DesignerCodeInput):
                 while _line <= insert_after_line:
                     _line_pos = self.text.find('\n', _line_pos + 1)
                     _line += 1
-    
+
                 self.text = self.text[:_line_pos] + '\n' + \
                     get_indent_str(indent + 4) + to_insert + \
                     self.text[_line_pos:]
@@ -358,7 +359,7 @@ class KVLangArea(DesignerCodeInput):
                         value = value.replace('"','').replace("'","")
 
                     else:
-                        return
+                        reload_kv_str = True
 
                     setattr(widget, prop, value)
                     self.have_error = False
