@@ -3,28 +3,6 @@
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
 #:import KivyLexer kivy.extras.highlight.KivyLexer
-
-<ConsoleDialog>:
-    error_console: error_console
-    kivy_console: kivy_console
-    tab_pannel: tab_pannel
-    DesignerTabbedPanel:
-        id: tab_pannel
-        do_default_tab: False
-        DesignerTabbedPanelItem:
-            text: 'Kivy Console'
-            KivyConsole:
-                id: kivy_console
-
-        DesignerTabbedPanelItem:
-            text: 'Error Console'
-            ScrollView:
-                id: scroll
-                CodeInput:
-                    id: error_console
-                    size_hint_y: None
-                    height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
-                    text: ''
     
 <PyScrollView>:
     id: scroll
@@ -387,6 +365,9 @@
     propertyviewer: propertyviewer
     playground: playground
     widgettree: widgettree
+    error_console: error_console
+    kivy_console: kivy_console
+    tab_pannel: tab_pannel
 
     GridLayout:
         height: root.height
@@ -418,19 +399,40 @@
                 size_hint_y: None
                 size_hint_x: None
                 height: 200
+                min_size: 150
                 max_size: 500
                 x: root.x
                 width: root.width - splitter_widget_tree.width
                 y: root.y
+                
+                DesignerTabbedPanel:
+                    id: tab_pannel
+                    do_default_tab: False
+                    DesignerTabbedPanelItem:
+                        text: 'KV Lang Area'
+                        ScrollView:
+                            id: scroll
+                            KVLangArea:
+                                id: code_input
+                                size_hint_y: None
+                                height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
+                                on_show_edit: root.on_show_edit()
                     
-                ScrollView:
-                    id: scroll
-                    KVLangArea:
-                        id: code_input
-                        size_hint_y: None
-                        height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
-                        on_show_edit: root.on_show_edit()                
-
+                    DesignerTabbedPanelItem:
+                        text: 'Kivy Console'
+                        KivyConsole:
+                            id: kivy_console
+        
+                    DesignerTabbedPanelItem:
+                        text: 'Error Console'
+                        ScrollView:
+                            id: e_scroll
+                            CodeInput:
+                                id: error_console
+                                size_hint_y: None
+                                height: max(e_scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
+                                text: ''
+   
             Splitter:
                 id: splitter_widget_tree
                 size_hint_x: None
@@ -603,20 +605,11 @@
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
-                ActionButton:
-                    text: 'Open Console'
-                    minimum_width: 150
-                    on_press: root.action_btn_console_pressed()
 
                 ActionButton:
                     text: 'Run Project'
                     minimum_width: 150
                     on_press: root.action_btn_run_project_pressed()
-                
-                ActionButton:
-                    text: 'Open Error Console'
-                    minimum_width: 150
-                    on_press: root.action_btn_error_console_pressed()
 
     StatusBar:
         id: statusbar

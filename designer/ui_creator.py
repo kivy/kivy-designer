@@ -56,6 +56,20 @@ class UICreator(FloatLayout):
        :data:`splitter_widget_tree` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    error_console = ObjectProperty(None)
+    '''Instance of :class:`~kivy.uix.codeinput.CodeInput` used for displaying
+       exceptions.
+    '''
+
+    kivy_console = ObjectProperty(None)
+    '''Instance of :class:`~designer.uix.kivy_console.KivyConsole`.
+    '''
+    
+    tab_pannel = ObjectProperty(None)
+    '''Instance of :class:`~designer.designer_content.DesignerTabbedPanel`
+       containing error_console, kivy_console and kv_lang_area 
+    '''
 
     def __init__(self, **kwargs):
         super(UICreator, self).__init__(**kwargs)

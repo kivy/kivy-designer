@@ -12,6 +12,7 @@ class DesignerSandbox(Sandbox):
         self.exception = exception
         self.tb = tb
         self.dispatch('on_getting_exception')
+        print 'exception'
         return super(DesignerSandbox, self).on_exception(exception, tb)
     
     def on_getting_exception(self, *args):

@@ -33,7 +33,6 @@ from designer.add_file import AddFileDialog
 from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
 from designer.uix.designer_sandbox import DesignerSandbox
-from designer.designer_console import ConsoleDialog
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
@@ -113,7 +112,6 @@ class Designer(FloatLayout):
         self.recent_manager = RecentManager()
         self.widget_to_paste = None
         self.designer_content = DesignerContent(size_hint=(1, None))
-        self.designer_console = ConsoleDialog()
 
         Clock.schedule_interval(self.project_loader.perform_auto_save,
                                 AUTO_SAVE_TIMEOUT)
@@ -787,45 +785,23 @@ class Designer(FloatLayout):
 
         self._popup.open()
 
-    def action_btn_console_pressed(self, *args):
-        '''Event Handler when ActionButton "Open Console" is pressed.
-        '''
-        self._open_console()
-        self.designer_console.tab_pannel.switch_to(
-            self.designer_console.tab_pannel.tab_list[1])
-    
-    def _open_console(self):
-        '''To open designer_console
-        '''
-        if self.designer_console.parent:
-            self.designer_console.parent = None
-
-        self._popup = Popup(title='Console', content=self.designer_console,
-                            size_hint=(0.5, 0.5))
-
-        self._popup.open()
-
     def action_btn_run_project_pressed(self, *args):
         '''Event Handler when ActionButton "Run" is pressed.
         '''
         if self.project_loader.file_list == []:
             return
 
-        self.action_btn_console_pressed()
         for _file in self.project_loader.file_list:
             if 'main.py' in os.path.basename(_file):
-                self.designer_console.kivy_console.stdin.write('python %s'%_file)
+                self.ui_creator.kivy_console.stdin.write('python %s'%_file)
+                self.ui_creator.tab_pannel.switch_to(
+                    self.ui_creator.tab_pannel.tab_list[1])
                 return
 
-        self.designer_console.kivy_console.stdin.write('python %s'%
-                                                       self.project_loader._app_file)
-    
-    def action_btn_error_console_pressed(self, *args):
-        '''Event Handler when ActionButton "Open Error Console" is pressed.
-        '''
-        self._open_console()
-        self.designer_console.tab_pannel.switch_to(
-            self.designer_console.tab_pannel.tab_list[0])
+        self.ui_creator.kivy_console.stdin.write('python %s'%
+                                                 self.project_loader._app_file)
+        self.ui_creator.tab_pannel.switch_to(
+            self.ui_creator.tab_pannel.tab_list[1])
 
     def on_sandbox_getting_exception(self, *args):
         '''Event Handler for 
@@ -833,13 +809,14 @@ class Designer(FloatLayout):
            on_getting_exception event. This function will add exception 
            string in error_console.
         '''
+
         s = traceback.format_list(traceback.extract_tb(
             self.ui_creator.playground.sandbox.tb))
         s = '\n'.join(s)
         to_insert = "Exception:\n" + s + '\n' + \
             "{!r}".format(self.ui_creator.playground.sandbox.exception)
-        text = self.designer_console.error_console.text + to_insert + '\n\n'
-        self.designer_console.error_console.text = text
+        text = self.ui_creator.error_console.text + to_insert + '\n\n'
+        self.ui_creator.error_console.text = text
 
 
 class DesignerApp(App):
@@ -855,6 +832,7 @@ class DesignerApp(App):
         Factory.register('UICreator', module='designer.ui_creator')
         Factory.register('DesignerContent', module='designer.designer_content')
         Factory.register('KivyConsole', module='designer.uix.kivy_console')
+        Factory.register('DesignerContent', module='designer.uix.designer_sandbox')
 
         self.create_kivy_designer_dir()
         self._widget_focused = None

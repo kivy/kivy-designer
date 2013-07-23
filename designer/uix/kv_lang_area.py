@@ -405,8 +405,7 @@ class KVLangArea(DesignerCodeInput):
                 root_str += lines[end_line] + '\n'
                 end_line += 1
 
-            #try:
-            if True:
+            try:
                 widget = project_loader.reload_from_str(root_str,
                                                         changed_class_str,
                                                         changed_class_rule)
@@ -419,8 +418,7 @@ class KVLangArea(DesignerCodeInput):
                 statusbar.show_message("")
                 self.have_error = False
 
-            #except:
-            else:
+            except:
                 self.have_error = True
                 statusbar.show_message("Cannot reload from text")
 
