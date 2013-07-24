@@ -33,6 +33,7 @@ from designer.add_file import AddFileDialog
 from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
 from designer.uix.designer_sandbox import DesignerSandbox
+from designer.project_settings import ProjectSettings
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
@@ -79,7 +80,9 @@ class Designer(FloatLayout):
     '''Reference to the :class:`~designer.project_loader.ProjectLoader`.
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
-
+    
+    proj_settings = ObjectProperty(None)
+    
     _curr_proj_changed = BooleanProperty(False)
     '''Specifies whether current project has been changed inside Kivy Designer
        :data:`_curr_proj_changed` is a :class:`~kivy.properties.BooleanProperty`
@@ -784,22 +787,41 @@ class Designer(FloatLayout):
                             size=(400, 300), auto_dismiss=False)
 
         self._popup.open()
+    
+    def action_btn_project_pref_pressed(self, *args):
+        '''Event Handler when ActionButton "Project Prefences" is pressed.
+        '''
+        self.proj_settings = ProjectSettings(proj_loader=self.project_loader)
+        self.proj_settings.load_proj_settings()
+        self.proj_settings.bind(on_close=self._cancel_popup)
+        self._popup = Popup(title="Project Preferences",
+                            content = self.proj_settings,
+                            size_hint=(None, None), 
+                            size=(600, 400), auto_dismiss=False)
+
+        self._popup.open()
 
     def action_btn_run_project_pressed(self, *args):
         '''Event Handler when ActionButton "Run" is pressed.
         '''
         if self.project_loader.file_list == []:
             return
+        
+        if self.proj_settings.config_parser:
+            args = self.proj_settings.config_parser.getdefault('arguments', 'arg', '')
+            envs = self.proj_settings.config_parser.getdefault('env variables', 'env', '')
+            for env in envs.split(' '):
+                self.ui_creator.kivy_console.environment[env[:env.find('=')]] = env[env.find('=')+1:]
 
         for _file in self.project_loader.file_list:
             if 'main.py' in os.path.basename(_file):
-                self.ui_creator.kivy_console.stdin.write('python %s'%_file)
+                self.ui_creator.kivy_console.stdin.write('python %s %s'%(_file, args))
                 self.ui_creator.tab_pannel.switch_to(
                     self.ui_creator.tab_pannel.tab_list[1])
                 return
 
-        self.ui_creator.kivy_console.stdin.write('python %s'%
-                                                 self.project_loader._app_file)
+        self.ui_creator.kivy_console.stdin.write('python %s %s'%
+                                                 (self.project_loader._app_file, args))
         self.ui_creator.tab_pannel.switch_to(
             self.ui_creator.tab_pannel.tab_list[1])
 
@@ -817,7 +839,8 @@ class Designer(FloatLayout):
             "{!r}".format(self.ui_creator.playground.sandbox.exception)
         text = self.ui_creator.error_console.text + to_insert + '\n\n'
         self.ui_creator.error_console.text = text
-
+        self.ui_creator.tab_pannel.switch_to(
+            self.ui_creator.tab_pannel.tab_list[0])
 
 class DesignerApp(App):
 

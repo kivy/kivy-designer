@@ -22,7 +22,7 @@ from designer.proj_watcher import ProjectWatcher
 
 PROJ_DESIGNER = '.designer'
 KV_PROJ_FILE_NAME = os.path.join(PROJ_DESIGNER, 'kvproj')
-PROJ_CONFIG = os.path.join(PROJ_DESIGNER, 'config.ini')
+PROJ_FILE_CONFIG = os.path.join(PROJ_DESIGNER, 'file_config.ini')
 
 class Comment(object):
     
@@ -409,7 +409,7 @@ class ProjectLoader(object):
         '''
 
         try:
-            f = open(os.path.join(self.proj_dir, PROJ_CONFIG), 'r')
+            f = open(os.path.join(self.proj_dir, PROJ_FILE_CONFIG), 'r')
             s = f.read()
             f.close()
             
