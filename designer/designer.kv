@@ -420,13 +420,24 @@
                     do_default_tab: False
                     DesignerTabbedPanelItem:
                         text: 'KV Lang Area'
-                        ScrollView:
-                            id: scroll
-                            KVLangArea:
-                                id: code_input
+                        BoxLayout:
+                            orientation: 'vertical'
+                            ScrollView:
+                                id: scroll
+                                KVLangArea:
+                                    id: code_input
+                                    size_hint_y: None
+                                    height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
+                                    on_show_edit: root.on_show_edit()
+                            
+                            Button:
                                 size_hint_y: None
-                                height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
-                                on_show_edit: root.on_show_edit()
+                                size_hint_x: 0.1
+                                height: '22pt'
+                                text: 'Reload'
+                                pos_hint: {'x': 0.9}
+                                on_release: root.reload_btn_pressed()
+                                
                     
                     DesignerTabbedPanelItem:
                         text: 'Kivy Console'

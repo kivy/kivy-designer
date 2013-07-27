@@ -75,6 +75,9 @@ class UICreator(FloatLayout):
         super(UICreator, self).__init__(**kwargs)
         Clock.schedule_once(self._setup_everything)
     
+    def reload_btn_pressed(self, *args):
+        self.kv_code_input.reload_kv()
+
     def on_touch_down(self, *args):
         if self.playground and self.playground.keyboard:
             self.playground.keyboard.release()

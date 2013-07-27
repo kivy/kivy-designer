@@ -373,11 +373,8 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.ui_creator.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
             try:
-                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
-                #self.project_loader.load_project(file_path)
+                self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
