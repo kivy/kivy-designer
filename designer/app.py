@@ -34,6 +34,7 @@ from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
 from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
+from designer.uix.placeholder import Placeholder
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
@@ -372,8 +373,11 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.ui_creator.playground.sandbox:
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
+            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
             try:
-                self.project_loader.load_project(file_path)
+                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
+                #self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -754,7 +758,7 @@ class Designer(FloatLayout):
             self._kv_area_height = self.ui_creator.splitter_kv_code_input.height
             self.ui_creator.splitter_kv_code_input.height = 0
             self._kv_area_parent.remove_widget(self.ui_creator.splitter_kv_code_input)
-    
+
     def _error_adding_file(self, *args):
         '''Event Handler for 'on_error' event of self._add_file_dlg
         '''
@@ -806,8 +810,10 @@ class Designer(FloatLayout):
         '''
         if self.project_loader.file_list == []:
             return
+        args = ''
+        envs = ''
         
-        if self.proj_settings.config_parser:
+        if self.proj_settings and self.proj_settings.config_parser:
             args = self.proj_settings.config_parser.getdefault('arguments', 'arg', '')
             envs = self.proj_settings.config_parser.getdefault('env variables', 'env', '')
             for env in envs.split(' '):
@@ -856,6 +862,7 @@ class DesignerApp(App):
         Factory.register('DesignerContent', module='designer.designer_content')
         Factory.register('KivyConsole', module='designer.uix.kivy_console')
         Factory.register('DesignerContent', module='designer.uix.designer_sandbox')
+        Factory.register('Placeholder', module='designer.uix.placeholder')
 
         self.create_kivy_designer_dir()
         self._widget_focused = None
@@ -891,21 +898,33 @@ class DesignerApp(App):
         if not os.path.exists(get_kivy_designer_dir()):
             os.mkdir(get_kivy_designer_dir())        
 
-    def create_draggable_element(self, widgetname, touch):
+    def create_draggable_element(self, widgetname, touch, widget=None):
         '''Create PlagroundDragElement and make it draggable 
            until the touch is released also search default args if exist
         '''
+        container = None
+        if not widget:
+            default_args = {}
+            for options in widgets:
+                if len(options) > 2:
+                    default_args = options[2]
+            
+            container = self.root.ui_creator.playground.\
+                get_playground_drag_element(widgetname, touch, **default_args)
 
-        default_args = {}
-        for options in widgets:
-            if len(options) > 2:
-                default_args = options[2]
-        
-        container = self.root.ui_creator.playground.get_playground_drag_element(widgetname, touch, **default_args)
+        else:
+            container = PlaygroundDragElement(playground=self.root.ui_creator.playground)
+            container.add_widget(widget)
+            touch.grab(container)
+            container.center_x = touch.x
+            container.y = touch.y + 20
+
         if container:
             self.root.add_widget(container)
         else:
             self.root.statusbar.show_message("Cannot create %s"%widgetname)
+        
+        return container
 
     def focus_widget(self, widget, *largs):
         '''Called when a widget is select in Playground. It will also draw

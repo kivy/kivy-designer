@@ -1,0 +1,14 @@
+[
+    {
+        "type": "string",
+        "title": "Arguments",
+        "section": "arguments",
+        "key": "arg"
+    },
+    {
+        "type": "string",
+        "title": "Environment Variables",
+        "section": "env variables",
+        "key": "env"
+    }
+]

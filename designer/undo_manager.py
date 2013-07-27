@@ -23,7 +23,7 @@ class WidgetOperation(OperationBase):
 
     def __init__(self, widget_op_type, widget, parent, playground, kv_str):
         super(WidgetOperation, self).__init__('widget')
-        self.widget_op_type  = widget_op_type
+        self.widget_op_type = widget_op_type
         self.parent = parent
         self.widget = widget
         self.playground = playground
@@ -55,6 +55,35 @@ class WidgetOperation(OperationBase):
             self.playground.add_widget_to_parent(self.widget, self.parent,
                                                  from_undo=True,
                                                  kv_str=self.kv_str)
+
+class WidgetDragOperation(OperationBase):
+
+    def __init__(self, widget, cur_parent, prev_parent, prev_index, playground, extra_args):
+        self.widget = widget
+        self.cur_parent = cur_parent
+        self.prev_parent = prev_parent
+        self.prev_index = prev_index
+        self.playground = playground
+        self.cur_index = extra_args['index']
+        self.extra_args = extra_args
+
+    def do_undo(self):
+        self.cur_parent.remove_widget(self.widget)
+        self.playground.drag_wigdet(self.widget, self.prev_parent,
+                                    extra_args={'index': self.prev_index,
+                                                'prev_index': self.cur_index,
+                                                'x': self.extra_args['prev_x'],
+                                                'y': self.extra_args['prev_y']},
+                                    from_undo=True)
+
+    def do_redo(self):
+        self.prev_parent.remove_widget(self.widget)
+        self.playground.drag_wigdet(self.widget, self.cur_parent,
+                                    extra_args={'index': self.cur_index,
+                                                'prev_index': self.prev_index,
+                                                'x': self.extra_args['x'],
+                                                'y': self.extra_args['y']},
+                                    from_undo=True)
 
 class PropOperation(OperationBase):
     '''PropOperation class for Property Operations of changing property value

@@ -251,7 +251,7 @@ class ProjectLoader(object):
         self.class_rules = []
         all_files_loaded = True
         _file = None
-        
+
         for _file in os.listdir(self.proj_dir):
             #Load each kv file in the directory
             _file = os.path.join(self.proj_dir, _file)
@@ -289,12 +289,14 @@ class ProjectLoader(object):
                         kv_string = kv_string[:match.start()]+'<'+root_name+'>:'+kv_string[match.end():]
                         self.root_rule = RootRule(root_name, None)
                         self.root_rule.kv_file = _file
+                        self._root_rule = self.root_rule
 
                 root_rule = Builder.load_string(kv_string)
                 if root_rule:
                     self.root_rule = RootRule(root_rule.__class__.__name__,
                                               root_rule)
                     self.root_rule.kv_file = _file
+                    self._root_rule = self.root_rule
 
             except Exception as e:
                 all_files_loaded = False
@@ -391,11 +393,12 @@ class ProjectLoader(object):
 
         if self.file_list == []:
              self.file_list = self._get_file_list(self.proj_dir)
-        
+
         #Get all files corresponding to each class
+        print 'get_class_files'
         self._get_class_files()
         
-        #If root widget is not created but root class is known 
+        #If root widget is not created but root class is known
         #then create widget
         if self.root_rule and not self.root_rule.widget and self.root_rule.name:
             self.root_rule.widget = self.get_widget_of_class(
@@ -856,7 +859,6 @@ class ProjectLoader(object):
         '''To search through all detected class rules and find
            their python files and to search for app.
         '''
-
         if self._app_file == None:
             #Search for main.py
             for _file in self.file_list:
@@ -932,9 +934,10 @@ class ProjectLoader(object):
             import_from_s = True
 
         run_pos = s.rfind('().run()')
+
         if run_pos != -1:
             run_pos -= 1
-            while s[run_pos] != ' ':
+            while not s[run_pos].isspace():
                 run_pos -= 1
 
             i = run_pos - 1
@@ -1067,6 +1070,7 @@ class ProjectLoader(object):
 
         if not root_widget:
             root_widget = self.get_widget_of_class(self.root_rule.name)
+            self.root_rule.widget = root_widget
 
         if not root_widget:
             root_name = root_str[:root_str.find('\n')]

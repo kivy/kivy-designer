@@ -56,12 +56,51 @@ class KVLangArea(DesignerCodeInput):
 
         path_to_widget = []
         _widget = widget
-        while _widget != self.playground.sandbox:
+        while _widget and _widget != self.playground.sandbox:
             place = len(_widget.parent.children) - _widget.parent.children.index(_widget) - 1
             path_to_widget.append(place)
             _widget = _widget.parent
 
         return path_to_widget
+    
+    def shift_widget(self, widget, from_index):
+        '''This function will shift widget's kv str from one position
+           to another.
+        '''
+        path = self._get_widget_path(widget)
+        path.reverse()
+        prev_path = [x for x in path]
+        prev_path[-1] = len(widget.parent.children) - from_index - 1
+        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, 
+                                                              widget.parent,
+                                                              path_to_widget=\
+                                                              prev_path)
+        widget_text = self.text[start_pos:end_pos]
+
+        if widget.parent.children.index(widget) == 0:
+            self.text = self.text[:start_pos] + self.text[end_pos:]
+            self.add_widget_to_parent(widget, widget.parent, kv_str=widget_text)
+
+        else:
+            self.text = self.text[:start_pos] + self.text[end_pos:]
+            text = re.sub(r'#.+', '', self.text)
+            lines = text.splitlines()
+            total_lines = len(lines)
+            root_lineno = 0
+            root_name = self.project_loader.root_rule.name
+            for lineno, line in enumerate(lines):
+                pos = line.find(root_name)
+                if pos != -1 and get_indentation(line) == 0:
+                    root_lineno = lineno
+                    break
+            
+            next_widget_path = path
+            lineno = self._find_widget_place(next_widget_path, lines, 
+                                             total_lines,
+                                             root_lineno + 1)
+
+            self.cursor = (0, lineno)
+            self.insert_text(widget_text+'\n')
 
     def add_widget_to_parent(self, widget, target, kv_str=''):
         '''This function is called when widget is added to target.
@@ -81,7 +120,6 @@ class KVLangArea(DesignerCodeInput):
         if target:
             path_to_widget = self._get_widget_path(widget.parent)
             path_to_widget.reverse()
-            
 
             root_lineno = 0
             root_name = self.project_loader.root_rule.name
@@ -126,7 +164,7 @@ class KVLangArea(DesignerCodeInput):
                         break
                     line = lines[lineno]
                     _indent = len(line) - len(line.lstrip())
-    
+
                 insert_after_line = lineno - 1
                 line = lines[insert_after_line]
                 while line.strip() == '':
@@ -175,12 +213,13 @@ class KVLangArea(DesignerCodeInput):
 
             self.project_loader.set_root_widget(type_name, widget)
 
-    def get_widget_text_pos_from_kv(self, widget, parent):
+    def get_widget_text_pos_from_kv(self, widget, parent, path_to_widget=[]):
         '''To get start and end pos of widget's rule in kv text
         '''
-
-        path_to_widget = self._get_widget_path(widget)
-        path_to_widget.reverse()
+        
+        if not path_to_widget:
+            path_to_widget = self._get_widget_path(widget)
+            path_to_widget.reverse()
 
         #Go to widget's rule's line and determines all its rule's
         #and it's child if any. Then delete them
@@ -227,12 +266,12 @@ class KVLangArea(DesignerCodeInput):
 
         return widget_line_pos, delete_until_line_pos
     
-    def get_widget_text_from_kv(self, widget, parent): 
+    def get_widget_text_from_kv(self, widget, parent, path=[]): 
         '''This function will get a widget's text from KVLangArea's text given
            its parent.
         '''
 
-        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent)
+        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent, path=path)
         text = self.text[start_pos:end_pos]
 
         return text
@@ -412,9 +451,11 @@ class KVLangArea(DesignerCodeInput):
                                                         changed_class_rule)
 
                 if widget:
+                    print playground.root, 'rtrtrtrtrt',
                     playground.remove_widget_from_parent(playground.root,
                                                          None, from_kv=True)
                     playground.add_widget_to_parent(widget, None, from_kv=True)
+                    print widget, 'wwwwwwwwwwwwww'
 
                 statusbar.show_message("")
                 self.have_error = False
@@ -494,7 +535,7 @@ class KVLangArea(DesignerCodeInput):
 
         path_to_widget = self._get_widget_path(widget)
         path_to_widget.reverse()
-        
+
         #Go to the line where widget is declared
         lines = re.sub(r'#.+', '', self.text).splitlines()
         total_lines = len(lines)
@@ -562,6 +603,7 @@ class KVLangArea(DesignerCodeInput):
             self.cursor = (0, lineno)
 
         else:
+            print widget_lineno, path_to_widget
             #if not found then add property after the widgets line
             _line_start_pos = get_line_start_pos(self.text, widget_lineno)
             _line_end_pos = get_line_end_pos(self.text, widget_lineno)

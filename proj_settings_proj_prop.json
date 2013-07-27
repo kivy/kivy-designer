@@ -1,0 +1,8 @@
+[
+    {
+        "type": "string",
+        "title": "Project Name",
+        "section": "proj_name",
+        "key": "name"
+    }
+]
