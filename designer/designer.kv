@@ -194,7 +194,6 @@
         on_press: root.dispatch('on_add_custom')
 
 <Playground>:
-    sandbox: sandbox
     do_scale: False
     do_rotation: False
     size_hint: None, None
@@ -208,11 +207,6 @@
             points: [0, 0, self.width, 0, self.width, self.height, 0, self.height]
             width: 2.
             close: True
-
-    DesignerSandbox:
-        id: sandbox
-        size: root.size
-        pos: root.pos
 
 <PlaygroundDragElement>:
     size_hint: None, None

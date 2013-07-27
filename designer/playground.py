@@ -19,6 +19,7 @@ from designer.common import widgets
 from designer.tree import Tree
 from designer.undo_manager import WidgetOperation, WidgetDragOperation
 from designer.uix.placeholder import Placeholder
+from designer.uix.designer_sandbox import DesignerSandbox
 
 class PlaygroundDragElement(BoxLayout):
     '''An instance of this class is the drag element shown when user tries to
@@ -198,6 +199,14 @@ class Playground(ScatterPlane):
         self.selected_widget = None
         self.undo_manager = None
 
+    def on_pos(self, *args):
+        if self.sandbox:
+            self.sandbox.pos = self.pos
+        
+    def on_size(self, *args):
+        if self.sandbox:
+            self.sandbox.size = self.size
+
     def on_show_edit(self, *args):
         pass
 
@@ -207,9 +216,6 @@ class Playground(ScatterPlane):
 
         x, y = self.to_local(x, y)
         return self.find_target(x, y, self.root, widget)
-
-    def on_root(self, instance, value):
-        pass #self.tree.insert(value, None)
 
     def place_widget(self, widget, x, y, index = 0):
         '''This function is used to first determine the target where to add 

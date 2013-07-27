@@ -880,7 +880,14 @@ class DesignerApp(App):
         self.root.ui_creator.widgettree.project_loader = self.root.project_loader
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)
-        
+        self.root.ui_creator.playground.sandbox = DesignerSandbox()
+        self.root.ui_creator.playground.add_widget(
+            self.root.ui_creator.playground.sandbox)
+        self.root.ui_creator.playground.sandbox.pos = \
+            self.root.ui_creator.playground.pos
+        self.root.ui_creator.playground.sandbox.size = \
+            self.root.ui_creator.playground.size
+
         self.root.ui_creator.playground.sandbox.bind(on_getting_exception=
             self.root.on_sandbox_getting_exception)
 
