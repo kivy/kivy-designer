@@ -27,7 +27,9 @@ class KVLangArea(DesignerCodeInput):
     '''Specifies whether to reload kv or not.
        :data:`_reload` is a :class:`~kivy.properties.BooleanProperty`
     '''
-
+    
+    reload_kv = BooleanProperty(True)
+    
     playground = ObjectProperty()
     '''Reference to :class:`~designer.playground.Playground`
        :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
@@ -326,6 +328,9 @@ class KVLangArea(DesignerCodeInput):
         return widget
 
     def reload_kv(self, *args):
+        if not self.reload_kv:
+            return
+
         if self.text == '':
             return
         

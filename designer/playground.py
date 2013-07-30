@@ -231,7 +231,8 @@ class Playground(ScatterPlane):
 
         else:
             extra_args={'x': x, 'y': y, 'index': index}
-            self.add_widget_to_parent(widget, target, from_kv=True, from_undo=True, extra_args=extra_args)
+            self.add_widget_to_parent(widget, target, from_kv=True, 
+                                      from_undo=True, extra_args=extra_args)
     
     def drag_wigdet(self, widget, target, extra_args, from_undo=False):
         extra_args['prev_x'], extra_args['prev_y'] = \
@@ -256,7 +257,9 @@ class Playground(ScatterPlane):
                                         self.drag_operation[2],
                                         self, extra_args=extra_args))
 
-        elif isinstance(target, BoxLayout) or isinstance(target, AnchorLayout) :
+        elif isinstance(target, BoxLayout) or \
+            isinstance(target, AnchorLayout) or \
+            isinstance(target, GridLayout):
             target.add_widget(widget, extra_args['index'])
             self.from_drag = False
             added = True

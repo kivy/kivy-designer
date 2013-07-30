@@ -35,12 +35,10 @@ from designer.designer_content import DesignerContent
 from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
 from designer.uix.placeholder import Placeholder
+from designer.designer_settings import DesignerSettings
+from designer.helper_functions import get_kivy_designer_dir
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
-AUTO_SAVE_TIMEOUT = 300 #300 secs i.e. 5 mins
-
-def get_kivy_designer_dir():
-    return os.path.join(os.path.expanduser('~'), '.kivy-designer')
 
 class Designer(FloatLayout):
     '''Designer is the Main Window class of Kivy Designer
@@ -83,7 +81,10 @@ class Designer(FloatLayout):
     '''
     
     proj_settings = ObjectProperty(None)
-    
+    '''Reference of :class:`~designer.project_settings.ProjectSettings`.
+       :data:`proj_settings` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
     _curr_proj_changed = BooleanProperty(False)
     '''Specifies whether current project has been changed inside Kivy Designer
        :data:`_curr_proj_changed` is a :class:`~kivy.properties.BooleanProperty`
@@ -108,6 +109,11 @@ class Designer(FloatLayout):
     '''Reference to Project Tree instance
        :data:`proj_tree_view` is a :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    designer_settings = ObjectProperty(None)
+    '''Reference of :class:`~designer.designer_settings.DesignerSettings`.
+       :data:`designer_settings` is a :class:`~kivy.properties.ObjectProperty`
+    '''
 
     def __init__(self, **kwargs):
         super(Designer, self).__init__(**kwargs)
@@ -116,10 +122,33 @@ class Designer(FloatLayout):
         self.recent_manager = RecentManager()
         self.widget_to_paste = None
         self.designer_content = DesignerContent(size_hint=(1, None))
+        
+        self.designer_settings = DesignerSettings()
+        self.designer_settings.bind(on_config_change=self._config_change)
+        self.designer_settings.load_settings()
+        self.designer_settings.bind(on_close=self._cancel_popup)
 
         Clock.schedule_interval(self.project_loader.perform_auto_save,
-                                AUTO_SAVE_TIMEOUT)
-    
+                                int(self.designer_settings.config_parser.getdefault(
+                                    'global', 'auto_save_time', 5))*60)
+
+    def _config_change(self, *args):
+        '''Event Handler for 'on_config_change' event of self.designer_settings.
+        '''
+
+        Clock.unschedule(self.project_loader.perform_auto_save)
+        Clock.schedule_interval(self.project_loader.perform_auto_save,
+                                int(self.designer_settings.config_parser.getdefault(
+                                    'global', 'auto_save_time', 5))*60)
+
+        self.ui_creator.kv_code_input.reload_kv = \
+            bool(self.designer_settings.config_parser.getdefault(
+                 'global', 'reload_kv', True))
+
+        self.recent_manager.max_recent_files = \
+            int(self.designer_settings.config_parser.getdefault(
+                'global', 'num_recent_files', 5))
+
     def _add_designer_content(self):
         '''Add designer_content to Designer, when a project is loaded
         '''
@@ -476,6 +505,15 @@ class Designer(FloatLayout):
 
         except:
             self.statusbar.show_message('Cannot save project')
+    
+    def action_btn_settings_pressed(self, *args):
+        self.designer_settings.parent = None
+        self._popup = Popup(title="Kivy Designer Settings",
+                            content = self.designer_settings,
+                            size_hint=(None, None), 
+                            size=(600, 400), auto_dismiss=False)
+
+        self._popup.open()
 
     def action_btn_recent_files_pressed(self, *args):
         '''Event Handler when ActionButton "Recent Files" is pressed.
@@ -810,6 +848,15 @@ class Designer(FloatLayout):
         args = ''
         envs = ''
         
+        python_path = self.designer_settings.config_parser.getdefault(
+            'global', 'python_shell_path', '')
+        
+        if python_path == '':
+            self.statusbar.show_message("Python Shell Path not specified,"
+                                        " please specify it before running"
+                                        " project")
+            return
+
         if self.proj_settings and self.proj_settings.config_parser:
             args = self.proj_settings.config_parser.getdefault('arguments', 'arg', '')
             envs = self.proj_settings.config_parser.getdefault('env variables', 'env', '')
@@ -818,13 +865,17 @@ class Designer(FloatLayout):
 
         for _file in self.project_loader.file_list:
             if 'main.py' in os.path.basename(_file):
-                self.ui_creator.kivy_console.stdin.write('python %s %s'%(_file, args))
+                self.ui_creator.kivy_console.stdin.write('%s %s %s'%
+                                                         (python_path,
+                                                          _file, args))
                 self.ui_creator.tab_pannel.switch_to(
                     self.ui_creator.tab_pannel.tab_list[1])
                 return
 
-        self.ui_creator.kivy_console.stdin.write('python %s %s'%
-                                                 (self.project_loader._app_file, args))
+        self.ui_creator.kivy_console.stdin.write('%s %s %s'%
+                                                 (python_path, 
+                                                  self.project_loader._app_file,
+                                                  args))
         self.ui_creator.tab_pannel.switch_to(
             self.ui_creator.tab_pannel.tab_list[1])
 
@@ -844,6 +895,7 @@ class Designer(FloatLayout):
         self.ui_creator.error_console.text = text
         self.ui_creator.tab_pannel.switch_to(
             self.ui_creator.tab_pannel.tab_list[0])
+
 
 class DesignerApp(App):
 

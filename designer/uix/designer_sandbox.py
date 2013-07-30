@@ -7,6 +7,12 @@ class DesignerSandbox(Sandbox):
     '''
 
     __events__ = ('on_getting_exception',)
+    
+    def __exit__(self, _type, value, tb):
+        self._context.pop()
+        #print 'EXITING THE SANDBOX', (self, _type, value, tb)
+        if _type is not None:
+            return self.on_exception(value, tb=tb)
 
     def on_exception(self, exception, tb=None):
         self.exception = exception

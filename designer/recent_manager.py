@@ -5,14 +5,13 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
 from kivy.uix.listview import ListView, ListItemButton
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, NumericProperty
 from kivy.adapters.listadapter import ListAdapter
 
 def get_kivy_designer_dir():
     return os.path.join(os.path.expanduser('~'), '.kivy-designer')
 
 RECENT_FILES_NAME = 'recent_files'
-MAX_RECENT_FILES = 10
 recent_file_path = os.path.join(get_kivy_designer_dir(), RECENT_FILES_NAME)
 
 class RecentManager(object):
@@ -23,6 +22,7 @@ class RecentManager(object):
     def __init__(self):
         super(RecentManager, self).__init__()
         self.list_files = []
+        self.max_recent_files = 5
         self.load_files()
 
     def add_file(self, _file):
@@ -40,9 +40,9 @@ class RecentManager(object):
             self.list_files.remove(_file)
 
         self.list_files.insert(0, _file)
-        
-        #Recent files should not be greater than MAX_RECENT_FILES
-        while len(self.list_files) > MAX_RECENT_FILES:
+
+        #Recent files should not be greater than max_recent_files
+        while len(self.list_files) > self.max_recent_files:
             self.list_files.pop()
 
         self.store_files()

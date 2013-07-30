@@ -1,0 +1,26 @@
+[
+    {
+        "type": "string",
+        "title": "Python Shell Path",
+        "section": "global",
+        "key": "python_shell_path"
+    },
+    {
+        "type": "bool",
+        "title": "Reload KV Automatically",
+        "section": "global",
+        "key": "reload_kv"
+    },
+    {
+        "type": "numeric",
+        "title": "Number of Recent Files",
+        "section": "global",
+        "key": "num_recent_files"
+    },
+    {
+         "type": "numeric",
+         "title": "Auto Save current Project after every (in mins)",
+         "section": "global",
+         "key": "auto_save_time"
+    }
+]

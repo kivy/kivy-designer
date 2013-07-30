@@ -2,6 +2,8 @@
    module of Kivy Designer.
 '''
 
+import os
+
 def get_indent_str(indentation):
     '''Return a string consisting only indentation number of spaces
     '''
@@ -68,4 +70,8 @@ def get_indentation(string):
             return count
     
     return count
-    
+
+def get_kivy_designer_dir():
+    '''
+    '''
+    return os.path.join(os.path.expanduser('~'), '.kivy-designer')
