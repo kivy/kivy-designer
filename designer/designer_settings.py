@@ -10,8 +10,6 @@ from kivy.uix.button import Button
 from designer.helper_functions import get_kivy_designer_dir
 
 DESIGNER_CONFIG_FILE_NAME = 'config.ini'
-DESIGNER_CONFIG = os.path.join(get_kivy_designer_dir(),
-                               DESIGNER_CONFIG_FILE_NAME)
 
 class DesignerSettings(Settings):
     '''Subclass of :class:`kivy.uix.settings.Settings` responsible for 
@@ -27,12 +25,16 @@ class DesignerSettings(Settings):
         '''This function loads project settings
         '''
         self.config_parser = ConfigParser()
+        DESIGNER_CONFIG = os.path.join(get_kivy_designer_dir(),
+                                       DESIGNER_CONFIG_FILE_NAME)
+        
         if not os.path.exists(DESIGNER_CONFIG):
-            shutil.copy(DESIGNER_CONFIG_FILE_NAME, DESIGNER_CONFIG)
+            print os.path.join(os.getcwd(), DESIGNER_CONFIG_FILE_NAME)
+            shutil.copyfile(os.path.join(os.getcwd(), DESIGNER_CONFIG_FILE_NAME), DESIGNER_CONFIG)
         
         self.config_parser.read(DESIGNER_CONFIG)
         self.add_json_panel('Kivy Designer Settings', self.config_parser,
-                            'designer_settings.json')
+                            './designer/settings/designer_settings.json')
     
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.

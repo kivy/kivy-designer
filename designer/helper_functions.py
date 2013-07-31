@@ -4,6 +4,8 @@
 
 import os
 
+from kivy.app import App
+
 def get_indent_str(indentation):
     '''Return a string consisting only indentation number of spaces
     '''
@@ -72,6 +74,9 @@ def get_indentation(string):
     return count
 
 def get_kivy_designer_dir():
+    '''This function returns kivy-designer's config dir
     '''
-    '''
-    return os.path.join(os.path.expanduser('~'), '.kivy-designer')
+    user_dir = os.path.join(App.get_running_app().user_data_dir, '.kivy-designer')
+    if not os.path.exists(user_dir):
+        os.makedirs(user_dir)
+    return user_dir

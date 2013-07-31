@@ -47,10 +47,10 @@ env =
 
         self.config_parser.read(file_path)
         proj_prop_panel = self.create_json_panel('Project Properties', self.config_parser,
-                                                 'proj_settings_proj_prop.json')
+                                                 './designer/settings/proj_settings_proj_prop.json')
         self.add_widget(proj_prop_panel)
         self.add_json_panel('Shell Environment', self.config_parser,
-                            'proj_settings_shell_env.json')
+                            './designer/settings/proj_settings_shell_env.json')
 
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.

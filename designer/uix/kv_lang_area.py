@@ -273,7 +273,8 @@ class KVLangArea(DesignerCodeInput):
            its parent.
         '''
 
-        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget, parent, path=path)
+        start_pos, end_pos = self.get_widget_text_pos_from_kv(
+            widget, parent, path_to_widget=path)
         text = self.text[start_pos:end_pos]
 
         return text
