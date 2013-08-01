@@ -73,10 +73,12 @@ class PropertyBase(object):
         try:
             if isinstance(self.propwidget.property(self.propname),
                           NumericProperty):
-                if value == 'None':
+
+                if value == 'None' or value == '':
                     value = None
                 else:
                     value = float(value)
+
         except Exception:
             conversion_err = True
 

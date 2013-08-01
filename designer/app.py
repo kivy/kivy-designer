@@ -387,6 +387,8 @@ class Designer(FloatLayout):
     def _fbrowser_load(self, instance):
         '''Event Handler for 'on_load' event of self._fbrowser
         '''
+        if instance.selection == []:
+            return
 
         file_path = instance.selection[0]
         self._popup.dismiss()

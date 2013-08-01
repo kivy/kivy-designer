@@ -53,15 +53,15 @@ class StatusBar(BoxLayout):
         '''
 
         self.app.widget_focused = None
-        label = Label(text=message)
-        if self.gridlayout.children and not \
+        if self.gridlayout.children or not \
             isinstance(self.gridlayout.children[0], Label):
-            self.gridlayout.clear_widgets()
-            #Create navbar again, as doing clearwidgets will make its reference
+            #Create navbar again, as doing clear_widgets will make its reference
             #count to 0 and it will be destroyed
             self.navbar = GridLayout(rows=1)
-
-        self.gridlayout.add_widget(label)
+        
+        self.gridlayout.clear_widgets()
+        self.gridlayout.add_widget(Label(text=message))
+        self.gridlayout.children[0].text = message
 
     def on_app(self, instance, app):
         app.bind(widget_focused=self.update_navbar)    

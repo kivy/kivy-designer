@@ -408,6 +408,7 @@ class KVLangArea(DesignerCodeInput):
                         value = value.replace('"','').replace("'","")
 
                     else:
+                        print prop, 'xxxxxxxxxxx'
                         reload_kv_str = True
 
                     setattr(widget, prop, value)
@@ -427,6 +428,7 @@ class KVLangArea(DesignerCodeInput):
 
         else:
             reload_kv_str = True
+            print 'reloading'
 
         if reload_kv_str:
             playground = self.playground

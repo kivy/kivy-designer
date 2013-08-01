@@ -14,6 +14,7 @@ from kivy.clock import Clock
 from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.gridlayout import GridLayout
 
 from designer.common import widgets
 from designer.tree import Tree
