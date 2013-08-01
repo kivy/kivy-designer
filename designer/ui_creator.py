@@ -86,6 +86,10 @@ class UICreator(FloatLayout):
 
     def on_show_edit(self, *args):
         App.get_running_app().root.on_show_edit(*args)
+    
+    def cleanup(self):
+        self.playground.cleanup()
+        self.kv_code_input.text = ''
 
     def _setup_everything(self, *args):
         '''To setup all the references in between widget

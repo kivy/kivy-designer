@@ -2,6 +2,7 @@ from kivy.properties import ObjectProperty
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 
 class StatusNavBarButton(Button):
     '''StatusNavBarButton is a :class:`~kivy.uix.button` representing 
@@ -52,21 +53,29 @@ class StatusBar(BoxLayout):
         '''
 
         self.app.widget_focused = None
-        self.clear_widgets()
         label = Label(text=message)
-        self.add_widget(label)
+        if self.gridlayout.children and not \
+            isinstance(self.gridlayout.children[0], Label):
+            self.gridlayout.clear_widgets()
+            #Create navbar again, as doing clearwidgets will make its reference
+            #count to 0 and it will be destroyed
+            self.navbar = GridLayout(rows=1)
+
+        self.gridlayout.add_widget(label)
 
     def on_app(self, instance, app):
-        app.bind(widget_focused=self.update_navbar)
+        app.bind(widget_focused=self.update_navbar)    
 
     def update_navbar(self, *largs):
         '''To update navbar with the parents of currently selected Widget.
         '''
 
-        self.clear_widgets()
-        self.add_widget(self.gridlayout)
-        self.navbar.clear_widgets()
+        if self.gridlayout.children and \
+            isinstance(self.gridlayout.children[0], Label):
+            self.gridlayout.clear_widgets()
+            self.gridlayout.add_widget(self.navbar)
 
+        self.navbar.clear_widgets()
         wid = self.app.widget_focused
         if not wid:
             return

@@ -359,7 +359,8 @@ class Playground(ScatterPlane):
         #Cleanup is called when project is created or loaded
         #so this operation shouldn't be recorded in Undo
         if self.root:
-            self.remove_widget_from_parent(self.root, True)
+            self.remove_widget_from_parent(self.root, from_undo=True,
+                                           from_kv=True)
 
         self.tree = Tree()
 

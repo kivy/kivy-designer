@@ -395,7 +395,6 @@ class ProjectLoader(object):
              self.file_list = self._get_file_list(self.proj_dir)
 
         #Get all files corresponding to each class
-        print 'get_class_files'
         self._get_class_files()
         
         #If root widget is not created but root class is known
@@ -671,11 +670,12 @@ class ProjectLoader(object):
                 f = open(self.root_rule.kv_file, 'r')
                 _file_str = f.read()
                 f.close()
-                
+
                 old_str = self.get_class_str_from_text(self.root_rule.name,
-                                                       _file_str)
-                new_str = self.get_class_str_from_text(self.root_rule.name, text)
-    
+                                                       _file_str, is_class=False)
+                new_str = self.get_class_str_from_text(self.root_rule.name,
+                                                       text, is_class=False)
+
                 f = open(self.root_rule.kv_file, 'w')
                 _file_str = _file_str.replace(old_str, new_str)
                 f.write(_file_str)
@@ -1004,6 +1004,8 @@ class ProjectLoader(object):
         self.list_comments = []
         self.custom_widgets = []
         self.dict_file_type_and_path = {}
+        self.root_rule = None
+        self._root_rule = None
 
     def get_app(self):
         '''To get the applications app class instance
@@ -1023,7 +1025,7 @@ class ProjectLoader(object):
         #if still couldn't get app, although that shouldn't happen
         return None
     
-    def reload_from_str(self, root_str, class_str='', class_name=''):
+    def reload_from_str(self, root_str):
         '''To reload root widget from root_str and if present then class_name's
            rule from class_str
         '''
@@ -1039,28 +1041,12 @@ class ProjectLoader(object):
         except:
             pass
 
-        if class_name != '' and class_str != '':
-            #Cleaning class rule
+        #Cleaning class rules
+        for _rule in self.class_rules:
             for rule in Builder.rules[:]:
-                if rule[1].name == '<'+class_name+'>':
+                if rule[1].name == '<'+_rule.name+'>':
                     Builder.rules.remove(rule)
                     break
-            
-            #loading class rule
-            class_str = re.sub(r'.+app+.+', '', class_str).strip()
-            Builder.load_string(class_str)
-            
-            #Checking if class rule has been created
-            class_rule_found = False
-            for rule in Builder.rules[:]:
-                if rule[1].name == '<'+class_name+'>':
-                    class_rule_found = True
-                    break
-
-            if not class_rule_found:
-                #If not then there is some error in class rule,
-                #donot reload
-                return None
 
         root_widget = None
         #Remove all the 'app' lines

@@ -300,7 +300,8 @@ class Designer(FloatLayout):
             self.project_loader.load_new_project(os.path.join(new_proj_dir, 
                                                               "main.kv"))
             root_wigdet = self.project_loader.get_root_widget()
-            self.ui_creator.playground.add_widget_to_parent(root_wigdet, None, from_undo=True)
+            self.ui_creator.playground.add_widget_to_parent(root_wigdet, None,
+                                                            from_undo=True)
             self.ui_creator.kv_code_input.text = self.project_loader.get_root_str()
             self.designer_content.update_tree_view(self.project_loader)
             self._add_designer_content()
@@ -311,7 +312,7 @@ class Designer(FloatLayout):
         '''
 
         self.project_loader.cleanup()
-        self.ui_creator.playground.cleanup()
+        self.ui_creator.cleanup()
         self.undo_manager.cleanup()
         self.designer_content.toolbox.cleanup()
 
@@ -402,11 +403,8 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.ui_creator.playground.sandbox:
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/examples/tutorials/pong/pong.kv')
-            #if not self.project_loader.load_project('/home/abhi/kivy_repo/kivy/dd/pong.kv')
             try:
-                self.project_loader.load_project('/home/abhi/kivy_designer/test/test2/main.kv')
-                #self.project_loader.load_project(file_path)
+                self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
@@ -463,12 +461,13 @@ class Designer(FloatLayout):
             try:
                 if self.project_loader.new_project:
                     self.action_btn_save_as_pressed()
+                    return
                 else:
                     self.project_loader.save_project()
 
                 self._curr_proj_changed = False
                 self.statusbar.show_message('Project saved successfully')
-            
+
             except:
                 self.statusbar.show_message('Cannot save project')
 
@@ -931,6 +930,7 @@ class DesignerApp(App):
         self.root.project_loader.tab_pannel = self.root.designer_content.tab_pannel
         self.root.ui_creator.playground.undo_manager = self.root.undo_manager
         self.root.ui_creator.kv_code_input.project_loader = self.root.project_loader
+        self.root.ui_creator.kv_code_input.statusbar = self.root.statusbar
         self.root.ui_creator.widgettree.project_loader = self.root.project_loader
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)

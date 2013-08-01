@@ -39,7 +39,8 @@ class KVLangArea(DesignerCodeInput):
     '''Reference to :class:`~designer.project_loader.ProjectLoader`
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+    statusbar = ObjectProperty()
+
     def __init__(self, **kwargs):
         super(KVLangArea, self).__init__(**kwargs)
         self._reload_trigger = Clock.create_trigger(self.reload_kv, 1)
@@ -283,6 +284,9 @@ class KVLangArea(DesignerCodeInput):
         '''This function is called when widget is removed from parent.
            It will delete widget's rule from parent's rule
         '''
+        if self.text == '':
+            return
+
         self._reload = False
 
         delete_from_kv = False
@@ -343,7 +347,7 @@ class KVLangArea(DesignerCodeInput):
             self._reload = True
             return
 
-        statusbar = App.get_running_app().root.statusbar
+        statusbar = self.statusbar
 
         reload_kv_str = False
 
@@ -425,43 +429,16 @@ class KVLangArea(DesignerCodeInput):
             reload_kv_str = True
 
         if reload_kv_str:
-            #A widget is added or removed
             playground = self.playground
             project_loader = self.project_loader
 
-            #Find which class rule has been modified
-            changed_class_str = ''
-            changed_class_rule = ''
-            if root_name not in lines[curr_lineno]:
-                changed_class_rule = lines[curr_lineno].replace('<','')
-                changed_class_rule = changed_class_rule.replace('>','')
-                changed_class_rule = changed_class_rule.replace(':','')
-                
-                changed_class_str = lines[curr_lineno] + '\n'
-                end_line = curr_lineno + 1
-                while end_line < total_lines and (lines[end_line].strip() == '' or
-                                        get_indentation(lines[end_line]) != 0):
-                    changed_class_str += lines[end_line] + '\n'
-                    end_line += 1
-
-            root_str = lines[root_lineno] + '\n'
-            end_line = root_lineno + 1
-            while end_line < total_lines and (lines[end_line].strip() == '' or
-                                    get_indentation(lines[end_line]) != 0):
-                root_str += lines[end_line] + '\n'
-                end_line += 1
-
             try:
-                widget = project_loader.reload_from_str(root_str,
-                                                        changed_class_str,
-                                                        changed_class_rule)
+                widget = project_loader.reload_from_str(self.text)
 
                 if widget:
-                    print playground.root, 'rtrtrtrtrt',
                     playground.remove_widget_from_parent(playground.root,
                                                          None, from_kv=True)
                     playground.add_widget_to_parent(widget, None, from_kv=True)
-                    print widget, 'wwwwwwwwwwwwww'
 
                 statusbar.show_message("")
                 self.have_error = False
@@ -609,7 +586,6 @@ class KVLangArea(DesignerCodeInput):
             self.cursor = (0, lineno)
 
         else:
-            print widget_lineno, path_to_widget
             #if not found then add property after the widgets line
             _line_start_pos = get_line_start_pos(self.text, widget_lineno)
             _line_end_pos = get_line_end_pos(self.text, widget_lineno)

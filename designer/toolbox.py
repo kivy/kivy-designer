@@ -86,15 +86,9 @@ class Toolbox(BoxLayout):
         '''To clean all the children in self.custom_category.
         '''
         if self.custom_category:
-            self.custom_category.gridlayout.clear_widgets()
-
-    def add_custom(self):
-        '''To add/update self.custom_category with new custom classes loaded
-           by project.
-        '''
-        if not self.custom_category:
+            self.accordion.remove_widget(self.custom_category)
             self.custom_category = ToolboxCategory(title='custom')
-            
+
             #FIXME: ToolboxCategory keeps on adding more scrollview,
             #if they are initialized again, unable to find the cause of problem
             #I just decided to delete those scrollview whose childs are not 
@@ -105,7 +99,27 @@ class Toolbox(BoxLayout):
                     _scrollview_parent.remove_widget(child)
                 
             self.accordion.add_widget(self.custom_category)
+
+    def add_custom(self):
+        '''To add/update self.custom_category with new custom classes loaded
+           by project.
+        '''
+        if not self.custom_category:
+            self.custom_category = ToolboxCategory(title='custom')
+
+            #FIXME: ToolboxCategory keeps on adding more scrollview,
+            #if they are initialized again, unable to find the cause of problem
+            #I just decided to delete those scrollview whose childs are not 
+            #self.gridlayout.
+            _scrollview_parent = self.custom_category.gridlayout.parent.parent
+            for child in _scrollview_parent.children[:]:
+                if child.children[0] != self.custom_category.gridlayout:
+                    _scrollview_parent.remove_widget(child)
+                
+            self.accordion.add_widget(self.custom_category)
+
         else:
+
             self.custom_category.gridlayout.clear_widgets()
 
         for widget in widgets:
