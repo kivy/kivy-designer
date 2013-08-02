@@ -338,10 +338,6 @@ class KVLangArea(DesignerCodeInput):
 
         if self.text == '':
             return
-        
-        lines = re.sub(r'#.+', '', self.text).splitlines()
-        if self.cursor[1] < 0 or self.cursor[1] >= len(lines):
-            return
 
         if not self._reload:
             self._reload = True
@@ -349,105 +345,23 @@ class KVLangArea(DesignerCodeInput):
 
         statusbar = self.statusbar
 
-        reload_kv_str = False
+        playground = self.playground
+        project_loader = self.project_loader
 
-        root_name = self.project_loader.root_rule.name
-        total_lines = len(lines)
-        root_lineno = 0
-        for lineno, line in enumerate(lines):
-            pos = line.find(root_name)
-            if pos != -1 and get_indentation(line) == 0:
-                root_lineno = lineno
-                break
-        
-        #Find whether cursor is in custom class or root widget
-        curr_lineno = self.cursor[1]
-        while curr_lineno >= 0 and \
-            get_indentation(lines[curr_lineno]) != 0:
-            curr_lineno -= 1
+        try:
+            widget = project_loader.reload_from_str(self.text)
 
-        if root_name not in lines[curr_lineno]:
-            #Another class rule has been modified, so reload
-            reload_kv_str = True
+            if widget:
+                playground.remove_widget_from_parent(playground.root,
+                                                     None, from_kv=True)
+                playground.add_widget_to_parent(widget, None, from_kv=True)
 
-        #Determine the widget inside which cursor is present
-        path_to_widget = self._get_widget_path_at_line(self.cursor[1],
-                                                       root_lineno)
-        widget = self._get_widget_from_path(path_to_widget)
+            statusbar.show_message("")
+            self.have_error = False
 
-        line = lines[self.cursor[1]]
-        colon_pos = line.find(':')
-
-        #if ':' in line, then either property is modified or added or
-        #widget's class is modified
-        if not reload_kv_str and colon_pos != -1:
-            if colon_pos != len(line.rstrip()) - 1:
-                #A property is modified or added
-                value = line[colon_pos+1:].strip()
-                if value.strip() == '':
-                    return
-
-                prop = line[:colon_pos].strip()
-                try:
-                    if isinstance(widget.properties()[prop], NumericProperty):
-                        if value == 'None':
-                            value = None
-                        else:
-                            value = float(value)
-    
-                    elif isinstance(widget.properties()[prop], StringProperty):
-                        value = value.replace('"','').replace("'","")
-    
-                    elif isinstance(widget.properties()[prop], BooleanProperty):
-                        if value == 'False':
-                            value = False
-                        elif value == 'True':
-                            value = True
-    
-                    elif isinstance(widget.properties()[prop], OptionProperty):
-                        value = value.replace('"','').replace("'","")
-
-                    else:
-                        print prop, 'xxxxxxxxxxx'
-                        reload_kv_str = True
-
-                    setattr(widget, prop, value)
-                    self.have_error = False
-                    statusbar.show_message("")
-
-                except:
-                    self.have_error = True
-                    statusbar.show_message("Cannot set '%s' to '%s'"%(value, prop))
-
-            else:
-                #':' at the end of line means, a widget has been 
-                #added or changed
-                #Reload only if cursors current position is not deleting spaces
-                if self.cursor[0] <= len(line.rstrip()):
-                    reload_kv_str = True
-
-        else:
-            reload_kv_str = True
-            print 'reloading'
-
-        if reload_kv_str:
-            playground = self.playground
-            project_loader = self.project_loader
-
-            try:
-                widget = project_loader.reload_from_str(self.text)
-
-                if widget:
-                    playground.remove_widget_from_parent(playground.root,
-                                                         None, from_kv=True)
-                    playground.add_widget_to_parent(widget, None, from_kv=True)
-
-                statusbar.show_message("")
-                self.have_error = False
-
-            except:
-                self.have_error = True
-                statusbar.show_message("Cannot reload from text")
+        except:
+            self.have_error = True
+            statusbar.show_message("Cannot reload from text")
 
     def _get_widget_path_at_line(self, lineno, root_lineno=0):
         '''To get widget path of widget at line
