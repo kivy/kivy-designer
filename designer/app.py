@@ -109,7 +109,7 @@ class Designer(FloatLayout):
     '''Reference to Project Tree instance
        :data:`proj_tree_view` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     designer_settings = ObjectProperty(None)
     '''Reference of :class:`~designer.designer_settings.DesignerSettings`.
        :data:`designer_settings` is a :class:`~kivy.properties.ObjectProperty`
@@ -978,6 +978,8 @@ class DesignerApp(App):
             container = PlaygroundDragElement(playground=self.root.ui_creator.playground)
             container.add_widget(widget)
             touch.grab(container)
+            touch.grab_current = container
+            container.on_touch_move(touch)
             container.center_x = touch.x
             container.y = touch.y + 20
 
@@ -1016,6 +1018,6 @@ class DesignerApp(App):
                 color = Color(.42, .62, .65)
                 line = Line(points=points, close=True, width=2.)
             self._widget_focused = [widget, color, line]
-        
+
         self.root.ui_creator.playground.clicked=True
         self.root.on_show_edit()

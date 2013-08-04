@@ -50,6 +50,8 @@ class PlaygroundDragElement(BoxLayout):
        drag-n-drop, from one position to another.
        :data:`drag_type` is a :class:`~kivy.properties.OptionProperty`
     '''
+    
+    drag_parent = ObjectProperty(None)
 
     placeholder = ObjectProperty(None)
     '''Instance of :class:`~designer.uix.placeholder`
@@ -70,13 +72,24 @@ class PlaygroundDragElement(BoxLayout):
             self.y = touch.y + 20
             self.target = self.playground.try_place_widget(
                     self.children[0], self.center_x, self.y - 20)
-            self.can_place = self.target is not None
+
+            if self.drag_type == 'dragndrop':
+                if not self.drag_parent:
+                    self.drag_parent = self.target
+
+                if self.target == self.drag_parent:
+                    self.can_place = True
+                else:
+                    self.can_place = False
+
+            else: 
+                self.can_place = self.target is not None
 
             if self.placeholder.parent:
                 self.placeholder.parent.remove_widget(self.placeholder)
 
             if self.target:
-                if self.drag_type == 'dragndrop':
+                if self.can_place and self.drag_type == 'dragndrop':
                     x, y = self.playground.to_local(*touch.pos)
                     target = self.playground.find_target(x, y, self.playground.root)
                     self.target.add_widget(self.placeholder,
@@ -86,8 +99,10 @@ class PlaygroundDragElement(BoxLayout):
                     self.placeholder.size = self.children[0].size
                     self.placeholder.size_hint = self.children[0].size_hint
 
-                else:
+                elif self.drag_type != 'dragndrop':
                     self.target.add_widget(self.placeholder)
+                
+                App.get_running_app().focus_widget(self.target)
 
             return True
 
@@ -98,9 +113,16 @@ class PlaygroundDragElement(BoxLayout):
             touch.ungrab(self)
             self.target = self.playground.try_place_widget(
                     self.children[0], self.center_x, self.y - 20)
-            self.can_place = self.target is not None
             parent = self.placeholder.parent
             index = -1
+            
+            if self.drag_type == 'dragndrop':
+                if self.target == self.drag_parent:
+                    self.can_place = True
+                else:
+                    self.can_place = False
+            else: 
+                self.can_place = self.target is not None
 
             if parent:
                 index = parent.children.index(self.placeholder)
@@ -110,10 +132,13 @@ class PlaygroundDragElement(BoxLayout):
                 child = self.children[0]
                 child.parent.remove_widget(child)
                 if self.drag_type == 'dragndrop':
-                    if parent:
+                    if self.can_place and parent:
                         self.playground.place_widget(
                                 child, self.center_x, self.y - 20,
                                 index=index)
+
+                    elif not self.can_place:
+                        self.playground.undo_dragging()
 
                 else:
                     self.playground.place_widget(
@@ -199,11 +224,13 @@ class Playground(ScatterPlane):
         self.keyboard = None
         self.selected_widget = None
         self.undo_manager = None
+        self._widget_x = -1
+        self._widget_y = -1
 
     def on_pos(self, *args):
         if self.sandbox:
             self.sandbox.pos = self.pos
-        
+
     def on_size(self, *args):
         if self.sandbox:
             self.sandbox.size = self.size
@@ -232,23 +259,25 @@ class Playground(ScatterPlane):
 
         else:
             extra_args={'x': x, 'y': y, 'index': index}
-            self.add_widget_to_parent(widget, target, from_kv=True, 
+            self.add_widget_to_parent(widget, target, from_kv=True,
                                       from_undo=True, extra_args=extra_args)
     
     def drag_wigdet(self, widget, target, extra_args, from_undo=False):
         extra_args['prev_x'], extra_args['prev_y'] = \
-            self.drag_operation[1].to_local(widget.x, widget.y)
+            self.to_parent(self._widget_x, self._widget_y)
 
         if isinstance(target, FloatLayout) or \
             isinstance(target, ScatterLayout) or \
             isinstance(target, RelativeLayout):
             target.add_widget(widget, self.drag_operation[2])
+            widget.pos_hint = {}
             widget.x, widget.y = self.to_local(extra_args['x'], extra_args['y'])
             self.from_drag = False
             added = True
+            local_x, local_y = widget.x - target.x, widget.y - target.y
             self.kv_code_input.set_property_value(
                 widget, 'pos_hint', "{'x': %f, 'y': %f}"%(
-                    widget.x/target.width, widget.y/target.height),
+                    local_x/target.width, local_y/target.height),
                 'ListPropery')
 
             if not from_undo:
@@ -604,6 +633,7 @@ class Playground(ScatterPlane):
             #x, y = self.to_local(*touch.pos)
             #target = self.find_target(x, y, self.root)
             drag_widget = self.selected_widget
+            self._widget_x, self._widget_y = drag_widget.x, drag_widget.y
             index = self.selected_widget.parent.children.index(drag_widget)
             self.drag_operation = (drag_widget, drag_widget.parent, index)
 
