@@ -113,6 +113,43 @@
             size_hint_x: None
             width: '90pt'
 
+<NewProjectDialog>:
+    image: image
+    list_parent: list_parent
+    select_button: select
+    cancel_button: cancel
+    orientation: 'vertical'
+    padding: '2sp'
+
+    Label:
+        size_hint: None, None
+        pos_hint: {'x': 0.1}
+        height: '22pt'
+        text: 'Select one of the following templates:'
+    
+    BoxLayout:
+        id: list_parent
+        orientation: 'horizontal'
+        padding: '2sp'
+        Image:
+            id: image
+
+    GridLayout:
+        rows: 1
+        size_hint_y: None
+        height: '25pt'
+        padding: '4sp'
+        Button:
+            id: select
+            text: 'Create New project'
+            size_hint_x: None
+            width: '90pt'
+        Button:
+            id: cancel
+            text: 'Cancel'
+            size_hint_x: None
+            width: '90pt'
+
 <RecentDialog>:
     select_button: select
     cancel_button: cancel

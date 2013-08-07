@@ -1,0 +1,47 @@
+from kivy.app import App
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.properties import NumericProperty
+from kivy.lang import Builder
+
+class CustomScreen(Screen):
+    '''This is the class representing root widget. This class is the
+       main screen class which will show different screens. Modify this
+       class if you want to modify every screen's behaviour.
+    '''
+    hue = NumericProperty(0)
+
+class RootWidget(ScreenManager):
+    '''This the class representing your root widget.
+       By default it is inherited from ScreenManager,
+       you can use any other layout/widget depending on your usage.
+    '''
+    pass
+
+class MainApp(App):
+    '''This is the main class of your app.
+       Define any app wide entities here.
+       This class can be accessed anywhere inside the kivy app as,
+       in python::
+
+         app = App.get_running_app()
+         print (app.title)
+
+       in kv language::
+
+         on_release: print(app.title)
+       Name of the .kv file that is auto-loaded is derived from the name of this cass::
+
+         MainApp = main.kv
+         MainClass = mainclass.kv
+
+       The App part is auto removed and the whole name is lowercased.
+    '''
+    def build(self):
+        '''Your app will be build from here.
+           Return your widget here.
+        '''
+
+        return RootWidget()
+
+if __name__ == '__main__':
+    MainApp().run()

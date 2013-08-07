@@ -17,6 +17,7 @@ from kivy.uix import actionbar
 from kivy.garden.filebrowser import FileBrowser
 from kivy.uix.popup import Popup
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
+from kivy.lang import Builder
 
 from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
@@ -37,8 +38,10 @@ from designer.project_settings import ProjectSettings
 from designer.uix.placeholder import Placeholder
 from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_kivy_designer_dir
+from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
+NEW_TEMPLATES_DIR = 'new_templates'
 
 class Designer(FloatLayout):
     '''Designer is the Main Window class of Kivy Designer
@@ -262,17 +265,29 @@ class Designer(FloatLayout):
         '''
 
         if not self._curr_proj_changed:
-            self._perform_new()
+            self._show_new_dialog()
             return
 
         self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
                                                ' lost.\n'
                                                'Do you want to continue?')
-        self._confirm_dlg.bind(on_ok=self._perform_new,
+        self._confirm_dlg.bind(on_ok=self._show_new_dialog,
                                on_cancel=self._cancel_popup)
 
         self._popup = Popup(title='New', content = self._confirm_dlg, 
                             size_hint=(None,None),size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+    
+    def _show_new_dialog(self, *args):
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
+        
+        self._new_dialog = NewProjectDialog()
+        self._new_dialog.bind(on_select=self._perform_new,
+                               on_cancel=self._cancel_popup)
+        self._popup = Popup(title='New Project', content = self._new_dialog, 
+                            size_hint=(None,None),size=('600pt', '400pt'),
                             auto_dismiss=False)
         self._popup.open()
 
@@ -282,18 +297,24 @@ class Designer(FloatLayout):
 
         if hasattr(self, '_popup'):
             self._popup.dismiss()
-
+        
         self.cleanup()
         new_proj_dir = os.path.join(get_kivy_designer_dir(),
                                     NEW_PROJECT_DIR_NAME)
         if os.path.exists(new_proj_dir):
             shutil.rmtree(new_proj_dir)
         
-        os.mkdir (new_proj_dir)
-        shutil.copy(os.path.join(os.getcwd(), "template_main_py"),
+        os.mkdir(new_proj_dir)
+        
+        template = self._new_dialog.adapter.selection[0].text
+        kv_file = NEW_PROJECTS[template][0]
+        py_file = NEW_PROJECTS[template][1]
+
+        templates_dir = os.path.join(os.getcwd(), NEW_TEMPLATES_DIR)
+        shutil.copy(os.path.join(templates_dir, py_file),
                     os.path.join(new_proj_dir, "main.py"))
 
-        shutil.copy(os.path.join(os.getcwd(), "template_main_kv"),
+        shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
         
         with self.ui_creator.playground.sandbox:
@@ -302,7 +323,7 @@ class Designer(FloatLayout):
             root_wigdet = self.project_loader.get_root_widget()
             self.ui_creator.playground.add_widget_to_parent(root_wigdet, None,
                                                             from_undo=True)
-            self.ui_creator.kv_code_input.text = self.project_loader.get_root_str()
+            self.ui_creator.kv_code_input.text = self.project_loader.get_full_str()
             self.designer_content.update_tree_view(self.project_loader)
             self._add_designer_content()
 
@@ -405,7 +426,7 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.ui_creator.playground.sandbox:
-            try:
+            #try:
                 self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
@@ -444,8 +465,8 @@ class Designer(FloatLayout):
                 self.designer_content.update_tree_view(self.project_loader)
                 self._add_designer_content()
 
-            except Exception as e:
-                self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
+            #except Exception as e:
+                #self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content

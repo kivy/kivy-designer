@@ -6,6 +6,7 @@ from kivy.clock import Clock
 from designer.common import widgets
 from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.metrics import pt
+from kivy.factory import Factory
 
 class ToolboxCategory(AccordionItem):
     '''ToolboxCategory is responsible for grouping and showing 
@@ -60,6 +61,7 @@ class Toolbox(BoxLayout):
         super(Toolbox, self).__init__(**kwargs)
         Clock.schedule_once(self.discover_widgets, 0)
         self.custom_category = None
+        self._list = []
 
     def discover_widgets(self, *largs):
         '''To create and add ToolboxCategory and ToolboxButton for widgets in
@@ -87,7 +89,9 @@ class Toolbox(BoxLayout):
         '''
         if self.custom_category:
             self.accordion.remove_widget(self.custom_category)
+            Factory.register('BoxLayout', module='kivy.uix.boxlayout')
             self.custom_category = ToolboxCategory(title='custom')
+            self._list.append(self.custom_category)
 
             #FIXME: ToolboxCategory keeps on adding more scrollview,
             #if they are initialized again, unable to find the cause of problem
@@ -104,23 +108,19 @@ class Toolbox(BoxLayout):
         '''To add/update self.custom_category with new custom classes loaded
            by project.
         '''
-        if not self.custom_category:
-            self.custom_category = ToolboxCategory(title='custom')
+        self.custom_category = ToolboxCategory(title='custom')
+        self._list.append(self.custom_category)
 
-            #FIXME: ToolboxCategory keeps on adding more scrollview,
-            #if they are initialized again, unable to find the cause of problem
-            #I just decided to delete those scrollview whose childs are not 
-            #self.gridlayout.
-            _scrollview_parent = self.custom_category.gridlayout.parent.parent
-            for child in _scrollview_parent.children[:]:
-                if child.children[0] != self.custom_category.gridlayout:
-                    _scrollview_parent.remove_widget(child)
-                
-            self.accordion.add_widget(self.custom_category)
-
-        else:
-
-            self.custom_category.gridlayout.clear_widgets()
+        #FIXME: ToolboxCategory keeps on adding more scrollview,
+        #if they are initialized again, unable to find the cause of problem
+        #I just decided to delete those scrollview whose childs are not 
+        #self.gridlayout.
+        _scrollview_parent = self.custom_category.gridlayout.parent.parent
+        for child in _scrollview_parent.children[:]:
+            if child.children[0] != self.custom_category.gridlayout:
+                _scrollview_parent.remove_widget(child)
+            
+        self.accordion.add_widget(self.custom_category)
 
         for widget in widgets:
             if widget[1] == 'custom':

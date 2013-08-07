@@ -1,0 +1,35 @@
+#:import random random.random
+<CustomScreen>:
+# this is the only auto provided screen, you should replace it with your own screen structure.
+    hue: random()
+    canvas:
+        Color:
+            hsv: self.hue, .5, .3
+        Rectangle:
+            size: self.size
+
+    Label:
+        font_size: 42
+        text: root.name
+
+    Button:
+        text: 'Next screen'
+        size_hint: None, None
+        pos_hint: {'right': 1}
+        size: 150, 50
+        on_release: root.manager.current = root.manager.next()
+
+    Button:
+        text: 'Previous screen'
+        size_hint: None, None
+        size: 150, 50
+        on_release: root.manager.current = root.manager.previous()
+
+<RootWidget>:
+#This is the root widget's kv definition
+    CustomScreen:
+        name: 'Screen 1'
+
+    CustomScreen:
+        name: 'Screen 2'
+            

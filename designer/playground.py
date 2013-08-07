@@ -656,7 +656,7 @@ class Playground(ScatterPlane):
             win = EventLoop.window
             self.keyboard = win.request_keyboard(self._keyboard_released, self)
             self.keyboard.bind(on_key_down=self._on_keyboard_down)
-            
+
         if self.selection_mode:
             if super(ScatterPlane, self).collide_point(*touch.pos):
                 if not self.dragging:

@@ -952,11 +952,12 @@ class ProjectLoader(object):
             exec s in module.__dict__
             sys.modules['AppModule'] = module
             return module
-
-        module = __import__(
-                _file[_file.rfind('/')+1:].replace('.py',''),
-                fromlist=_fromlist)
-
+        
+        module_name = _file[_file.rfind('/')+1:].replace('.py','')
+        if module_name in sys.modules:
+            del sys.modules[module_name]
+    
+        module = __import__(module_name, fromlist=_fromlist)
         return module
 
     def cleanup(self):
@@ -981,7 +982,7 @@ class ProjectLoader(object):
             for _rule in self.class_rules:
                 if "<" + _rule.name + ">" == _tuple[1].name:
                     Builder.rules.remove(_tuple)
-    
+
         if self.root_rule and hasattr(Factory, self.root_rule.name):
             Factory.unregister(self.root_rule.name)
 
@@ -989,7 +990,6 @@ class ProjectLoader(object):
         self._app_class = None
         self._app_module = None
         self._app = None
-        
         #Remove previous project directories 
         for _dir in self._dir_list:
             try:
@@ -1115,7 +1115,6 @@ class ProjectLoader(object):
         current_app = App.get_running_app()
         app = self.get_app()
         root_widget = None
-
         if app is not None:
             root_widget = app.build()
             if not root_widget:
