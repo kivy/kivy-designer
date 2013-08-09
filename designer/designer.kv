@@ -19,6 +19,7 @@
     code_input: code_input
     PyCodeInput:
         id: code_input
+        auto_indent: True
         size_hint_y: None
         height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
 
@@ -406,6 +407,7 @@
     error_console: error_console
     kivy_console: kivy_console
     tab_pannel: tab_pannel
+    eventviewer: eventviewer
 
     GridLayout:
         height: root.height
@@ -519,16 +521,18 @@
                         size_hint_y: None
                         height: 300
                         max_size: 500
-                        BoxLayout:
-                            orientation: 'vertical'
-                            Label:
-                                text: 'Property Navigator'
-                                font_size: '10pt'
-                                height: '20pt'
-                                size_hint_y: None
+                        DesignerTabbedPanel:
+                            do_default_tab: False
+                            DesignerTabbedPanelItem:
+                                text: '   Properties'
+                                PropertyViewer:
+                                    id: propertyviewer
 
-                            PropertyViewer:
-                                id: propertyviewer
+                            DesignerTabbedPanelItem:
+                                text: 'Events'
+                                EventViewer:
+                                    id: eventviewer
+                                    
 
 <DesignerContent>:
     ui_creator: ui_creator

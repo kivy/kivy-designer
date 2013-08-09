@@ -291,7 +291,7 @@ class ProjectLoader(object):
                         self.root_rule.kv_file = _file
                         self._root_rule = self.root_rule
 
-                root_rule = Builder.load_string(kv_string)
+                root_rule = Builder.load_string(re.sub(r'\s+on_\w+:\w+', '',kv_string))
                 if root_rule:
                     self.root_rule = RootRule(root_rule.__class__.__name__,
                                               root_rule)
@@ -634,12 +634,22 @@ class ProjectLoader(object):
             if not os.path.exists(custom_py):
                 shutil.copy(widget.py_file, custom_py)
         
-        #Saving all opened py files
+        #Saving all opened py files and also reimport them
         for _code_input in self.tab_pannel.list_py_code_inputs:
             path = os.path.join(self.proj_dir, _code_input.rel_file_path)
             f = open(path, 'w')
             f.write(_code_input.text)
             f.close()
+            _from_list = []
+            for rule in self.class_rules:
+                if rule.file == path:
+                    _from_list.append(rule.file)
+            
+            if not self.is_root_a_class_rule():
+                if self.root_rule.file == path:
+                    _from_list.append(self.root_rule.name)
+
+            self._import_module(_code_input.text, path, _fromlist=_from_list)
 
         #Save all class rules
         text = self.kv_code_input.text
@@ -927,7 +937,6 @@ class ProjectLoader(object):
     def _import_module(self, s, _file, _fromlist=[]):
         module = None
         import_from_s = False
-
         _r = re.findall(r'Builder\.load_file\s*\(\s*.+\s*\)', s)
         if _r:
             s = s.replace(_r[0], '')
@@ -947,6 +956,9 @@ class ProjectLoader(object):
         if i == run_pos - 1 or _r != []:
             if i == run_pos -1:
                 s = s.replace('%s().run()'%self._app_class, '')
+            
+            if 'AppModule' in sys.modules:
+                del sys.modules['AppModule']
 
             module = imp.new_module('AppModule')
             exec s in module.__dict__
@@ -1007,14 +1019,14 @@ class ProjectLoader(object):
         self.root_rule = None
         self._root_rule = None
 
-    def get_app(self):
+    def get_app(self, reload_app=False):
         '''To get the applications app class instance
         '''
 
         if not self._app_file or not self._app_class or not self._app_module:
             return None
         
-        if self._app:
+        if not reload_app and self._app:
             return self._app
         
         for name, obj in inspect.getmembers(self._app_module):
@@ -1026,8 +1038,7 @@ class ProjectLoader(object):
         return None
     
     def reload_from_str(self, root_str):
-        '''To reload root widget from root_str and if present then class_name's
-           rule from class_str
+        '''To reload from root_str
         '''
 
         rules = []
@@ -1073,7 +1084,7 @@ class ProjectLoader(object):
         for _rule in self.class_rules:
             if _rule.name == self.root_rule.name:
                 return True
-        
+
         return False
 
     def set_root_widget(self, root_name, widget=None):
@@ -1098,13 +1109,14 @@ class ProjectLoader(object):
 
         return root_widget
         
-    def get_root_widget(self):
+    def get_root_widget(self, new_root=False):
         '''To get the root widget of the current project.
         '''
         
-        if self.root_rule and self.root_rule.name != '':
+        if not new_root and self.root_rule and self.root_rule.name != '':
+            print 'khkhkhkkhkh'
             return self.root_rule.widget
-
+            
         if self._app_file == None:
             return None
 
@@ -1113,7 +1125,7 @@ class ProjectLoader(object):
         f.close()
 
         current_app = App.get_running_app()
-        app = self.get_app()
+        app = self.get_app(reload_app=True)
         root_widget = None
         if app is not None:
             root_widget = app.build()
@@ -1146,6 +1158,13 @@ class ProjectLoader(object):
         self.root = getattr(Factory, class_name)()
         return self.root
     
+    def is_widget_custom(self, widget):
+        for rule in self.class_rules:
+            if rule.name == type(widget).__name__:
+                return True
+        
+        return False
+
     def record(self):
         '''To record all the findings in ./designer/kvproj. These will
            be loaded again if project hasn't been modified

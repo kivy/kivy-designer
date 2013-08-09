@@ -70,6 +70,8 @@ class UICreator(FloatLayout):
     '''Instance of :class:`~designer.designer_content.DesignerTabbedPanel`
        containing error_console, kivy_console and kv_lang_area 
     '''
+    
+    eventviewer = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(UICreator, self).__init__(**kwargs)
@@ -99,3 +101,5 @@ class UICreator(FloatLayout):
         self.playground.kv_code_input = self.kv_code_input
         self.playground.widgettree = self.widgettree
         self.propertyviewer.kv_code_input = self.kv_code_input
+        self.eventviewer.kv_code_input = self.kv_code_input
+        print self.eventviewer.kv_code_input, 'kkkkk'

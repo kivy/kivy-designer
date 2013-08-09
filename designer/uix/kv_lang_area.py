@@ -419,11 +419,162 @@ class KVLangArea(DesignerCodeInput):
                 child_count = 0
 
         return path
+    
+    def get_property_value(self, widget, prop):
+        self._reload = False
+        if prop[:3] != 'on_' and not isinstance(widget.properties()[prop], StringProperty) and\
+            value == '':
+            return
+
+        path_to_widget = self._get_widget_path(widget)
+        path_to_widget.reverse()
+
+        #Go to the line where widget is declared
+        lines = re.sub(r'#.+', '', self.text).splitlines()
+        total_lines = len(lines)
+
+        root_name = self.project_loader.root_rule.name
+        total_lines = len(lines)
+        root_lineno = 0
+        for lineno, line in enumerate(lines):
+            pos = line.find(root_name)
+            if pos != -1 and get_indentation(line) == 0:
+                root_lineno = lineno
+                break
+
+        widget_lineno = self._find_widget_place(path_to_widget, lines,
+                                                total_lines, root_lineno+1)
+        widget_line = lines[widget_lineno]
+        indent = get_indentation(widget_line)
+        prop_found = False
+
+    
+        #Else find if property has already been declared with a value
+        lineno = widget_lineno + 1
+        #But if widget line is the last line in the text
+        if lineno < total_lines:
+            line = lines[lineno]
+            _indent = get_indentation(line)
+            colon_pos = -1
+            while lineno < total_lines and (line.strip() == '' or _indent > indent):
+                line = lines[lineno]
+                _indent = get_indentation(line)
+                if line.strip() != '':
+                    colon_pos = line.find(':')
+                    if colon_pos == -1:
+                        break
+                    
+                    if colon_pos == len(line.rstrip()) - 1:
+                        break
+                    
+                    if prop == line[:colon_pos].strip():
+                        prop_found = True
+                        break
+
+                lineno += 1
         
+        if prop_found:
+            #if property found then change its value
+            _pos_prop_value = get_line_start_pos(self.text, lineno) + colon_pos + 2
+            if lineno == total_lines - 1:
+                _line_end_pos = len(self.text)
+            else:
+                _line_end_pos = get_line_end_pos(self.text, lineno)
+
+            return self.text[_pos_prop_value:_line_end_pos]
+         
+        return ""
+
+    def set_event_handler(self, widget, prop, value):
+        self._reload = False
+
+        path_to_widget = self._get_widget_path(widget)
+        path_to_widget.reverse()
+
+        #Go to the line where widget is declared
+        lines = re.sub(r'#.+', '', self.text).splitlines()
+        total_lines = len(lines)
+
+        root_name = self.project_loader.root_rule.name
+        total_lines = len(lines)
+        root_lineno = 0
+        for lineno, line in enumerate(lines):
+            pos = line.find(root_name)
+            if pos != -1 and get_indentation(line) == 0:
+                root_lineno = lineno
+                break
+
+        widget_lineno = self._find_widget_place(path_to_widget, lines,
+                                                total_lines, root_lineno+1)
+        widget_line = lines[widget_lineno]
+        indent = get_indentation(widget_line)
+        prop_found = False
+
+        if ':' not in widget_line:
+            #If cannot find ':' then insert it
+            self.cursor = (len(lines[widget_lineno]), widget_lineno)
+            lines[widget_lineno] += ':'
+            self.insert_text(':')
+
+        else:
+            #Else find if property has already been declared with a value
+            lineno = widget_lineno + 1
+            #But if widget line is the last line in the text
+            if lineno < total_lines:
+                line = lines[lineno]
+                _indent = get_indentation(line)
+                colon_pos = -1
+                while lineno < total_lines and (line.strip() == '' or _indent > indent):
+                    line = lines[lineno]
+                    _indent = get_indentation(line)
+                    if line.strip() != '':
+                        colon_pos = line.find(':')
+                        if colon_pos == -1:
+                            break
+
+                        if colon_pos == len(line.rstrip()) - 1:
+                            break
+
+                        if prop == line[:colon_pos].strip():
+                            prop_found = True
+                            break
+
+                    lineno += 1
+
+        if prop_found:
+            if lineno == total_lines - 1:
+                _line_end_pos = len(self.text)
+            else:
+                _line_end_pos = get_line_end_pos(self.text, lineno)
+
+            if value != '':
+                #if property found then change its value
+                _pos_prop_value = get_line_start_pos(self.text, lineno) + colon_pos + 2
+                self.text = self.text[:_pos_prop_value] + ' ' + value + \
+                    self.text[_line_end_pos:]
+
+                self.cursor = (0, lineno)
+
+            else:
+                _line_start_pos = get_line_start_pos(self.text, widget_lineno)
+                self.text = self.text[:get_line_start_pos(self.text, lineno)] + self.text[_line_end_pos:]
+
+
+        elif value != '':
+            #if not found then add property after the widgets line
+            _line_end_pos = get_line_end_pos(self.text, widget_lineno)
+
+            indent_str = '\n'
+            for i in range(indent + 4):
+                indent_str += ' '
+
+            self.cursor = (len(lines[widget_lineno]), widget_lineno)
+            self.insert_text(indent_str + prop+ ': ' + str(value))
+
     def set_property_value(self, widget, prop, value, proptype):
         '''To find and change the value of property of widget rule in text
         '''
-        
+
         #Do not add property if value is empty and 
         #property is not a string property
         
@@ -475,10 +626,10 @@ class KVLangArea(DesignerCodeInput):
                         colon_pos = line.find(':')
                         if colon_pos == -1:
                             break
-                        
+
                         if colon_pos == len(line.rstrip()) - 1:
                             break
-                        
+
                         if prop == line[:colon_pos].strip():
                             prop_found = True
                             break

@@ -144,7 +144,7 @@ class DesignerTabbedPanel(TabbedPanel):
        :data:`list_py_code_inputs` is a :class:`~kivy.properties.ListProperty`
     '''
     
-    def open_file(self, path, rel_path):
+    def open_file(self, path, rel_path, switch_to=True):
         '''This will open py file for editing in the DesignerTabbedPanel.
         '''
 
@@ -164,7 +164,8 @@ class DesignerTabbedPanel(TabbedPanel):
         self.list_py_code_inputs.append(_py_code_input)
         panel_item.content = scroll
         self.add_widget(panel_item)
-        self.switch_to(self.tab_list[0])
+        if switch_to:
+            self.switch_to(self.tab_list[0])
 
 
 class DesignerTabbedPanelItem(TabbedPanelItem):

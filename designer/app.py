@@ -39,6 +39,7 @@ from designer.uix.placeholder import Placeholder
 from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_kivy_designer_dir
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
+from designer.eventviewer import EventViewer
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -426,7 +427,7 @@ class Designer(FloatLayout):
         self.cleanup()
 
         with self.ui_creator.playground.sandbox:
-            #try:
+            try:
                 self.project_loader.load_project(file_path)
 
                 if self.project_loader.class_rules:
@@ -465,8 +466,8 @@ class Designer(FloatLayout):
                 self.designer_content.update_tree_view(self.project_loader)
                 self._add_designer_content()
 
-            #except Exception as e:
-                #self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
+            except Exception as e:
+                self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content
@@ -485,8 +486,18 @@ class Designer(FloatLayout):
                 if self.project_loader.new_project:
                     self.action_btn_save_as_pressed()
                     return
+
                 else:
                     self.project_loader.save_project()
+                    projdir = self.project_loader.proj_dir
+                    self.project_loader.cleanup()
+                    self.ui_creator.playground.cleanup()
+                    self.project_loader.load_project(projdir)
+                    root_wigdet = self.project_loader.get_root_widget()
+                    self.ui_creator.playground.add_widget_to_parent(root_wigdet,
+                                                                    None,
+                                                                    from_undo=True)
+                    
 
                 self._curr_proj_changed = False
                 self.statusbar.show_message('Project saved successfully')
@@ -931,6 +942,7 @@ class DesignerApp(App):
         Factory.register('Toolbox', module='designer.toolbox')
         Factory.register('StatusBar', module='designer.statusbar')
         Factory.register('PropertyViewer', module='designer.propertyviewer')
+        Factory.register('EventViewer', module='designer.eventviewer')
         Factory.register('WidgetsTree', module='designer.nodetree')
         Factory.register('UICreator', module='designer.ui_creator')
         Factory.register('DesignerContent', module='designer.designer_content')
@@ -955,6 +967,9 @@ class DesignerApp(App):
         self.root.ui_creator.kv_code_input.project_loader = self.root.project_loader
         self.root.ui_creator.kv_code_input.statusbar = self.root.statusbar
         self.root.ui_creator.widgettree.project_loader = self.root.project_loader
+        self.root.ui_creator.eventviewer.project_loader = self.root.project_loader
+        self.root.ui_creator.eventviewer.designer_tabbed_panel = self.root.designer_content.tab_pannel
+        self.root.ui_creator.eventviewer.statusbar = self.root.statusbar
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)
         self.root.ui_creator.playground.sandbox = DesignerSandbox()
@@ -970,6 +985,9 @@ class DesignerApp(App):
 
         self.bind(widget_focused=
                   self.root.ui_creator.propertyviewer.setter('widget'))
+        self.bind(widget_focused=
+                  self.root.ui_creator.eventviewer.setter('widget'))
+
         self.focus_widget(self.root.ui_creator.playground.root)
         
         self.create_kivy_designer_dir()

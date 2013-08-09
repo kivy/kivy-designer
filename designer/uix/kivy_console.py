@@ -226,6 +226,8 @@ class KivyConsole(GridLayout):
 
     Shell = True, should be set only if absolutely necessary.
     '''
+    
+    txtinput_command_line = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         self.register_event_type('on_subprocess_done')
@@ -260,6 +262,7 @@ class KivyConsole(GridLayout):
         self.txtinput_command_line.bind(focus=self.on_focus)
         Clock.schedule_once(self._change_txtcache)
         self._focus(self.txtinput_command_line)
+        self._list = [self.txtinput_command_line]
 
     def _move_cursor_to_end(self, instance):
         def mte(*l):
@@ -514,7 +517,11 @@ class KivyConsole(GridLayout):
             parent.remove_widget(self.interact_layout)
             self.interact_layout = None
             # enable running a new command
-            parent.add_widget(self.txtinput_command_line)
+            try:
+                parent.add_widget(self.txtinput_command_line)
+            except:
+                self._initialize(0)
+
             self._focus(txtinput_command_line, True)
             Clock.schedule_once(self._change_txtcache, .1)
             self.dispatch('on_subprocess_done')

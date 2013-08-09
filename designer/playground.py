@@ -101,7 +101,7 @@ class PlaygroundDragElement(BoxLayout):
 
                 elif self.drag_type != 'dragndrop':
                     self.target.add_widget(self.placeholder)
-                
+
                 App.get_running_app().focus_widget(self.target)
 
             return True
