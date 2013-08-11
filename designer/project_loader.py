@@ -1,4 +1,3 @@
-import kivy
 import re
 import os, sys, inspect
 import time
@@ -17,7 +16,7 @@ from kivy.lang import Builder
 from kivy.uix.sandbox import Sandbox
 from kivy.clock import Clock
 
-from designer.helper_functions import get_indentation, get_indent_str, get_line_start_pos
+from designer.helper_functions import get_indentation, get_indent_str, get_line_start_pos, get_kivy_designer_dir
 from designer.proj_watcher import ProjectWatcher
 
 PROJ_DESIGNER = '.designer'
@@ -532,8 +531,7 @@ class ProjectLoader(object):
             if not os.path.exists(proj_dir):
                 os.mkdir(proj_dir)
 
-            kivy_designer_dir = os.path.join(os.path.expanduser('~'),
-                                             '.kivy-designer')
+            kivy_designer_dir = get_kivy_designer_dir()
             kivy_designer_new_proj_dir = os.path.join(kivy_designer_dir,
                                                       "new_proj")
             for _file in os.listdir(kivy_designer_new_proj_dir):
@@ -658,7 +656,7 @@ class ProjectLoader(object):
             f = open(_rule.kv_file, 'r')
             _file_str = f.read()
             f.close()
-            
+
             old_str = self.get_class_str_from_text(_rule.name, _file_str)
             new_str = self.get_class_str_from_text(_rule.name, text)
 
@@ -830,10 +828,25 @@ class ProjectLoader(object):
         _line += 1
         lines = _file_str.splitlines()
         _total_lines = len(lines)
+
+        hash_pos = 0
+        while hash_pos == 0 and _line < _total_lines:
+            hash_pos = lines[_line].find('#')
+            _line += 1
+
+        _line -= 1
+
         while _line < _total_lines and (lines[_line].strip() == '' or 
                                         get_indentation(lines[_line]) != 0):
             _line_pos = _file_str.find('\n', _line_pos + 1)
             _line += 1
+            hash_pos = 0
+            while hash_pos == 0 and _line < _total_lines:
+                hash_pos = lines[_line].find('#')
+                _line += 1
+
+            if _line < _total_lines:
+                _line -= 1
 
         end_pos = _line_pos
 

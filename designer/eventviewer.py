@@ -8,14 +8,24 @@ from designer.propertyviewer import PropertyViewer,\
 import re
 
 class EventHandlerTextInput(TextInput):
+    '''
+    '''
 
     eventwidget = ObjectProperty(None)
+    '''
+    '''
 
     eventname = StringProperty(None)
+    '''
+    '''
 
     kv_code_input = ObjectProperty()
+    '''
+    '''
 
     text_inserted = BooleanProperty(None)
+    '''
+    '''
 
     def on_text(self, instance, value):        
         if not self.kv_code_input:
@@ -84,7 +94,7 @@ class EventViewer(PropertyViewer):
             txt = NewEventTextInput(multiline=True)
             txt.bind(on_create_event=self.create_event)
             add(txt)
-    
+
     def create_event(self, txt):
         #Find the python file of widget
         py_file = None

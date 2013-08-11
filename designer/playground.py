@@ -15,6 +15,8 @@ from kivy.uix.scatterlayout import ScatterLayout
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.carousel import Carousel
+from kivy.uix.button import Button
 
 from designer.common import widgets
 from designer.tree import Tree
@@ -58,9 +60,26 @@ class PlaygroundDragElement(BoxLayout):
        :data:`placeholder` is a :class:`~kivy.properties.ObjectProperty`
     '''
     
+    widgettree = ObjectProperty(None)
+
     def __init__(self, **kwargs):
         super(PlaygroundDragElement, self).__init__(**kwargs)
         self.placeholder = Placeholder()
+
+    def is_intersecting_playground(self, x, y):
+        if self.playground.x <= x <= self.playground.right and\
+            self.playground.y <= y <= self.playground.top:
+            return True
+        
+        return False
+
+    def is_intersecting_widgettree(self, x, y):
+        #print self.widgettree
+        if self.widgettree.x <= x <= self.widgettree.right and\
+            self.widgettree.y <= y <= self.widgettree.top:
+            return True
+
+        return False
 
     def on_touch_move(self, touch):
         '''This is responsible for moving the drag element and showing where
@@ -68,88 +87,152 @@ class PlaygroundDragElement(BoxLayout):
         '''
 
         if touch.grab_current is self:
+            target = None
             self.center_x = touch.x
             self.y = touch.y + 20
-            self.target = self.playground.try_place_widget(
-                    self.children[0], self.center_x, self.y - 20)
+            local = self.playground.to_widget(self.center_x, self.y)
+            if self.is_intersecting_playground(self.center_x, self.y):
+                target = self.playground.try_place_widget(
+                        self.children[0], self.center_x, self.y - 20)
+
+            else:
+                #self.widgettree.collide_point(self.center_x, self.y) not working :(
+                #had to use this method
+                if self.is_intersecting_widgettree(self.center_x, self.y):
+                    node = self.widgettree.tree.get_node_at_pos((self.center_x, touch.y))
+                    if node:
+                        while node and node.node != self.playground.sandbox:
+                            widget = node.node
+                            if self.playground.allowed_target_for(widget, self.children[0]):
+                                target = widget
+                                break
+
+                            node = node.parent_node
 
             if self.drag_type == 'dragndrop':
                 if not self.drag_parent:
-                    self.drag_parent = self.target
+                    self.drag_parent = target
 
-                if self.target == self.drag_parent:
+                if target == self.drag_parent:
                     self.can_place = True
                 else:
                     self.can_place = False
 
             else: 
-                self.can_place = self.target is not None
-
-            if self.placeholder.parent:
-                self.placeholder.parent.remove_widget(self.placeholder)
+                self.can_place = target is not None
 
             if self.target:
+                self.target.remove_widget(self.placeholder)
+
+            elif self.placeholder.parent:
+                self.placeholder.parent.remove_widget(self.placeholder)
+            
+            self.placeholder.parent = None
+
+            if target:
                 if self.can_place and self.drag_type == 'dragndrop':
-                    x, y = self.playground.to_local(*touch.pos)
-                    target = self.playground.find_target(x, y, self.playground.root)
-                    self.target.add_widget(self.placeholder,
-                                           target.parent.children.index(target))
-                    self.placeholder.x = x
-                    self.placeholder.y = y
-                    self.placeholder.size = self.children[0].size
-                    self.placeholder.size_hint = self.children[0].size_hint
+                    if self.is_intersecting_playground(self.center_x, self.y):
+                        x, y = self.playground.to_local(*touch.pos)
+                        target2 = self.playground.find_target(x, y, self.playground.root)
+                        if target2.parent:
+                            target.add_widget(self.placeholder,
+                                              target2.parent.children.index(target2))
+                        self.placeholder.x = x
+                        self.placeholder.y = y
+                        self.placeholder.size = self.children[0].size
+                        self.placeholder.size_hint = self.children[0].size_hint
+
+                    else:
+                        if self.is_intersecting_widgettree(self.center_x, self.y):
+                            target.add_widget(self.placeholder)
 
                 elif self.drag_type != 'dragndrop':
-                    self.target.add_widget(self.placeholder)
+                    target.add_widget(self.placeholder)
+                    self.target = target
 
-                App.get_running_app().focus_widget(self.target)
+                App.get_running_app().focus_widget(target)
 
-            return True
+        return True
 
     def on_touch_up(self, touch):
         '''This is responsible for adding the widget to the parent
         '''
         if touch.grab_current is self:
             touch.ungrab(self)
-            self.target = self.playground.try_place_widget(
-                    self.children[0], self.center_x, self.y - 20)
+            widget_from = None
+            target = None
+            self.center_x = touch.x
+            self.y = touch.y + 20
+            local = self.playground.to_widget(self.center_x, self.y)
+            if self.center_x >= self.playground.x and self.y >= self.playground.y and \
+                self.center_x <= self.playground.right and self.y <= self.playground.top:
+                target = self.playground.try_place_widget(
+                        self.children[0], self.center_x, self.y - 20)
+                widget_from = 'playground'
+
+            else:
+                #self.widgettree.collide_point(self.center_x, self.y) not working :(
+                #had to use this method
+                if self.center_x >= self.widgettree.x and touch.y >= self.widgettree.y and \
+                   self.center_x <= self.widgettree.right and touch.y <= self.widgettree.top:
+                    node = self.widgettree.tree.get_node_at_pos((self.center_x, touch.y))
+                    if node:
+                        widget = node.node
+                        while widget and widget != self.playground.sandbox:
+                            if self.playground.allowed_target_for(widget, self.children[0]):
+                                target = widget
+                                widget_from = 'treeview'
+                                break
+
+                            widget = widget.parent
+
             parent = self.placeholder.parent
             index = -1
             
             if self.drag_type == 'dragndrop':
-                if self.target == self.drag_parent:
+                if target == self.drag_parent:
                     self.can_place = True
                 else:
                     self.can_place = False
             else: 
-                self.can_place = self.target is not None
+                self.can_place = target is not None
 
-            if parent:
+            if parent and self.target:
                 index = parent.children.index(self.placeholder)
-                parent.remove_widget(self.placeholder)
+                self.target.remove_widget(self.placeholder)
 
             if self.can_place or self.playground.root is None:
                 child = self.children[0]
                 child.parent.remove_widget(child)
+                child.parent = None
                 if self.drag_type == 'dragndrop':
                     if self.can_place and parent:
-                        self.playground.place_widget(
-                                child, self.center_x, self.y - 20,
-                                index=index)
+                        if widget_from == 'playground':
+                            self.playground.place_widget(
+                                    child, self.center_x, self.y - 20,
+                                    index=index)
+                        else:
+                            self.playground.add_widget_to_parent(child, target)
 
                     elif not self.can_place:
                         self.playground.undo_dragging()
 
                 else:
-                    self.playground.place_widget(
-                            child, self.center_x, self.y - 20)
+                    if widget_from == 'playground':
+                        self.playground.place_widget(
+                                child, self.center_x, self.y - 20)
+
+                    else:
+                        #self.playground.add_widget_to_parent(child, target)
+                        #doesn't work, don't know why :/. So, has to use this
+                        self.playground.add_widget_to_parent(type(child)(), target) 
 
             elif self.drag_type == 'dragndrop':
                 self.playground.undo_dragging()
 
             self.parent.remove_widget(self)
+            self.target = None
             return True
-
 
 class Playground(ScatterPlane):
     '''Playground represents the actual area where user will add and delete
@@ -323,13 +406,10 @@ class Playground(ScatterPlane):
             with self.sandbox:
                 if extra_args and self.from_drag:
                     self.drag_wigdet(widget, target, extra_args=extra_args)
+
                 else:
                     target.add_widget(widget)
                     added = True
-
-                #Added just for testing, clicking on the 
-                #playground will lead an error, but inside sandbox
-                #widget.bind(on_touch_down=widget)
 
         #self.tree.insert(widget, target)
         if not added:
@@ -340,7 +420,6 @@ class Playground(ScatterPlane):
         if not from_kv:
             self.kv_code_input.add_widget_to_parent(widget, target,
                                                     kv_str=kv_str)
-
         if not from_undo:
             root = App.get_running_app().root
             root.undo_manager.push_operation(WidgetOperation('add', 
@@ -409,7 +488,10 @@ class Playground(ScatterPlane):
                                                                        parent)
         if widget != self.root:
             parent = widget.parent
-            parent.remove_widget(widget)
+            if isinstance(parent.parent, Carousel):
+                parent.parent.remove_widget(widget)
+            else:
+                parent.remove_widget(widget)
         else:
             self.root.parent.remove_widget(self.root)
             self.root = None
@@ -442,14 +524,19 @@ class Playground(ScatterPlane):
                     return child
                 elif widget:
                     return target
+
+            elif isinstance(child.parent, Carousel):
+                return self.find_target(x, y, child, widget)
+
             else:
                 if not child.collide_point(x, y):
                     continue
     
-                if not self.allowed_target_for(child, widget):
+                if not self.allowed_target_for(child, widget) and not child.children:
                     continue
 
                 return self.find_target(x, y, child, widget)
+
         return target
     
     def _custom_widget_collides(self, widget, x, y):
@@ -492,10 +579,12 @@ class Playground(ScatterPlane):
         is_target_layout = isinstance(target, Layout)
         if is_widget_layout and is_target_layout:
             return True
-        if is_target_layout:
+
+        if is_target_layout or isinstance(target, Carousel):
             return True
+
         return False
-    
+
     def _keyboard_released(self, *args):
         '''Called when self.keyboard is released
         '''

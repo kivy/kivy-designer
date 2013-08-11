@@ -142,14 +142,14 @@
         padding: '4sp'
         Button:
             id: select
-            text: 'Create New project'
+            text: 'Create New Project'
             size_hint_x: None
-            width: '90pt'
+            width: '110pt'
         Button:
             id: cancel
             text: 'Cancel'
             size_hint_x: None
-            width: '90pt'
+            width: '110pt'
 
 <RecentDialog>:
     select_button: select
@@ -227,9 +227,6 @@
     ActionButton:
         text: 'Delete'
         on_press: root.dispatch('on_delete')
-    ActionButton:
-        text: 'Add Custom Widget'
-        on_press: root.dispatch('on_add_custom')
 
 <Playground>:
     do_scale: False
@@ -629,20 +626,24 @@
                     text: 'Project Tree and Toolbox'
                     minimum_width: 200
                     on_active: root.action_chk_btn_toolbox_active(self)
+
                 ActionCheckButton:
-                    text: 'Property Viewer'
+                    text: 'Properties and Events'
                     minimum_width: 150
                     on_active: root.action_chk_btn_property_viewer_active(self)
+
                 ActionCheckButton:
                     text: 'Widget Tree'
                     minimum_width: 150
                     on_active: root.action_chk_btn_widget_tree_active(self)
+
                 ActionCheckButton:
                     text: 'StatusBar'
                     minimum_width: 150
                     on_active: root.action_chk_btn_status_bar_active(self)
+
                 ActionCheckButton:
-                    text: 'KV Area'
+                    text: 'KV Lang Area'
                     minimum_width: 150
                     on_active: root.action_chk_btn_kv_area_active(self)
 
@@ -656,6 +657,10 @@
                     minimum_width: 150
                     on_press: root.action_btn_add_file_pressed()
                 
+                ActionButton:
+                    text: 'Add Custom Widget'
+                    on_press: root.action_btn_add_custom_widget_press()
+            
                 ActionButton:
                     text: 'Project Preferences'
                     minimum_width: 150

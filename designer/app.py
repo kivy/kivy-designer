@@ -18,6 +18,7 @@ from kivy.garden.filebrowser import FileBrowser
 from kivy.uix.popup import Popup
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.lang import Builder
+from kivy.uix.carousel import Carousel
 
 from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
@@ -234,9 +235,15 @@ class Designer(FloatLayout):
                 on_paste=self.action_btn_paste_pressed,
                 on_delete=self.action_btn_delete_pressed,
                 on_selectall=self.action_btn_select_all_pressed,
-                on_add_custom=self.action_btn_add_custom_widget_press)
+                on_next_screen=self._next_screen,
+                on_prev_screen=self._prev_screen)
 
         self.actionbar.add_widget(self.editcontview)
+
+        if isinstance(self.ui_creator.propertyviewer.widget, Carousel):
+            self.editcontview.show_action_btn_screen(True)
+        else:
+            self.editcontview.show_action_btn_screen(False)
 
         if self.ui_creator.kv_code_input.clicked:
             self._edit_selected = 'KV'
@@ -247,6 +254,17 @@ class Designer(FloatLayout):
 
         self.ui_creator.playground.clicked = False
         self.ui_creator.kv_code_input.clicked = False
+
+
+    def _prev_screen(self, *args):
+        widget = self.ui_creator.propertyviewer.widget
+        if isinstance(widget, Carousel):
+            widget.load_previous()
+     
+    def _next_screen(self, *args):
+        widget = self.ui_creator.propertyviewer.widget
+        if isinstance(widget, Carousel):
+            widget.load_next()
 
     def on_touch_down(self, touch):
         '''Override of FloatLayout.on_touch_down. Used to determine where
@@ -317,7 +335,7 @@ class Designer(FloatLayout):
 
         shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
-        
+
         with self.ui_creator.playground.sandbox:
             self.project_loader.load_new_project(os.path.join(new_proj_dir, 
                                                               "main.kv"))
@@ -503,6 +521,7 @@ class Designer(FloatLayout):
                 self.statusbar.show_message('Project saved successfully')
 
             except:
+                print 'sfsdfsdsdfsdf'
                 self.statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
@@ -536,8 +555,16 @@ class Designer(FloatLayout):
         proj_dir = os.path.join(proj_dir, instance.filename)
         try:
             self.project_loader.save_project(proj_dir)
-            self.statusbar.show_message('Project saved successfully')
             self.recent_manager.add_file(proj_dir)
+            projdir = self.project_loader.proj_dir
+            self.project_loader.cleanup()
+            self.ui_creator.playground.cleanup()
+            self.project_loader.load_project(projdir)
+            root_wigdet = self.project_loader.get_root_widget()
+            self.ui_creator.playground.add_widget_to_parent(root_wigdet,
+                                                            None,
+                                                            from_undo=True)
+            self.statusbar.show_message('Project saved successfully')
 
         except:
             self.statusbar.show_message('Cannot save project')
@@ -1026,7 +1053,9 @@ class DesignerApp(App):
             self.root.add_widget(container)
         else:
             self.root.statusbar.show_message("Cannot create %s"%widgetname)
-        
+
+        container.widgettree = self.root.ui_creator.widgettree
+
         return container
 
     def focus_widget(self, widget, *largs):

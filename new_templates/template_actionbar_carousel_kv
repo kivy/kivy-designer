@@ -26,9 +26,12 @@
         id: carousel
         pos_hint: {'top': 0.9}
         on_index: root.on_index(*args)
-        Button:
-            text: 'Slide one'
-        Button:
-            text: 'Slide Two'
-        Button:
-            text: 'Slide three'
+        BoxLayout:
+            Button:
+                text: 'Slide One'
+        BoxLayout:
+            Button:
+                text: 'Slide Two'
+        BoxLayout:
+            Button:
+                text: 'Slide three'

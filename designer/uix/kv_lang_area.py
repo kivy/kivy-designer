@@ -7,6 +7,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.factory import Factory
 from kivy.clock import Clock
+from kivy.uix.carousel import Carousel
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
@@ -60,9 +61,24 @@ class KVLangArea(DesignerCodeInput):
         path_to_widget = []
         _widget = widget
         while _widget and _widget != self.playground.sandbox:
-            place = len(_widget.parent.children) - _widget.parent.children.index(_widget) - 1
-            path_to_widget.append(place)
-            _widget = _widget.parent
+            if not _widget.parent:
+                break
+
+            if isinstance(_widget.parent.parent, Carousel):
+                parent = _widget.parent
+                try:
+                    place = parent.parent.slides.index(_widget)
+
+                except ValueError:
+                    place = 0
+
+                path_to_widget.append(place)
+                _widget = _widget.parent.parent
+
+            else:
+                place = len(_widget.parent.children) - _widget.parent.children.index(_widget) - 1
+                path_to_widget.append(place)
+                _widget = _widget.parent
 
         return path_to_widget
     
@@ -110,7 +126,6 @@ class KVLangArea(DesignerCodeInput):
            It will search for line where parent is defined in text and will add
            widget there.
         '''
-
         text = re.sub(r'#.+', '', self.text)
         lines = text.splitlines()
         total_lines = len(lines)
@@ -121,7 +136,8 @@ class KVLangArea(DesignerCodeInput):
 
         #If target is not none then widget is not root widget
         if target:
-            path_to_widget = self._get_widget_path(widget.parent)
+            path_to_widget = self._get_widget_path(target)
+
             path_to_widget.reverse()
 
             root_lineno = 0
@@ -131,11 +147,11 @@ class KVLangArea(DesignerCodeInput):
                 if pos != -1 and get_indentation(line) == 0:
                     root_lineno = lineno
                     break
-        
+
             parent_lineno = self._find_widget_place(path_to_widget, lines,
                                                     total_lines,
                                                     root_lineno + 1)
-            
+
             if parent_lineno >= total_lines:
                 return
     
@@ -145,16 +161,18 @@ class KVLangArea(DesignerCodeInput):
             if parent_line.find(':') == -1:
                 #If parent_line doesn't contain ':' then insert it
                 #Also insert widget's rule after its properties
-                insert_after_line = parent_line
+                insert_after_line = parent_lineno
                 _line = 0
                 _line_pos = -1
                 _line_pos = self.text.find('\n', _line_pos + 1)
+
                 while _line <= insert_after_line:
                     _line_pos = self.text.find('\n', _line_pos + 1)
                     _line += 1
-    
+
                 self.text = self.text[:_line_pos] + ':' + self.text[_line_pos:]
-    
+                indent = len(parent_line) - len(parent_line.lstrip())
+
             else:
                 #If ':' in parent_line then, find a place to insert widget's rule
                 indent = len(parent_line) - len(parent_line.lstrip())
@@ -179,7 +197,7 @@ class KVLangArea(DesignerCodeInput):
                 to_insert = type(widget).__name__ + ':'
             else:
                 to_insert = kv_str.strip()
-    
+
             if insert_after_line == total_lines - 1:
                 #if inserting at the last line
                 _line_pos = len(self.text) - 1
