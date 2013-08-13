@@ -78,7 +78,7 @@ class UICreator(FloatLayout):
         Clock.schedule_once(self._setup_everything)
     
     def reload_btn_pressed(self, *args):
-        self.kv_code_input.reload_kv()
+        self.kv_code_input.func_reload_kv()
 
     def on_touch_down(self, *args):
         if self.playground and self.playground.keyboard:
@@ -102,4 +102,3 @@ class UICreator(FloatLayout):
         self.playground.widgettree = self.widgettree
         self.propertyviewer.kv_code_input = self.kv_code_input
         self.eventviewer.kv_code_input = self.kv_code_input
-        print self.eventviewer.kv_code_input, 'kkkkk'

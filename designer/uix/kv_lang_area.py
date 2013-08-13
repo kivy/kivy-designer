@@ -44,7 +44,7 @@ class KVLangArea(DesignerCodeInput):
 
     def __init__(self, **kwargs):
         super(KVLangArea, self).__init__(**kwargs)
-        self._reload_trigger = Clock.create_trigger(self.reload_kv, 1)
+        self._reload_trigger = Clock.create_trigger(self.func_reload_kv, 1)
         self.bind(text=self._reload_trigger)
 
     def _get_widget_path(self, widget):
@@ -86,6 +86,9 @@ class KVLangArea(DesignerCodeInput):
         '''This function will shift widget's kv str from one position
            to another.
         '''
+        print 'shifting widget', widget, from_index
+        self._reload = False
+
         path = self._get_widget_path(widget)
         path.reverse()
         prev_path = [x for x in path]
@@ -112,7 +115,7 @@ class KVLangArea(DesignerCodeInput):
                 if pos != -1 and get_indentation(line) == 0:
                     root_lineno = lineno
                     break
-            
+
             next_widget_path = path
             lineno = self._find_widget_place(next_widget_path, lines, 
                                              total_lines,
@@ -350,7 +353,7 @@ class KVLangArea(DesignerCodeInput):
         
         return widget
 
-    def reload_kv(self, *args):
+    def func_reload_kv(self, *args):
         if not self.reload_kv:
             return
 
@@ -360,7 +363,8 @@ class KVLangArea(DesignerCodeInput):
         if not self._reload:
             self._reload = True
             return
-
+        
+        print 'reloading'
         statusbar = self.statusbar
 
         playground = self.playground

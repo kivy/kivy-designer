@@ -67,6 +67,9 @@ class PlaygroundDragElement(BoxLayout):
         self.placeholder = Placeholder()
 
     def is_intersecting_playground(self, x, y):
+        if not self.playground:
+            return False
+
         if self.playground.x <= x <= self.playground.right and\
             self.playground.y <= y <= self.playground.top:
             return True
@@ -74,7 +77,9 @@ class PlaygroundDragElement(BoxLayout):
         return False
 
     def is_intersecting_widgettree(self, x, y):
-        #print self.widgettree
+        if not self.widgettree:
+            return False
+
         if self.widgettree.x <= x <= self.widgettree.right and\
             self.widgettree.y <= y <= self.widgettree.top:
             return True
@@ -93,7 +98,7 @@ class PlaygroundDragElement(BoxLayout):
             local = self.playground.to_widget(self.center_x, self.y)
             if self.is_intersecting_playground(self.center_x, self.y):
                 target = self.playground.try_place_widget(
-                        self.children[0], self.center_x, self.y - 20)
+                        self.placeholder, self.center_x, self.y - 20)
 
             else:
                 #self.widgettree.collide_point(self.center_x, self.y) not working :(
@@ -103,20 +108,14 @@ class PlaygroundDragElement(BoxLayout):
                     if node:
                         while node and node.node != self.playground.sandbox:
                             widget = node.node
-                            if self.playground.allowed_target_for(widget, self.children[0]):
+                            if self.playground.allowed_target_for(widget, self.placeholder):
                                 target = widget
                                 break
 
                             node = node.parent_node
 
             if self.drag_type == 'dragndrop':
-                if not self.drag_parent:
-                    self.drag_parent = target
-
-                if target == self.drag_parent:
-                    self.can_place = True
-                else:
-                    self.can_place = False
+                self.can_place = target == self.drag_parent
 
             else: 
                 self.can_place = target is not None
@@ -144,7 +143,12 @@ class PlaygroundDragElement(BoxLayout):
 
                     else:
                         if self.is_intersecting_widgettree(self.center_x, self.y):
-                            target.add_widget(self.placeholder)
+                            node = self.widgettree.tree.get_node_at_pos((self.center_x, touch.y))
+                            if node:
+                                target2 = node.node
+                                if target2.parent:
+                                    target.add_widget(self.placeholder,
+                                                      target2.parent.children.index(target2))
 
                 elif self.drag_type != 'dragndrop':
                     target.add_widget(self.placeholder)
@@ -188,18 +192,23 @@ class PlaygroundDragElement(BoxLayout):
 
             parent = self.placeholder.parent
             index = -1
-            
+
             if self.drag_type == 'dragndrop':
-                if target == self.drag_parent:
-                    self.can_place = True
-                else:
-                    self.can_place = False
+                self.can_place = target == self.drag_parent
             else: 
                 self.can_place = target is not None
+            
+            try:
+                if self.target:
+                    index = self.target.children.index(self.placeholder)
+                    self.target.remove_widget(self.placeholder)
+    
+                elif self.placeholder.parent:
+                    index = parent.children.index(self.placeholder)
+                    self.placeholder.parent.remove_widget(self.placeholder)
 
-            if parent and self.target:
-                index = parent.children.index(self.placeholder)
-                self.target.remove_widget(self.placeholder)
+            except ValueError:
+                pass
 
             if self.can_place or self.playground.root is None:
                 child = self.children[0]
@@ -212,7 +221,9 @@ class PlaygroundDragElement(BoxLayout):
                                     child, self.center_x, self.y - 20,
                                     index=index)
                         else:
-                            self.playground.add_widget_to_parent(child, target)
+                            self.playground.place_widget(
+                                    child, self.center_x, self.y - 20,
+                                    index=index, target=target)
 
                     elif not self.can_place:
                         self.playground.undo_dragging()
@@ -328,12 +339,14 @@ class Playground(ScatterPlane):
         x, y = self.to_local(x, y)
         return self.find_target(x, y, self.root, widget)
 
-    def place_widget(self, widget, x, y, index = 0):
+    def place_widget(self, widget, x, y, index=0, target=None):
         '''This function is used to first determine the target where to add 
            the widget. Then it add that widget.
         '''
         local_x, local_y = self.to_local(x, y)
-        target = self.find_target(local_x, local_y, self.root, widget)
+        if not target:
+            target = self.find_target(local_x, local_y, self.root, widget)
+
         if not self.from_drag:
             #wx, wy = target.to_widget(x, y)
             #widget.pos = wx, wy
@@ -663,7 +676,7 @@ class Playground(ScatterPlane):
             while parent:
                 if isinstance(parent, Layout) and not is_child_custom:
                     break
-                    
+
                 parent = parent.parent
                 is_child_custom = False
                 for rule in class_rules:
@@ -701,6 +714,13 @@ class Playground(ScatterPlane):
         if self.selected_widget:
             self.remove_widget_from_parent(self.selected_widget)
     
+    def on_touch_move(self, touch):
+        if self.widgettree.dragging == True:
+            return True
+        
+        super(Playground, self).on_touch_move(touch)
+        return False
+
     def on_touch_up(self, touch):
         if super(ScatterPlane, self).collide_point(*touch.pos):
             self.dragging = False
@@ -731,6 +751,7 @@ class Playground(ScatterPlane):
                 '', self.touch, self.selected_widget)
 
             drag_elem.drag_type = 'dragndrop'
+            drag_elem.drag_parent = self.drag_operation[1]
             self.dragging = True
             self.from_drag = True
 

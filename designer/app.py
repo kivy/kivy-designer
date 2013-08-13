@@ -1055,7 +1055,6 @@ class DesignerApp(App):
             self.root.statusbar.show_message("Cannot create %s"%widgetname)
 
         container.widgettree = self.root.ui_creator.widgettree
-
         return container
 
     def focus_widget(self, widget, *largs):

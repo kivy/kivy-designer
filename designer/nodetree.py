@@ -1,7 +1,8 @@
 from kivy.uix.treeview import TreeViewLabel
 from kivy.uix.scrollview import ScrollView
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.app import App
+from kivy.clock import Clock
 
 from designer.uix.placeholder import Placeholder
 
@@ -29,6 +30,8 @@ class WidgetsTree(ScrollView):
     '''Reference to :class:`~designer.project_loader.ProjectLoader` instance.
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    dragging = BooleanProperty(False)
 
     def recursive_insert(self, node, treenode):
         '''This function will add a node to TreeView, by recursively travelling
@@ -62,3 +65,28 @@ class WidgetsTree(ScrollView):
             self.tree.remove_node(node)
 
         self.recursive_insert(self.playground.root, self.tree.root)
+
+    def on_touch_up(self, touch):
+        self.dragging = False
+        if self.collide_point(*touch.pos):
+            super(WidgetsTree, self).on_touch_up(touch)
+
+        return False
+
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos) and not self.dragging:
+            self.dragging = True
+            self.touch = touch
+            Clock.schedule_once(self._start_dragging, 2)
+            super(WidgetsTree, self).on_touch_down(touch)
+
+        return False
+                
+    def _start_dragging(self, *args):
+        if self.dragging:
+            node = self.tree.get_node_at_pos((self.touch.x, self.touch.y))
+            if node:
+                self.playground.selected_widget = node.node
+                self.playground.dragging = False
+                self.playground.touch = self.touch
+                self.playground.start_widget_dragging()
