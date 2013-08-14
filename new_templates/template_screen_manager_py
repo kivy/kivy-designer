@@ -3,13 +3,6 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import NumericProperty
 from kivy.lang import Builder
 
-class CustomScreen(Screen):
-    '''This is the class representing root widget. This class is the
-       main screen class which will show different screens. Modify this
-       class if you want to modify every screen's behaviour.
-    '''
-    hue = NumericProperty(0)
-
 class RootWidget(ScreenManager):
     '''This the class representing your root widget.
        By default it is inherited from ScreenManager,

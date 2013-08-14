@@ -8,6 +8,7 @@ from kivy.lang import Builder
 from kivy.factory import Factory
 from kivy.clock import Clock
 from kivy.uix.carousel import Carousel
+from kivy.uix.screenmanager import ScreenManager
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
@@ -74,6 +75,17 @@ class KVLangArea(DesignerCodeInput):
 
                 path_to_widget.append(place)
                 _widget = _widget.parent.parent
+            
+            elif isinstance(_widget.parent, ScreenManager):
+                parent = _widget.parent
+                try:
+                    place = parent.screens.index(_widget)
+                    
+                except ValueError:
+                    place = 0
+                
+                path_to_widget.append(place)
+                _widget = _widget.parent
 
             else:
                 place = len(_widget.parent.children) - _widget.parent.children.index(_widget) - 1

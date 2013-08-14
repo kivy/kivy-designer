@@ -19,6 +19,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.lang import Builder
 from kivy.uix.carousel import Carousel
+from kivy.uix.screenmanager import ScreenManager
 
 from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
@@ -240,7 +241,8 @@ class Designer(FloatLayout):
 
         self.actionbar.add_widget(self.editcontview)
 
-        if isinstance(self.ui_creator.propertyviewer.widget, Carousel):
+        if isinstance(self.ui_creator.propertyviewer.widget, Carousel) or\
+            isinstance(self.ui_creator.propertyviewer.widget, ScreenManager):
             self.editcontview.show_action_btn_screen(True)
         else:
             self.editcontview.show_action_btn_screen(False)
@@ -260,11 +262,17 @@ class Designer(FloatLayout):
         widget = self.ui_creator.propertyviewer.widget
         if isinstance(widget, Carousel):
             widget.load_previous()
+
+        elif isinstance(widget, ScreenManager):
+            widget.current = widget.previous()
      
     def _next_screen(self, *args):
         widget = self.ui_creator.propertyviewer.widget
         if isinstance(widget, Carousel):
             widget.load_next()
+
+        elif isinstance(widget, ScreenManager):
+            widget.current = widget.next()
 
     def on_touch_down(self, touch):
         '''Override of FloatLayout.on_touch_down. Used to determine where

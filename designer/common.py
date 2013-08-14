@@ -19,6 +19,9 @@ widgets = [
     ('BoxLayout', 'layout'),
     ('AnchorLayout', 'layout'),
     ('StackLayout', 'layout'),
+    ('ScreenManager', 'complex'),
+    ('Carousel', 'complex'),
+    ('Screen', 'complex'),
     ('Bubble', 'complex'),
     ('DropDown', 'complex'),
     ('FileChooserListView', 'complex'),
@@ -31,5 +34,4 @@ widgets = [
     #('VKeybord', 'complex'),
     #('Scatter', 'behavior'),
     #('StencilView', 'behavior'),
-    #('ScreenManager', 'screenmanager'),
 ]
