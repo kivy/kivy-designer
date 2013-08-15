@@ -3,6 +3,7 @@ import time
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+import traceback
 
 class ProjectEventHandler(FileSystemEventHandler):
     '''ProjectEventHandler is the event handler for any event occurring on
@@ -29,9 +30,10 @@ class ProjectWatcher(object):
     def __init__(self, callback):
         super(ProjectWatcher, self).__init__()
         self.proj_event = None
-        self._observer = Observer()
-        self._event_handler = ProjectEventHandler(self._observer, self)
+        self._observer = None
+        self._event_handler = None
         self._callback = callback
+        self.allow_event_dispatch = True
 
     def start_watching(self, project_dir):
         '''To start watching project_dir.
@@ -40,13 +42,8 @@ class ProjectWatcher(object):
         self._observer = Observer()
         self._event_handler = ProjectEventHandler(self._observer, self)
         self._watch = self._observer.schedule(self._event_handler,
-                                              project_dir, recursive=True)
+                                              self._project_dir, recursive=True)
         self._observer.start()
-
-    def stop_current_watching(self):
-        '''To stop watching currently watched directory.
-        '''
-        self.stop()
 
     def on_project_modified(self, *args):
         pass
@@ -56,22 +53,20 @@ class ProjectWatcher(object):
         '''
         self.proj_event = event
         #Do not dispatch event if '.designer' is modified
-        if '.designer' not in event.src_path:
+        if '.designer' not in event.src_path and self.allow_event_dispatch:
             self._callback(event)
 
-    def start(self):
-        self._observer.start()
-    
     def stop(self):
         '''To stop watching currently watched directory. This will also call
            join() on the thread created by Observer.
         '''
-        try:
+
+        if self._observer:
+            self._observer.unschedule_all()
             self._observer.stop()
             self.join()
-        except:
-            pass
+
+        self._observer = None
 
     def join(self):
         self._observer.join()
-        

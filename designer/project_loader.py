@@ -523,7 +523,7 @@ class ProjectLoader(object):
         '''
 
         #To stop ProjectWatcher from emitting event when project is saved
-        self.proj_watcher.stop()
+        self.proj_watcher.allow_event_dispatch = False
         proj_dir_changed = False
 
         if self.new_project:
@@ -856,8 +856,9 @@ class ProjectLoader(object):
     def _allow_proj_watcher_dispatch(self, *args):
         '''To start project_watcher to start watching self.proj_dir
         '''
-
-        self.proj_watcher.start_watching(self.proj_dir)
+        
+        self.proj_watcher.allow_event_dispatch = True
+        #self.proj_watcher.start_watching(self.proj_dir)
 
     def _app_in_string(self, s):
         '''To determine if there is an App class or runTouchApp
@@ -985,12 +986,14 @@ class ProjectLoader(object):
         module = __import__(module_name, fromlist=_fromlist)
         return module
 
-    def cleanup(self):
+    def cleanup(self, stop_watcher=True):
         '''To cleanup everything loaded by previous project.
         '''
-
-        self.proj_watcher.stop_current_watching()
         
+        print 'cleanup'
+        if stop_watcher:
+            self.proj_watcher.stop()
+
         #Remove all class rules and root rules of previous project
         rules = []
 
@@ -1031,6 +1034,7 @@ class ProjectLoader(object):
         self.dict_file_type_and_path = {}
         self.root_rule = None
         self._root_rule = None
+        print 'asdfgl'
 
     def get_app(self, reload_app=False):
         '''To get the applications app class instance

@@ -128,7 +128,7 @@ class Designer(FloatLayout):
         self.recent_manager = RecentManager()
         self.widget_to_paste = None
         self.designer_content = DesignerContent(size_hint=(1, None))
-        
+
         self.designer_settings = DesignerSettings()
         self.designer_settings.bind(on_config_change=self._config_change)
         self.designer_settings.load_settings()
@@ -215,8 +215,9 @@ class Designer(FloatLayout):
 
         #Perform reload of project after it is modified
         self._popup.dismiss()
-        self.project_watcher.stop_current_watching()
+        self.project_watcher.allow_event_dispatch = False
         self._perform_open(self.project_loader.proj_dir)
+        self.project_watcher.allow_event_dispatch = True
         self._proj_modified_outside = False
 
     def on_show_edit(self, *args):
@@ -516,7 +517,7 @@ class Designer(FloatLayout):
                 else:
                     self.project_loader.save_project()
                     projdir = self.project_loader.proj_dir
-                    self.project_loader.cleanup()
+                    self.project_loader.cleanup(stop_watcher=False)
                     self.ui_creator.playground.cleanup()
                     self.project_loader.load_project(projdir)
                     root_wigdet = self.project_loader.get_root_widget()
