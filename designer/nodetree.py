@@ -69,6 +69,7 @@ class WidgetsTree(ScrollView):
     def on_touch_up(self, touch):
         self.dragging = False
         if self.collide_point(*touch.pos):
+            Clock.unschedule(self._start_dragging)
             super(WidgetsTree, self).on_touch_up(touch)
 
         return False
@@ -81,7 +82,7 @@ class WidgetsTree(ScrollView):
             super(WidgetsTree, self).on_touch_down(touch)
 
         return False
-                
+
     def _start_dragging(self, *args):
         if self.dragging:
             node = self.tree.get_node_at_pos((self.touch.x, self.touch.y))

@@ -267,6 +267,8 @@ class PlaygroundDragElement(BoxLayout):
 
                     elif not self.can_place:
                         self.playground.undo_dragging()
+                    
+                    self.playground.drag_operation = []
 
                 else:
                     if widget_from == 'playground':
@@ -332,7 +334,7 @@ class Playground(ScatterPlane):
        :data:`from_drag` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
-    drag_operation = ListProperty(())
+    drag_operation = ListProperty((), allownone=True)
     '''Stores data of drag_operation in form of a tuple.
        drag_operation[0] is the widget which has been dragged.
        drag_operation[1] is the parent of above widget.
@@ -731,7 +733,7 @@ class Playground(ScatterPlane):
                                           parent,
                                           kv_str=self._widget_str_to_paste)
                 self.widget_to_paste = None
-    
+
     def do_cut(self):
         '''Cuts the selected widget
         '''
@@ -743,23 +745,23 @@ class Playground(ScatterPlane):
                 get_widget_text_from_kv(base_widget, None)
 
             self.remove_widget_from_parent(base_widget)
-    
+
     def do_select_all(self):
         '''Select All widgets which basically means selecting root widget
         '''
         self.selected_widget = self.root
         App.get_running_app().focus_widget(self.root)
-    
+
     def do_delete(self):
         '''Delete the selected widget
         '''
         if self.selected_widget:
             self.remove_widget_from_parent(self.selected_widget)
-    
+
     def on_touch_move(self, touch):
         if self.widgettree.dragging == True:
             return True
-        
+
         super(Playground, self).on_touch_move(touch)
         return False
 
@@ -769,18 +771,19 @@ class Playground(ScatterPlane):
             Clock.unschedule(self.start_widget_dragging)
 
         return super(Playground, self).on_touch_up(touch)
-    
+
     def undo_dragging(self):
         '''To undo the last dragging operation if it has not been completed.
         '''
         self.drag_operation[0].parent = None
         self.drag_operation[1].add_widget(self.drag_operation[0], self.drag_operation[2])
+        self.drag_operation = []
 
     def start_widget_dragging(self, *args):
         '''This function will create PlaygroundDragElement
            which will start dragging currently selected widget.
         '''
-        if not self.dragging:
+        if not self.dragging and not self.drag_operation:
             #x, y = self.to_local(*touch.pos)
             #target = self.find_target(x, y, self.root)
             drag_widget = self.selected_widget
@@ -796,6 +799,7 @@ class Playground(ScatterPlane):
             drag_elem.drag_parent = self.drag_operation[1]
             self.dragging = True
             self.from_drag = True
+            App.get_running_app().focus_widget(None)
 
     def on_touch_down(self, touch):
         '''An override of ScatterPlane's on_touch_down.
