@@ -288,8 +288,7 @@ class KivyConsole(GridLayout):
         tihb.text = ''.join(self.textcache)
         if not self.get_root_window():
             return
-        tihb.height = max((len(tihb._lines) + 1) *
-            (tihb.line_height + tihb._line_spacing), tihb.parent.height)
+        tihb.height = max(tihb.minimum_height, tihb.parent.height)
         tihb.parent.scroll_y = 0
 
     def on_text(self, instance, txt):

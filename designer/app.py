@@ -394,7 +394,7 @@ class Designer(FloatLayout):
         self._confirm_dlg.bind(on_ok=self._show_open_dialog,
                                on_cancel=self._cancel_popup)
 
-        self._popup = Popup(title='New', content = self._confirm_dlg, 
+        self._popup = Popup(title='Kivy Designer', content = self._confirm_dlg, 
                             size_hint=(None,None),size=('200pt', '150pt'),
                             auto_dismiss=False)
         self._popup.open()
@@ -410,7 +410,7 @@ class Designer(FloatLayout):
         self._fbrowser.bind(on_success=self._fbrowser_load,
                             on_canceled=self._cancel_popup)
 
-        self._popup = Popup(title="Open File", content = self._fbrowser,
+        self._popup = Popup(title="Open", content = self._fbrowser,
                             size_hint=(0.9, 0.9), auto_dismiss=False)
         self._popup.open()
     
@@ -530,7 +530,6 @@ class Designer(FloatLayout):
                 self.statusbar.show_message('Project saved successfully')
 
             except:
-                print 'sfsdfsdsdfsdf'
                 self.statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
@@ -686,7 +685,7 @@ class Designer(FloatLayout):
 
         if self._edit_selected == 'Play':
             self.ui_creator.playground.do_paste()
-         
+
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_paste()
 
@@ -702,7 +701,7 @@ class Designer(FloatLayout):
 
         if self._edit_selected == 'Play':
             self.ui_creator.playground.do_delete()
-        
+
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_delete()
 
@@ -747,7 +746,7 @@ class Designer(FloatLayout):
 
         file_path = instance.selection[0]
         self._popup.dismiss()
-        
+
         with self.ui_creator.playground.sandbox:
             try:
                 self.project_loader.add_custom_widget(file_path)
@@ -790,7 +789,7 @@ class Designer(FloatLayout):
                 add_tree = True
                 self.ui_creator.splitter_property.size_hint_y = None
                 self.ui_creator.splitter_property.height = 300
-            
+
             self._splitter_property_parent.clear_widgets()
             if add_tree:
                 self._splitter_property_parent.add_widget(self.ui_creator.grid_widget_tree)
@@ -810,7 +809,7 @@ class Designer(FloatLayout):
             add_prop = False
             if self.ui_creator.splitter_property.parent is not None:
                 add_prop = True
-    
+
             self._grid_widget_tree_parent.clear_widgets()
             self._grid_widget_tree_parent.add_widget(self.ui_creator.grid_widget_tree)
             if add_prop:
@@ -839,7 +838,7 @@ class Designer(FloatLayout):
         elif self.ui_creator.splitter_widget_tree.parent is None:
             self._splitter_widget_tree_parent.add_widget(self.ui_creator.splitter_widget_tree)
             self.ui_creator.splitter_widget_tree.width = self._splitter_widget_tree_width
-            
+
     def action_chk_btn_status_bar_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "StatusBar" is activated.
         '''
@@ -1025,7 +1024,7 @@ class DesignerApp(App):
                   self.root.ui_creator.eventviewer.setter('widget'))
 
         self.focus_widget(self.root.ui_creator.playground.root)
-        
+
         self.create_kivy_designer_dir()
 
     def create_kivy_designer_dir(self):
@@ -1082,6 +1081,7 @@ class DesignerApp(App):
 
         if not widget:
             return
+
         x, y = widget.pos
         right, top = widget.right, widget.top
         points = [x, y, right, y, right, top, x, top]

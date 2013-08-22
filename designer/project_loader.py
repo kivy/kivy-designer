@@ -989,8 +989,7 @@ class ProjectLoader(object):
     def cleanup(self, stop_watcher=True):
         '''To cleanup everything loaded by previous project.
         '''
-        
-        print 'cleanup'
+
         if stop_watcher:
             self.proj_watcher.stop()
 
@@ -1131,7 +1130,6 @@ class ProjectLoader(object):
         '''
         
         if not new_root and self.root_rule and self.root_rule.name != '':
-            print 'khkhkhkkhkh'
             return self.root_rule.widget
             
         if self._app_file == None:

@@ -454,7 +454,7 @@
                                 KVLangArea:
                                     id: code_input
                                     size_hint_y: None
-                                    height: max(scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
+                                    height: max(scroll.height, self.minimum_height)
                                     on_show_edit: root.on_show_edit()
                             
                             Button:
@@ -478,7 +478,7 @@
                             CodeInput:
                                 id: error_console
                                 size_hint_y: None
-                                height: max(e_scroll.height, (len(self._lines)+1) * (self.line_height + self._line_spacing))
+                                height: max(e_scroll.height, self.minimum_height)
                                 text: ''
    
             Splitter:
