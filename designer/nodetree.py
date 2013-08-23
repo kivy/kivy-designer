@@ -33,6 +33,9 @@ class WidgetsTree(ScrollView):
     
     dragging = BooleanProperty(False)
 
+    selected_widget = ObjectProperty(allownone=True)
+    
+
     def recursive_insert(self, node, treenode):
         '''This function will add a node to TreeView, by recursively travelling
            through the Root Widget's Tree.
@@ -79,15 +82,19 @@ class WidgetsTree(ScrollView):
             self.dragging = True
             self.touch = touch
             Clock.schedule_once(self._start_dragging, 2)
+            node = self.tree.get_node_at_pos((self.touch.x, self.touch.y))
+            if node:
+                self.selected_widget = node.node
+            else:
+                self.selected_widget = None
+
             super(WidgetsTree, self).on_touch_down(touch)
 
         return False
 
     def _start_dragging(self, *args):
-        if self.dragging:
-            node = self.tree.get_node_at_pos((self.touch.x, self.touch.y))
-            if node:
-                self.playground.selected_widget = node.node
-                self.playground.dragging = False
-                self.playground.touch = self.touch
-                self.playground.start_widget_dragging()
+        if self.dragging and self.selected_widget:
+            self.playground.selected_widget = self.selected_widget
+            self.playground.dragging = False
+            self.playground.touch = self.touch
+            self.playground.start_widget_dragging()

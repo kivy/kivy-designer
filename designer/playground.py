@@ -244,7 +244,7 @@ class PlaygroundDragElement(BoxLayout):
 
                 self.target.remove_widget(self.placeholder)
                 if isinstance(self.target, ScreenManager):
-                        self.target.real_remove_widget(self.placeholder)
+                    self.target.real_remove_widget(self.placeholder)
 
             elif parent:
                 index = parent.children.index(self.placeholder)
@@ -783,7 +783,7 @@ class Playground(ScatterPlane):
         '''This function will create PlaygroundDragElement
            which will start dragging currently selected widget.
         '''
-        if not self.dragging and not self.drag_operation:
+        if not self.dragging and not self.drag_operation and self.selected_widget:
             #x, y = self.to_local(*touch.pos)
             #target = self.find_target(x, y, self.root)
             drag_widget = self.selected_widget
