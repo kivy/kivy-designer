@@ -23,14 +23,34 @@ class RootWidget(FloatLayout):
             action_previous = actionbar.ActionPrevious(title='Go Back'))
 
         self.action_bar.bind(on_previous=self.on_previous)
+        self.prev_index = 0
+        self.from_actionbar = False
 
     def on_index(self, instance, value):
         if value == 2:
             self.action_bar.add_widget(self.cont2)
+
         elif value == 1:
-            self.action_bar.add_widget(self.cont1)
+            if self.prev_index == 0:
+                self.action_bar.add_widget(self.cont1)
+
+            elif not self.from_actionbar:
+                try:
+                    self.action_bar.on_previous()
+                except:
+                    pass
+        
+        elif self.from_actionbar == False:
+                try:
+                    self.action_bar.on_previous()
+                except:
+                    pass
+        
+        self.prev_index = value
+        self.from_actionbar = False
 
     def on_previous(self, *args):
+        self.from_actionbar = True
         self.carousel.load_previous()
 
 class MainApp(App):
