@@ -89,6 +89,7 @@ class ProjectLoader(object):
         self.tab_pannel = None
         self._root_rule = None
         self.file_list = []
+        self.proj_dir = ""
 
     def _get_file_list(self, path):
         '''This function is recursively called for loading all py file files

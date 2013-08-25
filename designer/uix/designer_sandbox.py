@@ -1,4 +1,5 @@
 from kivy.uix.sandbox import Sandbox
+from kivy.properties import BooleanProperty
 
 class DesignerSandbox(Sandbox):
     '''DesignerSandbox is subclass of :class:`~kivy.uix.sandbox.Sandbox`
@@ -7,7 +8,8 @@ class DesignerSandbox(Sandbox):
     '''
 
     __events__ = ('on_getting_exception',)
-    
+    error_active = BooleanProperty(False)
+
     def __exit__(self, _type, value, tb):
         self._context.pop()
         #print 'EXITING THE SANDBOX', (self, _type, value, tb)

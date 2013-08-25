@@ -315,7 +315,7 @@ class Designer(FloatLayout):
         self._new_dialog.bind(on_select=self._perform_new,
                                on_cancel=self._cancel_popup)
         self._popup = Popup(title='New Project', content = self._new_dialog, 
-                            size_hint=(None,None),size=('600pt', '400pt'),
+                            size_hint=(None,None),size=('650pt', '450pt'),
                             auto_dismiss=False)
         self._popup.open()
 
@@ -344,7 +344,8 @@ class Designer(FloatLayout):
 
         shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
-
+        
+        self.ui_creator.playground.sandbox.error_active = True
         with self.ui_creator.playground.sandbox:
             self.project_loader.load_new_project(os.path.join(new_proj_dir, 
                                                               "main.kv"))
@@ -354,6 +355,8 @@ class Designer(FloatLayout):
             self.ui_creator.kv_code_input.text = self.project_loader.get_full_str()
             self.designer_content.update_tree_view(self.project_loader)
             self._add_designer_content()
+        
+        self.ui_creator.playground.sandbox.error_active = False
 
     def cleanup(self):
         '''To cleanup everything loaded by the current project before loading
@@ -407,6 +410,16 @@ class Designer(FloatLayout):
             self._popup.dismiss()
 
         self._fbrowser = FileBrowser(select_string='Open')
+
+        def_path = os.getcwd() 
+        if not self.project_loader.new_project and self.project_loader.proj_dir:
+            def_path = self.project_loader.proj_dir            
+        
+        if self._fbrowser.ids.tabbed_browser.current_tab.text == 'List View':
+            self._fbrowser.ids.list_view.path = def_path
+        else:
+            self._fbrowser.ids.icon_view.path = def_path
+
         self._fbrowser.bind(on_success=self._fbrowser_load,
                             on_canceled=self._cancel_popup)
 
@@ -452,6 +465,8 @@ class Designer(FloatLayout):
                 widgets.remove(widget)
 
         self.cleanup()
+        
+        self.ui_creator.playground.sandbox.error_active = True
 
         with self.ui_creator.playground.sandbox:
             try:
@@ -486,7 +501,7 @@ class Designer(FloatLayout):
                                                                     None,
                                                                     from_undo=True)
                     self.ui_creator.kv_code_input.text = self.project_loader.get_full_str()
-                
+
                 self.recent_manager.add_file(file_path)
                 #Record everything for later use
                 self.project_loader.record()
@@ -495,6 +510,8 @@ class Designer(FloatLayout):
 
             except Exception as e:
                 self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
+        
+        self.ui_creator.playground.sandbox.error_active = False
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content
@@ -538,7 +555,18 @@ class Designer(FloatLayout):
 
         if self.project_loader.root_rule:
             self._curr_proj_changed = False
+
             self._save_as_browser = FileBrowser(select_string='Save')
+
+            def_path = os.getcwd() 
+            if not self.project_loader.new_project and self.project_loader.proj_dir:
+                def_path = self.project_loader.proj_dir
+
+            if self._save_as_browser.ids.tabbed_browser.current_tab.text == 'List View':
+                self._save_as_browser.ids.list_view.path = def_path
+            else:
+                self._save_as_browser.ids.icon_view.path = def_path
+
             self._save_as_browser.bind(on_success=self._perform_save_as,
                                        on_canceled=self._cancel_popup)
     
@@ -746,6 +774,8 @@ class Designer(FloatLayout):
 
         file_path = instance.selection[0]
         self._popup.dismiss()
+        
+        self.ui_creator.playground.sandbox.error_active = True
 
         with self.ui_creator.playground.sandbox:
             try:
@@ -759,6 +789,8 @@ class Designer(FloatLayout):
 
             except ProjectLoaderException as e:
                 self.statusbar.show_message('Cannot load widget. %s'%str(e))
+        
+        self.ui_creator.playground.sandbox.error_active = False
 
     def action_chk_btn_toolbox_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Toolbox" is activated.
@@ -964,8 +996,11 @@ class Designer(FloatLayout):
             "{!r}".format(self.ui_creator.playground.sandbox.exception)
         text = self.ui_creator.error_console.text + to_insert + '\n\n'
         self.ui_creator.error_console.text = text
-        self.ui_creator.tab_pannel.switch_to(
-            self.ui_creator.tab_pannel.tab_list[0])
+        if self.ui_creator.playground.sandbox.error_active:
+            self.ui_creator.tab_pannel.switch_to(
+                self.ui_creator.tab_pannel.tab_list[0])
+        
+        self.ui_creator.playground.sandbox.error_active = False
 
 
 class DesignerApp(App):
