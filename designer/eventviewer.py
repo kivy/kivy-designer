@@ -1,11 +1,52 @@
 from kivy.uix.textinput import TextInput
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.clock import Clock
+from kivy.uix.dropdown import DropDown
+from kivy.uix.button import Button
+from kivy.app import App
+from kivy.uix.scrollview import ScrollView
 
 from designer.propertyviewer import PropertyViewer,\
     PropertyTextInput, PropertyLabel
 
 import re
+
+class EventDropDown(ScrollView):
+    
+    def __init__(self, **kwargs):
+        super(EventDropDown, self).__init__(**kwargs)
+        self.dropdown = DropDown()
+        self.add_widget(self.dropdown)
+        Clock.schedule_once(self.initialize, 0)
+
+    def initialize(self, *args):
+        self.dropdown.size_hint_y = None
+        self.dropdown.bind(on_minimum_height=self.dropdown.setter('height'))
+
+    def dismiss(self):
+        if self.parent:
+            self.parent.remove_widget(self)
+
+        if self.dropdown and self.dropdown.attach_to:
+            self.dropdown.attach_to.unbind(pos=self._reposition,
+                                           size=self._reposition)
+            self.dropdown.attach_to = None
+
+    def on_touch_down(self, touch):
+        if super(ScrollView, self).on_touch_down(touch):
+            return True
+
+        if self.collide_point(*touch.pos):
+            return True
+
+        self.dismiss()
+
+    def on_touch_up(self, touch):
+        if super(EventDropDown, self).on_touch_up(touch):
+            return True
+
+        self.dismiss()
+
 
 class EventHandlerTextInput(TextInput):
     '''
@@ -26,13 +67,55 @@ class EventHandlerTextInput(TextInput):
     text_inserted = BooleanProperty(None)
     '''
     '''
+    
+    project_loader = ObjectProperty(None)
+    '''
+    '''
+
+    def show_drop_down_for_widget(self, widget):
+        self.dropdown = DropDown()
+        list_funcs = dir(widget)
+        for func in list_funcs:
+            if '__' not in func and hasattr(getattr(widget, func), '__call__'):
+                btn = Button(text=func, size_hint=(None, None), size=(100,30), shorten=True)
+                self.dropdown.add_widget(btn)                
+                btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
+                btn.text_size = [btn.size[0] - 4, btn.size[1]]
+                btn.valign = 'middle'
+
+        self.dropdown.open(self)
+        self.dropdown.pos = (self.x, self.y)
+        self.dropdown.bind(on_select=self._dropdown_select)
+
+    def _dropdown_select(self, instance, value):
+        self.text += value
 
     def on_text(self, instance, value):        
         if not self.kv_code_input:
             return
 
         self.kv_code_input.set_event_handler(self.eventwidget,
-                                             self.eventname, self.text)
+                                             self.eventname, 
+                                             self.text)
+        if self.text and self.text[-1] == '.':
+            if self.text == 'self.':
+                self.show_drop_down_for_widget(self.eventwidget)
+
+            elif self.text == 'root.':
+                self.show_drop_down_for_widget(
+                    self.project_loader.root_rule.widget)
+
+            else:
+                _id = self.text.replace('.', '')
+                root = self.project_loader.root_rule.widget
+                widget = None
+
+                if _id in root.ids:
+                    widget = root.ids[_id]
+
+                if widget:
+                    self.show_drop_down_for_widget(widget)
+
 
 class NewEventTextInput(TextInput):
     
@@ -169,4 +252,5 @@ class EventViewer(PropertyViewer):
                                      eventname=name,
                                      eventwidget=self.widget,
                                      multiline=False,
-                                     text=text)
+                                     text=text,
+                                     project_loader=self.project_loader)

@@ -1019,6 +1019,7 @@ class DesignerApp(App):
         Factory.register('KivyConsole', module='designer.uix.kivy_console')
         Factory.register('DesignerContent', module='designer.uix.designer_sandbox')
         Factory.register('Placeholder', module='designer.uix.placeholder')
+        Factory.register('EventDropDown', module='designer.eventviewer')
 
         self._widget_focused = None
         self.root = Designer()
