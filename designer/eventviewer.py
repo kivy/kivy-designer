@@ -6,71 +6,58 @@ from kivy.uix.button import Button
 from kivy.app import App
 from kivy.uix.scrollview import ScrollView
 
+from designer.uix.info_bubble import InfoBubble
 from designer.propertyviewer import PropertyViewer,\
     PropertyTextInput, PropertyLabel
 
 import re
 
-class EventDropDown(ScrollView):
-    
-    def __init__(self, **kwargs):
-        super(EventDropDown, self).__init__(**kwargs)
-        self.dropdown = DropDown()
-        self.add_widget(self.dropdown)
-        Clock.schedule_once(self.initialize, 0)
-
-    def initialize(self, *args):
-        self.dropdown.size_hint_y = None
-        self.dropdown.bind(on_minimum_height=self.dropdown.setter('height'))
-
-    def dismiss(self):
-        if self.parent:
-            self.parent.remove_widget(self)
-
-        if self.dropdown and self.dropdown.attach_to:
-            self.dropdown.attach_to.unbind(pos=self._reposition,
-                                           size=self._reposition)
-            self.dropdown.attach_to = None
-
-    def on_touch_down(self, touch):
-        if super(ScrollView, self).on_touch_down(touch):
-            return True
-
-        if self.collide_point(*touch.pos):
-            return True
-
-        self.dismiss()
-
-    def on_touch_up(self, touch):
-        if super(EventDropDown, self).on_touch_up(touch):
-            return True
-
-        self.dismiss()
-
-
 class EventHandlerTextInput(TextInput):
-    '''
+    '''EventHandlerTextInput is used to display/change/remove EventHandler
+       for an event
     '''
 
     eventwidget = ObjectProperty(None)
-    '''
+    '''Current selected widget
+       :data:`eventwidget` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     eventname = StringProperty(None)
-    '''
+    '''Name of current event
+       :data:`eventname` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     kv_code_input = ObjectProperty()
-    '''
+    '''Reference to KVLangArea
+       :data:`kv_code_input` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     text_inserted = BooleanProperty(None)
-    '''
+    '''Specifies whether text has been inserted or not
+       :data:`text_inserted` is a :class:`~kivy.properties.ObjectProperty`
     '''
     
     project_loader = ObjectProperty(None)
+    '''Reference to ProjectLoader
+       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    info_message = StringProperty(None)
+    '''Message to be displayed by InfoBubble
+       :data:`info_message` is a :class:`~kivy.properties.StringProperty`
     '''
+    
+    dropdown = ObjectProperty(None)
+    '''DropDown which will be displayed to show possible functions for that event
+       :data:`dropdown` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+    
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            self.info_bubble = InfoBubble(message=self.info_message)
+            self.info_bubble.show(self.pos, 1)
+
+        return super(EventHandlerTextInput, self).on_touch_down(touch)
 
     def show_drop_down_for_widget(self, widget):
         self.dropdown = DropDown()
@@ -115,12 +102,23 @@ class EventHandlerTextInput(TextInput):
 
                 if widget:
                     self.show_drop_down_for_widget(widget)
+        
+        elif self.dropdown:
+            self.dropdown.dismiss()
 
 
 class NewEventTextInput(TextInput):
-    
+    '''NewEventTextInput is TextInput which is used to create a new event
+       for a widget. When event is created then on_create_event is emitted
+    '''
+
     __events__ = ('on_create_event',)
     
+    info_message = StringProperty(None)
+    '''Message which will be displayed in the InfoBubble
+       :data:`info_message` is a :class:`~kivy.properties.StringProperty`
+    '''
+
     def on_create_event(self, *args):
         pass
 
@@ -133,16 +131,32 @@ class NewEventTextInput(TextInput):
 
         super(NewEventTextInput, self).insert_text(substring, from_undo)
 
+    def on_touch_down(self, touch):
+        if self.collide_point(*touch.pos):
+            self.info_bubble = InfoBubble(message=self.info_message)
+            self.info_bubble.show(self.pos, 1)
+
+        return super(NewEventTextInput, self).on_touch_down(touch)
+
 class EventLabel(PropertyLabel):
     pass
 
 class EventViewer(PropertyViewer):
     
     project_loader = ObjectProperty(None)
+    '''Reference to ProjectLoader
+       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
+    '''
     
     designer_tabbed_panel = ObjectProperty(None)
+    '''Reference to DesignerTabbedPanel
+       :data:`designer_tabbed_panel` is a :class:`~kivy.properties.ObjectProperty`
+    '''
     
     statusbar = ObjectProperty(None)
+    '''Reference to Statusbar
+       :data:`statusbar` is a :class:`~kivy.properties.ObjectProperty`
+    '''
 
     def on_widget(self, instance, value):
         self.clear()
@@ -174,7 +188,7 @@ class EventViewer(PropertyViewer):
         if self.project_loader.is_widget_custom(self.widget):
             #Allow adding a new event only if current widget is a custom rule
             add(EventLabel(text='Type and press enter to \ncreate a new event'))
-            txt = NewEventTextInput(multiline=True)
+            txt = NewEventTextInput(multiline=True, info_message = 'Type and press enter to create a new event')
             txt.bind(on_create_event=self.create_event)
             add(txt)
 
@@ -185,7 +199,7 @@ class EventViewer(PropertyViewer):
             if rule.name == type(self.widget).__name__:
                 py_file = rule.file
                 break
-        
+
         #Open it in DesignerTabbedPannel
         rel_path = py_file.replace(self.project_loader.proj_dir, '')
         if rel_path[0] == '/' or rel_path[0] == '\\':
@@ -253,4 +267,5 @@ class EventViewer(PropertyViewer):
                                      eventwidget=self.widget,
                                      multiline=False,
                                      text=text,
-                                     project_loader=self.project_loader)
+                                     project_loader=self.project_loader,
+                                     info_message="Set event handler for event %s"%(name))

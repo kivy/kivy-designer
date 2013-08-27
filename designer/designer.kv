@@ -4,6 +4,20 @@
 #:set titlecolor (.34, .39, .40)
 #:import KivyLexer kivy.extras.highlight.KivyLexer
 
+<InfoBubble>:
+    size_hint: None, None
+    width: '270dp'
+    height: lbl.texture_size[1] + dp(20)
+    on_touch_down: self.hide()
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '5dp'
+        spacing: '2dp'
+        Label:
+            id: lbl
+            text: root.message
+            text_size: self.width, None
+
 <Placeholder>:
     canvas:
         Color:
