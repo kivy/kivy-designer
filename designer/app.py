@@ -1020,6 +1020,9 @@ class DesignerApp(App):
         Factory.register('DesignerContent', module='designer.uix.designer_sandbox')
         Factory.register('Placeholder', module='designer.uix.placeholder')
         Factory.register('EventDropDown', module='designer.eventviewer')
+        Factory.register('DesignerActionPrevious', module='designer.uix.designer_action_items')
+        Factory.register('DesignerActionGroup', module='designer.uix.designer_action_items')
+        Factory.register('DesignerActionButton', module='designer.uix.designer_action_items')
 
         self._widget_focused = None
         self.root = Designer()
