@@ -14,7 +14,9 @@ NEW_PROJECTS = {'FloatLayout': ('template_floatlayout_kv', 'template_floatlayout
     'ScreenManager': ('template_screen_manager_kv', 'template_screen_manager_py'),
     'ActionBar': ('template_actionbar_kv', 'template_actionbar_py'),
     'Carousel and ActionBar': ('template_actionbar_carousel_kv', 'template_actionbar_carousel_py'),
-    'ScreenManager and ActionBar': ('template_screen_manager_actionbar_kv', 'template_screen_manager_actionbar_py')
+    'ScreenManager and ActionBar': ('template_screen_manager_actionbar_kv', 'template_screen_manager_actionbar_py'),
+    'TabbedPanel': ('template_tabbed_panel_kv', 'template_tabbed_panel_py'),
+    'TextInput and ScrollView': ('template_textinput_scrollview_kv', 'template_textinput_scrollview_py')
     }
 
 NEW_TEMPLATES_DIR = 'new_templates'
