@@ -120,6 +120,9 @@ class Designer(FloatLayout):
     '''Reference of :class:`~designer.designer_settings.DesignerSettings`.
        :data:`designer_settings` is a :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    start_page = ObjectProperty(None)
+    
 
     def __init__(self, **kwargs):
         super(Designer, self).__init__(**kwargs)
@@ -162,7 +165,7 @@ class Designer(FloatLayout):
         for _child in self.children[:]:
             if _child == self.designer_content:
                 return
-        
+        self.remove_widget(self.start_page)
         self.add_widget(self.designer_content, 1)
     
     def on_statusbar_height(self, *args):
@@ -1023,6 +1026,9 @@ class DesignerApp(App):
         Factory.register('DesignerActionPrevious', module='designer.uix.designer_action_items')
         Factory.register('DesignerActionGroup', module='designer.uix.designer_action_items')
         Factory.register('DesignerActionButton', module='designer.uix.designer_action_items')
+        Factory.register('DesignerStartPage', module='designer.start_page')
+        Factory.register('DesignerLinkLabel', module='designer.start_page')
+        Factory.register('RecentFilesBox', module='designer.start_page')
 
         self._widget_focused = None
         self.root = Designer()
@@ -1053,6 +1059,7 @@ class DesignerApp(App):
             self.root.ui_creator.playground.pos
         self.root.ui_creator.playground.sandbox.size = \
             self.root.ui_creator.playground.size
+        self.root.start_page.recent_files_box.root = self.root
 
         self.root.ui_creator.playground.sandbox.bind(on_getting_exception=
             self.root.on_sandbox_getting_exception)
@@ -1065,6 +1072,7 @@ class DesignerApp(App):
         self.focus_widget(self.root.ui_creator.playground.root)
 
         self.create_kivy_designer_dir()
+        self.root.start_page.recent_files_box.add_recent(self.root.recent_manager.list_files)
 
     def create_kivy_designer_dir(self):
         '''To create the ~/.kivy-designer dir

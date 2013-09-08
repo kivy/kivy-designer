@@ -4,6 +4,101 @@
 #:set titlecolor (.34, .39, .40)
 #:import KivyLexer kivy.extras.highlight.KivyLexer
 
+<DesignerLinkLabel>:
+    color: 0,0,1,1
+
+<RecentFilesBox>:
+    grid: grid
+    cols: 1
+    padding: '2sp'
+    GridLayout:
+        id: grid
+        cols: 1
+        size_hint_y: None
+        height: 1
+
+<DesignerStartPage>:
+    cols: 1
+    padding: '2sp'
+    btn_open: btn_open
+    btn_new: btn_new
+    recent_files_box: recent_files_box
+
+    Widget:
+        size_hint: None, None
+        height: '10sp'
+
+    BoxLayout:
+        size_hint: None, None
+        orientation: 'horizontal'
+        height: btn_open.height
+        padding: '2sp'
+        Button:
+            size_hint: None, None
+            height: '22pt'
+            id: btn_open
+            text: 'Open Project'
+            on_release: root.dispatch('on_open_down')
+
+        Button:
+            size_hint: None, None
+            height: '22pt'
+            id: btn_new
+            text: 'New Project'
+            on_release: root.dispatch('on_new_down')
+
+    Label:
+        text: 'Getting Started'
+        size_hint_y: None
+        height: '22pt'
+        text_size: self.size
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: None, None
+        padding: '2sp'
+        height: 2*kivy_label.height + 4
+        Label:
+            size_hint: None, 1
+            width: 10
+
+        GridLayout:
+            kivy_label: kivy_label
+            cols: 1
+            size_hint_y: None
+            height: 2*kivy_label.height
+            DesignerLinkLabel:
+                id: kivy_label
+                text: ' Kivy'
+                size_hint: None, None
+                height: '22pt'
+                text_size: self.size
+                valign: 'middle'
+                link: 'http://kivy.org'
+
+            DesignerLinkLabel:
+                text: ' Kivy Designer Help'
+                size_hint: None, None
+                size: '110pt', '22pt'
+                text_size: self.size
+                valign: 'middle'
+
+    Label:
+        text: 'Recent Projects'
+        size_hint_y: None
+        height: '27pt'
+        text_size: self.size
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: None, 1
+        Label:
+            size_hint: None, 1
+            width: 10
+
+        RecentFilesBox:
+            id: recent_files_box
+
 <DesignerActionPrevious>:
     text_size: (self.size[0]+sp(2), self.size[1])
     valign: 'middle'
@@ -603,6 +698,7 @@
 <Designer>:
     statusbar: statusbar
     actionbar: actionbar
+    start_page: start_page
 
     ActionBar:
         id: actionbar
@@ -702,6 +798,14 @@
                     text: 'Run Project'
                     minimum_width: 150
                     on_press: root.action_btn_run_project_pressed()
+
+    DesignerStartPage:
+        id: start_page
+        size_hint_y: None
+        height: root.height - actionbar.height - statusbar.height
+        top: root.height - actionbar.height
+        on_open_down: root.action_btn_open_pressed()
+        on_new_down: root.action_btn_new_pressed()
 
     StatusBar:
         id: statusbar
