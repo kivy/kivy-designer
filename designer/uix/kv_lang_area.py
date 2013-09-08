@@ -98,7 +98,6 @@ class KVLangArea(DesignerCodeInput):
         '''This function will shift widget's kv str from one position
            to another.
         '''
-        print 'shifting widget', widget, from_index
         self._reload = False
 
         path = self._get_widget_path(widget)
@@ -375,8 +374,7 @@ class KVLangArea(DesignerCodeInput):
         if not self._reload:
             self._reload = True
             return
-        
-        print 'reloading'
+
         statusbar = self.statusbar
 
         playground = self.playground

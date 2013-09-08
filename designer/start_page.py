@@ -20,17 +20,17 @@ class DesignerLinkLabel(Button):
 class RecentFilesBox(ScrollView):
     grid = ObjectProperty(None)
     root = ObjectProperty(None)
-    
+
     def __init__(self, **kwargs):
         super(RecentFilesBox, self).__init__(**kwargs)
-    
+
     def _setup_width(self, *args):
         max_width = -1
         for child in self.grid.children:
              max_width = max(child.texture_size[0], max_width)
         
         self.width = max_width + pt(20)
-    
+
     def add_recent(self, list_files):
         for i in list_files:
             btn = Button(text=i, size_hint_y=None, height=pt(22))

@@ -18,11 +18,12 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.carousel import Carousel
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.actionbar import ActionBar
 
 from designer.common import widgets
 from designer.tree import Tree
 from designer.undo_manager import WidgetOperation, WidgetDragOperation
-from designer.uix.placeholder import Placeholder, ScreenPlaceholder
+from designer.uix.placeholder import Placeholder, ScreenPlaceholder, ActionItemPlaceholder
 from designer.uix.designer_sandbox import DesignerSandbox
 
 class PlaygroundDragElement(BoxLayout):
@@ -84,6 +85,10 @@ class PlaygroundDragElement(BoxLayout):
 
             if isinstance(target, ScreenManager):
                 self.placeholder = ScreenPlaceholder(name='Placeholder%d'%self.i)
+                self.i += 1
+
+            elif isinstance(target, ActionBar):
+                self.placeholder = ActionItemPlaceholder(name='Placeholder%d'%self.i)
                 self.i += 1
 
             else:
