@@ -8,6 +8,7 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.metrics import pt
+from kivy.clock import Clock
 
 class DesignerLinkLabel(Button):
     link = StringProperty(None)
@@ -19,7 +20,17 @@ class DesignerLinkLabel(Button):
 class RecentFilesBox(ScrollView):
     grid = ObjectProperty(None)
     root = ObjectProperty(None)
-
+    
+    def __init__(self, **kwargs):
+        super(RecentFilesBox, self).__init__(**kwargs)
+    
+    def _setup_width(self, *args):
+        max_width = -1
+        for child in self.grid.children:
+             max_width = max(child.texture_size[0], max_width)
+        
+        self.width = max_width + pt(20)
+    
     def add_recent(self, list_files):
         for i in list_files:
             btn = Button(text=i, size_hint_y=None, height=pt(22))
@@ -30,12 +41,14 @@ class RecentFilesBox(ScrollView):
             self.grid.height += btn.height
 
         self.grid.height = max(self.grid.height, self.height)
+        Clock.schedule_once(self._setup_width, 0.01)
 
     def _btn_size_changed(self, instance, value):
         instance.text_size = value
-    
+
     def btn_release(self, instance):
         self.root._perform_open(instance.text)
+
 
 class DesignerStartPage(GridLayout):
     btn_open = ObjectProperty(None)

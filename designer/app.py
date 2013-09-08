@@ -165,9 +165,22 @@ class Designer(FloatLayout):
         for _child in self.children[:]:
             if _child == self.designer_content:
                 return
+
         self.remove_widget(self.start_page)
         self.add_widget(self.designer_content, 1)
-    
+
+        self.ids['actn_btn_save'].disabled = False
+        self.ids['actn_btn_save_as'].disabled = False
+        self.ids['actn_chk_proj_tree'].disabled = False
+        self.ids['actn_chk_prop_event'].disabled = False
+        self.ids['actn_chk_widget_tree'].disabled = False
+        self.ids['actn_chk_status_bar'].disabled = False
+        self.ids['actn_chk_kv_lang_area'].disabled = False
+        self.ids['actn_btn_add_file'].disabled = False
+        self.ids['actn_btn_custom_widget'].disabled = False
+        self.ids['actn_btn_proj_pref'].disabled = False
+        self.ids['actn_btn_run_proj'].disabled = False
+
     def on_statusbar_height(self, *args):
         '''Callback for statusbar.height
         '''
