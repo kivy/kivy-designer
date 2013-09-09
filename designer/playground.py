@@ -99,7 +99,7 @@ class PlaygroundDragElement(BoxLayout):
             line = Line(points=points, close=True, width=2.)
 
         self._canvas_instr = [color, line]
-    
+
     def remove_lines_on_child(self, *args):
         if hasattr(self, '_canvas_instr') and self._canvas_instr[1].points[0] != -1:
             try:
@@ -494,6 +494,10 @@ class Playground(ScatterPlane):
     def add_widget_to_parent(self, widget, target, from_undo=False, from_kv=False, kv_str='', extra_args={}):
         '''This function is used to add the widget to the target.
         '''
+        
+        print widget
+        if isinstance(widget, Button):
+            print widget.text
 
         added = False
         if target is None:
@@ -512,7 +516,6 @@ class Playground(ScatterPlane):
                     target.add_widget(widget)
                     added = True
 
-        #self.tree.insert(widget, target)
         if not added:
             return False
 
@@ -620,7 +623,7 @@ class Playground(ScatterPlane):
             
             #if point lies in custom wigdet's child then return custom widget
             if is_child_custom:
-                if widget and self._custom_widget_collides(child, x, y):
+                if not widget and self._custom_widget_collides(child, x, y):
                     return child
 
                 elif widget:
@@ -633,7 +636,7 @@ class Playground(ScatterPlane):
             else:
                 if not child.collide_point(x, y):
                     continue
-    
+
                 if not self.allowed_target_for(child, widget) and not child.children:
                     continue
 
@@ -651,7 +654,6 @@ class Playground(ScatterPlane):
             return True
         
         x, y = widget.to_local(x, y)
-
         for child in widget.children:
             if self._custom_widget_collides(child, x, y):
                 return True
@@ -738,16 +740,21 @@ class Playground(ScatterPlane):
             for prop in props:
                 if prop == 'id' or prop == 'children':
                     continue
-                
-                    setattr(self.widget_to_paste, prop,
-                            getattr(base_widget, prop))
+
+                setattr(self.widget_to_paste, prop,
+                        getattr(base_widget, prop))
+                    
+                if prop=='text':
+                        print getattr(base_widget, 'text'),'fgfdgfgdfg'
 
             self.widget_to_paste.parent = None
             widget_str = self.kv_code_input.\
                 get_widget_text_from_kv(base_widget, None)
+            
+            print self.widget_to_paste.text, self.widget_to_paste
             if not for_drag:
                 widget_str = re.sub(r'\s+id:\s*[\w\d_]+', '', widget_str)
-            self._widget_str_to_paste = widget_str            
+            self._widget_str_to_paste = widget_str
 
     def do_paste(self):
         '''Paste the selected widget to the current widget
@@ -774,6 +781,7 @@ class Playground(ScatterPlane):
                         break
 
             if parent is not None:
+                print parent, self.widget_to_paste, self.widget_to_paste.text
                 self.add_widget_to_parent(self.widget_to_paste,
                                           parent,
                                           kv_str=self._widget_str_to_paste)
