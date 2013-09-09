@@ -70,7 +70,10 @@ class RecentManager(object):
         _file = f.readline()
 
         while _file != '':
-            self.list_files.append(_file.strip())
+            file_path = _file.strip()
+            if os.path.exists(file_path):
+                self.list_files.append(file_path)
+
             _file = f.readline()
         
         f.close()
