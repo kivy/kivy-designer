@@ -108,8 +108,8 @@ from kivy.utils import platform
 Builder.load_string('''
 <KivyConsole>:
     cols:1
-    txtinput_history_box: history_box
-    txtinput_command_line: command_line
+    txtinput_history_box: history_box.__self__
+    txtinput_command_line: command_line.__self__
     ScrollView:
         CodeInput:
             id: history_box
