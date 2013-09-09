@@ -4,8 +4,6 @@ from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.app import App
 from kivy.clock import Clock
 
-from designer.uix.placeholder import Placeholder
-
 class WidgetTreeElement(TreeViewLabel):
     '''WidgetTreeElement represents each node in WidgetsTree
     '''
@@ -57,8 +55,7 @@ class WidgetsTree(ScrollView):
 
         if root_widget == node or not is_child_custom:
             for child in node.children:
-                if not isinstance(child, Placeholder):
-                    self.recursive_insert(child, b)
+                self.recursive_insert(child, b)
 
     def refresh(self, *l):
         '''This function will refresh the tree. It will first remove all nodes

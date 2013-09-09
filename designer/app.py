@@ -37,7 +37,6 @@ from designer.ui_creator import UICreator
 from designer.designer_content import DesignerContent
 from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
-from designer.uix.placeholder import Placeholder
 from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_kivy_designer_dir
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
@@ -1034,7 +1033,6 @@ class DesignerApp(App):
         Factory.register('DesignerContent', module='designer.designer_content')
         Factory.register('KivyConsole', module='designer.uix.kivy_console')
         Factory.register('DesignerContent', module='designer.uix.designer_sandbox')
-        Factory.register('Placeholder', module='designer.uix.placeholder')
         Factory.register('EventDropDown', module='designer.eventviewer')
         Factory.register('DesignerActionPrevious', module='designer.uix.designer_action_items')
         Factory.register('DesignerActionGroup', module='designer.uix.designer_action_items')
@@ -1109,8 +1107,8 @@ class DesignerApp(App):
                 get_playground_drag_element(widgetname, touch, **default_args)
 
         else:
-            container = PlaygroundDragElement(playground=self.root.ui_creator.playground)
-            container.add_widget(widget)
+            container = PlaygroundDragElement(
+                playground=self.root.ui_creator.playground, child=widget)
             touch.grab(container)
             touch.grab_current = container
             container.on_touch_move(touch)
