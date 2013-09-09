@@ -632,7 +632,7 @@ class ProjectLoader(object):
                                      os.path.basename(widget.py_file))
             if not os.path.exists(custom_py):
                 shutil.copy(widget.py_file, custom_py)
-        
+
         #Saving all opened py files and also reimport them
         for _code_input in self.tab_pannel.list_py_code_inputs:
             path = os.path.join(self.proj_dir, _code_input.rel_file_path)
@@ -657,9 +657,21 @@ class ProjectLoader(object):
             f = open(_rule.kv_file, 'r')
             _file_str = f.read()
             f.close()
-
+            
+            #print _file_str
             old_str = self.get_class_str_from_text(_rule.name, _file_str)
+            #print "OLD"
+            #print old_str
+            #print "/OLD"
             new_str = self.get_class_str_from_text(_rule.name, text)
+            #print "TEXT"
+            #print text
+            #print "/TEXT"
+            #print "NEW_STR"
+            #print new_str
+            #print "/NEW_STR"
+
+            #print new_str, old_str
 
             f = open(_rule.kv_file, 'w')
             _file_str = _file_str.replace(old_str, new_str)
@@ -805,7 +817,7 @@ class ProjectLoader(object):
     def get_class_str_from_text(self, class_name, _file_str, is_class=True):
         '''To return the full class rule of class_name from _file_str
         '''
-        _file_str += '\n'
+        #_file_str += '\n\n'
         start_pos = -1
         #Find the start position of class_name
         if is_class:
@@ -833,9 +845,9 @@ class ProjectLoader(object):
         hash_pos = 0
         while hash_pos == 0 and _line < _total_lines:
             hash_pos = lines[_line].find('#')
-            _line += 1
-
-        _line -= 1
+            if hash_pos == 0:
+                _line_pos += 1 + len(lines[_line])
+                _line += 1
 
         while _line < _total_lines and (lines[_line].strip() == '' or 
                                         get_indentation(lines[_line]) != 0):
@@ -844,10 +856,8 @@ class ProjectLoader(object):
             hash_pos = 0
             while hash_pos == 0 and _line < _total_lines:
                 hash_pos = lines[_line].find('#')
-                _line += 1
-
-            if _line < _total_lines:
-                _line -= 1
+                if hash_pos == 0:
+                    _line += 1
 
         end_pos = _line_pos
 

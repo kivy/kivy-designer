@@ -494,11 +494,6 @@ class Playground(ScatterPlane):
     def add_widget_to_parent(self, widget, target, from_undo=False, from_kv=False, kv_str='', extra_args={}):
         '''This function is used to add the widget to the target.
         '''
-        
-        print widget
-        if isinstance(widget, Button):
-            print widget.text
-
         added = False
         if target is None:
             with self.sandbox:
@@ -743,15 +738,11 @@ class Playground(ScatterPlane):
 
                 setattr(self.widget_to_paste, prop,
                         getattr(base_widget, prop))
-                    
-                if prop=='text':
-                        print getattr(base_widget, 'text'),'fgfdgfgdfg'
 
             self.widget_to_paste.parent = None
             widget_str = self.kv_code_input.\
                 get_widget_text_from_kv(base_widget, None)
-            
-            print self.widget_to_paste.text, self.widget_to_paste
+
             if not for_drag:
                 widget_str = re.sub(r'\s+id:\s*[\w\d_]+', '', widget_str)
             self._widget_str_to_paste = widget_str
@@ -781,7 +772,6 @@ class Playground(ScatterPlane):
                         break
 
             if parent is not None:
-                print parent, self.widget_to_paste, self.widget_to_paste.text
                 self.add_widget_to_parent(self.widget_to_paste,
                                           parent,
                                           kv_str=self._widget_str_to_paste)
