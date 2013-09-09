@@ -109,6 +109,7 @@ class PlaygroundDragElement(BoxLayout):
                 pass
             
             self._canvas_instr[1].points[0]=-1
+            Clock.unschedule(self._show_lines_on_child)
 
     def is_intersecting_playground(self, x, y):
         if not self.playground:
@@ -161,9 +162,12 @@ class PlaygroundDragElement(BoxLayout):
                                     if self.playground.allowed_target_for(widget, self.child):
                                         target = widget
                                         break
-    
+
                                     node = node.parent_node
-                
+
+                if target == self.child:
+                    return True
+
                 if self.child.parent:
                     if self.target:
                         if isinstance(self.target, ScreenManager):
@@ -312,7 +316,7 @@ class PlaygroundDragElement(BoxLayout):
                         if widget_from == 'playground':
                             self.playground.place_widget(
                                     child, self.center_x, self.y - 20)
-    
+
                         else:
                             #self.playground.add_widget_to_parent(child, target)
                             #doesn't work, don't know why :/. So, has to use this
@@ -320,7 +324,7 @@ class PlaygroundDragElement(BoxLayout):
     
                 elif self.drag_type == 'dragndrop':
                     self.playground.undo_dragging()
-                
+
                 self.remove_lines_on_child()
                 self.target = None
 
@@ -816,6 +820,9 @@ class Playground(ScatterPlane):
     def undo_dragging(self):
         '''To undo the last dragging operation if it has not been completed.
         '''
+        if not self.drag_operation:
+            return
+
         if self.drag_operation[0].parent:
             self.drag_operation[0].parent.remove_widget(self.drag_operation[0])
 
