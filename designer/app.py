@@ -41,6 +41,7 @@ from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_kivy_designer_dir
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
+from designer.uix.designer_action_items import DesignerActionButton
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -122,6 +123,7 @@ class Designer(FloatLayout):
     
     start_page = ObjectProperty(None)
     
+    recent_files_cont_menu = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(Designer, self).__init__(**kwargs)
@@ -633,29 +635,19 @@ class Designer(FloatLayout):
     def action_btn_recent_files_pressed(self, *args):
         '''Event Handler when ActionButton "Recent Files" is pressed.
         '''
+        pass
+    
+    def fill_recent_menu(self, *args):
+        recent_menu = self.recent_files_cont_menu
+        for _file in self.recent_manager.list_files:
+            act_btn = DesignerActionButton(text=_file, shorten=True)
+            recent_menu.add_widget(act_btn)
+            act_btn.bind(on_release=self._recent_file_release)
 
-        self._recent_dlg = RecentDialog(self.recent_manager.list_files)
-        self._recent_dlg.bind(on_select=self._recent_dlg_selected,
-                              on_cancel=self._cancel_popup)
-        
-        self._popup = Popup(title='Recent Files', content=self._recent_dlg,
-                            size_hint=(0.5, 0.5), auto_dismiss=False)
-        
-        self._popup.open()
-
-    def _recent_dlg_selected(self, *args):
+    def _recent_file_release(self, instance, *args):
         '''Event Handler for 'on_select' event of self._recent_dlg.
         '''
-
-        self._popup.dismiss()
-        selection = ''
-        try:
-            selection = self._recent_dlg.listview.adapter.selection[0].text
-        except:
-            pass
-
-        if selection != '':
-            self._perform_open(selection)
+        self._perform_open(instance.text)
 
     def action_btn_quit_pressed(self, *args):
         '''Event Handler when ActionButton "Quit" is pressed.
@@ -1038,9 +1030,11 @@ class DesignerApp(App):
         Factory.register('DesignerActionPrevious', module='designer.uix.designer_action_items')
         Factory.register('DesignerActionGroup', module='designer.uix.designer_action_items')
         Factory.register('DesignerActionButton', module='designer.uix.designer_action_items')
+        Factory.register('DesignerActionSubMenu', module='designer.uix.designer_action_items')
         Factory.register('DesignerStartPage', module='designer.start_page')
         Factory.register('DesignerLinkLabel', module='designer.start_page')
         Factory.register('RecentFilesBox', module='designer.start_page')
+        Factory.register('ContextMenu', module='designer.uix.contextual')
 
         self._widget_focused = None
         self.root = Designer()
@@ -1085,6 +1079,8 @@ class DesignerApp(App):
 
         self.create_kivy_designer_dir()
         self.root.start_page.recent_files_box.add_recent(self.root.recent_manager.list_files)
+        
+        self.root.fill_recent_menu()
 
     def create_kivy_designer_dir(self):
         '''To create the ~/.kivy-designer dir

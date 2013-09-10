@@ -1041,7 +1041,6 @@ class ProjectLoader(object):
         self.dict_file_type_and_path = {}
         self.root_rule = None
         self._root_rule = None
-        print 'asdfgl'
 
     def get_app(self, reload_app=False):
         '''To get the applications app class instance

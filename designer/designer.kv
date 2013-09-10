@@ -3,6 +3,7 @@
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
 #:import KivyLexer kivy.extras.highlight.KivyLexer
+#:import ContextMenu designer.uix.contextual.ContextMenu
 
 <DesignerLinkLabel>:
     color: 0,0,1,1
@@ -109,13 +110,17 @@
     text_size: (self.size[0]+sp(2), self.size[1])
     valign: 'middle'
 
-<DesignerActionGroup>:
-    text_size: self.size
-    valign: 'middle'
-
 <DesignerActionButton>:
     text_size: (self.size[0]-sp(4), self.size[1])
     valign: 'middle'
+    size_hint_y: None
+    height: 30
+
+<DesignerActionSubMenu>:
+    text_size: (self.size[0]-sp(4), self.size[1])
+    valign: 'middle'
+    size_hint_y: None
+    height: 30
 
 <InfoBubble>:
     size_hint: None, None
@@ -318,7 +323,7 @@
     
 <ActionCheckButton>:
     orientation: 'horizontal'
-    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+    background_normal: 'atlas://data/images/defaulttheme/action_item'
     canvas.before:
         Color:
             rgba: 1,1,1,1
@@ -705,6 +710,7 @@
     statusbar: statusbar
     actionbar: actionbar
     start_page: start_page
+    recent_files_cont_menu: recent_files_cont_menu
 
     ActionBar:
         id: actionbar
@@ -718,16 +724,21 @@
                 width: 200
                 with_previous: False
             ActionOverflow:
-            ActionGroup:
+            DesignerActionGroup:
                 text: 'File'
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
+                dropdown_cls: ContextMenu
                 DesignerActionButton:
                     text: 'New'
+                    size_hint_y: None
+                    height: 20
                     on_release: root.action_btn_new_pressed()
                 DesignerActionButton:
                     text: 'Open'
+                    size_hint_y: None
+                    height: 20
                     on_release: root.action_btn_open_pressed()
                 DesignerActionButton:
                     id: actn_btn_save
@@ -739,14 +750,21 @@
                     disabled: True
                     text: 'Save As'
                     on_release: root.action_btn_save_as_pressed()
-                DesignerActionButton:
+                DesignerActionSubMenu:
+                    id: recent_files_cont_menu
                     text: 'Recent Files'
+                    size_hint_y: None
+                    height: 20
                     on_release: root.action_btn_recent_files_pressed()
                 DesignerActionButton:
                     text: 'Settings'
+                    size_hint_y: None
+                    height: 20
                     on_release: root.action_btn_settings_pressed()
                 DesignerActionButton:
                     text: 'Quit'
+                    size_hint_y: None
+                    height: 20
                     on_release: root.action_btn_quit_pressed()
 
             ActionGroup:
@@ -754,6 +772,7 @@
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
+                dropdown_cls: ContextMenu
                 ActionCheckButton:
                     id: actn_chk_proj_tree
                     disabled: True
@@ -794,6 +813,7 @@
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
+                dropdown_cls: ContextMenu
                 DesignerActionButton:
                     id: actn_btn_add_file
                     disabled: True
@@ -819,7 +839,7 @@
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
-
+                dropdown_cls: ContextMenu
                 DesignerActionButton:
                     id: actn_btn_run_proj
                     disabled: True
