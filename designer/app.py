@@ -541,7 +541,7 @@ class Designer(FloatLayout):
         '''
 
         if self.project_loader.root_rule:
-            try:
+            #try:
                 if self.project_loader.new_project:
                     self.action_btn_save_as_pressed()
                     return
@@ -555,14 +555,15 @@ class Designer(FloatLayout):
                     root_wigdet = self.project_loader.get_root_widget()
                     self.ui_creator.playground.add_widget_to_parent(root_wigdet,
                                                                     None,
-                                                                    from_undo=True)
+                                                                    from_undo=True,
+                                                                    from_kv=True)
                     
 
                 self._curr_proj_changed = False
                 self.statusbar.show_message('Project saved successfully')
 
-            except:
-                self.statusbar.show_message('Cannot save project')
+##            except:
+##                self.statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
         '''Event Handler when ActionButton "Save As" is pressed.

@@ -90,6 +90,7 @@ class ProjectLoader(object):
         self._root_rule = None
         self.file_list = []
         self.proj_dir = ""
+        self._is_root_already_in_factory = False
 
     def _get_file_list(self, path):
         '''This function is recursively called for loading all py file files
@@ -279,6 +280,7 @@ class ProjectLoader(object):
             try:
                 root_name = re.findall(r'^([\w\d_]+)\:', kv_string,
                                         re.MULTILINE)
+
                 if root_name != []:
                     #It will occur when there is a root rule and it can't
                     #be loaded by Builder because the its file has been imported
@@ -290,8 +292,14 @@ class ProjectLoader(object):
                         self.root_rule = RootRule(root_name, None)
                         self.root_rule.kv_file = _file
                         self._root_rule = self.root_rule
+                        self._is_root_already_in_factory = False
 
-                root_rule = Builder.load_string(re.sub(r'\s+on_\w+:\w+', '',kv_string))
+                    else:
+                        self._is_root_already_in_factory = True
+                else:
+                    self._is_root_already_in_factory = False
+
+                root_rule = Builder.load_string(re.sub(r'\s+on_\w+:\w+', '', kv_string))
                 if root_rule:
                     self.root_rule = RootRule(root_rule.__class__.__name__,
                                               root_rule)
@@ -657,21 +665,9 @@ class ProjectLoader(object):
             f = open(_rule.kv_file, 'r')
             _file_str = f.read()
             f.close()
-            
-            #print _file_str
-            old_str = self.get_class_str_from_text(_rule.name, _file_str)
-            #print "OLD"
-            #print old_str
-            #print "/OLD"
-            new_str = self.get_class_str_from_text(_rule.name, text)
-            #print "TEXT"
-            #print text
-            #print "/TEXT"
-            #print "NEW_STR"
-            #print new_str
-            #print "/NEW_STR"
 
-            #print new_str, old_str
+            old_str = self.get_class_str_from_text(_rule.name, _file_str)
+            new_str = self.get_class_str_from_text(_rule.name, text)
 
             f = open(_rule.kv_file, 'w')
             _file_str = _file_str.replace(old_str, new_str)
@@ -918,7 +914,7 @@ class ProjectLoader(object):
         
         to_find = []
         for _rule in self.class_rules:
-            if _rule.file == None:
+            if _rule.file is None:
                 to_find.append(_rule)
 
         if self.root_rule:
@@ -1021,7 +1017,8 @@ class ProjectLoader(object):
                 if "<" + _rule.name + ">" == _tuple[1].name:
                     Builder.rules.remove(_tuple)
 
-        if self.root_rule and hasattr(Factory, self.root_rule.name):
+        if self.root_rule and not self._is_root_already_in_factory and\
+            hasattr(Factory, self.root_rule.name):
             Factory.unregister(self.root_rule.name)
 
         self._app_file = None
