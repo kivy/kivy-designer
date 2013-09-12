@@ -240,10 +240,10 @@ class ContextMenu(TabbedPanel):
             #Calculate minimum required width
             from kivy.metrics import dp
             if len(self.main_box.children) == 1:
-                self.bubble.width = max(self.current_tab.parent.parent.width,
+                self.bubble.width = max(self.main_tab.parent.parent.width,
                                         self.main_box.children[0].width)
             else:
-                self.bubble.width = max(self.current_tab.parent.parent.width,
+                self.bubble.width = max(self.main_tab.parent.parent.width,
                                         *([i.width for i in self.main_box.children]))
 
         Clock.schedule_once(self._set_width_to_bubble, 0.01)

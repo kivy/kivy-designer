@@ -980,7 +980,7 @@ class Designer(FloatLayout):
                                                          (python_path,
                                                           _file, args))
                 self.ui_creator.tab_pannel.switch_to(
-                    self.ui_creator.tab_pannel.tab_list[1])
+                    self.ui_creator.tab_pannel.tab_list[2])
                 return
 
         self.ui_creator.kivy_console.stdin.write('%s %s %s'%
@@ -988,7 +988,7 @@ class Designer(FloatLayout):
                                                   self.project_loader._app_file,
                                                   args))
         self.ui_creator.tab_pannel.switch_to(
-            self.ui_creator.tab_pannel.tab_list[1])
+            self.ui_creator.tab_pannel.tab_list[2])
 
     def on_sandbox_getting_exception(self, *args):
         '''Event Handler for 
@@ -1025,6 +1025,7 @@ class DesignerApp(App):
         Factory.register('UICreator', module='designer.ui_creator')
         Factory.register('DesignerContent', module='designer.designer_content')
         Factory.register('KivyConsole', module='designer.uix.kivy_console')
+        Factory.register('PythonConsole', module='designer.uix.py_console')
         Factory.register('DesignerContent', module='designer.uix.designer_sandbox')
         Factory.register('EventDropDown', module='designer.eventviewer')
         Factory.register('DesignerActionPrevious', module='designer.uix.designer_action_items')

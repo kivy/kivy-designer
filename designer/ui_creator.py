@@ -66,6 +66,8 @@ class UICreator(FloatLayout):
     '''Instance of :class:`~designer.uix.kivy_console.KivyConsole`.
     '''
     
+    python_console = ObjectProperty(None)
+    
     tab_pannel = ObjectProperty(None)
     '''Instance of :class:`~designer.designer_content.DesignerTabbedPanel`
        containing error_console, kivy_console and kv_lang_area 
@@ -102,3 +104,4 @@ class UICreator(FloatLayout):
         self.playground.widgettree = self.widgettree
         self.propertyviewer.kv_code_input = self.kv_code_input
         self.eventviewer.kv_code_input = self.kv_code_input
+        self.py_console.remove_widget(self.py_console.children[1])

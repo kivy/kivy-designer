@@ -5,6 +5,19 @@
 #:import KivyLexer kivy.extras.highlight.KivyLexer
 #:import ContextMenu designer.uix.contextual.ContextMenu
 
+<PythonConsole>:
+    text_input: text_input2
+    ScrollView:
+        InteractiveShellInput:
+            id: text_input2
+            size_hint: (1, None)
+            font_name: root.font_name
+            font_size: root.font_size
+            foreground_color: root.foreground_color
+            background_color: root.background_color
+            height: max(self.parent.height, self.minimum_height)
+            on_ready_to_input: root.ready_to_input()
+
 <DesignerLinkLabel>:
     color: 0,0,1,1
     background_normal: 'atlas://data/images/defaulttheme/action_item'
@@ -537,6 +550,7 @@
     kivy_console: kivy_console
     tab_pannel: tab_pannel
     eventviewer: eventviewer
+    py_console: py_console
 
     GridLayout:
         height: root.height
@@ -602,6 +616,11 @@
                         text: 'Kivy Console'
                         KivyConsole:
                             id: kivy_console
+                    
+                    DesignerTabbedPanelItem:
+                        text: 'Python Shell'
+                        PythonConsole:
+                            id: py_console
         
                     DesignerTabbedPanelItem:
                         text: 'Error Console'
@@ -612,6 +631,7 @@
                                 size_hint_y: None
                                 height: max(e_scroll.height, self.minimum_height)
                                 text: ''
+                                    
    
             Splitter:
                 id: splitter_widget_tree
