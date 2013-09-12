@@ -162,10 +162,14 @@ class InteractiveShellInput(TextInput):
 
     def show_output(self, output):
         self.text += output
-        Clock.schedule_once(self._set_cursor_val, 0)
+        Clock.schedule_once(self._set_cursor_val, 0.1)
     
     def _set_cursor_val(self, *args):
         self._cursor_pos = self.cursor_index()
+        from kivy.animation import Animation
+        anim = Animation(scroll_y=0, d=0.5)
+        anim.cancel_all(self.parent)
+        anim.start(self.parent)
 
 
 class PythonConsole(BoxLayout):
@@ -177,6 +181,10 @@ class PythonConsole(BoxLayout):
     '''
     '''
     
+    scroll_view = ObjectProperty(None)
+    '''
+    '''
+
     foreground_color = ListProperty((.5, .5, .5, .93))
     '''This defines the color of the text in the console
 
