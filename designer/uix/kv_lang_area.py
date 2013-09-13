@@ -61,7 +61,7 @@ class KVLangArea(DesignerCodeInput):
 
         path_to_widget = []
         _widget = widget
-        while _widget and _widget != self.playground.sandbox:
+        while _widget and _widget != self.playground.sandbox.children[0]:
             if not _widget.parent:
                 break
 
@@ -538,6 +538,7 @@ class KVLangArea(DesignerCodeInput):
 
         widget_lineno = self._find_widget_place(path_to_widget, lines,
                                                 total_lines, root_lineno+1)
+        print widget_lineno
         widget_line = lines[widget_lineno]
         indent = get_indentation(widget_line)
         prop_found = False
@@ -619,7 +620,7 @@ class KVLangArea(DesignerCodeInput):
         path_to_widget.reverse()
 
         #Go to the line where widget is declared
-        lines = re.sub(r'#.+', '', self.text).splitlines()
+        lines = re.sub(r'#.+', '', self.text.rstrip()).splitlines()
         total_lines = len(lines)
 
         root_name = self.project_loader.root_rule.name

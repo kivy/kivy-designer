@@ -4,6 +4,8 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 
+from kivy.uix.sandbox import SandboxContent
+
 class StatusNavBarButton(Button):
     '''StatusNavBarButton is a :class:`~kivy.uix.button` representing 
        the Widgets in the Widget heirarchy of currently selected widget.
@@ -83,7 +85,8 @@ class StatusBar(BoxLayout):
         # get parent list, until app.root.playground.root
         children = []
         while wid:
-            if wid == self.playground.sandbox:
+            if wid == self.playground.sandbox or\
+            wid == self.playground.sandbox.children[0]:
                 break
             children.append(StatusNavBarButton(node=wid))
             wid = wid.parent

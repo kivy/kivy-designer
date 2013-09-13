@@ -482,8 +482,10 @@ class Designer(FloatLayout):
                 widgets.remove(widget)
 
         self.cleanup()
-        
+
         self.ui_creator.playground.sandbox.error_active = True
+
+        root_widget = None
 
         with self.ui_creator.playground.sandbox:
             try:
@@ -492,12 +494,12 @@ class Designer(FloatLayout):
                 if self.project_loader.class_rules:
                     for i, _rule in enumerate(self.project_loader.class_rules):
                         widgets.append((_rule.name, 'custom'))
-            
+
                     self.designer_content.toolbox.add_custom()
 
                 #to test listview
                 #root_wigdet = None
-                root_wigdet = self.project_loader.get_root_widget()            
+                root_wigdet = self.project_loader.get_root_widget()
 
                 if not root_wigdet:
                     #Show list box showing widgets
