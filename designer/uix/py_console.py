@@ -34,6 +34,7 @@ class Shell(code.InteractiveConsole):
         code.InteractiveConsole.__init__(self)
         self.thread = None
         self.root = root
+        self._exit = False
 
     def write(self, data):
         import functools
@@ -70,6 +71,9 @@ class Shell(code.InteractiveConsole):
                 print
 
         sys.stdout = org_stdout
+    
+    def exit(self):
+        self._exit = True
 
     def interact(self, banner=None):
         """Closely emulate the interactive Python console.
@@ -98,7 +102,7 @@ class Shell(code.InteractiveConsole):
         else:
             self.write("%s\n" % str(banner))
         more = 0
-        while 1:
+        while not self._exit:
             try:
                 if more:
                     prompt = sys.ps2
@@ -106,6 +110,8 @@ class Shell(code.InteractiveConsole):
                     prompt = sys.ps1
                 try:
                     line = self.raw_input(prompt)
+                    if not line:
+                        continue
                     # Can be None if sys.stdin was redefined
                     encoding = getattr(sys.stdin, "encoding", None)
                     if encoding and not isinstance(line, unicode):
@@ -219,6 +225,7 @@ class PythonConsole(BoxLayout):
 
         Clock.schedule_once(self.run_sh, 0)
         self._ready_to_input = False
+        self._exit = False
 
     def ready_to_input(self, *args):
         self._ready_to_input = True
@@ -236,11 +243,15 @@ class PythonConsole(BoxLayout):
         import time
         self.prompt = prompt
         Clock.schedule_once(self._show_prompt, 0.1)
-        while not self._ready_to_input:
+        while not self._ready_to_input and not self._exit:
             time.sleep(0.05)
 
         self._ready_to_input = False
         return self.text_input.last_line
-        
+    
+    def exit(self):
+        self._exit = True
+        self.sh.exit()
+
 if __name__ == '__main__':
      runTouchApp(PythonConsole())

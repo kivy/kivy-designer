@@ -1014,7 +1014,10 @@ class Designer(FloatLayout):
 class DesignerApp(App):
 
     widget_focused = ObjectProperty(allownone=True)
-
+    
+    def on_stop(self, *args):
+        self.root.ui_creator.py_console.exit()
+        
     def build(self):
         Factory.register('Playground', module='designer.playground')
         Factory.register('Toolbox', module='designer.toolbox')
