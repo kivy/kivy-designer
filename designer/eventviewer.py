@@ -80,8 +80,6 @@ class EventHandlerTextInput(TextInput):
     def on_text(self, instance, value):        
         if not self.kv_code_input:
             return
-        
-        print self.eventwidget, self.eventname, self.text
 
         self.kv_code_input.set_event_handler(self.eventwidget,
                                              self.eventname, 

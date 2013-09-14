@@ -538,7 +538,7 @@ class KVLangArea(DesignerCodeInput):
 
         widget_lineno = self._find_widget_place(path_to_widget, lines,
                                                 total_lines, root_lineno+1)
-        print widget_lineno
+
         widget_line = lines[widget_lineno]
         indent = get_indentation(widget_line)
         prop_found = False

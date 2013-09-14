@@ -4,6 +4,8 @@ from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.app import App
 from kivy.clock import Clock
 
+from designer.common import widgets
+
 class WidgetTreeElement(TreeViewLabel):
     '''WidgetTreeElement represents each node in WidgetsTree
     '''
@@ -52,8 +54,14 @@ class WidgetsTree(ScrollView):
             if rule.name == type(node).__name__:
                 is_child_custom = True
                 break
+        
+        is_child_complex = False
+        for widget in widgets:
+            if widget[0] == type(node).__name__ and widget[1] == 'complex':
+                is_child_complex = True
+                break
 
-        if root_widget == node or not is_child_custom:
+        if root_widget == node or (not is_child_custom and not is_child_complex):
             for child in node.children:
                 self.recursive_insert(child, b)
 

@@ -254,7 +254,7 @@ class PlaygroundDragElement(BoxLayout):
                     target = self.playground.try_place_widget(
                             self.child, self.center_x, self.y - 20)
                     widget_from = 'playground'
-    
+
                 else:
                     #self.widgettree.collide_point(self.center_x, self.y) not working :(
                     #had to use this method
@@ -272,9 +272,9 @@ class PlaygroundDragElement(BoxLayout):
                 parent = None
                 if self.child.parent != self:
                     parent = self.child.parent
-    
+
                 index = -1
-    
+
                 if self.drag_type == 'dragndrop':
                     self.can_place = target == self.drag_parent and parent is not None
                 else: 
@@ -491,7 +491,8 @@ class Playground(ScatterPlane):
                                         self.drag_operation[2],
                                         self, extra_args=extra_args))
 
-    def add_widget_to_parent(self, widget, target, from_undo=False, from_kv=False, kv_str='', extra_args={}):
+    def add_widget_to_parent(self, widget, target, from_undo=False,
+                             from_kv=False, kv_str='', extra_args={}):
         '''This function is used to add the widget to the target.
         '''
         added = False
@@ -616,8 +617,15 @@ class Playground(ScatterPlane):
                     is_child_custom = True
                     break
             
+            is_child_complex = False
+            for _widget in widgets:
+                if _widget[0] == type(child).__name__ and\
+                    _widget[1] == 'complex':
+                    is_child_complex = True
+                    break
+
             #if point lies in custom wigdet's child then return custom widget
-            if is_child_custom:
+            if is_child_custom or is_child_complex:
                 if not widget and self._custom_widget_collides(child, x, y):
                     return child
 
