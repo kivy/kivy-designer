@@ -20,7 +20,7 @@ Builder.load_string('''
     text_size: self.size
     padding: '2dp', '2dp'
     background_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_disabled_normal: 'atlas://data/images/defaulttheme/button_disabled'
+    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
     background_down: 'atlas://data/images/defaulttheme/action_item_down'
     background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
     Image:
@@ -39,13 +39,14 @@ Builder.load_string('''
 
 <MenuButton>:
     background_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_disabled_normal: 'atlas://data/images/defaulttheme/button_disabled'
+    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
     background_down: 'atlas://data/images/defaulttheme/action_item_down'
     background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
 
 <ContextMenu>:
     tab_pos:'top_right'
     do_default_tab: False
+    tab_height: '24sp'
 
 <MenuBubble>:
     background_image: 'atlas://data/images/defaulttheme/action_item'
@@ -335,9 +336,10 @@ class ContextMenu(TabbedPanel):
                                    self.main_tab.content.height)
 
         if self.max_height:
-            self.bubble.height = min(self.main_box.height + self.tab_height + dp(10), self.max_height)
+            self.bubble.height = min(self.main_box.height + self.tab_height + dp(16),
+                                     self.max_height)
         else:
-            self.bubble.height = self.main_box.height + self.tab_height + dp(10)
+            self.bubble.height = self.main_box.height + self.tab_height + dp(16)
 
     def on_child_height(self, *args):
         height = 0
