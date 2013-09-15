@@ -12,47 +12,6 @@ from kivy.metrics import dp
 from kivy.uix.scrollview import ScrollView
 from kivy.clock import Clock
 
-Builder.load_string('''
-<MenuHeader>
-    color: (1, 1, 1, 1) if self.state == 'normal' else (0, 0, 0, 1)
-    font_size: '12dp'
-    shorten: True
-    text_size: self.size
-    padding: '2dp', '2dp'
-    background_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_down: 'atlas://data/images/defaulttheme/action_item_down'
-    background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
-    Image:
-        source: 'atlas://data/images/defaulttheme/tree_closed'
-        size: (20, 20) if root.show_arrow else (0,0)
-        center_y: root.center_y
-        x: (self.parent.right - self.width) if self.parent else 100
-
-<ContextSubMenu>:
-    arrow_image: 'atlas://data/images/defaulttheme/tree_closed'
-    Image:
-        source: root.arrow_image
-        size: (20, 20) if root.attached_menu and len(root._list_children) > 0 else (0,0)
-        y: self.parent.y + (self.parent.height/2) - (self.height/2)
-        x: self.parent.x + (self.parent.width - self.width)
-
-<MenuButton>:
-    background_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_down: 'atlas://data/images/defaulttheme/action_item_down'
-    background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
-
-<ContextMenu>:
-    tab_pos:'top_right'
-    do_default_tab: False
-    tab_height: '24sp'
-
-<MenuBubble>:
-    background_image: 'atlas://data/images/defaulttheme/action_item'
-''')
-
-
 class MenuBubble(Bubble):
     '''
     '''

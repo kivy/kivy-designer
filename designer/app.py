@@ -122,8 +122,15 @@ class Designer(FloatLayout):
     '''
     
     start_page = ObjectProperty(None)
-    
+    '''Reference of :class:`~designer.start_page.DesignerStartPage`.
+       :data:`start_page` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
     recent_files_cont_menu = ObjectProperty(None)
+    '''The context sub menu, containing the recently opened/saved projects.
+       Reference of :class:`~designer.uix.contextual.ContextSubMenu`.
+       :data:`recent_files_cont_menu` is a :class:`~kivy.properties.ObjectProperty`
+    '''
 
     def __init__(self, **kwargs):
         super(Designer, self).__init__(**kwargs)
@@ -1021,6 +1028,8 @@ class Designer(FloatLayout):
 class DesignerApp(App):
 
     widget_focused = ObjectProperty(allownone=True)
+    '''Currently focused widget
+    '''
     
     def on_stop(self, *args):
         self.root.ui_creator.py_console.exit()

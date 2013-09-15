@@ -32,9 +32,14 @@ class WidgetsTree(ScrollView):
     '''
     
     dragging = BooleanProperty(False)
+    '''Specifies whether a node is dragged or not.
+       :data:`dragging` is a :class:`~kivy.properties.BooleanProperty`
+    '''
 
     selected_widget = ObjectProperty(allownone=True)
-    
+    '''Current selected widget.
+       :data:`dragging` is a :class:`~kivy.properties.ObjectProperty`
+    '''
 
     def recursive_insert(self, node, treenode):
         '''This function will add a node to TreeView, by recursively travelling

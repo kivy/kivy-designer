@@ -9,7 +9,10 @@ from kivy.base import EventLoop
 from kivy.properties import ObjectProperty, ListProperty, StringProperty, NumericProperty
 from kivy.lang import Builder
 
-class PseudoFile(object):
+class PseudoFile(object): 
+    '''A psuedo file object, to redirect I/O operations from Python Shell to
+       InteractiveShellInput.
+    '''
     
     def __init__(self, sh):
         self.sh = sh
@@ -128,7 +131,8 @@ class Shell(code.InteractiveConsole):
 
 
 class InteractiveThread(threading.Thread):
-    
+    '''Another thread in which main loop of Shell will run.
+    '''
     def __init__(self, sh):
         super(InteractiveThread, self).__init__()
         self._sh = sh
@@ -139,6 +143,8 @@ class InteractiveThread(threading.Thread):
 
 
 class InteractiveShellInput(TextInput):
+    '''Displays Output and sends input to Shell.
+    '''
 
     __events__ = ('on_ready_to_input',)
 
@@ -181,14 +187,18 @@ class InteractiveShellInput(TextInput):
 class PythonConsole(BoxLayout):
     
     text_input = ObjectProperty(None)
+    '''Instance of :class:`~designer.uix.py_console.InteractiveShellInput`
+       :data:`text_input` is an :class:`~kivy.properties.ObjectProperty`
     '''
-    '''
+
     sh = ObjectProperty(None)
-    '''
+    '''Instance of :class:`~designer.uix.py_console.Shell`
+       :data:`sh` is an :class:`~kivy.properties.ObjectProperty`
     '''
     
     scroll_view = ObjectProperty(None)
-    '''
+    '''Instance of :class:`~kivy.uix.scrollview.ScrollView`
+       :data:`scroll_view` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     foreground_color = ListProperty((.5, .5, .5, .93))

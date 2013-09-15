@@ -56,6 +56,10 @@ class PlaygroundDragElement(BoxLayout):
     '''
     
     drag_parent = ObjectProperty(None)
+    '''Parent of currently dragged widget. 
+       Will be none if 'drag_type' is 'new widget'
+       :data:`drag_parent` is a :class:`~kivy.properties.ObjectProperty`
+    '''
 
     placeholder = ObjectProperty(None)
     '''Instance of :class:`~designer.uix.placeholder`
@@ -63,8 +67,15 @@ class PlaygroundDragElement(BoxLayout):
     '''
 
     widgettree = ObjectProperty(None)
+    '''Reference to class:`~designer.nodetree.WidgetsTree`, the widgettree of 
+       Designer.
+       :data:`widgettree` is a :class:`~kivy.properties.ObjectProperty`
+    '''
     
     child = ObjectProperty(None)
+    '''The widget which is currently being dragged.
+       :data:`child` is a :class:`~kivy.properties.ObjectProperty`
+    '''
 
     def __init__(self, **kwargs):
         super(PlaygroundDragElement, self).__init__(**kwargs)
