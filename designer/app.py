@@ -372,6 +372,11 @@ class Designer(FloatLayout):
             self.ui_creator.kv_code_input.text = self.project_loader.get_full_str()
             self.designer_content.update_tree_view(self.project_loader)
             self._add_designer_content()
+            if self.project_loader.class_rules:
+                for i, _rule in enumerate(self.project_loader.class_rules):
+                    widgets.append((_rule.name, 'custom'))
+
+                self.designer_content.toolbox.add_custom()
         
         self.ui_creator.playground.sandbox.error_active = False
 
@@ -431,7 +436,7 @@ class Designer(FloatLayout):
         def_path = os.getcwd() 
         if not self.project_loader.new_project and self.project_loader.proj_dir:
             def_path = self.project_loader.proj_dir            
-        
+
         if self._fbrowser.ids.tabbed_browser.current_tab.text == 'List View':
             self._fbrowser.ids.list_view.path = def_path
         else:

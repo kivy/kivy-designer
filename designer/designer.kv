@@ -427,7 +427,7 @@
             spacing: '3sp'
             size_hint_y: None
             size: root.size
-            height: self.minimum_height
+            height: max(self.parent.height, self.minimum_height)
     
 <ToolboxButton>:
     size_hint_y: None

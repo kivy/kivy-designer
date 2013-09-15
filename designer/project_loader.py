@@ -234,7 +234,6 @@ class ProjectLoader(object):
         self.new_project = False
         #Add project_dir to watch
         self.proj_watcher.start_watching(self.proj_dir)
-
         return ret
 
     def _load_project(self, kv_path):
@@ -311,7 +310,7 @@ class ProjectLoader(object):
 
         if not all_files_loaded:
             raise ProjectLoaderException('Cannot load file "%s"'%(_file))
-
+                        
         if os.path.exists(os.path.join(self.proj_dir, KV_PROJ_FILE_NAME)):
             projdir_mtime = os.path.getmtime(self.proj_dir)
 

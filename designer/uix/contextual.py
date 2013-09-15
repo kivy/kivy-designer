@@ -245,7 +245,8 @@ class ContextMenu(TabbedPanel):
                                         self.main_box.children[0].width)
             else:
                 self.bubble.width = max(self.main_tab.parent.parent.width,
-                                        *([i.width for i in self.main_box.children]))
+                                        self.bubble.width,
+                                        *([i.width for i in self.main_box.children]))                                        
 
         Clock.schedule_once(self._set_width_to_bubble, 0.01)
         # ensure the dropdown list doesn't get out on the X axis, with a

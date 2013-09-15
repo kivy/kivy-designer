@@ -101,8 +101,6 @@ class Toolbox(BoxLayout):
             for child in _scrollview_parent.children[:]:
                 if child.children[0] != self.custom_category.gridlayout:
                     _scrollview_parent.remove_widget(child)
-                
-            self.accordion.add_widget(self.custom_category)
 
     def add_custom(self):
         '''To add/update self.custom_category with new custom classes loaded
@@ -111,24 +109,14 @@ class Toolbox(BoxLayout):
         self.custom_category = ToolboxCategory(title='custom')
         self._list.append(self.custom_category)
 
-        #FIXME: ToolboxCategory keeps on adding more scrollview,
-        #if they are initialized again, unable to find the cause of problem
-        #I just decided to delete those scrollview whose childs are not 
-        #self.gridlayout.
-        _scrollview_parent = self.custom_category.gridlayout.parent.parent
-        for child in _scrollview_parent.children[:]:
-            if child.children[0] != self.custom_category.gridlayout:
-                _scrollview_parent.remove_widget(child)
-            
         self.accordion.add_widget(self.custom_category)
 
         for widget in widgets:
             if widget[1] == 'custom':
                 self.custom_category.gridlayout.add_widget(
                     ToolboxButton(text=widget[0]))
-        
+
         #Setting appropriate height to gridlayout to enable scrolling
         self.custom_category.gridlayout.size_hint_y = None
         self.custom_category.gridlayout.height = \
             (len(self.custom_category.gridlayout.children)+5)*pt(22)
-            
