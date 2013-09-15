@@ -10,14 +10,18 @@ from functools import partial
 class ActionCheckButton(ActionItem, BoxLayout):
     '''ActionCheckButton is a check button displaying text with a checkbox
     '''
+
     checkbox = ObjectProperty(None)
     '''Instance of :class:`~kivy.uix.checkbox.CheckBox`.
        :data:`checkbox` is a :class:`~kivy.properties.StringProperty`
     '''
+
     text = StringProperty('Check Button')
     '''text which is displayed by ActionCheckButton.
        :data:`text` is a :class:`~kivy.properties.StringProperty`
     '''
+    
+    cont_menu = ObjectProperty(None)
 
     __events__ = ('on_active',)
 
@@ -36,14 +40,16 @@ class ActionCheckButton(ActionItem, BoxLayout):
         Clock.schedule_once(self._label_setup, 0)
     
     def _label_setup(self, dt):
-        self._label.text_size = (self.minimum_width - self.checkbox.width - 4, self._label.size[1])
+        self._label.text_size = (self.minimum_width - self.checkbox.width - 4,
+                                 self._label.size[1])
 
     def on_touch_down(self, touch):
         '''Override of its parent's on_touch_down, used to reverse the state
            of CheckBox.
         '''
-        if self.collide_point(*touch.pos):
+        if not self.disabled and self.collide_point(*touch.pos):
             self.checkbox.active = not self.checkbox.active
+            self.cont_menu.dismiss()
 
     def on_active(self, *args):
         pass

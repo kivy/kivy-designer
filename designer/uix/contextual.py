@@ -73,7 +73,11 @@ class MenuButton(Button):
     '''MenuButton class. Used as a default menu button. It auto provides
        look and feel for a menu button.
     '''
-    pass
+    cont_menu = ObjectProperty(None)
+    
+    def on_release(self, *args):
+        self.cont_menu.dismiss()
+        super(MenuButton, self).on_release(*args)
 
 class ContextMenu(TabbedPanel):
     '''ContextMenu class. See module documentation for more information.
@@ -239,14 +243,13 @@ class ContextMenu(TabbedPanel):
         # set width and x
         if self.auto_width:
             #Calculate minimum required width
-            from kivy.metrics import dp
             if len(self.main_box.children) == 1:
                 self.bubble.width = max(self.main_tab.parent.parent.width,
                                         self.main_box.children[0].width)
             else:
                 self.bubble.width = max(self.main_tab.parent.parent.width,
                                         self.bubble.width,
-                                        *([i.width for i in self.main_box.children]))                                        
+                                        *([i.width for i in self.main_box.children]))                               
 
         Clock.schedule_once(self._set_width_to_bubble, 0.01)
         # ensure the dropdown list doesn't get out on the X axis, with a
@@ -402,7 +405,9 @@ class ContextSubMenu(MenuButton):
             return
 
         self._list_children.append((widget, index))
-    
+        if hasattr(widget, 'cont_menu'):
+            widget.cont_menu = self.cont_menu
+
     def on_cont_menu(self, *args):
         self._add_widget()
 
