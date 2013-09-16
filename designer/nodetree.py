@@ -3,6 +3,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.app import App
 from kivy.clock import Clock
+from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets
 
@@ -59,7 +60,7 @@ class WidgetsTree(ScrollView):
             if rule.name == type(node).__name__:
                 is_child_custom = True
                 break
-        
+
         is_child_complex = False
         for widget in widgets:
             if widget[0] == type(node).__name__ and widget[1] == 'complex':
@@ -67,9 +68,18 @@ class WidgetsTree(ScrollView):
                 break
 
         if root_widget == node or (not is_child_custom and not is_child_complex):
-            for child in node.children:
-                self.recursive_insert(child, b)
+            if isinstance(node, TabbedPanel):
+                self.insert_for_tabbed_panel(node, b)
+            else:
+                for child in node.children:
+                    self.recursive_insert(child, b)
 
+    def insert_for_tabbed_panel(self, node, treenode):
+        for tab in node.tab_list:
+            b = WidgetTreeElement(node=tab)
+            self.tree.add_node(b, treenode)            
+            self.recursive_insert(tab.content, b)
+        
     def refresh(self, *l):
         '''This function will refresh the tree. It will first remove all nodes
            and then insert them using recursive_insert
@@ -95,8 +105,10 @@ class WidgetsTree(ScrollView):
             node = self.tree.get_node_at_pos((self.touch.x, self.touch.y))
             if node:
                 self.selected_widget = node.node
+                self.playground.selected_widget = self.selected_widget
             else:
                 self.selected_widget = None
+                self.playground.selected_widget = None
 
             super(WidgetsTree, self).on_touch_down(touch)
 

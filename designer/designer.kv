@@ -43,20 +43,7 @@
 <MenuBubble>:
     background_image: 'atlas://data/images/defaulttheme/action_item'
 
-<PythonConsole>:
-    text_input: text_input2
-    scroll_view: scroll_view
-    ScrollView:
-        id: scroll_view
-        InteractiveShellInput:
-            id: text_input2
-            size_hint: (1, None)
-            font_name: root.font_name
-            font_size: root.font_size
-            foreground_color: root.foreground_color
-            background_color: root.background_color
-            height: max(self.parent.height, self.minimum_height)
-            on_ready_to_input: root.ready_to_input()
+
 
 <DesignerLinkLabel>:
     color: 0,0,1,1

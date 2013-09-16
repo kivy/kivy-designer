@@ -9,6 +9,23 @@ from kivy.base import EventLoop
 from kivy.properties import ObjectProperty, ListProperty, StringProperty, NumericProperty
 from kivy.lang import Builder
 
+Builder.load_string('''
+<PythonConsole>:
+    text_input: text_input2
+    scroll_view: scroll_view
+    ScrollView:
+        id: scroll_view
+        InteractiveShellInput:
+            id: text_input2
+            size_hint: (1, None)
+            font_name: root.font_name
+            font_size: root.font_size
+            foreground_color: root.foreground_color
+            background_color: root.background_color
+            height: max(self.parent.height, self.minimum_height)
+            on_ready_to_input: root.ready_to_input()
+''')
+
 class PseudoFile(object): 
     '''A psuedo file object, to redirect I/O operations from Python Shell to
        InteractiveShellInput.
@@ -113,7 +130,7 @@ class Shell(code.InteractiveConsole):
                     prompt = sys.ps1
                 try:
                     line = self.raw_input(prompt)
-                    if not line:
+                    if line == None:
                         continue
                     # Can be None if sys.stdin was redefined
                     encoding = getattr(sys.stdin, "encoding", None)
@@ -124,6 +141,7 @@ class Shell(code.InteractiveConsole):
                     break
                 else:
                     more = self.push(line)
+
             except KeyboardInterrupt:
                 self.write("\nKeyboardInterrupt\n")
                 self.resetbuffer()

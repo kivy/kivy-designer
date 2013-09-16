@@ -20,6 +20,7 @@ from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.actionbar import ActionBar
 from kivy.graphics import Color, Line
+from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets
 from designer.tree import Tree
@@ -187,7 +188,7 @@ class PlaygroundDragElement(BoxLayout):
 
                             self.target.real_remove_widget(self.child)
 
-                        else:
+                        elif not isinstance(self.target, TabbedPanel):
                             self.target.remove_widget(self.child)
 
                     if self.child.parent:
@@ -283,6 +284,8 @@ class PlaygroundDragElement(BoxLayout):
                 parent = None
                 if self.child.parent != self:
                     parent = self.child.parent
+                elif not self.playground.root:
+                    parent = self.child.parent
 
                 index = -1
 
@@ -290,13 +293,13 @@ class PlaygroundDragElement(BoxLayout):
                     self.can_place = target == self.drag_parent and parent is not None
                 else: 
                     self.can_place = target is not None and parent is not None
-    
+
                 if self.target:
                     try:
                         index = self.target.children.index(self.child)
                     except ValueError:
                         pass
-    
+
                     self.target.remove_widget(self.child)
                     if isinstance(self.target, ScreenManager):
                         self.target.real_remove_widget(self.child)
@@ -317,7 +320,7 @@ class PlaygroundDragElement(BoxLayout):
                                 self.playground.place_widget(
                                         child, self.center_x, self.y - 20,
                                         index=index, target=target)
-    
+
                         elif not self.can_place:
                             self.playground.undo_dragging()
                         
@@ -332,7 +335,7 @@ class PlaygroundDragElement(BoxLayout):
                             #self.playground.add_widget_to_parent(child, target)
                             #doesn't work, don't know why :/. So, has to use this
                             self.playground.add_widget_to_parent(type(child)(), target) 
-    
+
                 elif self.drag_type == 'dragndrop':
                     self.playground.undo_dragging()
 
@@ -641,7 +644,13 @@ class Playground(ScatterPlane):
                     return child
 
                 elif widget:
-                    return target
+                    if isinstance(child, TabbedPanel):
+                        if child.current_tab:
+                            _item = self.find_target(x, y, child.current_tab.content)
+                            return _item
+
+                    else:
+                        return target
 
             elif isinstance(child.parent, Carousel):
                 t = self.find_target(x, y, child, widget)
@@ -666,7 +675,7 @@ class Playground(ScatterPlane):
 
         if widget.collide_point(x, y):
             return True
-        
+
         x, y = widget.to_local(x, y)
         for child in widget.children:
             if self._custom_widget_collides(child, x, y):
@@ -819,6 +828,7 @@ class Playground(ScatterPlane):
         '''
         if self.selected_widget:
             self.remove_widget_from_parent(self.selected_widget)
+            self.selected_widget = None
 
     def on_touch_move(self, touch):
         if self.widgettree.dragging == True:
@@ -843,8 +853,11 @@ class Playground(ScatterPlane):
         if self.drag_operation[0].parent:
             self.drag_operation[0].parent.remove_widget(self.drag_operation[0])
 
-        self.drag_operation[1].add_widget(self.drag_operation[0], self.drag_operation[2])
-        Clock.schedule_once(functools.partial(App.get_running_app().focus_widget, self.drag_operation[0]), 0.01)
+        self.drag_operation[1].add_widget(self.drag_operation[0],
+                                          self.drag_operation[2])
+        Clock.schedule_once(functools.partial(
+                             App.get_running_app().focus_widget,
+                             self.drag_operation[0]), 0.01)
         self.drag_operation = []
 
     def start_widget_dragging(self, *args):

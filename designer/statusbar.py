@@ -3,6 +3,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.tabbedpanel import TabbedPanelContent, TabbedPanelHeader, TabbedPanel
 
 from kivy.uix.sandbox import SandboxContent
 
@@ -88,6 +89,20 @@ class StatusBar(BoxLayout):
             if wid == self.playground.sandbox or\
             wid == self.playground.sandbox.children[0]:
                 break
+
+            if isinstance(wid, TabbedPanelContent):
+                _wid = wid
+                wid = wid.parent.current_tab
+                children.append(StatusNavBarButton(node=wid))
+                wid = _wid.parent
+
+            elif isinstance(wid, TabbedPanelHeader):
+                children.append(StatusNavBarButton(node=wid))
+                _wid = wid
+                while _wid and not isinstance(_wid, TabbedPanel):        
+                    _wid = _wid.parent
+                wid = _wid
+
             children.append(StatusNavBarButton(node=wid))
             wid = wid.parent
 

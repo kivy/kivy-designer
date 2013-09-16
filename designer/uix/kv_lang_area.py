@@ -9,6 +9,7 @@ from kivy.factory import Factory
 from kivy.clock import Clock
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.tabbedpanel import TabbedPanelContent, TabbedPanel, TabbedPanelHeader
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
@@ -83,12 +84,34 @@ class KVLangArea(DesignerCodeInput):
                     
                 except ValueError:
                     place = 0
-                
+
                 path_to_widget.append(place)
                 _widget = _widget.parent
 
+            elif isinstance(_widget.parent, TabbedPanelContent):
+               tab_panel = _widget.parent.parent
+               path_to_widget.append(0)
+               place = len(tab_panel.tab_list) - \
+                   tab_panel.tab_list.index(tab_panel.current_tab) - 1
+
+               path_to_widget.append(place)
+               _widget = tab_panel
+
+            elif isinstance(_widget, TabbedPanelHeader):
+                tab_panel = _widget.parent
+                while tab_panel and not isinstance(tab_panel, TabbedPanel):
+                    tab_panel = tab_panel.parent
+
+                place = len(tab_panel.tab_list) - \
+                   tab_panel.tab_list.index(_widget) - 1
+
+                path_to_widget.append(place)
+                _widget = tab_panel
+
             else:
-                place = len(_widget.parent.children) - _widget.parent.children.index(_widget) - 1
+                place = len(_widget.parent.children) - \
+                    _widget.parent.children.index(_widget) - 1
+
                 path_to_widget.append(place)
                 _widget = _widget.parent
 
@@ -168,10 +191,11 @@ class KVLangArea(DesignerCodeInput):
 
             if parent_lineno >= total_lines:
                 return
-    
+
             #Get text of parents line
             parent_line = lines[parent_lineno]
             insert_after_line = -1
+
             if parent_line.find(':') == -1:
                 #If parent_line doesn't contain ':' then insert it
                 #Also insert widget's rule after its properties
