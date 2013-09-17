@@ -812,7 +812,7 @@ class ProjectLoader(object):
     def get_class_str_from_text(self, class_name, _file_str, is_class=True):
         '''To return the full class rule of class_name from _file_str
         '''
-        #_file_str += '\n\n'
+        _file_str += '\n'
         start_pos = -1
         #Find the start position of class_name
         if is_class:

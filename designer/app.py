@@ -557,7 +557,7 @@ class Designer(FloatLayout):
         '''
 
         if self.project_loader.root_rule:
-            #try:
+            try:
                 if self.project_loader.new_project:
                     self.action_btn_save_as_pressed()
                     return
@@ -578,8 +578,8 @@ class Designer(FloatLayout):
                 self._curr_proj_changed = False
                 self.statusbar.show_message('Project saved successfully')
 
-##            except:
-##                self.statusbar.show_message('Cannot save project')
+            except:
+                self.statusbar.show_message('Cannot save project')
 
     def action_btn_save_as_pressed(self, *args):
         '''Event Handler when ActionButton "Save As" is pressed.
@@ -621,7 +621,8 @@ class Designer(FloatLayout):
             proj_dir = instance.ids.icon_view.path
 
         proj_dir = os.path.join(proj_dir, instance.filename)
-        try:
+        #try:
+        if True:
             self.project_loader.save_project(proj_dir)
             self.recent_manager.add_file(proj_dir)
             projdir = self.project_loader.proj_dir
@@ -634,8 +635,8 @@ class Designer(FloatLayout):
                                                             from_undo=True)
             self.statusbar.show_message('Project saved successfully')
 
-        except:
-            self.statusbar.show_message('Cannot save project')
+        #except:
+        #    self.statusbar.show_message('Cannot save project')
     
     def action_btn_settings_pressed(self, *args):
         self.designer_settings.parent = None

@@ -603,8 +603,17 @@ class Playground(ScatterPlane):
             parent = widget.parent
             if isinstance(parent.parent, Carousel):
                 parent.parent.remove_widget(widget)
+
+            elif isinstance(parent, ScreenManager):
+                if isinstance(widget, Screen):
+                    parent.remove_widget(widget)
+                else:
+                    parent.real_remove_widget(widget)
+
             else:
                 parent.remove_widget(widget)
+            
+            
         else:
             self.root.parent.remove_widget(self.root)
             self.root = None

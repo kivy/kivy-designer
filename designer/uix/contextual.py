@@ -113,7 +113,7 @@ class ContextMenu(TabbedPanel):
         self._win = None
         self.add_tab = super(ContextMenu, self).add_widget
         self.bubble = self.bubble_cls(size_hint=(None, None))
-        self.main_box = None
+        self.container = None
         self.main_tab = self.header_cls(text='Main')
         self.main_tab.content = ScrollView(size_hint=(1,1))
         self.main_tab.content.bind(height=self.on_scroll_height)
@@ -202,13 +202,13 @@ class ContextMenu(TabbedPanel):
         # set width and x
         if self.auto_width:
             #Calculate minimum required width
-            if len(self.main_box.children) == 1:
+            if len(self.container.children) == 1:
                 self.bubble.width = max(self.main_tab.parent.parent.width,
-                                        self.main_box.children[0].width)
+                                        self.container.children[0].width)
             else:
                 self.bubble.width = max(self.main_tab.parent.parent.width,
                                         self.bubble.width,
-                                        *([i.width for i in self.main_box.children]))                               
+                                        *([i.width for i in self.container.children]))                               
 
         Clock.schedule_once(self._set_width_to_bubble, 0.01)
         # ensure the dropdown list doesn't get out on the X axis, with a
@@ -263,14 +263,14 @@ class ContextMenu(TabbedPanel):
             super(ContextMenu, self).add_widget(widget, index)
             return            
 
-        if not self.main_box:
-            self.main_box = GridLayout(orientation='vertical',
-                                       size_hint_y=None,
-                                       cols=1)
-            self.main_tab.content.add_widget(self.main_box)
-            self.main_box.bind(height=self.on_main_box_height)
+        if not self.container:
+            self.container = GridLayout(orientation='vertical',
+                                        size_hint_y=None,
+                                        cols=1)
+            self.main_tab.content.add_widget(self.container)
+            self.container.bind(height=self.on_main_box_height)
 
-        self.main_box.add_widget(widget, index)
+        self.container.add_widget(widget, index)
 
         if hasattr(widget, 'cont_menu'):
             widget.cont_menu = self
@@ -279,38 +279,38 @@ class ContextMenu(TabbedPanel):
         widget.size_hint_y = None
 
     def remove_widget(self, widget):
-        if self.main_box and widget in self.main_box.children:
-            self.main_box.remove_widget(widget)
+        if self.container and widget in self.container.children:
+            self.container.remove_widget(widget)
         else:
             super(ContextMenu, self).remove_widget(widget)
 
     def on_scroll_height(self, *args):
-        if not self.main_box:
+        if not self.container:
             return
 
-        self.main_box.height = max(self.main_box.height,
-                                   self.main_tab.content.height)
+        self.container.height = max(self.container.height,
+                                    self.main_tab.content.height)
 
     def on_main_box_height(self, *args):
-        if not self.main_box:
+        if not self.container:
             return
 
-        self.main_box.height = max(self.main_box.height,
-                                   self.main_tab.content.height)
+        self.container.height = max(self.container.height,
+                                    self.main_tab.content.height)
 
         if self.max_height:
-            self.bubble.height = min(self.main_box.height + self.tab_height + dp(16),
+            self.bubble.height = min(self.container.height + self.tab_height + dp(16),
                                      self.max_height)
         else:
-            self.bubble.height = self.main_box.height + self.tab_height + dp(16)
+            self.bubble.height = self.container.height + self.tab_height + dp(16)
 
     def on_child_height(self, *args):
         height = 0
-        for i in self.main_box.children:
+        for i in self.container.children:
             height += i.height
         
         self.main_tab.content.height = height
-        self.main_box.height = height
+        self.container.height = height
 
     def add_tab(self, widget, index = 0):
         super(ContextMenu, self).add_widget(widget, index)

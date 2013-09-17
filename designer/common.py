@@ -23,8 +23,6 @@ widgets = [
     ('BoxLayout', 'layout'),
     ('AnchorLayout', 'layout'),
     ('StackLayout', 'layout'),
-    ('Bubble', 'complex'),
-    ('DropDown', 'complex'),
     ('FileChooserListView', 'complex'),
     ('FileChooserIconView', 'complex'),
     ('Popup', 'complex'),

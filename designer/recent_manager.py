@@ -8,11 +8,9 @@ from kivy.uix.listview import ListView, ListItemButton
 from kivy.properties import ObjectProperty, NumericProperty
 from kivy.adapters.listadapter import ListAdapter
 
-def get_kivy_designer_dir():
-    return os.path.join(os.path.expanduser('~'), '.kivy-designer')
+from designer.helper_functions import get_kivy_designer_dir
 
 RECENT_FILES_NAME = 'recent_files'
-recent_file_path = os.path.join(get_kivy_designer_dir(), RECENT_FILES_NAME)
 
 class RecentManager(object):
     '''RecentManager is responsible for retrieving/storing the list of recently
@@ -54,7 +52,8 @@ class RecentManager(object):
         _string = ''
         for _file in self.list_files:
             _string += _file + '\n'
-        
+
+        recent_file_path = os.path.join(get_kivy_designer_dir(), RECENT_FILES_NAME)
         f = open(recent_file_path, 'w')
         f.write(_string)
         f.close()
@@ -62,6 +61,8 @@ class RecentManager(object):
     def load_files(self):
         '''To load the list of files from disk
         '''
+        
+        recent_file_path = os.path.join(get_kivy_designer_dir(), RECENT_FILES_NAME)
 
         if not os.path.exists(recent_file_path):
             return

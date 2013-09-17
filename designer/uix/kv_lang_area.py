@@ -194,6 +194,9 @@ class KVLangArea(DesignerCodeInput):
 
             #Get text of parents line
             parent_line = lines[parent_lineno]
+            if not parent_line.strip():
+                return
+
             insert_after_line = -1
 
             if parent_line.find(':') == -1:
@@ -567,6 +570,9 @@ class KVLangArea(DesignerCodeInput):
         indent = get_indentation(widget_line)
         prop_found = False
 
+        if not widget_line.strip():
+            return
+
         if ':' not in widget_line:
             #If cannot find ':' then insert it
             self.cursor = (len(lines[widget_lineno]), widget_lineno)
@@ -659,6 +665,9 @@ class KVLangArea(DesignerCodeInput):
         widget_lineno = self._find_widget_place(path_to_widget, lines,
                                                 total_lines, root_lineno+1)
         widget_line = lines[widget_lineno]
+        if not widget_line.strip():
+            return
+
         indent = get_indentation(widget_line)
         prop_found = False
 
