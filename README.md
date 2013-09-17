@@ -17,7 +17,7 @@ make
 
 cd kivy/tools
 
-garden install filebrowser00
+garden install filebrowser
 
 export PYTHONPATH=PATH-TO-ABOVE-KIVY
 
