@@ -265,9 +265,12 @@ class Designer(FloatLayout):
                 on_prev_screen=self._prev_screen)
 
         self.actionbar.add_widget(self.editcontview)
+        
+        widget = self.ui_creator.propertyviewer.widget
 
-        if isinstance(self.ui_creator.propertyviewer.widget, Carousel) or\
-            isinstance(self.ui_creator.propertyviewer.widget, ScreenManager):
+        if isinstance(widget, Carousel) or\
+            isinstance(widget, ScreenManager) or\
+            isinstance(widget, TabbedPanel):
             self.editcontview.show_action_btn_screen(True)
         else:
             self.editcontview.show_action_btn_screen(False)
@@ -282,7 +285,6 @@ class Designer(FloatLayout):
         self.ui_creator.playground.clicked = False
         self.ui_creator.kv_code_input.clicked = False
 
-
     def _prev_screen(self, *args):
         widget = self.ui_creator.propertyviewer.widget
         if isinstance(widget, Carousel):
@@ -290,6 +292,13 @@ class Designer(FloatLayout):
 
         elif isinstance(widget, ScreenManager):
             widget.current = widget.previous()
+        
+        elif isinstance(widget, TabbedPanel):
+            index = widget.tab_list.index(widget.current_tab)
+            if len(widget.tab_list) <= index + 1:
+                return
+            
+            widget.switch_to(widget.tab_list[index + 1])
      
     def _next_screen(self, *args):
         widget = self.ui_creator.propertyviewer.widget
@@ -298,6 +307,14 @@ class Designer(FloatLayout):
 
         elif isinstance(widget, ScreenManager):
             widget.current = widget.next()
+
+        elif isinstance(widget, TabbedPanel):
+            index = widget.tab_list.index(widget.current_tab)
+            if index == 0:
+                return
+            
+            widget.switch_to(widget.tab_list[index - 1])
+            
 
     def on_touch_down(self, touch):
         '''Override of FloatLayout.on_touch_down. Used to determine where

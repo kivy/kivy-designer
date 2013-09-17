@@ -9,7 +9,6 @@
             ActionPrevious:
                 title: 'Action Bar'
                 with_previous: False
-            ActionOverflow:
             ActionGroup:
                 text: 'File'
                 mode: 'spinner'
