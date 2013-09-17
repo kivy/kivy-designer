@@ -1,0 +1,26 @@
+<RootWidget>:
+# this is the rule for your root widget, defining it's look and feel.
+    ActionBar:
+    #this is the auto provided ActionBar with some menus. Replace it with your
+    #app structure
+        pos_hint: {'top':1}
+        ActionView:
+            use_separator: True
+            ActionPrevious:
+                title: 'Action Bar'
+                with_previous: False
+            ActionGroup:
+                text: 'File'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                ActionButton:
+                    text: 'New'
+                ActionButton:
+                    text: 'Open'
+                ActionButton:
+                    text: 'Save'
+                ActionButton:
+                    text: 'Save As'
+                ActionButton:
+                    text: 'Quit'

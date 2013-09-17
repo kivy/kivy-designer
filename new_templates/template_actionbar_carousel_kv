@@ -1,0 +1,37 @@
+<RootWidget>:
+# this is the rule for your root widget, defining it's look and feel.
+    action_bar: _action
+    carousel: carousel
+    #These are the auto provided ActionBar and Carousel, change them according
+    #to your needs
+    ActionBar:
+        id: _action
+        size_hint: 1,0.1
+        pos_hint: {'top':1}
+        ActionView:
+            use_separator: True
+            ActionPrevious:
+                title: 'Slide 1'
+                with_previous: False
+            ActionOverflow:
+                disabled: True
+            ActionButton:
+                text: 'Go To Slide 2'
+                on_release: carousel.index = 1
+            ActionButton:
+                text: 'Go To Slide 3'
+                on_release: carousel.index = 2
+
+    Carousel:
+        id: carousel
+        pos_hint: {'top': 0.9}
+        on_index: root.on_index(*args)
+        BoxLayout:
+            Button:
+                text: 'Slide One'
+        BoxLayout:
+            Button:
+                text: 'Slide Two'
+        BoxLayout:
+            Button:
+                text: 'Slide three'

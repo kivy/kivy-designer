@@ -1,0 +1,5 @@
+<RootWidget>:
+    # this is the rule for your root widget, defining it's look and feel.
+    Button:
+        # this is the only auto provided widget, you should replace it with your own app structure.
+        text: 'Hello World !!'

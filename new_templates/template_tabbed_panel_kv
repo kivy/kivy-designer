@@ -1,0 +1,15 @@
+<RootWidget>:
+    TabbedPanel:
+        do_default_tab: False
+        
+        TabbedPanelItem:
+            text: 'Item 1'
+            BoxLayout:
+        
+        TabbedPanelItem:
+            text: 'Item 2'
+            BoxLayout:
+        
+        TabbedPanelItem:
+            text: 'Item 3'
+            BoxLayout:

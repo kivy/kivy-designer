@@ -1,0 +1,12 @@
+<RootWidget>:
+#This is the root widget's kv definition
+    Screen:
+        name: 'Screen 1'
+        Label:
+            text: 'Screen 1'
+
+    Screen:
+        name: 'Screen 2'
+        Label:
+            text: 'Screen 2'
+            

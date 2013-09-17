@@ -1,0 +1,6 @@
+<RootWidget>:
+    ScrollView:
+        id: e_scroll
+        TextInput:
+            size_hint_y: None
+            height: max(e_scroll.height, self.minimum_height)

@@ -2,112 +2,410 @@
 #:set bgcolor (.06, .07, .08)
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
+#:import KivyLexer kivy.extras.highlight.KivyLexer
+#:import ContextMenu designer.uix.contextual.ContextMenu
 
-<Designer>:
-    propertyviewer: propertyviewer
-    playground: playground
-    widgettree: widgettree
+<MenuHeader>
+    color: (1, 1, 1, 1) if self.state == 'normal' else (0, 0, 0, 1)
+    font_size: '12dp'
+    shorten: True
+    text_size: self.size
+    padding: '2dp', '2dp'
+    background_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_down: 'atlas://data/images/defaulttheme/action_item_down'
+    background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
+    Image:
+        source: 'atlas://data/images/defaulttheme/tree_closed'
+        size: (20, 20) if root.show_arrow else (0,0)
+        center_y: root.center_y
+        x: (self.parent.right - self.width) if self.parent else 100
+
+<ContextSubMenu>:
+    arrow_image: 'atlas://data/images/defaulttheme/tree_closed'
+    Image:
+        source: root.arrow_image
+        size: (20, 20) if root.attached_menu and len(root._list_children) > 0 else (0,0)
+        y: self.parent.y + (self.parent.height/2) - (self.height/2)
+        x: self.parent.x + (self.parent.width - self.width)
+
+<MenuButton>:
+    background_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_down: 'atlas://data/images/defaulttheme/action_item_down'
+    background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
+
+<ContextMenu>:
+    tab_pos:'top_right'
+    do_default_tab: False
+    tab_height: '24sp'
+
+<MenuBubble>:
+    background_image: 'atlas://data/images/defaulttheme/action_item'
+
+
+
+<DesignerLinkLabel>:
+    color: 0,0,1,1
+    background_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item_disabled'
+
+<RecentFilesBox>:
+    grid: grid
+    cols: 1
+    padding: '2sp'
+    size_hint_x: None
+    GridLayout:
+        id: grid
+        cols: 1
+        size_hint_y: None
+        height: 1
+
+<DesignerStartPage>:
+    cols: 1
+    padding: '2sp'
+    btn_open: btn_open
+    btn_new: btn_new
+    recent_files_box: recent_files_box
+
+    Widget:
+        size_hint: None, None
+        height: '10sp'
+
+    BoxLayout:
+        size_hint: 1, None
+        orientation: 'horizontal'
+        height: btn_open.height
+        padding: '4sp'
+        Button:
+            size_hint: None, None
+            height: '22pt'
+            id: btn_open
+            text: 'Open Project'
+            on_release: root.dispatch('on_open_down')
+
+        Button:
+            size_hint: None, None
+            height: '22pt'
+            id: btn_new
+            text: 'New Project'
+            on_release: root.dispatch('on_new_down')
+
+    Label:
+        text: 'Getting Started:'
+        size_hint_y: None
+        height: '22pt'
+        text_size: self.size
+        bold: True
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: None, None
+        padding: '2sp'
+        height: 2*kivy_label.height + 4
+        Label:
+            size_hint: None, 1
+            width: 10
+
+        GridLayout:
+            kivy_label: kivy_label
+            cols: 1
+            size_hint_y: None
+            height: 2*kivy_label.height
+            DesignerLinkLabel:
+                id: kivy_label
+                text: ' Kivy'
+                size_hint: None, None
+                height: '22pt'
+                text_size: self.size
+                valign: 'middle'
+                link: 'http://kivy.org'
+
+            DesignerLinkLabel:
+                text: ' Kivy Designer Help'
+                size_hint: None, None
+                size: '110pt', '22pt'
+                text_size: self.size
+                valign: 'middle'
+
+    Label:
+        text: 'Recent Projects:'
+        size_hint_y: None
+        height: '30pt'
+        text_size: self.size
+        valign: 'middle'
+        bold: True
+
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint: None, 1
+        Label:
+            size_hint: None, 1
+            width: 10
+
+        RecentFilesBox:
+            id: recent_files_box
+
+<DesignerActionPrevious>:
+    text_size: (self.size[0]+sp(2), self.size[1])
+    valign: 'middle'
+
+<DesignerActionButton>:
+    text_size: (self.size[0]-sp(4), self.size[1])
+    valign: 'middle'
+    size_hint_y: None
+    height: 30
+
+<DesignerActionSubMenu>:
+    text_size: (self.size[0]-sp(4), self.size[1])
+    valign: 'middle'
+    size_hint_y: None
+    height: 30
+
+<InfoBubble>:
+    size_hint: None, None
+    width: '270dp'
+    height: lbl.texture_size[1] + dp(20)
+    on_touch_down: self.hide()
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '5dp'
+        spacing: '2dp'
+        Label:
+            id: lbl
+            text: root.message
+            text_size: self.width, None
+
+<Placeholder>:
+    canvas:
+        Color:
+            rgb: 1, 0.5, 0.8
+        
+        Line:
+            points: self.x - 2, self.y - 2, self.right - 2, self.y - 2, self.right - 2, self.top - 2, self.x - 2, self.top - 2
+            width: 2.
+            close: True
+
+<PyScrollView>:
+    id: scroll
+    code_input: code_input
+    PyCodeInput:
+        id: code_input
+        auto_indent: True
+        size_hint_y: None
+        height: max(scroll.height, self.minimum_height)
+
+<AddFileDialog>:
+    text_file: text_file
+    text_folder: text_folder
+    always_check: always_check
+    orientation: 'vertical'
+
+    Label:
+        text: 'File:'
+        size_hint_x: None
+        width: '20pt'
+
+    BoxLayout:
+        size_hint_y: None
+        height: 'DesignerActionButton24pt'
+        TextInput:
+            id: text_file
+            multiline: False
+            on_text: root.update_from_file()
+        Button:
+            size_hint_x: None
+            text: 'Open File'
+            on_press: root.open_file_btn_pressed()
+            
+    Label:
+        text: 'Add File to:'
+        size_hint_x: None
+        width: '55pt'
+
+    BoxLayout:
+        size_hint_y: None
+        height: '24pt'
+        TextInput:
+            id: text_folder
+            multiline: False
+        Button:
+            size_hint_x: None
+            text: 'Open Folder'
+            on_press: root.open_folder_btn_pressed()
+
+    BoxLayout:
+        CheckBox:
+            id: always_check
+            width: '20sp'
+            size_hint_x: None
+        Label:
+            width: '120pt'
+            size_hint_x: None
+            text: 'Always use this folder'
+
+    BoxLayout:
+        padding: '2sp'
+        Button:
+            text: 'Add'
+            on_press: root._perform_add_file()
+        Button:
+            text: 'Cancel'
+            on_press: root.dispatch('on_cancel')
+
+<KVLangArea>:
+    auto_indent: True
+    lexer: KivyLexer()
+    canvas.after:
+        Color:
+            rgba: .9, .1, .1, (1 if self.have_error else 0)
+        Line:
+            points: [self.x, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
+            close: True
+            width: 2
+
+<SelectClass>:
+    select_button: select
+    cancel_button: cancel
+    orientation: 'vertical'
+    padding: '2sp'
+    
+    GridLayout:
+        rows: 1
+        size_hint_y: None
+        height: '25pt'
+        padding: '4sp'
+        Button:
+            id: select
+            text: 'Select Class'
+            size_hint_x: None
+            width: '90pt'
+        Button:
+            id: cancel
+            text: 'Cancel'
+            size_hint_x: None
+            width: '90pt'
+
+<NewProjectDialog>:
+    image: image
+    list_parent: list_parent
+    select_button: select
+    cancel_button: cancel
+    orientation: 'vertical'
+    padding: '2sp'
+
+    Label:
+        size_hint: None, None
+        pos_hint: {'x': 0.1}
+        height: '22pt'
+        text: 'Select one of the following templates:'
+    
+    BoxLayout:
+        id: list_parent
+        orientation: 'horizontal'
+        padding: '2sp'
+        Image:
+            id: image
 
     GridLayout:
-        cols: 1
+        rows: 1
+        size_hint_y: None
+        height: '25pt'
+        padding: '4sp'
+        Button:
+            id: select
+            text: 'Create New Project'
+            size_hint_x: None
+            width: '110pt'
+        Button:
+            id: cancel
+            text: 'Cancel'
+            size_hint_x: None
+            width: '110pt'
 
-        FloatLayout:
-            canvas:
-                Color:
-                    rgb: .21, .22, .22
-                Rectangle:
-                    pos: self.pos
-                    size: self.size
+<RecentDialog>:
+    select_button: select
+    cancel_button: cancel
+    orientation: 'vertical'
+    padding: '2sp'
+    
+    GridLayout:
+        rows: 1
+        size_hint_y: None
+        height: '25pt'
+        padding: '4sp'
+        Button:
+            id: select
+            text: 'Open'
+            size_hint_x: None
+            width: '90pt'
+        Button:
+            id: cancel
+            text: 'Cancel'
+            size_hint_x: None
+            width: '90pt'
 
-            Playground:
-                id: playground
-                canvas.before:
-                    Color:
-                        rgb: 0, 0, 0
-                    Rectangle:
-                        size: self.size
+<ConfirmationDialog>:
+    orientation: 'vertical'
+    padding: '5sp'
+    Label:
+        text: root.message
+    
+    BoxLayout:
+        size_hint_y: None
+        height: '25pt'
+        Button:
+            text: 'Yes'
+            on_press: root.dispatch('on_ok')
+        Button:
+            text: 'No'
+            on_press: root.dispatch('on_cancel')
+    
+<ActionCheckButton>:
+    orientation: 'horizontal'
+    background_normal: 'atlas://data/images/defaulttheme/action_item'
+    canvas.before:
+        Color:
+            rgba: 1,1,1,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: self.background_normal
 
-            Splitter:
-                sizable_from: 'right'
-                min_size: 150
-                size_hint: None, 1
-                width: 150
-                pos_hint: {'y': 0, 'x': 0}
-                GridLayout:
-                    cols: 1
-                    canvas:
-                        Color:
-                            rgb: bgcolor
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-
-                    Label:
-                        text: 'Toolbox'
-                        font_size: '10pt'
-                        height: '20pt'
-                        size_hint_y: None
-
-                        canvas.before:
-                            Color:
-                                rgb: titlecolor
-                            Rectangle:
-                                pos: self.pos
-                                size: self.size
-
-                    Toolbox
-
-            Splitter:
-                size_hint_x: None
-                min_size: 170
-                width: 250
-                pos_hint: {'y': 0, 'right': 1}
-                GridLayout:
-                    cols: 1
-                    spacing: .5
-
-                    canvas:
-                        Color:
-                            rgb: titlecolor
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-
-                    Label:
-                        text: 'Widget Navigator'
-                        font_size: '10pt'
-                        height: '20pt'
-                        size_hint_y: None
-
-                    WidgetsTree:
-                        id: widgettree
-                        playground: playground
-
-                    Splitter:
-                        sizable_from: 'top'
-                        size_hint_y: None
-                        height: 300
-                        max_size: 500
-                        BoxLayout:
-                            orientation: 'vertical'
-                            Label:
-                                text: 'Property Navigator'
-                                font_size: '10pt'
-                                height: '20pt'
-                                size_hint_y: None
-
-                            PropertyViewer:
-                                id: propertyviewer
-
-        StatusBar
+<EditContView>:
+    ActionPrevious:
+        title: "Edit"
+        width: 100
+        with_previous: True
+    ActionOverflow:
+    ActionButton:
+        text: 'Undo'
+        on_release: root.dispatch('on_undo')
+    ActionButton:
+        text: 'Redo'
+        on_release: root.dispatch('on_redo')
+    ActionButton:
+        text: 'Cut'
+        on_release: root.dispatch('on_cut')
+    ActionButton:
+        text: 'Copy'
+        on_release: root.dispatch('on_copy')
+    ActionButton:
+        text: 'Paste'
+        on_release: root.dispatch('on_paste')
+    ActionButton:
+        text: 'Select All'
+        on_release: root.dispatch('on_selectall')
+    ActionButton:
+        text: 'Delete'
+        on_release: root.dispatch('on_delete')
 
 <Playground>:
-    root: root_widget
     do_scale: False
     do_rotation: False
     size_hint: None, None
-    size: 640, 480
-    pos: 155, 60
+    size: 550, 350
+    pos: 300, 230
     auto_bring_to_front: False
     canvas:
         Color:
@@ -116,10 +414,6 @@
             points: [0, 0, self.width, 0, self.width, self.height, 0, self.height]
             width: 2.
             close: True
-
-    FloatLayout:
-        id: root_widget
-        size: root.size
 
 <PlaygroundDragElement>:
     size_hint: None, None
@@ -135,25 +429,31 @@
     on_target: app.focus_widget(args[1])
 
 <Toolbox>:
-    widgets_list: widgets_list
-
-    ScrollView:
-        do_scroll_x: False
+    accordion: accordion
+    Accordion:
+        id: accordion
+        orientation: 'vertical'
         pos: root.pos
-        GridLayout:
-            id: widgets_list
-            cols: 1
-            spacing: 3
-            padding: 5
-            size_hint_y: None
-            height: self.minimum_height
+        size_hint_y: None
+        height: root.height
 
 <ToolboxCategory>:
+    gridlayout: gridlayout
     size_hint_y: None
     height: '22pt'
-    font_size: '10pt'
-    text: self.text[0].upper() + self.text[1:]
-
+    title: self.title[0].upper() + self.title[1:]
+    ScrollView:
+        pos: root.pos
+        GridLayout:
+            id: gridlayout
+            cols: 1
+            orientation: 'vertical'
+            padding: '5sp'
+            spacing: '3sp'
+            size_hint_y: None
+            size: root.size
+            height: max(self.parent.height, self.minimum_height)
+    
 <ToolboxButton>:
     size_hint_y: None
     height: '22pt'
@@ -161,10 +461,9 @@
     on_press_and_touch: app.create_draggable_element(self.text, args[1])
 
 <StatusBar>:
-    size_hint_y: None
-    height: '20pt'
     app: app
     navbar: navbar
+    gridlayout: gridlayout
     canvas:
         Color:
             rgb: bordercolor
@@ -178,16 +477,11 @@
             size: self.size
 
     GridLayout:
+        id: gridlayout
         rows: 1
         GridLayout:
             rows: 1
             id: navbar
-        BoxLayout:
-            size_hint_x: None
-            width: '44pt'
-            Button:
-                text: 'Delete'
-                font_size: '10pt'
 
 <StatusNavBarButton>:
     text: getattr(root.node, '__class__').__name__
@@ -245,8 +539,8 @@
     on_text: self.set_value(args[1])
 
 <PropertyBoolean>:
-    active: getattr(self.propwidget, self.propname)
     on_active: self.set_value(args[1])
+    active: bool(getattr(self.propwidget, self.propname))
 
 <WidgetsTree>:
     do_scroll_x: False
@@ -260,7 +554,7 @@
 
     TreeView:
         id: tree
-        height: 1000
+        height: self.minimum_height
         size_hint_y: None
         hide_root: True
         on_selected_node: app.focus_widget(args[1].node)
@@ -269,3 +563,348 @@
     is_open: True
     text: getattr(root.node, '__class__').__name__
     font_size: '10pt'
+
+<UICreator>:
+    kv_code_input: code_input
+    splitter_kv_code_input: splitter_kv
+    grid_widget_tree: grid_widget_tree
+    splitter_property: splitter_property
+    splitter_widget_tree: splitter_widget_tree
+    propertyviewer: propertyviewer
+    playground: playground
+    widgettree: widgettree
+    error_console: error_console
+    kivy_console: kivy_console
+    tab_pannel: tab_pannel
+    eventviewer: eventviewer
+    py_console: py_console
+
+    GridLayout:
+        height: root.height
+        pos: root.pos
+        cols: 1
+        splitter_widget_tree: splitter_widget_tree
+
+        FloatLayout:
+            size_hint: 1,1
+            canvas:
+                Color:
+                    rgb: .21, .22, .22
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            Playground:
+                id: playground
+                canvas.before:
+                    Color:
+                        rgb: 0, 0, 0
+                    Rectangle:
+                        size: self.size
+                on_show_edit: root.on_show_edit()
+
+            Splitter:
+                id: splitter_kv
+                sizable_from: 'top'
+                size_hint_y: None
+                size_hint_x: None
+                height: 200
+                min_size: 150
+                max_size: 500
+                x: root.x
+                width: root.width - splitter_widget_tree.width
+                y: root.y
+                
+                DesignerTabbedPanel:
+                    id: tab_pannel
+                    do_default_tab: False
+                    DesignerTabbedPanelItem:
+                        text: 'KV Lang Area'
+                        BoxLayout:
+                            orientation: 'vertical'
+                            ScrollView:
+                                id: scroll
+                                KVLangArea:
+                                    id: code_input
+                                    size_hint_y: None
+                                    height: max(scroll.height, self.minimum_height)
+                                    on_show_edit: root.on_show_edit()
+                            
+                            Button:
+                                size_hint_y: None
+                                size_hint_x: 0.1
+                                height: '22pt'
+                                text: 'Reload'
+                                pos_hint: {'x': 0.9}
+                                on_release: root.reload_btn_pressed()
+                                
+                    
+                    DesignerTabbedPanelItem:
+                        text: 'Kivy Console'
+                        KivyConsole:
+                            id: kivy_console
+                    
+                    DesignerTabbedPanelItem:
+                        text: 'Python Shell'
+                        PythonConsole:
+                            id: py_console
+        
+                    DesignerTabbedPanelItem:
+                        text: 'Error Console'
+                        ScrollView:
+                            id: e_scroll
+                            CodeInput:
+                                id: error_console
+                                size_hint_y: None
+                                height: max(e_scroll.height, self.minimum_height)
+                                text: ''
+                                    
+   
+            Splitter:
+                id: splitter_widget_tree
+                size_hint_x: None
+                min_size: 170
+                width: 250
+                pos_hint: {'y': 0, 'right': 1}
+                GridLayout:
+                    cols: 1
+                    spacing: .5
+
+                    canvas:
+                        Color:
+                            rgb: titlecolor
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+
+                    GridLayout:
+                        id: grid_widget_tree
+                        cols: 1
+                        spacing: .5
+                        Label:
+                            text: 'Widget Navigator'
+                            font_size: '10pt'
+                            height: '20pt'
+                            size_hint_y: None
+
+                        WidgetsTree:
+                            id: widgettree
+                            playground: playground
+
+                    Splitter:
+                        id: splitter_property
+                        sizable_from: 'top'
+                        size_hint_y: None
+                        height: 300
+                        max_size: 500
+                        DesignerTabbedPanel:
+                            do_default_tab: False
+                            DesignerTabbedPanelItem:
+                                text: '   Properties'
+                                PropertyViewer:
+                                    id: propertyviewer
+
+                            DesignerTabbedPanelItem:
+                                text: 'Events'
+                                EventViewer:
+                                    id: eventviewer
+                                    
+
+<DesignerContent>:
+    ui_creator: ui_creator
+    tree_view: tree_view
+    tab_pannel: tab_panel
+    toolbox: toolbox
+    splitter_tree: splitter_tree
+    tree_toolbox_tab_panel: tree_toolbox_tab_panel
+
+    DesignerTabbedPanel:
+        id: tab_panel
+        size_hint: None, None
+        height: root.height
+        y: root.y
+        x: splitter_tree.width
+        width: root.width - splitter_tree.width
+        do_default_tab: False
+
+        DesignerTabbedPanelItem:
+            text: 'UI Creator'
+            UICreator:
+                id: ui_creator
+
+    Splitter:
+        id: splitter_tree
+        pos: root.pos
+        size_hint_x: None
+        sizable_from: 'right'
+        min_size: 220
+        width: 220
+        DesignerTabbedPanel:
+            id: tree_toolbox_tab_panel
+            do_default_tab: False
+            DesignerTabbedPanelItem:
+                text: 'Project Tree'
+                TreeView:
+                    id: tree_view
+                    size_hint: 1, 1
+            
+            DesignerTabbedPanelItem:
+                text: 'Toolbox'
+                Toolbox:
+                    id: toolbox
+
+<Designer>:
+    statusbar: statusbar
+    actionbar: actionbar
+    start_page: start_page
+    recent_files_cont_menu: recent_files_cont_menu
+
+    ActionBar:
+        id: actionbar
+        pos_hint: {'top': 1}
+        on_height: root.on_actionbar_height()
+        size_hint: 1, None
+        height: '55sp'
+        ActionView:
+            ActionPrevious:
+                title: 'Kivy Designer'
+                width: 200
+                with_previous: False
+            ActionOverflow:
+            DesignerActionGroup:
+                text: 'File'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                dropdown_cls: ContextMenu
+                DesignerActionButton:
+                    text: 'New'
+                    size_hint_y: None
+                    height: 20
+                    on_release: root.action_btn_new_pressed()
+                DesignerActionButton:
+                    text: 'Open'
+                    size_hint_y: None
+                    height: 20
+                    on_release: root.action_btn_open_pressed()
+                DesignerActionButton:
+                    id: actn_btn_save
+                    disabled: True
+                    text: 'Save'
+                    on_release: root.action_btn_save_pressed()
+                DesignerActionButton:
+                    id: actn_btn_save_as
+                    disabled: True
+                    text: 'Save As'
+                    on_release: root.action_btn_save_as_pressed()
+                DesignerActionSubMenu:
+                    id: recent_files_cont_menu
+                    text: 'Recent Files'
+                    size_hint_y: None
+                    height: 20
+                    on_release: root.action_btn_recent_files_pressed()
+                DesignerActionButton:
+                    text: 'Settings'
+                    size_hint_y: None
+                    height: 20
+                    on_release: root.action_btn_settings_pressed()
+                DesignerActionButton:
+                    text: 'Quit'
+                    size_hint_y: None
+                    height: 20
+                    on_release: root.action_btn_quit_pressed()
+
+            ActionGroup:
+                text: 'View'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                dropdown_cls: ContextMenu
+                ActionCheckButton:
+                    id: actn_chk_proj_tree
+                    disabled: True
+                    text: 'Project Tree and Toolbox'
+                    minimum_width: 200
+                    on_active: root.action_chk_btn_toolbox_active(self)
+
+                ActionCheckButton:
+                    id: actn_chk_prop_event
+                    disabled: True
+                    text: 'Properties and Events'
+                    minimum_width: 200
+                    on_active: root.action_chk_btn_property_viewer_active(self)
+
+                ActionCheckButton:
+                    id: actn_chk_widget_tree
+                    disabled: True
+                    text: 'Widget Tree'
+                    minimum_width: 200
+                    on_active: root.action_chk_btn_widget_tree_active(self)
+
+                ActionCheckButton:
+                    id: actn_chk_status_bar
+                    disabled: True
+                    text: 'StatusBar'
+                    minimum_width: 200
+                    on_active: root.action_chk_btn_status_bar_active(self)
+
+                ActionCheckButton:
+                    id: actn_chk_kv_lang_area
+                    disabled: True
+                    text: 'KV Lang Area'
+                    minimum_width: 200
+                    on_active: root.action_chk_btn_kv_area_active(self)
+
+            ActionGroup:
+                text: 'Project'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                dropdown_cls: ContextMenu
+                DesignerActionButton:
+                    id: actn_btn_add_file
+                    disabled: True
+                    text: 'Add File'
+                    minimum_width: 150
+                    on_press: root.action_btn_add_file_pressed()
+                
+                DesignerActionButton:
+                    id: actn_btn_custom_widget
+                    disabled: True
+                    text: 'Add Custom Widget'
+                    on_press: root.action_btn_add_custom_widget_press()
+            
+                DesignerActionButton:
+                    id: actn_btn_proj_pref
+                    disabled: True
+                    text: 'Project Preferences'
+                    minimum_width: 150
+                    on_press: root.action_btn_project_pref_pressed()
+
+            ActionGroup:
+                text: 'Run'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                dropdown_cls: ContextMenu
+                DesignerActionButton:
+                    id: actn_btn_run_proj
+                    disabled: True
+                    text: 'Run Project'
+                    minimum_width: 150
+                    on_release: root.action_btn_run_project_pressed()
+
+    DesignerStartPage:
+        id: start_page
+        size_hint_y: None
+        height: root.height - actionbar.height - statusbar.height
+        top: root.height - actionbar.height
+        on_open_down: root.action_btn_open_pressed()
+        on_new_down: root.action_btn_new_pressed()
+
+    StatusBar:
+        id: statusbar
+        size_hint_y: None
+        on_height: root.on_statusbar_height()
+        height: '20pt'
+        pos_hint: {'y': 0}

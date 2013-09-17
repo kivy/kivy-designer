@@ -1,0 +1,26 @@
+<RootWidget>:
+#This is the root widget's kv definition
+    manager: manager
+    ActionBar:
+        id: _action
+        size_hint: 1,0.1
+        pos_hint: {'top':1}
+        ActionView:
+            use_separator: True
+            ActionPrevious:
+                title: 'Previous Slide'
+                with_previous: False
+                on_release: root.manager.current = root.manager.previous()
+
+    ScreenManager:
+        id: manager
+        pos_hint: {'top': 0.9}
+        Screen:
+            name: 'Screen 1'
+            Label:
+                text: 'Screen 1'    
+
+        Screen:
+            name: 'Screen 2'
+            Label:
+                text: 'Screen 2'
