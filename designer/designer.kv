@@ -634,6 +634,14 @@
                 x: root.x
                 width: root.width - splitter_widget_tree.width
                 y: root.y
+                canvas.before:
+                    Color:
+                        rgb: .21, .22, .22
+                    
+                    Rectangle:
+                        size: splitter_kv.size
+                        pos: splitter_kv.pos
+                    
                 
                 DesignerTabbedPanel:
                     id: tab_pannel
