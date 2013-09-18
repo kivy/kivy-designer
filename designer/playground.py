@@ -820,7 +820,7 @@ class Playground(ScatterPlane):
         '''
         base_widget = self.selected_widget
 
-        if base_widget:
+        if base_widget and base_widget.parent:
             self.widget_to_paste = base_widget
             self._widget_str_to_paste = self.kv_code_input.\
                 get_widget_text_from_kv(base_widget, None)
