@@ -791,6 +791,7 @@ class Playground(ScatterPlane):
         parent = self.selected_widget
         if parent and self.widget_to_paste:
             class_rules = App.get_running_app().root.project_loader.class_rules
+            root_widget = App.get_running_app().root.project_loader.root_rule.widget
             is_child_custom = False
             for rule in class_rules:
                 if rule.name == type(parent).__name__:
@@ -799,7 +800,8 @@ class Playground(ScatterPlane):
 
             #find appropriate parent to add widget_to_paste
             while parent:
-                if isinstance(parent, Layout) and not is_child_custom:
+                if isinstance(parent, Layout) and (not is_child_custom 
+                                                   or root_widget == parent):
                     break
 
                 parent = parent.parent
