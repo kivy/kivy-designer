@@ -546,6 +546,11 @@
     on_active: self.set_value(args[1])
     active: bool(getattr(self.propwidget, self.propname))
 
+<PropertyOptions>:
+    valign: 'middle'
+    halign: 'left'
+    on_text: self.set_value(args[1])
+
 <WidgetsTree>:
     do_scroll_x: False
     tree: tree

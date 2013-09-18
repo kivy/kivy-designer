@@ -1,9 +1,10 @@
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty, \
-        BoundedNumericProperty, BooleanProperty
+        BoundedNumericProperty, BooleanProperty, OptionProperty
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
+from kivy.uix.spinner import Spinner
 from kivy.app import App
 
 from designer.undo_manager import PropOperation
@@ -98,6 +99,16 @@ class PropertyBase(object):
                 setattr(self.propwidget, self.propname, oldvalue)
 
 
+class PropertyOptions(PropertyBase, Spinner):
+
+    def __init__(self, prop, **kwargs):
+        PropertyBase.__init__(self, **kwargs)
+        Spinner.__init__(self, values=prop.options, **kwargs)
+    
+    def on_propvalue(self, *args):
+        self.text = self.propvalue
+
+
 class PropertyTextInput(PropertyBase, TextInput):
     '''PropertyTextInput is used as widget to display
        :class:`~kivy.properties.StringProperty` and
@@ -188,16 +199,24 @@ class PropertyViewer(ScrollView):
             return PropertyTextInput(propwidget=self.widget, propname=name,
                                      proptype = 'NumericProperty',
                                      kv_code_input=self.kv_code_input)
+
         elif isinstance(prop, StringProperty):
             return PropertyTextInput(propwidget=self.widget, propname=name,
                                      proptype = 'StringProperty',
                                      kv_code_input=self.kv_code_input)
+
         elif isinstance(prop, BooleanProperty):
             ip = PropertyBoolean(propwidget=self.widget, propname=name,
                                  proptype = 'BooleanProperty',
                                  kv_code_input=self.kv_code_input)
             ip.record_to_undo = True
             return ip
+        
+        elif isinstance(prop, OptionProperty):
+             ip = PropertyOptions(prop, propwidget=self.widget, propname=name,
+                                  proptype = 'StringProperty',
+                                  kv_code_input=self.kv_code_input)
+             return ip
 
         return None
 
