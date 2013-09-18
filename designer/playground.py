@@ -422,6 +422,7 @@ class Playground(ScatterPlane):
         self.undo_manager = None
         self._widget_x = -1
         self._widget_y = -1
+        self.widget_to_paste = None
 
     def on_pos(self, *args):
         if self.sandbox:
