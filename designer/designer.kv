@@ -519,7 +519,11 @@
     font_size: '10pt'
     valign: 'middle'
     size_hint_x: None
-    width: max(100, self.texture_size[0] + 10)
+    width: '90sp'
+    text_size: self.size
+    halign: 'left'
+    valign: 'middle'
+    shorten: True
 
 <PropertyBase>:
     propvalue: getattr(self.propwidget, self.propname)
