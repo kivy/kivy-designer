@@ -42,6 +42,7 @@ from designer.helper_functions import get_kivy_designer_dir
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton
+from designer.help_dialog import HelpDialog
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -148,6 +149,16 @@ class Designer(FloatLayout):
         Clock.schedule_interval(self.project_loader.perform_auto_save,
                                 int(self.designer_settings.config_parser.getdefault(
                                     'global', 'auto_save_time', 5))*60)
+    
+    def show_help(self, *args):
+        self.help_dlg = HelpDialog()
+        self._popup = Popup(title='Kivy Designer Help', content=self.help_dlg,
+                            size_hint=(0.95, 0.95),
+                            auto_dismiss=False)
+        self._popup.open()
+        self.help_dlg.bind(on_cancel=self._cancel_popup)
+
+        self.help_dlg.rst.source = 'help.rst'
 
     def _config_change(self, *args):
         '''Event Handler for 'on_config_change' event of self.designer_settings.

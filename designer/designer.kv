@@ -5,6 +5,18 @@
 #:import KivyLexer kivy.extras.highlight.KivyLexer
 #:import ContextMenu designer.uix.contextual.ContextMenu
 
+<HelpDialog>:
+    orientation: 'vertical'
+    rst: rst
+    padding: '2sp'
+    RstDocument:
+        id: rst
+    Button:
+        text: 'Close'
+        size_hint: None, None
+        size: '44pt', '22pt'
+        on_release: root.dispatch('on_cancel')
+
 <MenuHeader>
     color: (1, 1, 1, 1) if self.state == 'normal' else (0, 0, 0, 1)
     font_size: '12dp'
@@ -42,8 +54,6 @@
 
 <MenuBubble>:
     background_image: 'atlas://data/images/defaulttheme/action_item'
-
-
 
 <DesignerLinkLabel>:
     color: 0,0,1,1
@@ -127,6 +137,7 @@
                 size: '110pt', '22pt'
                 text_size: self.size
                 valign: 'middle'
+                on_release: root.dispatch('on_help')
 
     Label:
         text: 'Recent Projects:'
@@ -910,6 +921,7 @@
         top: root.height - actionbar.height
         on_open_down: root.action_btn_open_pressed()
         on_new_down: root.action_btn_new_pressed()
+        on_help: root.show_help()
 
     StatusBar:
         id: statusbar

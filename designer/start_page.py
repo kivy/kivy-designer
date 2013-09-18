@@ -105,10 +105,13 @@ class DesignerStartPage(GridLayout):
        :data:`designer_link` is a :class:`~kivy.properties.ObjectProperty`
     '''
     
-    __events__ = ('on_open_down', 'on_new_down')
+    __events__ = ('on_open_down', 'on_new_down', 'on_help')
     
     def on_open_down(self, *args):
         pass
     
     def on_new_down(self, *args):
+        pass
+    
+    def on_help(self, *args):
         pass
