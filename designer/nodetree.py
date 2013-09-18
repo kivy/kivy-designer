@@ -91,11 +91,8 @@ class WidgetsTree(ScrollView):
 
     def on_touch_up(self, touch):
         self.dragging = False
-        if self.collide_point(*touch.pos):
-            Clock.unschedule(self._start_dragging)
-            super(WidgetsTree, self).on_touch_up(touch)
-
-        return False
+        Clock.unschedule(self._start_dragging)
+        return super(WidgetsTree, self).on_touch_up(touch)
 
     def on_touch_down(self, touch):
         if self.collide_point(*touch.pos) and not self.dragging:
@@ -110,9 +107,7 @@ class WidgetsTree(ScrollView):
                 self.selected_widget = None
                 self.playground.selected_widget = None
 
-            super(WidgetsTree, self).on_touch_down(touch)
-
-        return False
+        return super(WidgetsTree, self).on_touch_down(touch)
 
     def _start_dragging(self, *args):
         if self.dragging and self.selected_widget:
