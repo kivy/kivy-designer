@@ -17,6 +17,17 @@
         size: '44pt', '22pt'
         on_release: root.dispatch('on_cancel')
 
+<AboutDialog>:
+    Label:
+        text: 'Kivy Designer'
+        
+    Button:
+        text: 'Close'
+        size_hint: None, None
+        size: '44pt', '22pt'
+        on_release: root.dispatch('on_cancel')
+
+
 <MenuHeader>
     color: (1, 1, 1, 1) if self.state == 'normal' else (0, 0, 0, 1)
     font_size: '12dp'
@@ -921,6 +932,24 @@
                     text: 'Run Project'
                     minimum_width: 150
                     on_release: root.action_btn_run_project_pressed()
+            
+            ActionGroup:
+                text: 'Help'
+                mode: 'spinner'
+                size_hint_x: None
+                width: 90
+                dropdown_cls: ContextMenu
+                DesignerActionButton:
+                    id: actn_btn_help
+                    text: 'Kivy Designer Help'
+                    minimum_width: 150
+                    on_release: root.show_help()
+                
+                DesignerActionButton:
+                    id: actn_btn_about
+                    text: 'About Kivy Designer'
+                    minimum_width: 150
+                    on_release: root.action_btn_about_pressed()
 
     DesignerStartPage:
         id: start_page

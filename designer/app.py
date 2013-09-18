@@ -42,7 +42,7 @@ from designer.helper_functions import get_kivy_designer_dir
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton
-from designer.help_dialog import HelpDialog
+from designer.help_dialog import HelpDialog, AboutDialog
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -1052,6 +1052,14 @@ class Designer(FloatLayout):
                 self.ui_creator.tab_pannel.tab_list[0])
         
         self.ui_creator.playground.sandbox.error_active = False
+        
+    def action_btn_about_pressed(self, *args):
+        self.about_dlg = AboutDialog()
+        self._popup = Popup(title='About Kivy Designer', content=self.about_dlg,
+                            size_hint=(None, None), size=(600, 400),
+                            auto_dismiss=False)
+        self._popup.open()
+        self.about_dlg.bind(on_cancel=self._cancel_popup)
 
 
 class DesignerApp(App):

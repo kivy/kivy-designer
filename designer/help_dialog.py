@@ -8,3 +8,10 @@ class HelpDialog(BoxLayout):
     
     def on_cancel(self, *args):
         pass
+
+class AboutDialog(BoxLayout):
+    
+    __events__ = ('on_cancel',)
+    
+    def on_cancel(self, *args):
+        pass
