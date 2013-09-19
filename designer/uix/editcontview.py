@@ -25,6 +25,9 @@ class EditContView(ContextualActionView):
     action_btn_prev_screen = ObjectProperty(None, allownone=True)
 
     def show_action_btn_screen(self, show):
+        '''To add action_btn_next_screen and action_btn_prev_screen 
+           if show is True. Otherwise not.
+        '''
         if self.action_btn_next_screen:
             self.remove_widget(self.action_btn_next_screen)
         if self.action_btn_prev_screen:

@@ -67,6 +67,8 @@ class UICreator(FloatLayout):
     '''
     
     python_console = ObjectProperty(None)
+    '''Instance of :class:`~designer.uix.py_console.PythonConsole`
+    '''
     
     tab_pannel = ObjectProperty(None)
     '''Instance of :class:`~designer.designer_content.DesignerTabbedPanel`
@@ -80,18 +82,26 @@ class UICreator(FloatLayout):
         Clock.schedule_once(self._setup_everything)
     
     def reload_btn_pressed(self, *args):
+        '''Default handler for 'on_release' event of "Reload" button.
+        '''
         self.kv_code_input.func_reload_kv()
 
     def on_touch_down(self, *args):
+        '''Default handler for 'on_touch_down' event.
+        '''
         if self.playground and self.playground.keyboard:
             self.playground.keyboard.release()
   
         return super(UICreator, self).on_touch_down(*args)
 
     def on_show_edit(self, *args):
+        '''Event handler for 'on_show_edit' event.
+        '''
         App.get_running_app().root.on_show_edit(*args)
     
     def cleanup(self):
+        '''To clean up everything before loading new project.
+        '''
         self.playground.cleanup()
         self.kv_code_input.text = ''
 

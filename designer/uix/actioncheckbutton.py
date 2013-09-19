@@ -40,6 +40,8 @@ class ActionCheckButton(ActionItem, BoxLayout):
         Clock.schedule_once(self._label_setup, 0)
     
     def _label_setup(self, dt):
+        '''To setup text_size of _label
+        '''
         self._label.text_size = (self.minimum_width - self.checkbox.width - 4,
                                  self._label.size[1])
 
@@ -52,6 +54,8 @@ class ActionCheckButton(ActionItem, BoxLayout):
             self.cont_menu.dismiss()
 
     def on_active(self, *args):
+        '''Default handler for 'on_active' event.
+        '''
         pass
 
     def on_text(self, instance, value):

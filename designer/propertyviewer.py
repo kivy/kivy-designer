@@ -100,12 +100,16 @@ class PropertyBase(object):
 
 
 class PropertyOptions(PropertyBase, Spinner):
+    '''PropertyOptions to show/set/get options for an OptionProperty
+    '''
 
     def __init__(self, prop, **kwargs):
         PropertyBase.__init__(self, **kwargs)
         Spinner.__init__(self, values=prop.options, **kwargs)
     
     def on_propvalue(self, *args):
+        '''Default handler for 'on_propvalue'.
+        '''
         self.text = self.propvalue
 
 
@@ -161,6 +165,8 @@ class PropertyViewer(ScrollView):
     '''
 
     def on_widget(self, instance, value):
+        '''Default handler for 'on_widget'.
+        '''
         self.clear()
         if value is not None:
             self.discover(value)

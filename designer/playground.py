@@ -89,9 +89,13 @@ class PlaygroundDragElement(BoxLayout):
             self.add_widget(self.child)
     
     def show_lines_on_child(self, *args):
+        '''To schedule Clock's callback for _show_lines_on_child.
+        '''
         Clock.schedule_once(self._show_lines_on_child, 0.01)
 
     def _show_lines_on_child(self, *args):
+        '''To show boundaries around the child.
+        '''
         x, y = self.child.pos
         right, top = self.child.right, self.child.top
         points = [x, y, right, y, right, top, x, top]
@@ -113,6 +117,8 @@ class PlaygroundDragElement(BoxLayout):
         self._canvas_instr = [color, line]
 
     def remove_lines_on_child(self, *args):
+        '''Remove lines from canvas of child.
+        '''
         if hasattr(self, '_canvas_instr') and self._canvas_instr[1].points[0] != -1:
             try:
                 self.child.canvas.after.remove(self._canvas_instr[0])
@@ -124,6 +130,8 @@ class PlaygroundDragElement(BoxLayout):
             Clock.unschedule(self._show_lines_on_child)
 
     def is_intersecting_playground(self, x, y):
+        '''To determine whether x,y is inside playground
+        '''
         if not self.playground:
             return False
 
@@ -134,6 +142,8 @@ class PlaygroundDragElement(BoxLayout):
         return False
 
     def is_intersecting_widgettree(self, x, y):
+        '''To determine whether x,y is inside playground
+        '''
         if not self.widgettree:
             return False
 
@@ -425,14 +435,20 @@ class Playground(ScatterPlane):
         self.widget_to_paste = None
 
     def on_pos(self, *args):
+        '''Default handler for 'on_pos'
+        '''
         if self.sandbox:
             self.sandbox.pos = self.pos
 
     def on_size(self, *args):
+        '''Default handler for 'on_size'
+        '''
         if self.sandbox:
             self.sandbox.size = self.size
 
     def on_show_edit(self, *args):
+        '''Default handler for 'on_show_edit'
+        '''
         pass
 
     def try_place_widget(self, widget, x, y):
@@ -462,6 +478,9 @@ class Playground(ScatterPlane):
                                       from_undo=True, extra_args=extra_args)
     
     def drag_wigdet(self, widget, target, extra_args, from_undo=False):
+        '''This function will drag widget from one place to another inside
+           target
+        '''
         extra_args['prev_x'], extra_args['prev_y'] = \
             self.to_parent(self._widget_x, self._widget_y)
 
@@ -843,6 +862,8 @@ class Playground(ScatterPlane):
             self.selected_widget = None
 
     def on_touch_move(self, touch):
+        '''Default handler for 'on_touch_move' 
+        '''
         if self.widgettree.dragging == True:
             return True
 
@@ -850,6 +871,8 @@ class Playground(ScatterPlane):
         return False
 
     def on_touch_up(self, touch):
+        '''Default handler for 'on_touch_move' 
+        '''
         if super(ScatterPlane, self).collide_point(*touch.pos):
             self.dragging = False
             Clock.unschedule(self.start_widget_dragging)

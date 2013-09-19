@@ -22,18 +22,24 @@ class DesignerSandbox(Sandbox):
         Clock.unschedule(self._clock_sandbox_draw)
 
     def __exit__(self, _type, value, tb):
+        '''Override of __exit__
+        '''
         self._context.pop()
         #print 'EXITING THE SANDBOX', (self, _type, value, tb)
         if _type is not None:
             return self.on_exception(value, tb=tb)
 
     def on_exception(self, exception, tb=None):
+        '''Override of on_exception
+        '''
         self.exception = exception
         self.tb = tb
         self.dispatch('on_getting_exception')
         return super(DesignerSandbox, self).on_exception(exception, tb)
     
     def on_getting_exception(self, *args):
+        '''Default handler for 'on_getting_exception'
+        '''
         pass
     
     @sandbox

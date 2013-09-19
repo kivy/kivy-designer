@@ -53,6 +53,8 @@ class EventHandlerTextInput(TextInput):
     '''
     
     def on_touch_down(self, touch):
+        '''Default handler for 'on_touch_down' event
+        '''
         if self.collide_point(*touch.pos):
             self.info_bubble = InfoBubble(message=self.info_message)
             self.info_bubble.show(self.pos, 1)
@@ -60,6 +62,8 @@ class EventHandlerTextInput(TextInput):
         return super(EventHandlerTextInput, self).on_touch_down(touch)
 
     def show_drop_down_for_widget(self, widget):
+        '''Show all functions for a widget in a Dropdown.
+        '''
         self.dropdown = DropDown()
         list_funcs = dir(widget)
         for func in list_funcs:
@@ -75,9 +79,13 @@ class EventHandlerTextInput(TextInput):
         self.dropdown.bind(on_select=self._dropdown_select)
 
     def _dropdown_select(self, instance, value):
+        '''Event handler for 'on_select' event of self.dropdown
+        '''
         self.text += value
 
-    def on_text(self, instance, value):        
+    def on_text(self, instance, value):
+        '''Default event handler for 'on_text'
+        '''
         if not self.kv_code_input:
             return
 
@@ -120,9 +128,13 @@ class NewEventTextInput(TextInput):
     '''
 
     def on_create_event(self, *args):
+        '''Default event handler for 'on_create_event'
+        '''
         pass
 
     def insert_text(self, substring, from_undo=False):
+        '''Override of 'insert_text' of :class:`kivy.uix.textinput.TextInput`
+        '''
         if '\n' in substring:
             #Enter pressed create a new event
             substring = substring.replace('\n', '')
@@ -132,6 +144,8 @@ class NewEventTextInput(TextInput):
         super(NewEventTextInput, self).insert_text(substring, from_undo)
 
     def on_touch_down(self, touch):
+        '''Default handler for 'on_touch_down' event.
+        '''
         if self.collide_point(*touch.pos):
             self.info_bubble = InfoBubble(message=self.info_message)
             self.info_bubble.show(self.pos, 1)
@@ -142,6 +156,9 @@ class EventLabel(PropertyLabel):
     pass
 
 class EventViewer(PropertyViewer):
+    '''EventViewer, to display all the events associated with the widget and
+       event handler.
+    '''
     
     project_loader = ObjectProperty(None)
     '''Reference to ProjectLoader
@@ -159,6 +176,8 @@ class EventViewer(PropertyViewer):
     '''
 
     def on_widget(self, instance, value):
+        '''Default handler for change of 'widget' property
+        '''
         self.clear()
         if value is not None:
             self.discover(value)
@@ -193,6 +212,8 @@ class EventViewer(PropertyViewer):
             add(txt)
 
     def create_event(self, txt):
+        '''This function will create a new event given by 'txt' to the widget.
+        '''
         #Find the python file of widget
         py_file = None
         for rule in self.project_loader.class_rules:
@@ -211,6 +232,8 @@ class EventViewer(PropertyViewer):
         Clock.schedule_once(self._add_event)
 
     def _add_event(self, *args):
+        '''This function will create a new event given by 'txt' to the widget.
+        '''
         #Find the class definition
         py_code_input = None
         txt = self.txt

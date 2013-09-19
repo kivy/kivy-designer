@@ -21,6 +21,10 @@ class MenuHeader(TabbedPanelHeader):
     '''MenuHeader class. To be used as default TabbedHeader.
     '''
     show_arrow = BooleanProperty(False)
+    '''Specifies whether to show arrow or not.
+       :data:`show_arrow` is a :class:`~kivy.properties.BooleanProperty`, default
+       to True
+    '''
 
 
 class ContextMenuException(Exception):
@@ -33,8 +37,12 @@ class MenuButton(Button):
        look and feel for a menu button.
     '''
     cont_menu = ObjectProperty(None)
-    
+    '''Reference to :class:`~designer.uix.contextual.ContextMenu`.
+    '''
+
     def on_release(self, *args):
+        '''Default Event Handler for 'on_release'
+        '''
         self.cont_menu.dismiss()
         super(MenuButton, self).on_release(*args)
 
@@ -124,6 +132,8 @@ class ContextMenu(TabbedPanel):
         self.bubble.bind(on_height=self._bubble_height)
     
     def _bubble_height(self, *args):
+        '''Handler for bubble's 'on_height' event.
+        '''
         self.height = self.bubble.height
 
     def open(self, widget):
@@ -155,6 +165,8 @@ class ContextMenu(TabbedPanel):
         self._win.add_widget(self.bubble)
 
     def on_select(self, data):
+        '''Default handler for 'on_select' event.
+        '''
         pass
 
     def dismiss(self, *largs):
@@ -183,9 +195,13 @@ class ContextMenu(TabbedPanel):
             self.dismiss()
 
     def on_dismiss(self):
+        '''Default event handler for 'on_dismiss' event.
+        '''
         pass
     
     def _set_width_to_bubble(self, *args):
+        '''To set self.width and bubble's width equal.
+        '''
         self.width = self.bubble.width
 
     def _reposition(self, *largs):
@@ -243,6 +259,8 @@ class ContextMenu(TabbedPanel):
                 self.bubble.arrow_pos = 'bottom_mid'
 
     def on_touch_down(self, touch):
+        '''Default Handler for 'on_touch_down'
+        '''
         if super(ContextMenu, self).on_touch_down(touch):
             return True
         if self.collide_point(*touch.pos):
@@ -250,11 +268,16 @@ class ContextMenu(TabbedPanel):
         self.dismiss()
 
     def on_touch_up(self, touch):
+        '''Default Handler for 'on_touch_up'
+        '''
+
         if super(ContextMenu, self).on_touch_up(touch):
             return True
         self.dismiss()
 
     def add_widget(self, widget, index=0):
+        '''Add a widget.
+        '''
         if self.tab_list and widget == self.tab_list[0].content or\
             widget == self._current_tab.content or self.content == widget or\
             self._tab_layout == widget or\
@@ -279,12 +302,16 @@ class ContextMenu(TabbedPanel):
         widget.size_hint_y = None
 
     def remove_widget(self, widget):
+        '''Remove a widget
+        '''
         if self.container and widget in self.container.children:
             self.container.remove_widget(widget)
         else:
             super(ContextMenu, self).remove_widget(widget)
 
     def on_scroll_height(self, *args):
+        '''Event Handler for scollview's height.
+        '''
         if not self.container:
             return
 
@@ -292,6 +319,9 @@ class ContextMenu(TabbedPanel):
                                     self.main_tab.content.height)
 
     def on_main_box_height(self, *args):
+        '''Event Handler for main_box's height.
+        '''
+
         if not self.container:
             return
 
@@ -305,6 +335,8 @@ class ContextMenu(TabbedPanel):
             self.bubble.height = self.container.height + self.tab_height + dp(16)
 
     def on_child_height(self, *args):
+        '''Event Handler for children's height.
+        '''
         height = 0
         for i in self.container.children:
             height += i.height
@@ -313,6 +345,8 @@ class ContextMenu(TabbedPanel):
         self.container.height = height
 
     def add_tab(self, widget, index = 0):
+        '''To add a Widget as a new Tab.
+        '''
         super(ContextMenu, self).add_widget(widget, index)
 
 
@@ -352,13 +386,19 @@ class ContextSubMenu(MenuButton):
         self._list_children = []
 
     def on_text(self, *args):
+        '''Default handler for text.
+        '''
         if self.attached_menu:
             self.attached_menu.text = self.text
 
     def on_attached_menu(self, *args):
+        '''Default handler for attached_menu.
+        '''
         self.attached_menu.text = self.text
 
     def add_widget(self, widget, index = 0):
+        '''Add a widget.
+        '''
         if isinstance(widget, Image):
             Button.add_widget(self, widget, index)
             return
@@ -368,6 +408,8 @@ class ContextSubMenu(MenuButton):
             widget.cont_menu = self.cont_menu
 
     def on_cont_menu(self, *args):
+        '''Default handler for cont_menu.
+        '''
         self._add_widget()
 
     def _add_widget(self, *args):
@@ -390,14 +432,20 @@ class ContextSubMenu(MenuButton):
             widget.bind(height=self.on_child_height)
 
     def on_scroll_height(self, *args):
+        '''Handler for scrollview's height.
+        '''
         self.container.height = max(self.container.height,
                                     self.attached_menu.content.height)
 
     def on_container_height(self, *args):
+        '''Handler for container's height.
+        '''
         self.container.height = max(self.container.height,
                                     self.attached_menu.content.height)
 
     def on_child_height(self, *args):
+        '''Handler for children's height.
+        '''
         height = 0
         for i in self.container.children:
             height += i.height
@@ -405,6 +453,8 @@ class ContextSubMenu(MenuButton):
         self.container.height = height
 
     def on_release(self, *args):
+        '''Default handler for 'on_release' event.
+        '''
         if not self.attached_menu or not self._list_children:
             return
 
@@ -435,6 +485,8 @@ class ContextSubMenu(MenuButton):
         Clock.schedule_once(self._scroll, 0.1)
 
     def _scroll(self, dt):
+        '''To scroll ContextMenu's strip to appropriate place.
+        '''
         from kivy.animation import Animation
         self.cont_menu._reposition()
         total_tabs = len(self.cont_menu.tab_list)

@@ -75,6 +75,8 @@ class WidgetsTree(ScrollView):
                     self.recursive_insert(child, b)
 
     def insert_for_tabbed_panel(self, node, treenode):
+        '''This function will insert nodes in tree specially for TabbedPanel.
+        '''
         for tab in node.tab_list:
             b = WidgetTreeElement(node=tab)
             self.tree.add_node(b, treenode)            
@@ -90,11 +92,15 @@ class WidgetsTree(ScrollView):
         self.recursive_insert(self.playground.root, self.tree.root)
 
     def on_touch_up(self, touch):
+        '''Default event handler for 'on_touch_up' event.
+        '''
         self.dragging = False
         Clock.unschedule(self._start_dragging)
         return super(WidgetsTree, self).on_touch_up(touch)
 
     def on_touch_down(self, touch):
+        '''Default event handler for 'on_touch_down' event.
+        '''
         if self.collide_point(*touch.pos) and not self.dragging:
             self.dragging = True
             self.touch = touch
@@ -110,6 +116,8 @@ class WidgetsTree(ScrollView):
         return super(WidgetsTree, self).on_touch_down(touch)
 
     def _start_dragging(self, *args):
+        '''This function will start dragging the widget.
+        '''
         if self.dragging and self.selected_widget:
             self.playground.selected_widget = self.selected_widget
             self.playground.dragging = False

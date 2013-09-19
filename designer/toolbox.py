@@ -31,11 +31,15 @@ class ToolboxButton(Button):
         super(ToolboxButton, self).__init__(**kwargs)
 
     def on_touch_down(self, touch):
+        '''Default handler for 'on_touch_down'
+        '''
         if self.collide_point(*touch.pos):
             self.dispatch('on_press_and_touch', touch)
         return super(ToolboxButton, self).on_touch_down(touch)
 
     def on_press_and_touch(self, touch):
+        '''Default handler for 'on_press_and_touch' event
+        '''
         pass
 
 

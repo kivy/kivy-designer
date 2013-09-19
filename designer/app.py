@@ -151,6 +151,9 @@ class Designer(FloatLayout):
                                     'global', 'auto_save_time', 5))*60)
     
     def show_help(self, *args):
+        '''Event handler for 'on_help' event of self.start_page
+        '''
+
         self.help_dlg = HelpDialog()
         self._popup = Popup(title='Kivy Designer Help', content=self.help_dlg,
                             size_hint=(0.95, 0.95),
@@ -297,6 +300,9 @@ class Designer(FloatLayout):
         self.ui_creator.kv_code_input.clicked = False
 
     def _prev_screen(self, *args):
+        '''Event handler for 'on_prev_screen' for self.editcontview
+        '''
+
         widget = self.ui_creator.propertyviewer.widget
         if isinstance(widget, Carousel):
             widget.load_previous()
@@ -312,6 +318,9 @@ class Designer(FloatLayout):
             widget.switch_to(widget.tab_list[index + 1])
      
     def _next_screen(self, *args):
+        '''Event handler for 'on_next_screen' for self.editcontview
+        '''
+
         widget = self.ui_creator.propertyviewer.widget
         if isinstance(widget, Carousel):
             widget.load_next()
@@ -649,8 +658,7 @@ class Designer(FloatLayout):
             proj_dir = instance.ids.icon_view.path
 
         proj_dir = os.path.join(proj_dir, instance.filename)
-        #try:
-        if True:
+        try:
             self.project_loader.save_project(proj_dir)
             self.recent_manager.add_file(proj_dir)
             projdir = self.project_loader.proj_dir
@@ -663,10 +671,14 @@ class Designer(FloatLayout):
                                                             from_undo=True)
             self.statusbar.show_message('Project saved successfully')
 
-        #except:
-        #    self.statusbar.show_message('Cannot save project')
+        except:
+            self.statusbar.show_message('Cannot save project')
     
     def action_btn_settings_pressed(self, *args):
+        '''Event handler for 'on_release' event of 
+           DesignerActionButton "Settings"
+        '''
+
         self.designer_settings.parent = None
         self._popup = Popup(title="Kivy Designer Settings",
                             content = self.designer_settings,
@@ -681,6 +693,9 @@ class Designer(FloatLayout):
         pass
     
     def fill_recent_menu(self, *args):
+        '''Fill self.recent_files_cont_menu with DesignerActionButton
+           of all Recent Files
+        '''
         recent_menu = self.recent_files_cont_menu
         for _file in self.recent_manager.list_files:
             act_btn = DesignerActionButton(text=_file, shorten=True)
@@ -1054,6 +1069,9 @@ class Designer(FloatLayout):
         self.ui_creator.playground.sandbox.error_active = False
         
     def action_btn_about_pressed(self, *args):
+        '''Event handler for 'on_release' event of DesignerActionButton
+           "About Kivy Designer"
+        '''
         self.about_dlg = AboutDialog()
         self._popup = Popup(title='About Kivy Designer', content=self.about_dlg,
                             size_hint=(None, None), size=(600, 400),
@@ -1068,9 +1086,11 @@ class DesignerApp(App):
     '''Currently focused widget
     '''
     
+    title = 'Kivy Designer'
+    
     def on_stop(self, *args):
         self.root.ui_creator.py_console.exit()
-        
+
     def build(self):
         Factory.register('Playground', module='designer.playground')
         Factory.register('Toolbox', module='designer.toolbox')

@@ -69,4 +69,6 @@ class ProjectWatcher(object):
         self._observer = None
 
     def join(self):
+        '''join observer after unschedulling it
+        '''
         self._observer.join()

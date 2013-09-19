@@ -19,9 +19,9 @@ class InfoBubble(Bubble):
         # wait for the bubble to adjust it's size according to text then animate
         Clock.schedule_once(lambda dt: self._show(pos, duration))
 
-
     def _show(self, pos, duration):
-
+        '''To show Infobubble at pos with Animation of duration.
+        '''
         def on_stop(*l):
             if duration:
                 Clock.schedule_once(self.hide, duration + .5)

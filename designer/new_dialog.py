@@ -45,10 +45,15 @@ class NewProjectDialog(BoxLayout):
     '''
     
     image = ObjectProperty(None)
-    '''
+    '''Type of :class:`~kivy.uix.image.Image` to display image of selected 
+       new template.
+       :data:`image` is a :class:`~kivy.properties.ObjectProperty`
     '''
     
     list_parent = ObjectProperty(None)
+    '''Parent of listview.
+       :data:`list_parent` is a :class:`~kivy.properties.ObjectProperty`
+    '''
     
     __events__=('on_select', 'on_cancel')
 
@@ -66,6 +71,8 @@ class NewProjectDialog(BoxLayout):
         self.on_adapter_selection_change(self.adapter)
 
     def on_adapter_selection_change(self, adapter):
+        '''Event handler for 'on_selection_change' event of adapter.
+        '''
         name = adapter.selection[0].text.lower()+'.png'
         name = name.replace(' and ', '_')
         image_source = os.path.join(NEW_TEMPLATE_IMAGE_PATH, name)
@@ -76,13 +83,21 @@ class NewProjectDialog(BoxLayout):
         parent.add_widget(self.image)
     
     def on_select(self, *args):
+        '''Default Event Handler for 'on_select' event
+        '''
         pass
     
     def on_cancel(self, *args):
+        '''Default Event Handler for 'on_cancel' event
+        '''
         pass
     
     def on_select_button(self, *args):
+        '''Event Handler for 'on_release' of select button.
+        '''
         self.select_button.bind(on_press=partial(self.dispatch, 'on_select'))
     
     def on_cancel_button(self, *args):
+        '''Event Handler for 'on_release' of cancel button.
+        '''
         self.cancel_button.bind(on_press=partial(self.dispatch, 'on_cancel'))

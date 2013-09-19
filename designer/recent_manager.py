@@ -119,13 +119,21 @@ class RecentDialog(BoxLayout):
         self.add_widget(self.listview, 1)
 
     def on_select_button(self, *args):
+        '''Event handler for 'on_release' event of select_button.
+        '''
         self.select_button.bind(on_press=partial(self.dispatch, 'on_select'))
     
     def on_cancel_button(self, *args):
+        '''Event handler for 'on_release' event of cancel_button.
+        '''
         self.cancel_button.bind(on_press=partial(self.dispatch, 'on_cancel'))
         
     def on_select(self, *args):
+        '''Default event handler for 'on_select' event.
+        '''
         pass
     
     def on_cancel(self, *args):
+        '''Default event handler for 'on_cancel' event.
+        '''
         pass

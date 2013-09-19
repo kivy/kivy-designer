@@ -35,16 +35,25 @@ class PseudoFile(object):
         self.sh = sh
 
     def write(self, s):
+        '''To write to a PsuedoFile object.
+        '''
         self.sh.write(s)
 
     def writelines(self, lines):
+        '''To write lines to a PsuedoFile object.
+        '''
+
         for line in lines:
             self.write(line)
 
     def flush(self):
+        '''To flush a PsuedoFile object.
+        '''
         pass
 
     def isatty(self):
+        '''To determine if PsuedoFile object is a tty or not.
+        '''
         return True
 
 class Shell(code.InteractiveConsole):
@@ -57,13 +66,14 @@ class Shell(code.InteractiveConsole):
         self._exit = False
 
     def write(self, data):
+        '''write data to show as output on the screen.
+        '''
         import functools
         Clock.schedule_once(functools.partial(self.root.show_output, data), 0)
-
-    def push(self, line):
-        return code.InteractiveConsole.push(self, line)
     
     def raw_input(self, prompt=""):
+        '''To show prompt and get required data from user.
+        '''
         return self.root.get_input(prompt)
     
     def runcode(self, _code):
@@ -93,6 +103,8 @@ class Shell(code.InteractiveConsole):
         sys.stdout = org_stdout
     
     def exit(self):
+        '''To exit PythonConsole.
+        '''
         self._exit = True
 
     def interact(self, banner=None):
@@ -157,11 +169,14 @@ class InteractiveThread(threading.Thread):
         self._sh.thread = self
 
     def run(self):
+        '''To start main loop of _sh in this thread.
+        '''
         self._sh.interact()
 
 
 class InteractiveShellInput(TextInput):
-    '''Displays Output and sends input to Shell.
+    '''Displays Output and sends input to Shell. Emits 'on_ready_to_input' 
+       when it is ready to get input from user.
     '''
 
     __events__ = ('on_ready_to_input',)
@@ -171,6 +186,8 @@ class InteractiveShellInput(TextInput):
         self.last_line = None
 
     def _keyboard_on_key_down(self, window, keycode, text, modifiers):
+        '''Override of _keyboard_on_key_down.
+        '''
         if keycode[0] == 13:
             #For enter
             self.last_line = self.text[self._cursor_pos:]
@@ -182,19 +199,27 @@ class InteractiveShellInput(TextInput):
                                                                         modifiers)
     
     def insert_text(self, substring, from_undo=False):
+        '''Override of insert_text
+        '''
         if self.cursor_index() < self._cursor_pos:
             return
 
         return super(InteractiveShellInput, self).insert_text(substring, from_undo)
 
     def on_ready_to_input(self, *args):
+        '''Default handler of 'on_ready_to_input'
+        '''
         pass
 
     def show_output(self, output):
+        '''Show output to the user.
+        '''
         self.text += output
         Clock.schedule_once(self._set_cursor_val, 0.1)
     
     def _set_cursor_val(self, *args):
+        '''Get last position of cursor where output was added.
+        '''
         self._cursor_pos = self.cursor_index()
         from kivy.animation import Animation
         anim = Animation(scroll_y=0, d=0.5)
@@ -256,18 +281,28 @@ class PythonConsole(BoxLayout):
         self._exit = False
 
     def ready_to_input(self, *args):
+        '''Specifies that PythonConsole is ready to take input from user.
+        '''
         self._ready_to_input = True
 
     def run_sh(self, *args):
+        '''Start Python Shell.
+        '''
         self._thread.start()
 
     def show_output(self, data, dt):
+        '''Show output to user.
+        '''
         self.text_input.show_output(data)
 
     def _show_prompt(self, *args):
+        '''Show prompt to user and asks for input.
+        '''
         self.text_input.show_output(self.prompt)
 
     def get_input(self, prompt):
+        '''Get input from user.
+        '''
         import time
         self.prompt = prompt
         Clock.schedule_once(self._show_prompt, 0.1)
@@ -278,6 +313,8 @@ class PythonConsole(BoxLayout):
         return self.text_input.last_line
     
     def exit(self):
+        '''Exit PythonConsole
+        '''
         self._exit = True
         self.sh.exit()
 
