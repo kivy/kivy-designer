@@ -226,7 +226,7 @@ class KivyConsole(GridLayout):
 
     Shell = True, should be set only if absolutely necessary.
     '''
-    
+
     txtinput_command_line = ObjectProperty(None)
 
     def __init__(self, **kwargs):
@@ -604,7 +604,7 @@ class KivyConsole(GridLayout):
                 e_q = command[7:].find('=')
                 _exprt = command[7:]
                 if e_q:
-                    os.environ[_exprt[:e_q]] = _exprt[e_q+1:]
+                    os.environ[_exprt[:e_q]] = _exprt[e_q + 1:]
                     self.environment = os.environ.copy()
             else:
                 try:
@@ -771,3 +771,4 @@ class std_in_out(object):
     def flush(self):
         self.textcache = u''.join(self.obj.textcache)
         return
+
