@@ -8,8 +8,9 @@ from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.metrics import pt
 from kivy.factory import Factory
 
+
 class ToolboxCategory(AccordionItem):
-    '''ToolboxCategory is responsible for grouping and showing 
+    '''ToolboxCategory is responsible for grouping and showing
        :class:`~designer.toolbox.ToolboxButton`
        of same class into one category.
     '''
@@ -20,8 +21,9 @@ class ToolboxCategory(AccordionItem):
        :class:`~kivy.properties.ObjectProperty`
     '''
 
+
 class ToolboxButton(Button):
-    '''ToolboxButton is a subclass of :class:`~kivy.uix.button.Button`, 
+    '''ToolboxButton is a subclass of :class:`~kivy.uix.button.Button`,
        to display class of Widgets in
        :class:`~designer.toolbox.ToolboxCategory`.
     '''
@@ -44,12 +46,12 @@ class ToolboxButton(Button):
 
 
 class Toolbox(BoxLayout):
-    '''Toolbox is used to display all the widgets in designer.common.widgets 
+    '''Toolbox is used to display all the widgets in designer.common.widgets
        in their respective classes.
     '''
 
     accordion = ObjectProperty()
-    '''An instance to :class:`~kivy.uix.accordion.Accordion`, 
+    '''An instance to :class:`~kivy.uix.accordion.Accordion`,
        used to show Widgets in their groups.
        :data:`accordion` is an
        :class:`~kivy.properties.ObjectProperty`
@@ -87,7 +89,7 @@ class Toolbox(BoxLayout):
                     ToolboxButton(text=widget[0]))
 
         self.accordion.children[-1].collapse = False
-    
+
     def cleanup(self):
         '''To clean all the children in self.custom_category.
         '''
@@ -99,7 +101,7 @@ class Toolbox(BoxLayout):
 
             #FIXME: ToolboxCategory keeps on adding more scrollview,
             #if they are initialized again, unable to find the cause of problem
-            #I just decided to delete those scrollview whose childs are not 
+            #I just decided to delete those scrollview whose childs are not
             #self.gridlayout.
             _scrollview_parent = self.custom_category.gridlayout.parent.parent
             for child in _scrollview_parent.children[:]:

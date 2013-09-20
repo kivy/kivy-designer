@@ -8,8 +8,9 @@ from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.treeview import TreeViewLabel
 from designer.uix.py_code_input import PyCodeInput, PyScrollView
 
+
 class DesignerContent(FloatLayout):
-    '''This class contains the body of the Kivy Designer. It contains, 
+    '''This class contains the body of the Kivy Designer. It contains,
        Project Tree and TabbedPanel.
     '''
 
@@ -18,32 +19,32 @@ class DesignerContent(FloatLayout):
        instance. As there can only be one
        :data:`ui_creator` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     tree_toolbox_tab_panel = ObjectProperty(None)
-    '''TabbedPanel containing Toolbox and Project Tree. Instance of 
+    '''TabbedPanel containing Toolbox and Project Tree. Instance of
        :class:`~designer.designer_content.DesignerTabbedPanel`
     '''
 
     splitter_tree = ObjectProperty(None)
     '''Reference to the splitter parent of tree_toolbox_tab_panel.
-       :data:`splitter_toolbox` is an 
+       :data:`splitter_toolbox` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     toolbox = ObjectProperty(None)
     '''Reference to the :class:`~designer.toolbox.Toolbox` instance.
        :data:`toolbox` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     tree_view = ObjectProperty(None)
-    '''This property refers to Project Tree. Project Tree displays project's 
+    '''This property refers to Project Tree. Project Tree displays project's
        py files under its parent directories. Clicking on any of the file will
        open it up for editing.
        :data:`tree_view` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     tab_pannel = ObjectProperty(None)
-    '''This property refers to the instance of 
+    '''This property refers to the instance of
        :class:`~designer.designer_content.DesignerTabbedPanel`.
        :data:`tab_pannel` is a :class:`~kivy.properties.ObjectProperty`
     '''
@@ -71,7 +72,7 @@ class DesignerContent(FloatLayout):
         #The way os.path.dirname works, there will never be '/' at the end
         #of a directory. So, there will always be '/' at the starting
         #of 'dirname' variable after removing proj_dir
-        
+
         #This algorithm first breaks path into its components
         #and creates a list of these components.
         _dirname = dirname
@@ -82,10 +83,10 @@ class DesignerContent(FloatLayout):
             _dirname = _split[0]
             _basename = _split[1]
             list_path_components.insert(0, _split[1])
-        
+
         if list_path_components[0] == '':
             del list_path_components[0]
-        
+
         #Then it traverses from root_node to its children searching from
         #each component in the path. If it doesn't find any component
         #related with node then it creates it.
@@ -97,7 +98,7 @@ class DesignerContent(FloatLayout):
                     node = _node
                     found = True
                     break
-            
+
             if not found:
                 for component in list_path_components:
                     _node = TreeViewLabel(text=component)
@@ -106,7 +107,7 @@ class DesignerContent(FloatLayout):
                 list_path_components = []
             else:
                 del list_path_components[0]
-        
+
         #Finally add file_node with node as parent.
         file_node = TreeViewLabel(text=os.path.basename(_file))
         file_node.bind(on_touch_down=self._file_node_clicked)
@@ -116,7 +117,7 @@ class DesignerContent(FloatLayout):
             text=os.path.basename(self.proj_loader.proj_dir))
 
     def _file_node_clicked(self, instance, touch):
-        '''This is emmited whenever any file node of Project Tree is 
+        '''This is emmited whenever any file node of Project Tree is
            clicked. This will open up a tab in DesignerTabbedPanel, for
            editing that py file.
         '''
@@ -134,7 +135,7 @@ class DesignerContent(FloatLayout):
 
 
 class DesignerTabbedPanel(TabbedPanel):
-    '''DesignerTabbedPanel is used to display files opened up in tabs with 
+    '''DesignerTabbedPanel is used to display files opened up in tabs with
        :class:`~designer.ui_creator.UICreator`
        Tab as a special one containing all features to edit the UI.
     '''
@@ -143,7 +144,7 @@ class DesignerTabbedPanel(TabbedPanel):
     '''This list contains reference to all the PyCodeInput's opened till now
        :data:`list_py_code_inputs` is a :class:`~kivy.properties.ListProperty`
     '''
-    
+
     def open_file(self, path, rel_path, switch_to=True):
         '''This will open py file for editing in the DesignerTabbedPanel.
         '''
@@ -159,7 +160,8 @@ class DesignerTabbedPanel(TabbedPanel):
         _py_code_input = scroll.code_input
         _py_code_input.rel_file_path = rel_path
         _py_code_input.text = f.read()
-        _py_code_input.bind(on_show_edit=App.get_running_app().root.on_show_edit)
+        _py_code_input.bind(
+            on_show_edit=App.get_running_app().root.on_show_edit)
         f.close()
         self.list_py_code_inputs.append(_py_code_input)
         panel_item.content = scroll

@@ -8,9 +8,10 @@ from kivy.uix.label import Label
 from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
 
+
 class AddFileDialog(BoxLayout):
     '''AddFileDialog is a dialog for adding files to current project. It emits
-       'on_added' event if file has been added successfully, 'on_error' if 
+       'on_added' event if file has been added successfully, 'on_error' if
        there has been some error in adding file and 'on_cancel' when user
        wishes to cancel the operation.
     '''
@@ -26,8 +27,8 @@ class AddFileDialog(BoxLayout):
     '''
 
     always_check = ObjectProperty()
-    '''An instance to :class:`~kivy.uix.checkbox.CheckBox`, which will 
-       determine whether same folder will be used for all files of 
+    '''An instance to :class:`~kivy.uix.checkbox.CheckBox`, which will
+       determine whether same folder will be used for all files of
        same type or not.
        :data:`always_check` is a :class:`~kivy.properties.ObjectProperty`
     '''
@@ -43,7 +44,7 @@ class AddFileDialog(BoxLayout):
 
     def on_added(self):
         pass
-    
+
     def on_error(self):
         pass
 
@@ -53,24 +54,25 @@ class AddFileDialog(BoxLayout):
 
         if self.text_file.text == '' or self.text_folder.text == '':
             return
-        
+
         self.proj_loader.proj_watcher.stop()
 
         folder = os.path.join(self.proj_loader.proj_dir, self.text_folder.text)
         if not os.path.exists(folder):
             os.mkdir(folder)
-        
+
         try:
             shutil.copy(self.text_file.text,
                         os.path.join(folder,
                                      os.path.basename(self.text_file.text)))
-            
+
             if self.always_check.active:
                 self.proj_loader.add_dir_for_file_type(
                     self.text_file.text[self.text_file.text.rfind('.')+1:],
                     self.text_folder.text)
-            
-            self.proj_loader.proj_watcher.start_watching(self.proj_loader.proj_dir)
+
+            self.proj_loader.proj_watcher.start_watching(
+                self.proj_loader.proj_dir)
             self.dispatch('on_added')
 
         except OSError, IOError:
@@ -140,7 +142,7 @@ class AddFileDialog(BoxLayout):
                 proj_dir = proj_dir[1:]
 
             self.text_folder.text = proj_dir
-        
+
     def open_folder_btn_pressed(self, *args):
         '''To load File Browser for selected folder when 'Open Folder'
            is clicked

@@ -1,13 +1,15 @@
-import sys, os
+import sys
+import os
 import time
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 import traceback
 
+
 class ProjectEventHandler(FileSystemEventHandler):
     '''ProjectEventHandler is the event handler for any event occurring on
-       its current directory. See FileSystemEventHandler in python-watchdog 
+       its current directory. See FileSystemEventHandler in python-watchdog
        documentation for more information.
     '''
     def __init__(self, observer, proj_watcher):
@@ -42,7 +44,8 @@ class ProjectWatcher(object):
         self._observer = Observer()
         self._event_handler = ProjectEventHandler(self._observer, self)
         self._watch = self._observer.schedule(self._event_handler,
-                                              self._project_dir, recursive=True)
+                                              self._project_dir,
+                                              recursive=True)
         self._observer.start()
 
     def on_project_modified(self, *args):

@@ -7,8 +7,9 @@ from kivy.adapters.listadapter import ListAdapter
 
 from functools import partial
 
+
 class SelectClass(BoxLayout):
-    '''SelectClass dialog is shows a list of classes. User would have to 
+    '''SelectClass dialog is shows a list of classes. User would have to
        select a class from these classes. It will emit 'on_select' when
        select_button is pressed and 'on_cancel' when cancel_button is pressed.
     '''
@@ -33,12 +34,14 @@ class SelectClass(BoxLayout):
        :data:`adapter` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    __events__=('on_select', 'on_cancel')
+    __events__ = ('on_select', 'on_cancel')
 
     def __init__(self, class_rule_list, **kwargs):
         super(SelectClass, self).__init__(**kwargs)
         item_strings = [_rule.name for _rule in class_rule_list]
-        adapter = ListAdapter(cls=ListItemButton, data=item_strings, selection_mode='single', allow_empty_selection=False)
+        adapter = ListAdapter(cls=ListItemButton, data=item_strings,
+                              selection_mode='single',
+                              allow_empty_selection=False)
         self.listview = ListView(adapter=adapter)
         self.add_widget(self.listview, 1)
 
@@ -46,17 +49,17 @@ class SelectClass(BoxLayout):
         '''Event handler for 'on_release' event of select_button.
         '''
         self.select_button.bind(on_press=partial(self.dispatch, 'on_select'))
-    
+
     def on_cancel_button(self, *args):
         '''Event handler for 'on_release' event of cancel_button.
         '''
         self.cancel_button.bind(on_press=partial(self.dispatch, 'on_cancel'))
-        
+
     def on_select(self, *args):
         '''Default event handler for 'on_select' event.
         '''
         pass
-    
+
     def on_cancel(self, *args):
         '''Default event handler for 'on_cancel' event.
         '''

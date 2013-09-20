@@ -3,6 +3,7 @@ from kivy.properties import ObjectProperty
 
 from functools import partial
 
+
 class EditContView(ContextualActionView):
     '''EditContView is a ContextualActionView, used to display Edit items:
        Copy, Cut, Paste, Undo, Redo, Select All, Add Custom Widget. It has
@@ -20,12 +21,12 @@ class EditContView(ContextualActionView):
     __events__ = ('on_undo', 'on_redo', 'on_cut', 'on_copy',
                   'on_paste', 'on_delete', 'on_selectall',
                   'on_next_screen', 'on_prev_screen')
-    
+
     action_btn_next_screen = ObjectProperty(None, allownone=True)
     action_btn_prev_screen = ObjectProperty(None, allownone=True)
 
     def show_action_btn_screen(self, show):
-        '''To add action_btn_next_screen and action_btn_prev_screen 
+        '''To add action_btn_next_screen and action_btn_prev_screen
            if show is True. Otherwise not.
         '''
         if self.action_btn_next_screen:
@@ -38,9 +39,11 @@ class EditContView(ContextualActionView):
 
         if show:
             self.action_btn_next_screen = ActionButton(text="Next Screen")
-            self.action_btn_next_screen.bind(on_press=partial(self.dispatch, 'on_next_screen'))
+            self.action_btn_next_screen.bind(
+                on_press=partial(self.dispatch, 'on_next_screen'))
             self.action_btn_prev_screen = ActionButton(text="Previous Screen")
-            self.action_btn_prev_screen.bind(on_press=partial(self.dispatch, 'on_prev_screen'))
+            self.action_btn_prev_screen.bind(
+                on_press=partial(self.dispatch, 'on_prev_screen'))
 
             self.add_widget(self.action_btn_next_screen)
             self.add_widget(self.action_btn_prev_screen)

@@ -47,11 +47,12 @@ from designer.help_dialog import HelpDialog, AboutDialog
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
 
+
 class Designer(FloatLayout):
     '''Designer is the Main Window class of Kivy Designer
        :data:`message` is a :class:`~kivy.properties.StringProperty`
     '''
-    
+
     designer_console = ObjectProperty(None)
     '''Instance of :class:`designer.designer_console.ConsoleDialog`
     '''
@@ -67,7 +68,7 @@ class Designer(FloatLayout):
     '''
 
     actionbar = ObjectProperty(None)
-    '''Reference to the :class:`~kivy.actionbar.ActionBar` instance. 
+    '''Reference to the :class:`~kivy.actionbar.ActionBar` instance.
        ActionBar is used as a MenuBar to display bunch of menu items.
        :data:`actionbar` is a :class:`~kivy.properties.ObjectProperty`
     '''
@@ -86,7 +87,7 @@ class Designer(FloatLayout):
     '''Reference to the :class:`~designer.project_loader.ProjectLoader`.
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     proj_settings = ObjectProperty(None)
     '''Reference of :class:`~designer.project_settings.ProjectSettings`.
        :data:`proj_settings` is a :class:`~kivy.properties.ObjectProperty`
@@ -94,12 +95,14 @@ class Designer(FloatLayout):
 
     _curr_proj_changed = BooleanProperty(False)
     '''Specifies whether current project has been changed inside Kivy Designer
-       :data:`_curr_proj_changed` is a :class:`~kivy.properties.BooleanProperty`
+       :data:`_curr_proj_changed` is
+       a :class:`~kivy.properties.BooleanProperty`
     '''
 
     _proj_modified_outside = BooleanProperty(False)
     '''Specifies whether current project has been changed outside Kivy Designer
-       :data:`_proj_modified_outside` is a :class:`~kivy.properties.BooleanProperty`
+       :data:`_proj_modified_outside` is a
+       :class:`~kivy.properties.BooleanProperty`
     '''
 
     ui_creator = ObjectProperty(None)
@@ -108,7 +111,8 @@ class Designer(FloatLayout):
     '''
 
     designer_content = ObjectProperty(None)
-    '''Reference to :class:`~designer.designer_content.DesignerContent` instance.
+    '''Reference to
+       :class:`~designer.designer_content.DesignerContent` instance.
        :data:`designer_content` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -121,7 +125,7 @@ class Designer(FloatLayout):
     '''Reference of :class:`~designer.designer_settings.DesignerSettings`.
        :data:`designer_settings` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     start_page = ObjectProperty(None)
     '''Reference of :class:`~designer.start_page.DesignerStartPage`.
        :data:`start_page` is a :class:`~kivy.properties.ObjectProperty`
@@ -130,7 +134,8 @@ class Designer(FloatLayout):
     recent_files_cont_menu = ObjectProperty(None)
     '''The context sub menu, containing the recently opened/saved projects.
        Reference of :class:`~designer.uix.contextual.ContextSubMenu`.
-       :data:`recent_files_cont_menu` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`recent_files_cont_menu` is a
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     def __init__(self, **kwargs):
@@ -146,10 +151,11 @@ class Designer(FloatLayout):
         self.designer_settings.load_settings()
         self.designer_settings.bind(on_close=self._cancel_popup)
 
-        Clock.schedule_interval(self.project_loader.perform_auto_save,
-                                int(self.designer_settings.config_parser.getdefault(
-                                    'global', 'auto_save_time', 5))*60)
-    
+        Clock.schedule_interval(
+            self.project_loader.perform_auto_save,
+            int(self.designer_settings.config_parser.getdefault(
+                'global', 'auto_save_time', 5))*60)
+
     def show_help(self, *args):
         '''Event handler for 'on_help' event of self.start_page
         '''
@@ -164,13 +170,15 @@ class Designer(FloatLayout):
         self.help_dlg.rst.source = 'help.rst'
 
     def _config_change(self, *args):
-        '''Event Handler for 'on_config_change' event of self.designer_settings.
+        '''Event Handler for 'on_config_change'
+           event of self.designer_settings.
         '''
 
         Clock.unschedule(self.project_loader.perform_auto_save)
-        Clock.schedule_interval(self.project_loader.perform_auto_save,
-                                int(self.designer_settings.config_parser.getdefault(
-                                    'global', 'auto_save_time', 5))*60)
+        Clock.schedule_interval(
+            self.project_loader.perform_auto_save,
+            int(self.designer_settings.config_parser.getdefault(
+                'global', 'auto_save_time', 5))*60)
 
         self.ui_creator.kv_code_input.reload_kv = \
             bool(self.designer_settings.config_parser.getdefault(
@@ -215,7 +223,7 @@ class Designer(FloatLayout):
         '''
 
         self.on_height(*args)
-    
+
     def on_height(self, *args):
         '''Callback for self.height
         '''
@@ -234,22 +242,21 @@ class Designer(FloatLayout):
         if self._proj_modified_outside:
             return
 
-        self._confirm_dlg = ConfirmationDialog(message="Current Project has "
-                                               "been modified\n"
-                                               "outside the Kivy Designer.\n"
-                                               "Do you want to reload project?")
+        self._confirm_dlg = ConfirmationDialog(
+            message="Current Project has been modified\n"
+            "outside the Kivy Designer.\nDo you want to reload project?")
         self._confirm_dlg.bind(on_ok=self._perform_reload,
                                on_cancel=self._cancel_popup)
         self._popup = Popup(title='Kivy Designer', content=self._confirm_dlg,
-                            size_hint=(None, None),size=('200pt', '150pt'),
+                            size_hint=(None, None), size=('200pt', '150pt'),
                             auto_dismiss=False)
         self._popup.open()
 
         self._proj_modified_outside = True
-    
+
     def _perform_reload(self, *args):
         '''Perform reload of project after it is modified
-        ''' 
+        '''
 
         #Perform reload of project after it is modified
         self._popup.dismiss()
@@ -265,8 +272,8 @@ class Designer(FloatLayout):
 
         if isinstance(self.actionbar.children[0], EditContView):
             return
-        
-        if self.editcontview == None:
+
+        if self.editcontview is None:
             self.editcontview = EditContView(
                 on_undo=self.action_btn_undo_pressed,
                 on_redo=self.action_btn_redo_pressed,
@@ -279,12 +286,12 @@ class Designer(FloatLayout):
                 on_prev_screen=self._prev_screen)
 
         self.actionbar.add_widget(self.editcontview)
-        
+
         widget = self.ui_creator.propertyviewer.widget
 
         if isinstance(widget, Carousel) or\
-            isinstance(widget, ScreenManager) or\
-            isinstance(widget, TabbedPanel):
+                isinstance(widget, ScreenManager) or\
+                isinstance(widget, TabbedPanel):
             self.editcontview.show_action_btn_screen(True)
         else:
             self.editcontview.show_action_btn_screen(False)
@@ -309,14 +316,14 @@ class Designer(FloatLayout):
 
         elif isinstance(widget, ScreenManager):
             widget.current = widget.previous()
-        
+
         elif isinstance(widget, TabbedPanel):
             index = widget.tab_list.index(widget.current_tab)
             if len(widget.tab_list) <= index + 1:
                 return
-            
+
             widget.switch_to(widget.tab_list[index + 1])
-     
+
     def _next_screen(self, *args):
         '''Event handler for 'on_next_screen' for self.editcontview
         '''
@@ -332,9 +339,8 @@ class Designer(FloatLayout):
             index = widget.tab_list.index(widget.current_tab)
             if index == 0:
                 return
-            
+
             widget.switch_to(widget.tab_list[index - 1])
-            
 
     def on_touch_down(self, touch):
         '''Override of FloatLayout.on_touch_down. Used to determine where
@@ -346,8 +352,8 @@ class Designer(FloatLayout):
             return super(FloatLayout, self).on_touch_down(touch)
 
         self.actionbar.on_previous(self)
-        
-        return super(FloatLayout, self).on_touch_down(touch)  
+
+        return super(FloatLayout, self).on_touch_down(touch)
 
     def action_btn_new_pressed(self, *args):
         '''Event Handler when ActionButton "New" is pressed.
@@ -363,20 +369,20 @@ class Designer(FloatLayout):
         self._confirm_dlg.bind(on_ok=self._show_new_dialog,
                                on_cancel=self._cancel_popup)
 
-        self._popup = Popup(title='New', content = self._confirm_dlg, 
-                            size_hint=(None,None),size=('200pt', '150pt'),
+        self._popup = Popup(title='New', content=self._confirm_dlg,
+                            size_hint=(None, None), size=('200pt', '150pt'),
                             auto_dismiss=False)
         self._popup.open()
-    
+
     def _show_new_dialog(self, *args):
         if hasattr(self, '_popup'):
             self._popup.dismiss()
-        
+
         self._new_dialog = NewProjectDialog()
         self._new_dialog.bind(on_select=self._perform_new,
-                               on_cancel=self._cancel_popup)
-        self._popup = Popup(title='New Project', content = self._new_dialog, 
-                            size_hint=(None,None),size=('650pt', '450pt'),
+                              on_cancel=self._cancel_popup)
+        self._popup = Popup(title='New Project', content=self._new_dialog,
+                            size_hint=(None, None), size=('650pt', '450pt'),
                             auto_dismiss=False)
         self._popup.open()
 
@@ -386,15 +392,15 @@ class Designer(FloatLayout):
 
         if hasattr(self, '_popup'):
             self._popup.dismiss()
-        
+
         self.cleanup()
         new_proj_dir = os.path.join(get_kivy_designer_dir(),
                                     NEW_PROJECT_DIR_NAME)
         if os.path.exists(new_proj_dir):
             shutil.rmtree(new_proj_dir)
-        
+
         os.mkdir(new_proj_dir)
-        
+
         template = self._new_dialog.adapter.selection[0].text
         kv_file = NEW_PROJECTS[template][0]
         py_file = NEW_PROJECTS[template][1]
@@ -405,15 +411,16 @@ class Designer(FloatLayout):
 
         shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
-        
+
         self.ui_creator.playground.sandbox.error_active = True
         with self.ui_creator.playground.sandbox:
-            self.project_loader.load_new_project(os.path.join(new_proj_dir, 
+            self.project_loader.load_new_project(os.path.join(new_proj_dir,
                                                               "main.kv"))
             root_wigdet = self.project_loader.get_root_widget()
             self.ui_creator.playground.add_widget_to_parent(root_wigdet, None,
                                                             from_undo=True)
-            self.ui_creator.kv_code_input.text = self.project_loader.get_full_str()
+            self.ui_creator.kv_code_input.text = \
+                self.project_loader.get_full_str()
             self.designer_content.update_tree_view(self.project_loader)
             self._add_designer_content()
             if self.project_loader.class_rules:
@@ -421,7 +428,7 @@ class Designer(FloatLayout):
                     widgets.append((_rule.name, 'custom'))
 
                 self.designer_content.toolbox.add_custom()
-        
+
         self.ui_creator.playground.sandbox.error_active = False
 
     def cleanup(self):
@@ -457,14 +464,14 @@ class Designer(FloatLayout):
             return
 
         self._confirm_dlg = ConfirmationDialog('All unsaved changes will be '
-                                                'lost.\n'
-                                                'Do you want to continue?')
+                                               'lost.\n'
+                                               'Do you want to continue?')
 
         self._confirm_dlg.bind(on_ok=self._show_open_dialog,
                                on_cancel=self._cancel_popup)
 
-        self._popup = Popup(title='Kivy Designer', content = self._confirm_dlg, 
-                            size_hint=(None,None),size=('200pt', '150pt'),
+        self._popup = Popup(title='Kivy Designer', content=self._confirm_dlg,
+                            size_hint=(None, None), size=('200pt', '150pt'),
                             auto_dismiss=False)
         self._popup.open()
 
@@ -477,9 +484,10 @@ class Designer(FloatLayout):
 
         self._fbrowser = FileBrowser(select_string='Open')
 
-        def_path = os.getcwd() 
-        if not self.project_loader.new_project and self.project_loader.proj_dir:
-            def_path = self.project_loader.proj_dir            
+        def_path = os.getcwd()
+        if not self.project_loader.new_project and \
+                self.project_loader.proj_dir:
+            def_path = self.project_loader.proj_dir
 
         if self._fbrowser.ids.tabbed_browser.current_tab.text == 'List View':
             self._fbrowser.ids.list_view.path = def_path
@@ -489,10 +497,10 @@ class Designer(FloatLayout):
         self._fbrowser.bind(on_success=self._fbrowser_load,
                             on_canceled=self._cancel_popup)
 
-        self._popup = Popup(title="Open", content = self._fbrowser,
+        self._popup = Popup(title="Open", content=self._fbrowser,
                             size_hint=(0.9, 0.9), auto_dismiss=False)
         self._popup.open()
-    
+
     def _select_class_selected(self, *args):
         '''Event Handler for 'on_select' event of self._select_class
         '''
@@ -501,11 +509,14 @@ class Designer(FloatLayout):
 
         with self.ui_creator.playground.sandbox:
             root_widget = self.project_loader.set_root_widget(selection)
-            self.ui_creator.playground.add_widget_to_parent(root_widget, None, from_undo=True)
-            self.ui_creator.kv_code_input.text = self.project_loader.get_root_str()
+            self.ui_creator.playground.add_widget_to_parent(root_widget,
+                                                            None,
+                                                            from_undo=True)
+            self.ui_creator.kv_code_input.text = \
+                self.project_loader.get_root_str()
 
         self._select_class_popup.dismiss()
-    
+
     def _select_class_cancel(self, *args):
         '''Event Handler for 'on_cancel' event of self._select_class
         '''
@@ -554,21 +565,23 @@ class Designer(FloatLayout):
                     #Show list box showing widgets
                     self._select_class = SelectClass(
                         self.project_loader.class_rules)
-    
-                    self._select_class.bind(on_select=self._select_class_selected,
-                                            on_cancel=self._select_class_cancel)
-    
-                    self._select_class_popup = Popup(title="Select Root Widget",
-                                                     content = self._select_class,
-                                                     size_hint=(0.5, 0.5),
-                                                     auto_dismiss=False)
+
+                    self._select_class.bind(
+                        on_select=self._select_class_selected,
+                        on_cancel=self._select_class_cancel)
+
+                    self._select_class_popup = Popup(
+                        title="Select Root Widget",
+                        content=self._select_class,
+                        size_hint=(0.5, 0.5),
+                        auto_dismiss=False)
                     self._select_class_popup.open()
 
                 else:
-                    self.ui_creator.playground.add_widget_to_parent(root_wigdet,
-                                                                    None,
-                                                                    from_undo=True)
-                    self.ui_creator.kv_code_input.text = self.project_loader.get_full_str()
+                    self.ui_creator.playground.add_widget_to_parent(
+                        root_wigdet, None, from_undo=True)
+                    self.ui_creator.kv_code_input.text = \
+                        self.project_loader.get_full_str()
 
                 self.recent_manager.add_file(file_path)
                 #Record everything for later use
@@ -577,8 +590,9 @@ class Designer(FloatLayout):
                 self._add_designer_content()
 
             except Exception as e:
-                self.statusbar.show_message('Cannot load Project: %s'%(str(e)))
-        
+                self.statusbar.show_message('Cannot load Project: %s' %
+                                            (str(e)))
+
         self.ui_creator.playground.sandbox.error_active = False
 
     def _cancel_popup(self, *args):
@@ -606,12 +620,8 @@ class Designer(FloatLayout):
                     self.ui_creator.playground.cleanup()
                     self.project_loader.load_project(projdir)
                     root_wigdet = self.project_loader.get_root_widget()
-                    self.ui_creator.playground.add_widget_to_parent(root_wigdet,
-                                                                    None,
-                                                                    from_undo=True,
-                                                                    from_kv=True)
-                    
-
+                    self.ui_creator.playground.add_widget_to_parent(
+                        root_wigdet, None, from_undo=True, from_kv=True)
                 self._curr_proj_changed = False
                 self.statusbar.show_message('Project saved successfully')
 
@@ -627,20 +637,22 @@ class Designer(FloatLayout):
 
             self._save_as_browser = FileBrowser(select_string='Save')
 
-            def_path = os.getcwd() 
-            if not self.project_loader.new_project and self.project_loader.proj_dir:
+            def_path = os.getcwd()
+            if not self.project_loader.new_project and \
+                    self.project_loader.proj_dir:
                 def_path = self.project_loader.proj_dir
 
-            if self._save_as_browser.ids.tabbed_browser.current_tab.text == 'List View':
+            if self._save_as_browser.ids.tabbed_browser.current_tab.text == \
+                    'List View':
                 self._save_as_browser.ids.list_view.path = def_path
             else:
                 self._save_as_browser.ids.icon_view.path = def_path
 
             self._save_as_browser.bind(on_success=self._perform_save_as,
                                        on_canceled=self._cancel_popup)
-    
+
             self._popup = Popup(title="Enter Folder Name",
-                                content = self._save_as_browser,
+                                content=self._save_as_browser,
                                 size_hint=(0.9, 0.9), auto_dismiss=False)
             self._popup.open()
 
@@ -673,16 +685,16 @@ class Designer(FloatLayout):
 
         except:
             self.statusbar.show_message('Cannot save project')
-    
+
     def action_btn_settings_pressed(self, *args):
-        '''Event handler for 'on_release' event of 
+        '''Event handler for 'on_release' event of
            DesignerActionButton "Settings"
         '''
 
         self.designer_settings.parent = None
         self._popup = Popup(title="Kivy Designer Settings",
-                            content = self.designer_settings,
-                            size_hint=(None, None), 
+                            content=self.designer_settings,
+                            size_hint=(None, None),
                             size=(600, 400), auto_dismiss=False)
 
         self._popup.open()
@@ -691,7 +703,7 @@ class Designer(FloatLayout):
         '''Event Handler when ActionButton "Recent Files" is pressed.
         '''
         pass
-    
+
     def fill_recent_menu(self, *args):
         '''Fill self.recent_files_cont_menu with DesignerActionButton
            of all Recent Files
@@ -722,8 +734,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_undo()
         elif self._edit_selected == 'Py':
-            for code_input in self.designer_content.tab_pannel.list_py_code_inputs:
-                if code_input.clicked == True:
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
                     code_input.clicked = False
                     code_input.do_undo()
 
@@ -736,8 +749,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_redo()
         elif self._edit_selected == 'Py':
-            for code_input in self.designer_content.tab_pannel.list_py_code_inputs:
-                if code_input.clicked == True:
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
                     code_input.clicked = False
                     code_input.do_redo()
 
@@ -752,8 +766,9 @@ class Designer(FloatLayout):
             self.ui_creator.kv_code_input.do_cut()
 
         elif self._edit_selected == 'Py':
-            for code_input in self.designer_content.tab_pannel.list_py_code_inputs:
-                if code_input.clicked == True:
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
                     code_input.clicked = False
                     code_input.do_cut()
 
@@ -763,16 +778,17 @@ class Designer(FloatLayout):
 
         if self._edit_selected == 'Play':
             self.ui_creator.playground.do_copy()
-         
+
         elif self._edit_selected == 'KV':
             self.ui_creator.kv_code_input.do_copy()
 
         elif self._edit_selected == 'Py':
-            for code_input in self.designer_content.tab_pannel.list_py_code_inputs:
-                if code_input.clicked == True:
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
                     code_input.clicked = False
                     code_input.do_copy()
-        
+
     def action_btn_paste_pressed(self, *args):
         '''Event Handler when ActionButton "Paste" is pressed.
         '''
@@ -784,8 +800,9 @@ class Designer(FloatLayout):
             self.ui_creator.kv_code_input.do_paste()
 
         elif self._edit_selected == 'Py':
-            for code_input in self.designer_content.tab_pannel.list_py_code_inputs:
-                if code_input.clicked == True:
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
                     code_input.clicked = False
                     code_input.do_paste()
 
@@ -800,8 +817,9 @@ class Designer(FloatLayout):
             self.ui_creator.kv_code_input.do_delete()
 
         elif self._edit_selected == 'Py':
-            for code_input in self.designer_content.tab_pannel.list_py_code_inputs:
-                if code_input.clicked == True:
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
                     code_input.clicked = False
                     code_input.do_delete()
 
@@ -816,8 +834,9 @@ class Designer(FloatLayout):
             self.ui_creator.kv_code_input.do_select_all()
 
         elif self._edit_selected == 'Py':
-            for code_input in self.designer_content.tab_pannel.list_py_code_inputs:
-                if code_input.clicked == True:
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
                     code_input.clicked = False
                     code_input.do_select_all()
 
@@ -830,7 +849,7 @@ class Designer(FloatLayout):
                                   on_canceled=self._cancel_popup)
 
         self._popup = Popup(title="Add Custom Widget",
-                            content = self._custom_browser,
+                            content=self._custom_browser,
                             size_hint=(0.9, 0.9), auto_dismiss=False)
         self._popup.open()
 
@@ -840,7 +859,7 @@ class Designer(FloatLayout):
 
         file_path = instance.selection[0]
         self._popup.dismiss()
-        
+
         self.ui_creator.playground.sandbox.error_active = True
 
         with self.ui_creator.playground.sandbox:
@@ -854,8 +873,8 @@ class Designer(FloatLayout):
                 self.designer_content.toolbox.add_custom()
 
             except ProjectLoaderException as e:
-                self.statusbar.show_message('Cannot load widget. %s'%str(e))
-        
+                self.statusbar.show_message('Cannot load widget. %s' % str(e))
+
         self.ui_creator.playground.sandbox.error_active = False
 
     def action_chk_btn_toolbox_active(self, chk_btn):
@@ -863,12 +882,14 @@ class Designer(FloatLayout):
         '''
 
         if chk_btn.checkbox.active:
-            self._toolbox_parent.add_widget(self.designer_content.splitter_tree)
+            self._toolbox_parent.add_widget(
+                self.designer_content.splitter_tree)
             self.designer_content.splitter_tree.width = self._toolbox_width
 
         else:
             self._toolbox_parent = self.designer_content.splitter_tree.parent
-            self._toolbox_parent.remove_widget(self.designer_content.splitter_tree)
+            self._toolbox_parent.remove_widget(
+                self.designer_content.splitter_tree)
             self._toolbox_width = self.designer_content.splitter_tree.width
             self.designer_content.splitter_tree.width = 0
 
@@ -879,8 +900,10 @@ class Designer(FloatLayout):
         if chk_btn.checkbox.active:
             self._toggle_splitter_widget_tree()
             if self.ui_creator.splitter_widget_tree.parent is None:
-                self._splitter_widget_tree_parent.add_widget(self.ui_creator.splitter_widget_tree)
-                self.ui_creator.splitter_widget_tree.width = self._splitter_widget_tree_width
+                self._splitter_widget_tree_parent.add_widget(
+                    self.ui_creator.splitter_widget_tree)
+                self.ui_creator.splitter_widget_tree.width = \
+                    self._splitter_widget_tree_width
 
             add_tree = False
             if self.ui_creator.grid_widget_tree.parent is not None:
@@ -890,12 +913,16 @@ class Designer(FloatLayout):
 
             self._splitter_property_parent.clear_widgets()
             if add_tree:
-                self._splitter_property_parent.add_widget(self.ui_creator.grid_widget_tree)
+                self._splitter_property_parent.add_widget(
+                    self.ui_creator.grid_widget_tree)
 
-            self._splitter_property_parent.add_widget(self.ui_creator.splitter_property)
+            self._splitter_property_parent.add_widget(
+                self.ui_creator.splitter_property)
         else:
-            self._splitter_property_parent = self.ui_creator.splitter_property.parent
-            self._splitter_property_parent.remove_widget(self.ui_creator.splitter_property)
+            self._splitter_property_parent = \
+                self.ui_creator.splitter_property.parent
+            self._splitter_property_parent.remove_widget(
+                self.ui_creator.splitter_property)
             self._toggle_splitter_widget_tree()
 
     def action_chk_btn_widget_tree_active(self, chk_btn):
@@ -909,14 +936,18 @@ class Designer(FloatLayout):
                 add_prop = True
 
             self._grid_widget_tree_parent.clear_widgets()
-            self._grid_widget_tree_parent.add_widget(self.ui_creator.grid_widget_tree)
+            self._grid_widget_tree_parent.add_widget(
+                self.ui_creator.grid_widget_tree)
             if add_prop:
-                self._grid_widget_tree_parent.add_widget(self.ui_creator.splitter_property)
+                self._grid_widget_tree_parent.add_widget(
+                    self.ui_creator.splitter_property)
                 self.ui_creator.splitter_property.size_hint_y = None
                 self.ui_creator.splitter_property.height = 300
         else:
-            self._grid_widget_tree_parent = self.ui_creator.grid_widget_tree.parent
-            self._grid_widget_tree_parent.remove_widget(self.ui_creator.grid_widget_tree)
+            self._grid_widget_tree_parent = \
+                self.ui_creator.grid_widget_tree.parent
+            self._grid_widget_tree_parent.remove_widget(
+                self.ui_creator.grid_widget_tree)
             self.ui_creator.splitter_property.size_hint_y = 1
             self._toggle_splitter_widget_tree()
 
@@ -925,17 +956,22 @@ class Designer(FloatLayout):
         '''
 
         if self.ui_creator.splitter_widget_tree.parent is not None and\
-            self.ui_creator.splitter_property.parent is None and\
-            self.ui_creator.grid_widget_tree.parent is None:
+                self.ui_creator.splitter_property.parent is None and\
+                self.ui_creator.grid_widget_tree.parent is None:
 
-            self._splitter_widget_tree_parent = self.ui_creator.splitter_widget_tree.parent
-            self._splitter_widget_tree_parent.remove_widget(self.ui_creator.splitter_widget_tree)
-            self._splitter_widget_tree_width = self.ui_creator.splitter_widget_tree.width
+            self._splitter_widget_tree_parent = \
+                self.ui_creator.splitter_widget_tree.parent
+            self._splitter_widget_tree_parent.remove_widget(
+                self.ui_creator.splitter_widget_tree)
+            self._splitter_widget_tree_width = \
+                self.ui_creator.splitter_widget_tree.width
             self.ui_creator.splitter_widget_tree.width = 0
 
         elif self.ui_creator.splitter_widget_tree.parent is None:
-            self._splitter_widget_tree_parent.add_widget(self.ui_creator.splitter_widget_tree)
-            self.ui_creator.splitter_widget_tree.width = self._splitter_widget_tree_width
+            self._splitter_widget_tree_parent.add_widget(
+                self.ui_creator.splitter_widget_tree)
+            self.ui_creator.splitter_widget_tree.width = \
+                self._splitter_widget_tree_width
 
     def action_chk_btn_status_bar_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "StatusBar" is activated.
@@ -949,19 +985,24 @@ class Designer(FloatLayout):
             self._statusbar_height = self.statusbar.height
             self._statusbar_parent.remove_widget(self.statusbar)
             self.statusbar.height = 0
-    
+
     def action_chk_btn_kv_area_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "KVLangArea" is activated.
         '''
 
         if chk_btn.checkbox.active:
-            self.ui_creator.splitter_kv_code_input.height = self._kv_area_height
-            self._kv_area_parent.add_widget(self.ui_creator.splitter_kv_code_input)
+            self.ui_creator.splitter_kv_code_input.height = \
+                self._kv_area_height
+            self._kv_area_parent.add_widget(
+                self.ui_creator.splitter_kv_code_input)
         else:
-            self._kv_area_parent = self.ui_creator.splitter_kv_code_input.parent
-            self._kv_area_height = self.ui_creator.splitter_kv_code_input.height
+            self._kv_area_parent = \
+                self.ui_creator.splitter_kv_code_input.parent
+            self._kv_area_height = \
+                self.ui_creator.splitter_kv_code_input.height
             self.ui_creator.splitter_kv_code_input.height = 0
-            self._kv_area_parent.remove_widget(self.ui_creator.splitter_kv_code_input)
+            self._kv_area_parent.remove_widget(
+                self.ui_creator.splitter_kv_code_input)
 
     def _error_adding_file(self, *args):
         '''Event Handler for 'on_error' event of self._add_file_dlg
@@ -969,7 +1010,7 @@ class Designer(FloatLayout):
 
         self.statusbar.show_message('Error while adding file to project')
         self._popup.dismiss()
-    
+
     def _added_file(self, *args):
         '''Event Handler for 'on_added' event of self._add_file_dlg
         '''
@@ -990,12 +1031,12 @@ class Designer(FloatLayout):
                                 on_cancel=self._cancel_popup)
 
         self._popup = Popup(title="Add File",
-                            content = self._add_file_dlg,
-                            size_hint=(None, None), 
+                            content=self._add_file_dlg,
+                            size_hint=(None, None),
                             size=(400, 300), auto_dismiss=False)
 
         self._popup.open()
-    
+
     def action_btn_project_pref_pressed(self, *args):
         '''Event Handler when ActionButton "Project Prefences" is pressed.
         '''
@@ -1003,8 +1044,8 @@ class Designer(FloatLayout):
         self.proj_settings.load_proj_settings()
         self.proj_settings.bind(on_close=self._cancel_popup)
         self._popup = Popup(title="Project Preferences",
-                            content = self.proj_settings,
-                            size_hint=(None, None), 
+                            content=self.proj_settings,
+                            size_hint=(None, None),
                             size=(600, 400), auto_dismiss=False)
 
         self._popup.open()
@@ -1016,10 +1057,10 @@ class Designer(FloatLayout):
             return
         args = ''
         envs = ''
-        
+
         python_path = self.designer_settings.config_parser.getdefault(
             'global', 'python_shell_path', '')
-        
+
         if python_path == '':
             self.statusbar.show_message("Python Shell Path not specified,"
                                         " please specify it before running"
@@ -1027,31 +1068,32 @@ class Designer(FloatLayout):
             return
 
         if self.proj_settings and self.proj_settings.config_parser:
-            args = self.proj_settings.config_parser.getdefault('arguments', 'arg', '')
-            envs = self.proj_settings.config_parser.getdefault('env variables', 'env', '')
+            args = self.proj_settings.config_parser.getdefault('arguments',
+                                                               'arg', '')
+            envs = self.proj_settings.config_parser.getdefault(
+                'env variables', 'env', '')
             for env in envs.split(' '):
-                self.ui_creator.kivy_console.environment[env[:env.find('=')]] = env[env.find('=')+1:]
+                self.ui_creator.kivy_console.environment[
+                    env[:env.find('=')]] = env[env.find('=')+1:]
 
         for _file in self.project_loader.file_list:
             if 'main.py' in os.path.basename(_file):
-                self.ui_creator.kivy_console.stdin.write('%s %s %s'%
-                                                         (python_path,
-                                                          _file, args))
+                self.ui_creator.kivy_console.stdin.write(
+                    '%s %s %s' % (python_path, _file, args))
                 self.ui_creator.tab_pannel.switch_to(
                     self.ui_creator.tab_pannel.tab_list[2])
                 return
 
-        self.ui_creator.kivy_console.stdin.write('%s %s %s'%
-                                                 (python_path, 
-                                                  self.project_loader._app_file,
-                                                  args))
+        self.ui_creator.kivy_console.stdin.write(
+            '%s %s %s' % (python_path, self.project_loader._app_file, args))
+
         self.ui_creator.tab_pannel.switch_to(
             self.ui_creator.tab_pannel.tab_list[2])
 
     def on_sandbox_getting_exception(self, *args):
-        '''Event Handler for 
+        '''Event Handler for
            :class:`~designer.uix.designer_sandbox.DesignerSandbox`
-           on_getting_exception event. This function will add exception 
+           on_getting_exception event. This function will add exception
            string in error_console.
         '''
 
@@ -1065,15 +1107,16 @@ class Designer(FloatLayout):
         if self.ui_creator.playground.sandbox.error_active:
             self.ui_creator.tab_pannel.switch_to(
                 self.ui_creator.tab_pannel.tab_list[0])
-        
+
         self.ui_creator.playground.sandbox.error_active = False
-        
+
     def action_btn_about_pressed(self, *args):
         '''Event handler for 'on_release' event of DesignerActionButton
            "About Kivy Designer"
         '''
         self.about_dlg = AboutDialog()
-        self._popup = Popup(title='About Kivy Designer', content=self.about_dlg,
+        self._popup = Popup(title='About Kivy Designer',
+                            content=self.about_dlg,
                             size_hint=(None, None), size=(600, 400),
                             auto_dismiss=False)
         self._popup.open()
@@ -1085,9 +1128,9 @@ class DesignerApp(App):
     widget_focused = ObjectProperty(allownone=True)
     '''Currently focused widget
     '''
-    
+
     title = 'Kivy Designer'
-    
+
     def on_stop(self, *args):
         self.root.ui_creator.py_console.exit()
 
@@ -1099,15 +1142,21 @@ class DesignerApp(App):
         Factory.register('EventViewer', module='designer.eventviewer')
         Factory.register('WidgetsTree', module='designer.nodetree')
         Factory.register('UICreator', module='designer.ui_creator')
-        Factory.register('DesignerContent', module='designer.designer_content')
+        Factory.register('DesignerContent',
+                         module='designer.designer_content')
         Factory.register('KivyConsole', module='designer.uix.kivy_console')
         Factory.register('PythonConsole', module='designer.uix.py_console')
-        Factory.register('DesignerContent', module='designer.uix.designer_sandbox')
+        Factory.register('DesignerContent',
+                         module='designer.uix.designer_sandbox')
         Factory.register('EventDropDown', module='designer.eventviewer')
-        Factory.register('DesignerActionPrevious', module='designer.uix.designer_action_items')
-        Factory.register('DesignerActionGroup', module='designer.uix.designer_action_items')
-        Factory.register('DesignerActionButton', module='designer.uix.designer_action_items')
-        Factory.register('DesignerActionSubMenu', module='designer.uix.designer_action_items')
+        Factory.register('DesignerActionPrevious',
+                         module='designer.uix.designer_action_items')
+        Factory.register('DesignerActionGroup',
+                         module='designer.uix.designer_action_items')
+        Factory.register('DesignerActionButton',
+                         module='designer.uix.designer_action_items')
+        Factory.register('DesignerActionSubMenu',
+                         module='designer.uix.designer_action_items')
         Factory.register('DesignerStartPage', module='designer.start_page')
         Factory.register('DesignerLinkLabel', module='designer.start_page')
         Factory.register('RecentFilesBox', module='designer.start_page')
@@ -1124,14 +1173,20 @@ class DesignerApp(App):
         self.root.proj_tree_view = self.root.designer_content.tree_view
         self.root.ui_creator = self.root.designer_content.ui_creator
         self.root.statusbar.playground = self.root.ui_creator.playground
-        self.root.project_loader.kv_code_input = self.root.ui_creator.kv_code_input
-        self.root.project_loader.tab_pannel = self.root.designer_content.tab_pannel
+        self.root.project_loader.kv_code_input = \
+            self.root.ui_creator.kv_code_input
+        self.root.project_loader.tab_pannel = \
+            self.root.designer_content.tab_pannel
         self.root.ui_creator.playground.undo_manager = self.root.undo_manager
-        self.root.ui_creator.kv_code_input.project_loader = self.root.project_loader
+        self.root.ui_creator.kv_code_input.project_loader = \
+            self.root.project_loader
         self.root.ui_creator.kv_code_input.statusbar = self.root.statusbar
-        self.root.ui_creator.widgettree.project_loader = self.root.project_loader
-        self.root.ui_creator.eventviewer.project_loader = self.root.project_loader
-        self.root.ui_creator.eventviewer.designer_tabbed_panel = self.root.designer_content.tab_pannel
+        self.root.ui_creator.widgettree.project_loader = \
+            self.root.project_loader
+        self.root.ui_creator.eventviewer.project_loader = \
+            self.root.project_loader
+        self.root.ui_creator.eventviewer.designer_tabbed_panel = \
+            self.root.designer_content.tab_pannel
         self.root.ui_creator.eventviewer.statusbar = self.root.statusbar
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)
@@ -1144,8 +1199,8 @@ class DesignerApp(App):
             self.root.ui_creator.playground.size
         self.root.start_page.recent_files_box.root = self.root
 
-        self.root.ui_creator.playground.sandbox.bind(on_getting_exception=
-            self.root.on_sandbox_getting_exception)
+        self.root.ui_creator.playground.sandbox.bind(
+            on_getting_exception=self.root.on_sandbox_getting_exception)
 
         self.bind(widget_focused=
                   self.root.ui_creator.propertyviewer.setter('widget'))
@@ -1155,8 +1210,9 @@ class DesignerApp(App):
         self.focus_widget(self.root.ui_creator.playground.root)
 
         self.create_kivy_designer_dir()
-        self.root.start_page.recent_files_box.add_recent(self.root.recent_manager.list_files)
-        
+        self.root.start_page.recent_files_box.add_recent(
+            self.root.recent_manager.list_files)
+
         self.root.fill_recent_menu()
 
     def create_kivy_designer_dir(self):
@@ -1164,10 +1220,10 @@ class DesignerApp(App):
         '''
 
         if not os.path.exists(get_kivy_designer_dir()):
-            os.mkdir(get_kivy_designer_dir())        
+            os.mkdir(get_kivy_designer_dir())
 
     def create_draggable_element(self, widgetname, touch, widget=None):
-        '''Create PlagroundDragElement and make it draggable 
+        '''Create PlagroundDragElement and make it draggable
            until the touch is released also search default args if exist
         '''
         container = None
@@ -1176,7 +1232,7 @@ class DesignerApp(App):
             for options in widgets:
                 if len(options) > 2:
                     default_args = options[2]
-            
+
             container = self.root.ui_creator.playground.\
                 get_playground_drag_element(widgetname, touch, **default_args)
 
@@ -1192,7 +1248,7 @@ class DesignerApp(App):
         if container:
             self.root.add_widget(container)
         else:
-            self.root.statusbar.show_message("Cannot create %s"%widgetname)
+            self.root.statusbar.show_message("Cannot create %s" % widgetname)
 
         container.widgettree = self.root.ui_creator.widgettree
         return container
@@ -1202,7 +1258,8 @@ class DesignerApp(App):
            lines around focussed widget.
         '''
 
-        if self._widget_focused and (widget is None or self._widget_focused[0] != widget):
+        if self._widget_focused and (widget is None or
+                                     self._widget_focused[0] != widget):
             fwidget = self._widget_focused[0]
             for instr in self._widget_focused[1:]:
                 fwidget.canvas.after.remove(instr)
@@ -1227,5 +1284,5 @@ class DesignerApp(App):
                 line = Line(points=points, close=True, width=2.)
             self._widget_focused = [widget, color, line]
 
-        self.root.ui_creator.playground.clicked=True
+        self.root.ui_creator.playground.clicked = True
         self.root.on_show_edit()

@@ -4,6 +4,7 @@ from kivy.clock import Clock
 from kivy.animation import Animation
 from kivy.core.window import Window
 
+
 class InfoBubble(Bubble):
     '''Bubble to be used to display short Help Information'''
 
@@ -16,7 +17,7 @@ class InfoBubble(Bubble):
         '''Animate the bubble into position'''
         if width:
             self.width = width
-        # wait for the bubble to adjust it's size according to text then animate
+        #wait for the bubble to adjust it's size according to text then animate
         Clock.schedule_once(lambda dt: self._show(pos, duration))
 
     def _show(self, pos, duration):
@@ -41,7 +42,6 @@ class InfoBubble(Bubble):
         anim.bind(on_complete=on_stop)
         anim.cancel_all(self)
         anim.start(self)
-
 
     def hide(self, *dt):
         ''' Auto fade out the Bubble

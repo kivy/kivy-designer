@@ -43,8 +43,9 @@ or
     subprocess.Popen('ps', stdout = console.stdout, shell = True)
 
 Warning: To read from stdout remember that the process is run in a thread, give
-it time to complete otherwise you might get a empty or partial string; returning
-whatever has been written to the stdout pipe till the time read() was called.
+it time to complete otherwise you might get a empty or partial string;
+returning whatever has been written to the stdout pipe till the time
+read() was called.
 
     text = console.stdout.read() or read(no_of_bytes) or readline()
 
@@ -92,8 +93,8 @@ from pygments.lexers import BashSessionLexer
 
 from kivy.uix.gridlayout import GridLayout
 from kivy.properties import (NumericProperty, StringProperty,
-                            BooleanProperty, ObjectProperty, DictProperty,
-                            AliasProperty, ListProperty)
+                             BooleanProperty, ObjectProperty, DictProperty,
+                             AliasProperty, ListProperty)
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.textinput import TextInput
@@ -216,7 +217,8 @@ class KivyConsole(GridLayout):
     Default to 'False'
 
     WARNING: Shell = True is a security risk and therefore = False by default,
-    As a result with shell = False some shell specific commands and redirections
+    As a result with shell = False some shell specific commands and
+    redirections
     like 'ls |grep lte' or dir >output.txt will not work.
     If for some reason you need to run such commands, try running the platform
     shell first
@@ -281,7 +283,7 @@ class KivyConsole(GridLayout):
     def prompt(self, *args):
         return "[%s@%s %s]>> " % (
             os.environ.get('USER', 'UNKNOWN'), os.uname()[1],
-                os.path.basename(self.cur_dir))
+            os.path.basename(self.cur_dir))
 
     def _change_txtcache(self, *args):
         tihb = self.txtinput_history_box
@@ -333,7 +335,7 @@ class KivyConsole(GridLayout):
                 self.command_history_pos = self.command_history_pos\
                     + plus_minus
                 cmd = self.command_history[self.command_history_pos]
-                if  cmd[:len(command)] == command:
+                if cmd[:len(command)] == command:
                     ticl.text = u''.join((
                         self.prompt(), cmd))
                     move_cursor_to(col)
@@ -345,15 +347,17 @@ class KivyConsole(GridLayout):
                 # up arrow: display previous command
                 if self.command_history_pos > 0:
                     self.command_history_pos = self.command_history_pos - 1
-                    ticl.text = u''.join((self.prompt(),
-                              self.command_history[self.command_history_pos]))
+                    ticl.text = u''.join(
+                        (self.prompt(),
+                         self.command_history[self.command_history_pos]))
                 return
             if l[1] == 274:
                 # dn arrow: display next command
                 if self.command_history_pos < len(self.command_history) - 1:
                     self.command_history_pos = self.command_history_pos + 1
-                    ticl.text = u''.join((self.prompt(),
-                              self.command_history[self.command_history_pos]))
+                    ticl.text = u''.join(
+                        (self.prompt(),
+                         self.command_history[self.command_history_pos]))
                 else:
                     self.command_history_pos = len(self.command_history)
                     ticl.text = self.prompt()
@@ -389,12 +393,14 @@ class KivyConsole(GridLayout):
                         len_txt = len(txt) - 1
                         cmdl_text = ticl.text
                         len_cmdl = len(cmdl_text)
-                        os_sep = os.sep if col == len_cmdl or (col < len_cmdl
-                            and cmdl_text[col] != os.sep) else ''
+                        os_sep = os.sep \
+                            if col == len_cmdl or (col < len_cmdl and
+                                                   cmdl_text[col] !=
+                                                   os.sep) else ''
                         ticl.text = u''.join(
                             (self.prompt(), text_before_cursor,
-                            txt[len_starts_with:len_txt], os_sep,
-                            cmdl_text[col:]))
+                             txt[len_starts_with:len_txt], os_sep,
+                             cmdl_text[col:]))
                         move_cursor_to(col + (len_txt - len_starts_with) + 1)
                     elif no_of_matches > 1:
                         self.add_to_cache(txt)
@@ -422,8 +428,8 @@ class KivyConsole(GridLayout):
                     cmd_start = text_before_cursor.rfind(' ')
                     cmd_start += 1
                     cur_dir = self.cur_dir\
-                                 if text_before_cursor[cmd_start] != os.sep\
-                                 else os.sep
+                        if text_before_cursor[cmd_start] != os.sep\
+                        else os.sep
                     os_sep = os.sep if cur_dir != os.sep else ''
                     cmd_end = text_before_cursor.rfind(os.sep)
                     len_txt_bef_cur = len(text_before_cursor) - 1
@@ -445,17 +451,18 @@ class KivyConsole(GridLayout):
                             return
                         # insert at cursor os.sep: / or \
                         ticl.text = u''.join((self.prompt(),
-                            text_before_cursor, os_sep, ticl.text[col:]))
+                                              text_before_cursor, os_sep,
+                                              ticl.text[col:]))
                     else:
                         if cmd_end < 0:
                             cmd_end = cmd_start
                         else:
                             cmd_end += 1
                         display_dir(u''.join((
-                                        cur_dir,
-                                        os_sep,
-                                        text_before_cursor[cmd_start:cmd_end])),
-                                        text_before_cursor[cmd_end:])
+                                    cur_dir,
+                                    os_sep,
+                                    text_before_cursor[cmd_start:cmd_end])),
+                                    text_before_cursor[cmd_end:])
                 return
             if l[1] == 280:
                 # pgup: search last command starting with...
@@ -512,7 +519,7 @@ class KivyConsole(GridLayout):
         command_history = self.command_history
 
         def remove_command_interaction_widgets(*l):
-            # command finished:remove widget responsible for interaction with it
+            #command finished:remove widget responsible for interaction with it
             parent.remove_widget(self.interact_layout)
             self.interact_layout = None
             # enable running a new command
@@ -530,7 +537,7 @@ class KivyConsole(GridLayout):
             try:
                 comand = command.encode('utf-8')
                 cmd = shlex.split(str(command))\
-                         if not self.shell else command
+                    if not self.shell else command
             except Exception as err:
                 cmd = ''
                 self.add_to_cache(u''.join((str(err), ' <', command, ' >\n')))
@@ -566,7 +573,7 @@ class KivyConsole(GridLayout):
                         txt = popen_stdout_r()
                 except OSError or ValueError, err:
                     add_to_cache(u''.join((str(err.strerror),
-                                                ' < ', command, ' >\n')))
+                                           ' < ', command, ' >\n')))
                 sys.stdout = prev_stdout
             self.popen_obj = None
             Clock.schedule_once(remove_command_interaction_widgets)
@@ -615,7 +622,7 @@ class KivyConsole(GridLayout):
                     self.cur_dir = os.getcwdu()
                 except OSError, err:
                     Logger.debug('Shell Console: err:' + err.strerror +
-                                ' directory:' + command[3:])
+                                 ' directory:' + command[3:])
                     add_to_cache(u''.join((err.strerror, '\n')))
             add_to_cache(u''.join((txtinput_command_line.text, '\n')))
             txtinput_command_line.text = self.prompt()
@@ -646,14 +653,14 @@ class KivyConsole(GridLayout):
         txtinput_run_command.bind(on_text_validate=interact_with_command)
         txtinput_run_command.bind(focus=self.on_focus)
         btn_kill = Button(text="kill",
-                        width=27,
-                        size_hint=(None, 1))
+                          width=27,
+                          size_hint=(None, 1))
 
         def kill_process(*l):
             self.popen_obj.kill()
 
         self.interact_layout = il = GridLayout(rows=1, cols=2, height=27,
-            size_hint=(1, None))
+                                               size_hint=(1, None))
         btn_kill.bind(on_press=kill_process)
         il.add_widget(txtinput_run_command)
         il.add_widget(btn_kill)
@@ -771,4 +778,3 @@ class std_in_out(object):
     def flush(self):
         self.textcache = u''.join(self.obj.textcache)
         return
-

@@ -1,5 +1,6 @@
 
-#: Describe the widgets to show in the toolbox, and anything else needed for the
+#: Describe the widgets to show in the toolbox,
+#: and anything else needed for the
 #: designer. The base is a list, because python dict don't preserve the order.
 #: The first field is the name used for Factory.<name>
 #: The second field represent a category name

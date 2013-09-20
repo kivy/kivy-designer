@@ -1,5 +1,6 @@
 from kivy.uix.widget import Widget
 
+
 class TreeException(Exception):
     pass
 
@@ -29,7 +30,8 @@ class Tree(object):
         self.list_root_nodes = []
 
     def insert(self, widget, parent=None):
-        '''inserts a new node of widget with parent. Returns new node on success
+        '''inserts a new node of widget with parent.
+           Returns new node on success
         '''
 
         if not isinstance(widget, Widget):
@@ -44,11 +46,11 @@ class Tree(object):
         if not isinstance(parent, Widget):
             TreeException('Tree only accepts parent to be a Widget')
 
-        parent_node = self.get_node_for_widget(parent)    
+        parent_node = self.get_node_for_widget(parent)
         node = TreeNode()
         node.widget = widget
         node.parent_node = parent_node
-        if parent_node == None:
+        if parent_node is None:
             self.list_root_nodes.append(node)
         else:
             parent_node.list_children.append(node)
@@ -87,7 +89,8 @@ class Tree(object):
                 self.traverse_tree(child)
 
     def delete(self, widget):
-        '''deletes a node of widget from the Tree. Returns that node on deletion
+        '''deletes a node of widget from the Tree.
+           Returns that node on deletion
         '''
         if not isinstance(widget, Widget):
             TreeException('Tree accepts only Widget to be deleted')

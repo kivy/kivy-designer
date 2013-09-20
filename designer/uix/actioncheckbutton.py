@@ -7,6 +7,7 @@ from kivy.clock import Clock
 
 from functools import partial
 
+
 class ActionCheckButton(ActionItem, BoxLayout):
     '''ActionCheckButton is a check button displaying text with a checkbox
     '''
@@ -20,7 +21,7 @@ class ActionCheckButton(ActionItem, BoxLayout):
     '''text which is displayed by ActionCheckButton.
        :data:`text` is a :class:`~kivy.properties.StringProperty`
     '''
-    
+
     cont_menu = ObjectProperty(None)
 
     __events__ = ('on_active',)
@@ -38,7 +39,7 @@ class ActionCheckButton(ActionItem, BoxLayout):
         self._label.text = self.text
         self.checkbox.bind(active=partial(self.dispatch, 'on_active'))
         Clock.schedule_once(self._label_setup, 0)
-    
+
     def _label_setup(self, dt):
         '''To setup text_size of _label
         '''

@@ -12,6 +12,7 @@ from designer.propertyviewer import PropertyViewer,\
 
 import re
 
+
 class EventHandlerTextInput(TextInput):
     '''EventHandlerTextInput is used to display/change/remove EventHandler
        for an event
@@ -36,22 +37,23 @@ class EventHandlerTextInput(TextInput):
     '''Specifies whether text has been inserted or not
        :data:`text_inserted` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     project_loader = ObjectProperty(None)
     '''Reference to ProjectLoader
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     info_message = StringProperty(None)
     '''Message to be displayed by InfoBubble
        :data:`info_message` is a :class:`~kivy.properties.StringProperty`
     '''
-    
+
     dropdown = ObjectProperty(None)
-    '''DropDown which will be displayed to show possible functions for that event
+    '''DropDown which will be displayed to show possible
+       functions for that event
        :data:`dropdown` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     def on_touch_down(self, touch):
         '''Default handler for 'on_touch_down' event
         '''
@@ -68,8 +70,9 @@ class EventHandlerTextInput(TextInput):
         list_funcs = dir(widget)
         for func in list_funcs:
             if '__' not in func and hasattr(getattr(widget, func), '__call__'):
-                btn = Button(text=func, size_hint=(None, None), size=(100,30), shorten=True)
-                self.dropdown.add_widget(btn)                
+                btn = Button(text=func, size_hint=(None, None),
+                             size=(100, 30), shorten=True)
+                self.dropdown.add_widget(btn)
                 btn.bind(on_release=lambda btn: self.dropdown.select(btn.text))
                 btn.text_size = [btn.size[0] - 4, btn.size[1]]
                 btn.valign = 'middle'
@@ -90,7 +93,7 @@ class EventHandlerTextInput(TextInput):
             return
 
         self.kv_code_input.set_event_handler(self.eventwidget,
-                                             self.eventname, 
+                                             self.eventname,
                                              self.text)
         if self.text and self.text[-1] == '.':
             if self.text == 'self.':
@@ -110,7 +113,7 @@ class EventHandlerTextInput(TextInput):
 
                 if widget:
                     self.show_drop_down_for_widget(widget)
-        
+
         elif self.dropdown:
             self.dropdown.dismiss()
 
@@ -121,7 +124,7 @@ class NewEventTextInput(TextInput):
     '''
 
     __events__ = ('on_create_event',)
-    
+
     info_message = StringProperty(None)
     '''Message which will be displayed in the InfoBubble
        :data:`info_message` is a :class:`~kivy.properties.StringProperty`
@@ -152,24 +155,27 @@ class NewEventTextInput(TextInput):
 
         return super(NewEventTextInput, self).on_touch_down(touch)
 
+
 class EventLabel(PropertyLabel):
     pass
+
 
 class EventViewer(PropertyViewer):
     '''EventViewer, to display all the events associated with the widget and
        event handler.
     '''
-    
+
     project_loader = ObjectProperty(None)
     '''Reference to ProjectLoader
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     designer_tabbed_panel = ObjectProperty(None)
     '''Reference to DesignerTabbedPanel
-       :data:`designer_tabbed_panel` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`designer_tabbed_panel` is a
+       :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     statusbar = ObjectProperty(None)
     '''Reference to Statusbar
        :data:`statusbar` is a :class:`~kivy.properties.ObjectProperty`
@@ -203,11 +209,14 @@ class EventViewer(PropertyViewer):
                 continue
             add(EventLabel(text=event))
             add(ip)
-        
+
         if self.project_loader.is_widget_custom(self.widget):
             #Allow adding a new event only if current widget is a custom rule
-            add(EventLabel(text='Type and press enter to \ncreate a new event'))
-            txt = NewEventTextInput(multiline=True, info_message = 'Type and press enter to create a new event')
+            add(EventLabel(text='Type and press enter to \n'
+                           'create a new event'))
+            txt = NewEventTextInput(
+                multiline=True,
+                info_message='Type and press enter to create a new event')
             txt.bind(on_create_event=self.create_event)
             add(txt)
 
@@ -226,7 +235,8 @@ class EventViewer(PropertyViewer):
         if rel_path[0] == '/' or rel_path[0] == '\\':
             rel_path = rel_path[1:]
 
-        self.designer_tabbed_panel.open_file(py_file, rel_path, switch_to=False)
+        self.designer_tabbed_panel.open_file(py_file, rel_path,
+                                             switch_to=False)
         self.rel_path = rel_path
         self.txt = txt
         Clock.schedule_once(self._add_event)
@@ -242,13 +252,13 @@ class EventViewer(PropertyViewer):
             if code_input.rel_file_path == rel_path:
                 py_code_input = code_input
                 break
-        
+
         pos = -1
-        for searchiter in re.finditer(r'class\s+%s\(.+\):'%\
+        for searchiter in re.finditer(r'class\s+%s\(.+\):' %
                                       type(self.widget).__name__,
                                       py_code_input.text):
             pos = searchiter.end()
-        
+
         if pos != -1:
             col, row = py_code_input.get_cursor_from_index(pos)
             lines = py_code_input.text.splitlines()
@@ -259,13 +269,13 @@ class EventViewer(PropertyViewer):
                     found_events = True
                     events_row = i
                     break
-                
+
                 elif re.match('class\s+[\w\d\_]+\(.+\):', lines[i]):
                     break
-                
+
                 elif re.match('def\s+[\w\d\_]+\(.+\):', lines[i]):
-                    break              
-            
+                    break
+
             if found_events:
                 events_col = lines[events_row].rfind(')') - 1
                 py_code_input.cursor = events_row, events_col
@@ -274,7 +284,8 @@ class EventViewer(PropertyViewer):
             else:
                 py_code_input.text = py_code_input.text[:pos] + \
                     '\n    __events__=("%s",)\n'\
-                    '    def %s(self, *args):\n        pass'%(txt.text, txt.text)+\
+                    '    def %s(self, *args):\n        pass' % \
+                    (txt.text, txt.text) +\
                     py_code_input.text[pos:]
             self.statusbar.show_message('New Event Created you must save '
                                         'project for changes to take effect')
@@ -285,10 +296,8 @@ class EventViewer(PropertyViewer):
            for Property 'name'
         '''
         text = self.kv_code_input.get_property_value(self.widget, name)
-        return EventHandlerTextInput(kv_code_input=self.kv_code_input,
-                                     eventname=name,
-                                     eventwidget=self.widget,
-                                     multiline=False,
-                                     text=text,
-                                     project_loader=self.project_loader,
-                                     info_message="Set event handler for event %s"%(name))
+        return EventHandlerTextInput(
+            kv_code_input=self.kv_code_input, eventname=name,
+            eventwidget=self.widget, multiline=False, text=text,
+            project_loader=self.project_loader,
+            info_message="Set event handler for event %s" % (name))

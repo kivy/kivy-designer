@@ -7,13 +7,15 @@ from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets
 
+
 class WidgetTreeElement(TreeViewLabel):
     '''WidgetTreeElement represents each node in WidgetsTree
     '''
     node = ObjectProperty(None)
 
+
 class WidgetsTree(ScrollView):
-    '''WidgetsTree class is used to display the Root Widget's Tree in a 
+    '''WidgetsTree class is used to display the Root Widget's Tree in a
        Tree hierarchy.
     '''
     playground = ObjectProperty(None)
@@ -26,12 +28,12 @@ class WidgetsTree(ScrollView):
        This TreeView is responsible for showing Root Widget's Tree.
        :data:`tree` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     project_loader = ObjectProperty()
     '''Reference to :class:`~designer.project_loader.ProjectLoader` instance.
        :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     dragging = BooleanProperty(False)
     '''Specifies whether a node is dragged or not.
        :data:`dragging` is a :class:`~kivy.properties.BooleanProperty`
@@ -67,7 +69,8 @@ class WidgetsTree(ScrollView):
                 is_child_complex = True
                 break
 
-        if root_widget == node or (not is_child_custom and not is_child_complex):
+        if root_widget == node or (not is_child_custom and
+                                   not is_child_complex):
             if isinstance(node, TabbedPanel):
                 self.insert_for_tabbed_panel(node, b)
             else:
@@ -79,9 +82,9 @@ class WidgetsTree(ScrollView):
         '''
         for tab in node.tab_list:
             b = WidgetTreeElement(node=tab)
-            self.tree.add_node(b, treenode)            
+            self.tree.add_node(b, treenode)
             self.recursive_insert(tab.content, b)
-        
+
     def refresh(self, *l):
         '''This function will refresh the tree. It will first remove all nodes
            and then insert them using recursive_insert

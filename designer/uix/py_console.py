@@ -1,4 +1,6 @@
-import code, sys, threading
+import code
+import sys
+import threading
 
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
@@ -6,7 +8,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.base import runTouchApp
 from kivy.clock import Clock
 from kivy.base import EventLoop
-from kivy.properties import ObjectProperty, ListProperty, StringProperty, NumericProperty
+from kivy.properties import ObjectProperty, ListProperty,\
+    StringProperty, NumericProperty
 from kivy.lang import Builder
 
 Builder.load_string('''
@@ -26,11 +29,12 @@ Builder.load_string('''
             on_ready_to_input: root.ready_to_input()
 ''')
 
-class PseudoFile(object): 
+
+class PseudoFile(object):
     '''A psuedo file object, to redirect I/O operations from Python Shell to
        InteractiveShellInput.
     '''
-    
+
     def __init__(self, sh):
         self.sh = sh
 
@@ -56,6 +60,7 @@ class PseudoFile(object):
         '''
         return True
 
+
 class Shell(code.InteractiveConsole):
     "Wrapper around Python that can filter input/output to the shell"
 
@@ -70,12 +75,12 @@ class Shell(code.InteractiveConsole):
         '''
         import functools
         Clock.schedule_once(functools.partial(self.root.show_output, data), 0)
-    
+
     def raw_input(self, prompt=""):
         '''To show prompt and get required data from user.
         '''
         return self.root.get_input(prompt)
-    
+
     def runcode(self, _code):
         """Execute a code object.
 
@@ -101,7 +106,7 @@ class Shell(code.InteractiveConsole):
                 print
 
         sys.stdout = org_stdout
-    
+
     def exit(self):
         '''To exit PythonConsole.
         '''
@@ -126,7 +131,8 @@ class Shell(code.InteractiveConsole):
             sys.ps2
         except AttributeError:
             sys.ps2 = "... "
-        cprt = 'Type "help", "copyright", "credits" or "license" for more information.'
+        cprt = 'Type "help", "copyright", "credits" or "license"'\
+            ' for more information.'
         if banner is None:
             self.write("Python %s on %s\n%s\n(%s)\n" %
                        (sys.version, sys.platform, cprt,
@@ -142,7 +148,7 @@ class Shell(code.InteractiveConsole):
                     prompt = sys.ps1
                 try:
                     line = self.raw_input(prompt)
-                    if line == None:
+                    if line is None:
                         continue
                     # Can be None if sys.stdin was redefined
                     encoding = getattr(sys.stdin, "encoding", None)
@@ -175,7 +181,7 @@ class InteractiveThread(threading.Thread):
 
 
 class InteractiveShellInput(TextInput):
-    '''Displays Output and sends input to Shell. Emits 'on_ready_to_input' 
+    '''Displays Output and sends input to Shell. Emits 'on_ready_to_input'
        when it is ready to get input from user.
     '''
 
@@ -193,18 +199,17 @@ class InteractiveShellInput(TextInput):
             self.last_line = self.text[self._cursor_pos:]
             self.dispatch('on_ready_to_input')
 
-        return super(InteractiveShellInput, self)._keyboard_on_key_down(window,
-                                                                        keycode,
-                                                                        text,
-                                                                        modifiers)
-    
+        return super(InteractiveShellInput, self)._keyboard_on_key_down(
+            window, keycode, text, modifiers)
+
     def insert_text(self, substring, from_undo=False):
         '''Override of insert_text
         '''
         if self.cursor_index() < self._cursor_pos:
             return
 
-        return super(InteractiveShellInput, self).insert_text(substring, from_undo)
+        return super(InteractiveShellInput, self).insert_text(substring,
+                                                              from_undo)
 
     def on_ready_to_input(self, *args):
         '''Default handler of 'on_ready_to_input'
@@ -216,7 +221,7 @@ class InteractiveShellInput(TextInput):
         '''
         self.text += output
         Clock.schedule_once(self._set_cursor_val, 0.1)
-    
+
     def _set_cursor_val(self, *args):
         '''Get last position of cursor where output was added.
         '''
@@ -228,7 +233,7 @@ class InteractiveShellInput(TextInput):
 
 
 class PythonConsole(BoxLayout):
-    
+
     text_input = ObjectProperty(None)
     '''Instance of :class:`~designer.uix.py_console.InteractiveShellInput`
        :data:`text_input` is an :class:`~kivy.properties.ObjectProperty`
@@ -238,7 +243,7 @@ class PythonConsole(BoxLayout):
     '''Instance of :class:`~designer.uix.py_console.Shell`
        :data:`sh` is an :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     scroll_view = ObjectProperty(None)
     '''Instance of :class:`~kivy.uix.scrollview.ScrollView`
        :data:`scroll_view` is an :class:`~kivy.properties.ObjectProperty`
@@ -256,14 +261,14 @@ class PythonConsole(BoxLayout):
 
     :data:`foreground_color` is an :class:`~kivy.properties.ListProperty`,
     Default to '(0, 0, 0, 1)'''
-    
+
     font_name = StringProperty('data/fonts/DroidSansMono.ttf')
     '''Indicates the font Style used in the console
 
     :data:`font` is a :class:`~kivy.properties.StringProperty`,
     Default to 'DroidSansMono'
     '''
-    
+
     font_size = NumericProperty(14)
     '''Indicates the size of the font used for the console
 
@@ -311,7 +316,7 @@ class PythonConsole(BoxLayout):
 
         self._ready_to_input = False
         return self.text_input.last_line
-    
+
     def exit(self):
         '''Exit PythonConsole
         '''
@@ -319,4 +324,4 @@ class PythonConsole(BoxLayout):
         self.sh.exit()
 
 if __name__ == '__main__':
-     runTouchApp(PythonConsole())
+    runTouchApp(PythonConsole())

@@ -5,6 +5,7 @@ from kivy.clock import Clock
 from kivy.context import Context
 from kivy.uix.floatlayout import FloatLayout
 
+
 class DesignerSandbox(Sandbox):
     '''DesignerSandbox is subclass of :class:`~kivy.uix.sandbox.Sandbox`
        for use with Kivy Designer. It emits on_getting_exeption event
@@ -13,7 +14,7 @@ class DesignerSandbox(Sandbox):
 
     __events__ = ('on_getting_exception',)
     error_active = BooleanProperty(False)
-    
+
     def __init__(self, **kwargs):
         super(DesignerSandbox, self).__init__(**kwargs)
         self._context['Builder'] = object.__getattribute__(Builder, '_obj')
@@ -36,12 +37,12 @@ class DesignerSandbox(Sandbox):
         self.tb = tb
         self.dispatch('on_getting_exception')
         return super(DesignerSandbox, self).on_exception(exception, tb)
-    
+
     def on_getting_exception(self, *args):
         '''Default handler for 'on_getting_exception'
         '''
         pass
-    
+
     @sandbox
     def _clock_sandbox(self, dt):
         pass

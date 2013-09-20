@@ -3,6 +3,7 @@ from kivy.properties import ObjectProperty, NumericProperty
 from kivy.app import App
 from kivy.clock import Clock
 
+
 class UICreator(FloatLayout):
     '''UICreator is the Wigdet responsible for editing/creating UI of project
     '''
@@ -13,8 +14,9 @@ class UICreator(FloatLayout):
     '''
 
     propertyviewer = ObjectProperty(None)
-    '''Reference to the :class:`~designer.propertyviewer.PropertyViewer` instance.
-       :data:`propertyviewer` is an :class:`~kivy.properties.ObjectProperty`
+    '''Reference to the :class:`~designer.propertyviewer.PropertyViewer`
+       instance. :data:`propertyviewer` is an
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     playground = ObjectProperty(None)
@@ -26,28 +28,28 @@ class UICreator(FloatLayout):
     '''Reference to the :class:`~designer.nodetree.WidgetsTree` instance.
        :data:`widgettree` is an :class:`~kivy.properties.ObjectProperty`
     '''
-   
+
     kv_code_input = ObjectProperty(None)
     '''Reference to the :class:`~designer.uix.KVLangArea` instance.
-       :data:`kv_code_input` is an 
+       :data:`kv_code_input` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
 
     splitter_kv_code_input = ObjectProperty(None)
     '''Reference to the splitter parent of kv_code_input.
-       :data:`splitter_kv_code_input` is an 
+       :data:`splitter_kv_code_input` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
 
     grid_widget_tree = ObjectProperty(None)
     '''Reference to the grid parent of widgettree.
-       :data:`grid_widget_tree` is an 
+       :data:`grid_widget_tree` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
 
     splitter_property = ObjectProperty(None)
     '''Reference to the splitter parent of propertyviewer.
-       :data:`splitter_property` is an 
+       :data:`splitter_property` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -56,7 +58,7 @@ class UICreator(FloatLayout):
        :data:`splitter_widget_tree` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     error_console = ObjectProperty(None)
     '''Instance of :class:`~kivy.uix.codeinput.CodeInput` used for displaying
        exceptions.
@@ -65,22 +67,22 @@ class UICreator(FloatLayout):
     kivy_console = ObjectProperty(None)
     '''Instance of :class:`~designer.uix.kivy_console.KivyConsole`.
     '''
-    
+
     python_console = ObjectProperty(None)
     '''Instance of :class:`~designer.uix.py_console.PythonConsole`
     '''
-    
+
     tab_pannel = ObjectProperty(None)
     '''Instance of :class:`~designer.designer_content.DesignerTabbedPanel`
-       containing error_console, kivy_console and kv_lang_area 
+       containing error_console, kivy_console and kv_lang_area
     '''
-    
+
     eventviewer = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(UICreator, self).__init__(**kwargs)
         Clock.schedule_once(self._setup_everything)
-    
+
     def reload_btn_pressed(self, *args):
         '''Default handler for 'on_release' event of "Reload" button.
         '''
@@ -91,14 +93,14 @@ class UICreator(FloatLayout):
         '''
         if self.playground and self.playground.keyboard:
             self.playground.keyboard.release()
-  
+
         return super(UICreator, self).on_touch_down(*args)
 
     def on_show_edit(self, *args):
         '''Event handler for 'on_show_edit' event.
         '''
         App.get_running_app().root.on_show_edit(*args)
-    
+
     def cleanup(self):
         '''To clean up everything before loading new project.
         '''
@@ -108,7 +110,7 @@ class UICreator(FloatLayout):
     def _setup_everything(self, *args):
         '''To setup all the references in between widget
         '''
-        
+
         self.kv_code_input.playground = self.playground
         self.playground.kv_code_input = self.kv_code_input
         self.playground.widgettree = self.widgettree

@@ -10,6 +10,7 @@ from kivy.properties import StringProperty, ObjectProperty
 from kivy.metrics import pt
 from kivy.clock import Clock
 
+
 class DesignerLinkLabel(Button):
     '''DesignerLinkLabel displays a http link and opens it in a browser window
        when clicked.
@@ -19,15 +20,16 @@ class DesignerLinkLabel(Button):
     '''Contains the http link to be opened.
        :data:`link` is a :class:`~kivy.properties.StringProperty`
     '''
-    
+
     def on_release(self, *args):
         '''Default event handler for 'on_release' event.
         '''
         if self.link:
             webbrowser.open(self.link)
 
+
 class RecentFilesBox(ScrollView):
-    '''Container consistings of buttons, with their names specifying 
+    '''Container consistings of buttons, with their names specifying
        the recent files.
     '''
 
@@ -50,8 +52,8 @@ class RecentFilesBox(ScrollView):
         '''
         max_width = -1
         for child in self.grid.children:
-             max_width = max(child.texture_size[0], max_width)
-        
+            max_width = max(child.texture_size[0], max_width)
+
         self.width = max_width + pt(20)
 
     def add_recent(self, list_files):
@@ -81,10 +83,10 @@ class RecentFilesBox(ScrollView):
 
 class DesignerStartPage(GridLayout):
     '''This is the start page of the Designer. It will contain two buttons
-       'Open Project' and 'New Project', two DesignerLinkLabel 
-       'Kivy' and 'Kivy Designer Help' and a RecentFilesBox. It emits two events
-       'on_open_down' when 'Open Project' is clicked and 'on_new_down' when
-       'New Project' is clicked.
+       'Open Project' and 'New Project', two DesignerLinkLabel
+       'Kivy' and 'Kivy Designer Help' and a RecentFilesBox. It emits two
+       events 'on_open_down' when 'Open Project' is clicked and
+       'on_new_down' when 'New Project' is clicked.
     '''
 
     btn_open = ObjectProperty(None)
@@ -100,7 +102,7 @@ class DesignerStartPage(GridLayout):
     '''
 
     recent_files_box = ObjectProperty(None)
-    '''This property is an instance 
+    '''This property is an instance
         of :class:`~designer.start_page.RecentFilesBox`
        :data:`recent_files_box` is a :class:`~kivy.properties.ObjectProperty`
     '''
@@ -114,19 +116,19 @@ class DesignerStartPage(GridLayout):
     '''The 'Kivy Designer Help' DesignerLinkLabel.
        :data:`designer_link` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     __events__ = ('on_open_down', 'on_new_down', 'on_help')
-    
+
     def on_open_down(self, *args):
         '''Default Event Handler for 'on_open_down'
         '''
         pass
-    
+
     def on_new_down(self, *args):
         '''Default Event Handler for 'on_new_down'
         '''
         pass
-    
+
     def on_help(self, *args):
         '''Default Event Handler for 'on_help'
         '''

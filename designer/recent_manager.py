@@ -12,6 +12,7 @@ from designer.helper_functions import get_kivy_designer_dir
 
 RECENT_FILES_NAME = 'recent_files'
 
+
 class RecentManager(object):
     '''RecentManager is responsible for retrieving/storing the list of recently
        opened/saved projects.
@@ -53,16 +54,18 @@ class RecentManager(object):
         for _file in self.list_files:
             _string += _file + '\n'
 
-        recent_file_path = os.path.join(get_kivy_designer_dir(), RECENT_FILES_NAME)
+        recent_file_path = os.path.join(get_kivy_designer_dir(),
+                                        RECENT_FILES_NAME)
         f = open(recent_file_path, 'w')
         f.write(_string)
         f.close()
-    
+
     def load_files(self):
         '''To load the list of files from disk
         '''
-        
-        recent_file_path = os.path.join(get_kivy_designer_dir(), RECENT_FILES_NAME)
+
+        recent_file_path = os.path.join(get_kivy_designer_dir(),
+                                        RECENT_FILES_NAME)
 
         if not os.path.exists(recent_file_path):
             return
@@ -76,7 +79,7 @@ class RecentManager(object):
                 self.list_files.append(file_path)
 
             _file = f.readline()
-        
+
         f.close()
 
 
@@ -106,13 +109,13 @@ class RecentDialog(BoxLayout):
        :data:`adapter` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    __events__=('on_select', 'on_cancel')
+    __events__ = ('on_select', 'on_cancel')
 
     def __init__(self, file_list, **kwargs):
         super(RecentDialog, self).__init__(**kwargs)
         item_strings = file_list
-        adapter = ListAdapter(cls=ListItemButton, data=item_strings,\
-                              selection_mode='single',\
+        adapter = ListAdapter(cls=ListItemButton, data=item_strings,
+                              selection_mode='single',
                               allow_empty_selection=False)
 
         self.listview = ListView(adapter=adapter)
@@ -122,17 +125,17 @@ class RecentDialog(BoxLayout):
         '''Event handler for 'on_release' event of select_button.
         '''
         self.select_button.bind(on_press=partial(self.dispatch, 'on_select'))
-    
+
     def on_cancel_button(self, *args):
         '''Event handler for 'on_release' event of cancel_button.
         '''
         self.cancel_button.bind(on_press=partial(self.dispatch, 'on_cancel'))
-        
+
     def on_select(self, *args):
         '''Default event handler for 'on_select' event.
         '''
         pass
-    
+
     def on_cancel(self, *args):
         '''Default event handler for 'on_cancel' event.
         '''

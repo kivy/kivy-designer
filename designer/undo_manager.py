@@ -3,6 +3,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.app import App
 
+
 class OperationBase(object):
     '''UndoOperationBase class, Abstract class for all Undo Operations
     '''
@@ -16,6 +17,7 @@ class OperationBase(object):
 
     def do_redo(self):
         pass
+
 
 class WidgetOperation(OperationBase):
     '''WidgetOperation class for widget operations of add and remove
@@ -56,9 +58,11 @@ class WidgetOperation(OperationBase):
                                                  from_undo=True,
                                                  kv_str=self.kv_str)
 
+
 class WidgetDragOperation(OperationBase):
 
-    def __init__(self, widget, cur_parent, prev_parent, prev_index, playground, extra_args):
+    def __init__(self, widget, cur_parent, prev_parent, prev_index,
+                 playground, extra_args):
         self.widget = widget
         self.cur_parent = cur_parent
         self.prev_parent = prev_parent
@@ -84,6 +88,7 @@ class WidgetDragOperation(OperationBase):
                                                 'x': self.extra_args['x'],
                                                 'y': self.extra_args['y']},
                                     from_undo=True)
+
 
 class PropOperation(OperationBase):
     '''PropOperation class for Property Operations of changing property value
@@ -121,10 +126,11 @@ class PropOperation(OperationBase):
         setattr(self.prop.propwidget, self.prop.propname, self.newvalue)
         self._update_widget(self.newvalue)
 
+
 class UndoManager(object):
     '''UndoManager is reponsible for managing all the operations related
        to Widgets. It is also responsible for redoing and undoing the last
-       available operation. 
+       available operation.
     '''
 
     def __init__(self, **kwargs):
@@ -158,7 +164,7 @@ class UndoManager(object):
         operation = self._redo_stack_operation.pop()
         operation.do_redo()
         self._undo_stack_operation.append(operation)
-    
+
     def cleanup(self):
         '''To cleanup operation stacks when another project is loaded
         '''

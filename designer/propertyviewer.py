@@ -1,6 +1,6 @@
 from kivy.uix.scrollview import ScrollView
-from kivy.properties import ObjectProperty, NumericProperty, StringProperty, \
-        BoundedNumericProperty, BooleanProperty, OptionProperty
+from kivy.properties import ObjectProperty, NumericProperty, StringProperty,\
+    BoundedNumericProperty, BooleanProperty, OptionProperty
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
@@ -9,11 +9,13 @@ from kivy.app import App
 
 from designer.undo_manager import PropOperation
 
+
 class PropertyLabel(Label):
     '''This class represents the :class:`~kivy.label.Label` for showing
        Property Names in :class:`~designer.propertyviewer.PropertyViewer`.
     '''
     pass
+
 
 class PropertyBase(object):
     '''This class represents Abstract Class for Property showing classes i.e.
@@ -41,7 +43,7 @@ class PropertyBase(object):
     '''
 
     have_error = BooleanProperty(False)
-    '''It specifies whether there have been an error in setting new value 
+    '''It specifies whether there have been an error in setting new value
        to property
        :data:`have_error` is a :class:`~kivy.properties.BooleanProperty`
     '''
@@ -53,17 +55,19 @@ class PropertyBase(object):
 
     record_to_undo = BooleanProperty(False)
     '''It specifies whether the property change has to be recorded to undo.
-       It is used when :class:`~designer.undo_manager.UndoManager` undoes or redoes the property change.
+       It is used when :class:`~designer.undo_manager.UndoManager` undoes
+       or redoes the property change.
        :data:`record_to_undo` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     kv_code_input = ObjectProperty()
-    '''It is a reference to the :class:`~designer.uix.kv_code_input.KVLangArea`.
+    '''It is a reference to the
+       :class:`~designer.uix.kv_code_input.KVLangArea`.
        :data:`kv_code_input` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     def set_value(self, value):
-        '''This function first converts the value of the propwidget, then sets 
+        '''This function first converts the value of the propwidget, then sets
            the new value. If there is some error in setting new value, then it
            sets the property value back to oldvalue
         '''
@@ -94,7 +98,7 @@ class PropertyBase(object):
                     root.undo_manager.push_operation(
                         PropOperation(self, oldvalue, value))
                 self.record_to_undo = True
-            except Exception:            
+            except Exception:
                 self.have_error = True
                 setattr(self.propwidget, self.propname, oldvalue)
 
@@ -106,7 +110,7 @@ class PropertyOptions(PropertyBase, Spinner):
     def __init__(self, prop, **kwargs):
         PropertyBase.__init__(self, **kwargs)
         Spinner.__init__(self, values=prop.options, **kwargs)
-    
+
     def on_propvalue(self, *args):
         '''Default handler for 'on_propvalue'.
         '''
@@ -120,15 +124,15 @@ class PropertyTextInput(PropertyBase, TextInput):
     '''
 
     def insert_text(self, substring, from_undo=False):
-        '''Override of :class:`~kivy.uix.textinput.TextInput`.insert_text, 
+        '''Override of :class:`~kivy.uix.textinput.TextInput`.insert_text,
            it first checks whether the value being entered is valid or not.
            If yes, then it enters that value otherwise it doesn't.
-           For Example, if Property is NumericProperty then it will 
+           For Example, if Property is NumericProperty then it will
            first checks if value being entered should be a number
            or decimal only.
         '''
         if self.proptype == 'NumericProperty' and \
-           substring.isdigit() == False and\
+           substring.isdigit() is False and\
            (substring != '.' or '.' in self.text)\
            and substring not in 'None':
                 return
@@ -137,7 +141,7 @@ class PropertyTextInput(PropertyBase, TextInput):
 
 
 class PropertyBoolean(PropertyBase, CheckBox):
-    '''PropertyBoolean is used as widget to display 
+    '''PropertyBoolean is used as widget to display
        :class:`~kivy.properties.BooleanProperty`.
     '''
     pass
@@ -154,7 +158,7 @@ class PropertyViewer(ScrollView):
     '''
 
     prop_list = ObjectProperty()
-    '''Widget in which all the properties and their value is added. It is a 
+    '''Widget in which all the properties and their value is added. It is a
        :class:`~kivy.gridlayout.GridLayout.
        :data:`prop_list` is a :class:`~kivy.properties.ObjectProperty`
     '''
@@ -195,7 +199,7 @@ class PropertyViewer(ScrollView):
             add(ip)
 
     def build_for(self, name):
-        '''To create :class:`~designer.propertyviewer.PropertyBoolean`/
+        '''To create :class:`~designer.propertyviewer.PropertyBoolean`
            :class:`~designer.propertyviewer.PropertyTextInput`
            for Property 'name'
         '''
@@ -203,26 +207,25 @@ class PropertyViewer(ScrollView):
         prop = self.widget.property(name)
         if isinstance(prop, NumericProperty):
             return PropertyTextInput(propwidget=self.widget, propname=name,
-                                     proptype = 'NumericProperty',
+                                     proptype='NumericProperty',
                                      kv_code_input=self.kv_code_input)
 
         elif isinstance(prop, StringProperty):
             return PropertyTextInput(propwidget=self.widget, propname=name,
-                                     proptype = 'StringProperty',
+                                     proptype='StringProperty',
                                      kv_code_input=self.kv_code_input)
 
         elif isinstance(prop, BooleanProperty):
             ip = PropertyBoolean(propwidget=self.widget, propname=name,
-                                 proptype = 'BooleanProperty',
+                                 proptype='BooleanProperty',
                                  kv_code_input=self.kv_code_input)
             ip.record_to_undo = True
             return ip
-        
+
         elif isinstance(prop, OptionProperty):
-             ip = PropertyOptions(prop, propwidget=self.widget, propname=name,
-                                  proptype = 'StringProperty',
-                                  kv_code_input=self.kv_code_input)
-             return ip
+            ip = PropertyOptions(prop, propwidget=self.widget, propname=name,
+                                 proptype='StringProperty',
+                                 kv_code_input=self.kv_code_input)
+            return ip
 
         return None
-

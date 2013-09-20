@@ -1,5 +1,7 @@
-from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem, TabbedPanelHeader, TabbedPanelContent
-from kivy.properties import ObjectProperty, StringProperty, BooleanProperty, NumericProperty
+from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem,\
+    TabbedPanelHeader, TabbedPanelContent
+from kivy.properties import ObjectProperty, StringProperty,\
+    BooleanProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
@@ -12,18 +14,20 @@ from kivy.metrics import dp
 from kivy.uix.scrollview import ScrollView
 from kivy.clock import Clock
 
+
 class MenuBubble(Bubble):
     '''
     '''
     pass
+
 
 class MenuHeader(TabbedPanelHeader):
     '''MenuHeader class. To be used as default TabbedHeader.
     '''
     show_arrow = BooleanProperty(False)
     '''Specifies whether to show arrow or not.
-       :data:`show_arrow` is a :class:`~kivy.properties.BooleanProperty`, default
-       to True
+       :data:`show_arrow` is a :class:`~kivy.properties.BooleanProperty`,
+       default to True
     '''
 
 
@@ -31,6 +35,7 @@ class ContextMenuException(Exception):
     '''ContextMenuException class
     '''
     pass
+
 
 class MenuButton(Button):
     '''MenuButton class. Used as a default menu button. It auto provides
@@ -45,6 +50,7 @@ class MenuButton(Button):
         '''
         self.cont_menu.dismiss()
         super(MenuButton, self).on_release(*args)
+
 
 class ContextMenu(TabbedPanel):
     '''ContextMenu class. See module documentation for more information.
@@ -73,34 +79,35 @@ class ContextMenu(TabbedPanel):
     '''
 
     bubble_cls = ObjectProperty(MenuBubble)
-    '''Bubble Class, whose instance will be used to create 
+    '''Bubble Class, whose instance will be used to create
        container of ContextMenu.
-       :data:`bubble_cls` is a :class:`~kivy.properties.ObjectProperty`, default
-       to :class:`MenuBubble`.
+       :data:`bubble_cls` is a :class:`~kivy.properties.ObjectProperty`,
+       default to :class:`MenuBubble`.
     '''
 
     header_cls = ObjectProperty(MenuHeader)
     '''Header Class used to create Tab Header.
-       :data:`header_cls` is a :class:`~kivy.properties.ObjectProperty`, default
-       to :class:`MenuHeader`.
+       :data:`header_cls` is a :class:`~kivy.properties.ObjectProperty`,
+       default to :class:`MenuHeader`.
     '''
 
     attach_to = ObjectProperty(allownone=True)
-    '''(internal) Property that will be set to the widget on which the drop down
-       list is attached to.
+    '''(internal) Property that will be set to the widget on which the
+       drop down list is attached to.
 
        The method :meth:`open` will automatically set that property, while
-       :meth:`dismiss` will set back to None.       
+       :meth:`dismiss` will set back to None.
     '''
 
     auto_width = BooleanProperty(True)
-    '''By default, the width of the ContextMenu will be the same as the width of
-       the attached widget. Set to False if you want to provide your own width.
+    '''By default, the width of the ContextMenu will be the same
+       as the width of the attached widget. Set to False if you want
+       to provide your own width.
     '''
 
     dismiss_on_select = BooleanProperty(True)
-    '''By default, the ContextMenu will be automatically dismissed when a selection
-    have been done. Set to False to prevent the dismiss.
+    '''By default, the ContextMenu will be automatically dismissed
+    when a selection have been done. Set to False to prevent the dismiss.
 
     :data:`dismiss_on_select` is a :class:`~kivy.properties.BooleanProperty`,
     default to True.
@@ -123,14 +130,14 @@ class ContextMenu(TabbedPanel):
         self.bubble = self.bubble_cls(size_hint=(None, None))
         self.container = None
         self.main_tab = self.header_cls(text='Main')
-        self.main_tab.content = ScrollView(size_hint=(1,1))
+        self.main_tab.content = ScrollView(size_hint=(1, 1))
         self.main_tab.content.bind(height=self.on_scroll_height)
 
         super(ContextMenu, self).__init__(**kwargs)
         self.bubble.add_widget(self)
         self.bind(size=self._reposition)
         self.bubble.bind(on_height=self._bubble_height)
-    
+
     def _bubble_height(self, *args):
         '''Handler for bubble's 'on_height' event.
         '''
@@ -138,15 +145,16 @@ class ContextMenu(TabbedPanel):
 
     def open(self, widget):
         '''Open the dropdown list, and attach to a specific widget.
-        Depending the position of the widget on the window and the height of the
-        dropdown, the placement might be lower or higher off that widget.
+           Depending the position of the widget on the window and
+           the height of the dropdown, the placement might be
+           lower or higher off that widget.
         '''
-        # ensure we are not already attached
+        #ensure we are not already attached
         if self.attach_to is not None:
             self.dismiss()
 
-        # we will attach ourself to the main window, so ensure the widget we are
-        # looking for have a window
+        #we will attach ourself to the main window, so ensure the widget we are
+        #looking for have a window
         self._win = widget.get_parent_window()
         if self._win is None:
             raise ContextMenuException(
@@ -183,7 +191,7 @@ class ContextMenu(TabbedPanel):
 
         for child in self.tab_list[:]:
             self.remove_widget(child)
-        
+
         self.dispatch('on_dismiss')
 
     def select(self, data):
@@ -198,7 +206,7 @@ class ContextMenu(TabbedPanel):
         '''Default event handler for 'on_dismiss' event.
         '''
         pass
-    
+
     def _set_width_to_bubble(self, *args):
         '''To set self.width and bubble's width equal.
         '''
@@ -224,7 +232,8 @@ class ContextMenu(TabbedPanel):
             else:
                 self.bubble.width = max(self.main_tab.parent.parent.width,
                                         self.bubble.width,
-                                        *([i.width for i in self.container.children]))                               
+                                        *([i.width
+                                           for i in self.container.children]))
 
         Clock.schedule_once(self._set_width_to_bubble, 0.01)
         # ensure the dropdown list doesn't get out on the X axis, with a
@@ -236,7 +245,7 @@ class ContextMenu(TabbedPanel):
             x = 0
         self.bubble.x = x
 
-        # determine if we display the dropdown upper or lower to the widget
+        #determine if we display the dropdown upper or lower to the widget
         h_bottom = wy - self.bubble.height
         h_top = win.height - (wtop + self.bubble.height)
         if h_bottom > 0:
@@ -246,8 +255,8 @@ class ContextMenu(TabbedPanel):
             self.bubble.y = wtop
             self.bubble.arrow_pos = 'bottom_mid'
         else:
-            # none of both top/bottom have enough place to display the widget at
-            # the current size. Take the best side, and fit to it.
+            #none of both top/bottom have enough place to display the widget at
+            #the current size. Take the best side, and fit to it.
             height = max(h_bottom, h_top)
             if height == h_bottom:
                 self.bubble.top = wy
@@ -279,12 +288,13 @@ class ContextMenu(TabbedPanel):
         '''Add a widget.
         '''
         if self.tab_list and widget == self.tab_list[0].content or\
-            widget == self._current_tab.content or self.content == widget or\
-            self._tab_layout == widget or\
-            isinstance(widget, TabbedPanelContent) or\
-            isinstance(widget, TabbedPanelHeader):
+                widget == self._current_tab.content or \
+                self.content == widget or\
+                self._tab_layout == widget or\
+                isinstance(widget, TabbedPanelContent) or\
+                isinstance(widget, TabbedPanelHeader):
             super(ContextMenu, self).add_widget(widget, index)
-            return            
+            return
 
         if not self.container:
             self.container = GridLayout(orientation='vertical',
@@ -329,10 +339,12 @@ class ContextMenu(TabbedPanel):
                                     self.main_tab.content.height)
 
         if self.max_height:
-            self.bubble.height = min(self.container.height + self.tab_height + dp(16),
+            self.bubble.height = min(self.container.height +
+                                     self.tab_height + dp(16),
                                      self.max_height)
         else:
-            self.bubble.height = self.container.height + self.tab_height + dp(16)
+            self.bubble.height = self.container.height + \
+                self.tab_height + dp(16)
 
     def on_child_height(self, *args):
         '''Event Handler for children's height.
@@ -340,11 +352,11 @@ class ContextMenu(TabbedPanel):
         height = 0
         for i in self.container.children:
             height += i.height
-        
+
         self.main_tab.content.height = height
         self.container.height = height
 
-    def add_tab(self, widget, index = 0):
+    def add_tab(self, widget, index=0):
         '''To add a Widget as a new Tab.
         '''
         super(ContextMenu, self).add_widget(widget, index)
@@ -375,10 +387,10 @@ class ContextSubMenu(MenuButton):
 
     show_arrow = BooleanProperty(False)
     '''(internal) To specify whether ">" arrow image should be shown in the
-       header or not. If there exists a child menu then arrow image will be 
+       header or not. If there exists a child menu then arrow image will be
        shown otherwise not.
-       :data:`show_arrow` is a :class:`~kivy.properties.BooleanProperty`, default
-       to False
+       :data:`show_arrow` is a
+       :class:`~kivy.properties.BooleanProperty`, default to False
     '''
 
     def __init__(self, **kwargs):
@@ -396,7 +408,7 @@ class ContextSubMenu(MenuButton):
         '''
         self.attached_menu.text = self.text
 
-    def add_widget(self, widget, index = 0):
+    def add_widget(self, widget, index=0):
         '''Add a widget.
         '''
         if isinstance(widget, Image):
@@ -418,14 +430,14 @@ class ContextSubMenu(MenuButton):
 
         if not self.attached_menu:
             self.attached_menu = self.cont_menu.header_cls(text=self.text)
-            self.attached_menu.content = ScrollView(size_hint=(1,1))
+            self.attached_menu.content = ScrollView(size_hint=(1, 1))
             self.attached_menu.content.bind(height=self.on_scroll_height)
             self.container = GridLayout(orientation='vertical',
-                                       size_hint_y = None, cols=1)
+                                        size_hint_y=None, cols=1)
 
             self.attached_menu.content.add_widget(self.container)
             self.container.bind(height=self.on_container_height)
-        
+
         for widget, index in self._list_children:
             self.container.add_widget(widget, index)
             widget.cont_menu = self.cont_menu
@@ -468,7 +480,8 @@ class ContextSubMenu(MenuButton):
                 tab.show_arrow = False
 
         except:
-            curr_index = self.cont_menu.tab_list.index(self.cont_menu.current_tab)
+            curr_index = self.cont_menu.tab_list.index(
+                self.cont_menu.current_tab)
             for i in range(curr_index - 1, -1, -1):
                 self.cont_menu.remove_widget(self.cont_menu.tab_list[i])
 
@@ -478,8 +491,6 @@ class ContextSubMenu(MenuButton):
                 self.cont_menu.tab_list[1].show_arrow = True
             else:
                 self.cont_menu.tab_list[1].show_arrow = False
-            
-       
 
         from kivy.clock import Clock
         Clock.schedule_once(self._scroll, 0.1)
@@ -497,11 +508,11 @@ class ContextSubMenu(MenuButton):
         anim.cancel_all(self.cont_menu.current_tab.parent.parent)
         anim.start(self.cont_menu.current_tab.parent.parent)
 
-
-if __name__=='__main__':
+if __name__ == '__main__':
     from kivy.app import App
-    
+
     from kivy.uix.actionbar import ActionItem
+
     class ActionContext(ContextSubMenu, ActionItem):
         pass
 
@@ -579,6 +590,5 @@ if __name__=='__main__':
     class MyApp(App):
         def build(self):
             return Test()
-
 
     MyApp().run()
