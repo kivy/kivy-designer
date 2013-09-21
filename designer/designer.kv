@@ -36,7 +36,7 @@
     padding: '2dp', '2dp'
     background_normal: 'atlas://data/images/defaulttheme/action_item'
     background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_down: 'atlas://data/images/defaulttheme/action_item_down'
+    background_down: 'atlas://data/images/defaulttheme/action_item_down' if self.color[3] == 1 else 'atlas://data/images/defaulttheme/action_item'
     background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
     Image:
         source: 'atlas://data/images/defaulttheme/tree_closed'

@@ -171,6 +171,7 @@ class ContextMenu(TabbedPanel):
 
         # attach ourself to the main window
         self._win.add_widget(self.bubble)
+        self.main_tab.color = (0, 0, 0, 0)
 
     def on_select(self, data):
         '''Default handler for 'on_select' event.
@@ -503,7 +504,7 @@ class ContextSubMenu(MenuButton):
         total_tabs = len(self.cont_menu.tab_list)
         tab_list = self.cont_menu.tab_list
         curr_index = total_tabs - tab_list.index(self.cont_menu.current_tab)
-        to_scroll = len(tab_list)/curr_index
+        to_scroll = len(tab_list) / curr_index
         anim = Animation(scroll_x=to_scroll, d=0.75)
         anim.cancel_all(self.cont_menu.current_tab.parent.parent)
         anim.start(self.cont_menu.current_tab.parent.parent)
