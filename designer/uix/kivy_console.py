@@ -281,9 +281,14 @@ class KivyConsole(GridLayout):
             widg.focus = t_f
 
     def prompt(self, *args):
+        _platform = ''
+        if hasattr(os, 'uname'):
+            _platform = os.uname()
+        else:
+            _platform = os.environ.get('COMPUTERNAME')
         return "[%s@%s %s]>> " % (
-            os.environ.get('USER', 'UNKNOWN'), os.uname()[1],
-            os.path.basename(self.cur_dir))
+            os.environ.get('USERNAME', 'UNKNOWN'), _platform,
+            os.path.basename(str(self.cur_dir)))
 
     def _change_txtcache(self, *args):
         tihb = self.txtinput_history_box
@@ -536,7 +541,10 @@ class KivyConsole(GridLayout):
             # this is run inside a thread so take care, avoid gui ops
             try:
                 comand = command.encode('utf-8')
-                cmd = shlex.split(str(command))\
+                _posix = True
+                if sys.platform[0] == 'w':
+                    _posix = False
+                cmd = shlex.split(str(command), posix=_posix)\
                     if not self.shell else command
             except Exception as err:
                 cmd = ''

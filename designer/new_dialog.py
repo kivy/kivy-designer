@@ -7,6 +7,8 @@ from kivy.adapters.listadapter import ListAdapter
 from kivy.uix.image import Image
 
 import os
+import os.path
+import designer
 from functools import partial
 
 NEW_PROJECTS = {
@@ -82,10 +84,12 @@ class NewProjectDialog(BoxLayout):
     def on_adapter_selection_change(self, adapter):
         '''Event handler for 'on_selection_change' event of adapter.
         '''
-        name = adapter.selection[0].text.lower()+'.png'
+        name = adapter.selection[0].text.lower() + '.png'
         name = name.replace(' and ', '_')
         image_source = os.path.join(NEW_TEMPLATE_IMAGE_PATH, name)
-        image_source = os.path.join(os.getcwd(), image_source)
+        _dir = os.path.dirname(designer.__file__)
+        _dir = os.path.split(_dir)[0]
+        image_source = os.path.join(_dir, image_source)
         parent = self.image.parent
         parent.remove_widget(self.image)
         self.image = Image(source=image_source)

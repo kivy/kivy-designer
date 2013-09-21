@@ -21,6 +21,7 @@ from kivy.lang import Builder
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
 
+import designer
 from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
@@ -405,7 +406,9 @@ class Designer(FloatLayout):
         kv_file = NEW_PROJECTS[template][0]
         py_file = NEW_PROJECTS[template][1]
 
-        templates_dir = os.path.join(os.getcwd(), NEW_TEMPLATES_DIR)
+        _dir = os.path.dirname(designer.__file__)
+        _dir = os.path.split(_dir)[0]
+        templates_dir = os.path.join(_dir, NEW_TEMPLATES_DIR)
         shutil.copy(os.path.join(templates_dir, py_file),
                     os.path.join(new_proj_dir, "main.py"))
 

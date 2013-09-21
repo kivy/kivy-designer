@@ -1,4 +1,5 @@
 import os
+import os.path
 import shutil
 import sys
 
@@ -9,6 +10,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 
 from designer.helper_functions import get_kivy_designer_dir
+import designer
 
 DESIGNER_CONFIG_FILE_NAME = 'config.ini'
 
@@ -30,14 +32,17 @@ class DesignerSettings(Settings):
         DESIGNER_CONFIG = os.path.join(get_kivy_designer_dir(),
                                        DESIGNER_CONFIG_FILE_NAME)
 
+        _dir = os.path.dirname(designer.__file__)
+        _dir = os.path.split(_dir)[0]
+
         if not os.path.exists(DESIGNER_CONFIG):
-            shutil.copyfile(os.path.join(os.getcwd(),
+            shutil.copyfile(os.path.join(_dir,
                                          DESIGNER_CONFIG_FILE_NAME),
                             DESIGNER_CONFIG)
 
         self.config_parser.read(DESIGNER_CONFIG)
         self.add_json_panel('Kivy Designer Settings', self.config_parser,
-                            './designer/settings/designer_settings.json')
+                            os.path.join(_dir, 'designer', 'settings', 'designer_settings.json'))
 
         path = self.config_parser.getdefault(
             'global', 'python_shell_path', '')
