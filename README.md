@@ -5,6 +5,8 @@ Kivy Designer is Kivy's tool for designing Graphical User Interfaces (GUIs) from
 
 Installation
 ------------
+Prerequisite for Kivy Designer is watchdog. To install watchdog refer to: http://pythonhosted.org/watchdog/
+
 git clone http://github.com/kivy/kivy/
 
 cd kivy
