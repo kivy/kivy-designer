@@ -213,6 +213,7 @@
     code_input: code_input
     PyCodeInput:
         id: code_input
+        font_name: 'data/fonts/DroidSansMono.ttf'
         auto_indent: True
         size_hint_y: None
         height: max(scroll.height, self.minimum_height)
@@ -277,6 +278,7 @@
 
 <KVLangArea>:
     auto_indent: True
+    font_name: 'data/fonts/DroidSansMono.ttf'
     lexer: KivyLexer()
     canvas.after:
         Color:
