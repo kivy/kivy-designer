@@ -9,6 +9,9 @@ Prerequisite for Kivy Designer is watchdog. To install watchdog refer to: http:/
 
     Make sure you have kivy 1.8(currently devel branch) installed.
     
+    cd kivy/tools
+    garden install filebrowser
+    
     git clone http://github.com/kivy/kivy-designer/
     cd kivy-designer
     python main.py
