@@ -1082,13 +1082,13 @@ class Designer(FloatLayout):
         for _file in self.project_loader.file_list:
             if 'main.py' in os.path.basename(_file):
                 self.ui_creator.kivy_console.stdin.write(
-                    '%s %s %s' % (python_path, _file, args))
+                    '"%s" "%s" %s' % (python_path, _file, args))
                 self.ui_creator.tab_pannel.switch_to(
                     self.ui_creator.tab_pannel.tab_list[2])
                 return
 
         self.ui_creator.kivy_console.stdin.write(
-            '%s %s %s' % (python_path, self.project_loader._app_file, args))
+            '"%s" "%s" %s' % (python_path, self.project_loader._app_file, args))
 
         self.ui_creator.tab_pannel.switch_to(
             self.ui_creator.tab_pannel.tab_list[2])
