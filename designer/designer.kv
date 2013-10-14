@@ -5,6 +5,30 @@
 #:import KivyLexer kivy.extras.highlight.KivyLexer
 #:import ContextMenu designer.uix.contextual.ContextMenu
 
+#
+# Helper for keeping a consistency accross the whole designer UI
+#
+# Rules:
+# - rows height are 48sp
+# - padding is 4sp
+# - spacing is 4sp
+# - button / label / widget are 40sp height
+<DesignerButton@Button,DesignerLabel@Label>:
+	size_hint_y: None
+	height: '40sp'
+
+<DesignerButtonFit@DesignerButton>
+	size_hint_x: None
+	width: self.texture_size[0] + sp(16)
+
+<DesignerLabelFit@DesignerLabel>:
+	text_size: self.width - sp(16), None
+
+
+#
+# Dialogs
+#
+
 <HelpDialog>:
     orientation: 'vertical'
     rst: rst
@@ -67,7 +91,7 @@
     background_image: 'atlas://data/images/defaulttheme/action_item'
 
 <DesignerLinkLabel>:
-    color: 0,0,1,1
+    color: 0, 0, 1, 1
     background_normal: 'atlas://data/images/defaulttheme/action_item'
     background_disabled_normal: 'atlas://data/images/defaulttheme/action_item_disabled'
 
@@ -84,11 +108,13 @@
 
 <DesignerStartPage>:
     cols: 1
-    padding: '2sp'
+    padding: '4sp'
+	spacing: '4sp'
     btn_open: btn_open
     btn_new: btn_new
     recent_files_box: recent_files_box
 
+	# XXX should not be needed
     Widget:
         size_hint: None, None
         height: '10sp'
@@ -98,64 +124,46 @@
         orientation: 'horizontal'
         height: btn_open.height
         padding: '4sp'
-        Button:
-            size_hint: None, None
-            height: '22pt'
+		spacing: '4sp'
+        DesignerButtonFit:
             id: btn_open
             text: 'Open Project'
             on_release: root.dispatch('on_open_down')
 
-        Button:
-            size_hint: None, None
-            height: '22pt'
+        DesignerButtonFit:
             id: btn_new
             text: 'New Project'
             on_release: root.dispatch('on_new_down')
 
-    Label:
-        text: 'Getting Started:'
-        size_hint_y: None
-        height: '22pt'
-        text_size: self.size
+    DesignerLabelFit:
+        text: 'Getting Started'
         bold: True
 
-    BoxLayout:
-        orientation: 'horizontal'
-        size_hint: None, None
-        padding: '2sp'
-        height: 2*kivy_label.height + 4
-        Label:
-            size_hint: None, 1
-            width: 10
+	GridLayout:
+		kivy_label: kivy_label
+		cols: 1
+		size_hint_y: None
+		height: self.minimum_height
+		row_force_default: True
+		row_default_height: '40sp'
+		spacing: '4sp'
+		padding: '12sp', '4sp'
 
-        GridLayout:
-            kivy_label: kivy_label
-            cols: 1
-            size_hint_y: None
-            height: 2*kivy_label.height
-            DesignerLinkLabel:
-                id: kivy_label
-                text: ' Kivy'
-                size_hint: None, None
-                height: '22pt'
-                text_size: self.size
-                valign: 'middle'
-                link: 'http://kivy.org'
 
-            DesignerLinkLabel:
-                text: ' Kivy Designer Help'
-                size_hint: None, None
-                size: '110pt', '22pt'
-                text_size: self.size
-                valign: 'middle'
-                on_release: root.dispatch('on_help')
+		DesignerLinkLabel:
+			id: kivy_label
+			text: ' Kivy'
+			text_size: self.width, None
+			link: 'http://kivy.org'
 
-    Label:
-        text: 'Recent Projects:'
-        size_hint_y: None
-        height: '30pt'
-        text_size: self.size
-        valign: 'middle'
+		DesignerLinkLabel:
+			text: ' Kivy Designer Help'
+			size_hint_y: None
+			text_size: self.width, None
+			on_release: root.dispatch('on_help')
+
+    DesignerLabelFit:
+        text: 'Recent Projects'
         bold: True
 
     BoxLayout:
