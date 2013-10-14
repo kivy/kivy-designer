@@ -287,7 +287,7 @@ class KivyConsole(GridLayout):
         else:
             _platform = os.environ.get('COMPUTERNAME')
         return "[%s@%s %s]>> " % (
-            os.environ.get('USERNAME', 'UNKNOWN'), _platform,
+            os.environ.get('USERNAME', 'UNKNOWN'), _platform[1],
             os.path.basename(str(self.cur_dir)))
 
     def _change_txtcache(self, *args):
