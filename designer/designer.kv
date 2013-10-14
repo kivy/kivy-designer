@@ -89,7 +89,7 @@
     background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
 
 <ContextMenu>:
-    tab_pos:'bottom_right'
+    tab_pos: 'bottom_right'
     do_default_tab: False
     tab_height: '24sp'
 
@@ -183,20 +183,20 @@
             id: recent_files_box
 
 <DesignerActionPrevious>:
-    text_size: (self.size[0]+sp(2), self.size[1])
+    text_size: (self.width - sp(24), self.size[1])
     valign: 'middle'
 
 <DesignerActionButton>:
-    text_size: (self.size[0]-sp(4), self.size[1])
+    text_size: (self.width - sp(24), self.size[1])
     valign: 'middle'
     size_hint_y: None
-    height: 30
+    height: '40sp'
 
 <DesignerActionSubMenu>:
-    text_size: (self.size[0]-sp(4), self.size[1])
+    text_size: (self.width - sp(24), self.size[1])
     valign: 'middle'
     size_hint_y: None
-    height: 30
+    height: '40sp'
 
 <InfoBubble>:
     size_hint: None, None
@@ -815,29 +815,20 @@
         id: actionbar
         pos_hint: {'top': 1}
         on_height: root.on_actionbar_height()
-        size_hint: 1, None
-        height: '55sp'
         ActionView:
             ActionPrevious:
                 title: 'Kivy Designer'
-                width: 200
                 with_previous: False
             ActionOverflow:
             DesignerActionGroup:
                 text: 'File'
                 mode: 'spinner'
-                size_hint_x: None
-                width: 90
                 dropdown_cls: ContextMenu
                 DesignerActionButton:
                     text: 'New'
-                    size_hint_y: None
-                    height: 20
                     on_release: root.action_btn_new_pressed()
                 DesignerActionButton:
                     text: 'Open'
-                    size_hint_y: None
-                    height: 20
                     on_release: root.action_btn_open_pressed()
                 DesignerActionButton:
                     id: actn_btn_save
@@ -852,18 +843,12 @@
                 DesignerActionSubMenu:
                     id: recent_files_cont_menu
                     text: 'Recent Files'
-                    size_hint_y: None
-                    height: 20
                     on_release: root.action_btn_recent_files_pressed()
                 DesignerActionButton:
                     text: 'Settings'
-                    size_hint_y: None
-                    height: 20
                     on_release: root.action_btn_settings_pressed()
                 DesignerActionButton:
                     text: 'Quit'
-                    size_hint_y: None
-                    height: 20
                     on_release: root.action_btn_quit_pressed()
 
             ActionGroup:
