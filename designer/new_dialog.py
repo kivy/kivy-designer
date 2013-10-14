@@ -1,15 +1,13 @@
+import designer
+
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.listview import ListView, ListItemButton
+from kivy.uix.listview import ListView
 from kivy.properties import ObjectProperty
 from kivy.adapters.listadapter import ListAdapter
 from kivy.uix.image import Image
-
-import os
-import os.path
-import designer
+from os.path import join, dirname, split
 from functools import partial
+from kivy.factory import Factory
 
 NEW_PROJECTS = {
     'FloatLayout': ('template_floatlayout_kv',
@@ -30,7 +28,7 @@ NEW_PROJECTS = {
                                  'template_textinput_scrollview_py')}
 
 NEW_TEMPLATES_DIR = 'new_templates'
-NEW_TEMPLATE_IMAGE_PATH = os.path.join(NEW_TEMPLATES_DIR, 'images')
+NEW_TEMPLATE_IMAGE_PATH = join(NEW_TEMPLATES_DIR, 'images')
 
 
 class NewProjectDialog(BoxLayout):
@@ -71,12 +69,12 @@ class NewProjectDialog(BoxLayout):
     def __init__(self, **kwargs):
         super(NewProjectDialog, self).__init__(**kwargs)
         item_strings = NEW_PROJECTS.keys()
-        self.adapter = ListAdapter(cls=ListItemButton, data=item_strings,
+        self.adapter = ListAdapter(cls=Factory.DesignerListItemButton, data=item_strings,
                                    selection_mode='single',
                                    allow_empty_selection=False)
         self.adapter.bind(on_selection_change=self.on_adapter_selection_change)
         self.listview = ListView(adapter=self.adapter)
-        self.listview.size_hint = (0.5, 0.5)
+        self.listview.size_hint = (0.5, 1)
         self.listview.pos_hint = {'top': 1}
         self.list_parent.add_widget(self.listview, 1)
         self.on_adapter_selection_change(self.adapter)
@@ -86,10 +84,10 @@ class NewProjectDialog(BoxLayout):
         '''
         name = adapter.selection[0].text.lower() + '.png'
         name = name.replace(' and ', '_')
-        image_source = os.path.join(NEW_TEMPLATE_IMAGE_PATH, name)
-        _dir = os.path.dirname(designer.__file__)
-        _dir = os.path.split(_dir)[0]
-        image_source = os.path.join(_dir, image_source)
+        image_source = join(NEW_TEMPLATE_IMAGE_PATH, name)
+        _dir = dirname(designer.__file__)
+        _dir = split(_dir)[0]
+        image_source = join(_dir, image_source)
         parent = self.image.parent
         parent.remove_widget(self.image)
         self.image = Image(source=image_source)

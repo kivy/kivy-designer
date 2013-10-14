@@ -24,6 +24,12 @@
 <DesignerLabelFit@DesignerLabel>:
 	text_size: self.width - sp(32), None
 
+<DesignerListItemButton@ListItemButton>:
+	size_hint: None, None
+	size: self.texture_size[0] + sp(32), '40sp'
+	selected_color: 1, 1, 1, 1
+	deselected_color: .8, .8, .8, .5
+
 
 #
 # Dialogs
@@ -342,18 +348,15 @@
     GridLayout:
         rows: 1
         size_hint_y: None
-        height: '25pt'
+        height: '48sp'
         padding: '4sp'
-        Button:
+        spacing: '4sp'
+        DesignerButtonFit:
             id: select
             text: 'Create New Project'
-            size_hint_x: None
-            width: '110pt'
-        Button:
+        DesignerButtonFit:
             id: cancel
             text: 'Cancel'
-            size_hint_x: None
-            width: '110pt'
 
 <RecentDialog>:
     select_button: select
