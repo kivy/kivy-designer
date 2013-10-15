@@ -80,11 +80,14 @@ class Toolbox(BoxLayout):
         for category in categories:
             toolbox_category = ToolboxCategory(title=category)
             self.accordion.add_widget(toolbox_category)
-
+            
+            cat_widgets = []
             for widget in widgets:
-                if widget[1] != category:
-                    continue
-
+                if widget[1] == category:
+                    cat_widgets.append(widget)
+            
+            cat_widgets.sort()
+            for widget in cat_widgets:
                 toolbox_category.gridlayout.add_widget(
                     ToolboxButton(text=widget[0]))
 
@@ -116,11 +119,16 @@ class Toolbox(BoxLayout):
         self._list.append(self.custom_category)
 
         self.accordion.add_widget(self.custom_category)
-
+        
+        custom_widgets = []
         for widget in widgets:
             if widget[1] == 'custom':
-                self.custom_category.gridlayout.add_widget(
-                    ToolboxButton(text=widget[0]))
+                custom_widgets.append(widget)
+        
+        custom_widgets.sort()
+        for widget in custom_widgets:
+            self.custom_category.gridlayout.add_widget(
+                ToolboxButton(text=widget[0]))
 
         #Setting appropriate height to gridlayout to enable scrolling
         self.custom_category.gridlayout.size_hint_y = None
