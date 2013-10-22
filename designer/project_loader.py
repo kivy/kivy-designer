@@ -1011,7 +1011,7 @@ class ProjectLoader(object):
             sys.modules['AppModule'] = module
             return module
 
-        module_name = _file[_file.rfind('/')+1:].replace('.py', '')
+        module_name = _file[_file.rfind(os.sep)+1:].replace('.py', '')
         if module_name in sys.modules:
             del sys.modules[module_name]
 
