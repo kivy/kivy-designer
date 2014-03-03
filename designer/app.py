@@ -6,7 +6,7 @@ import os
 import shutil
 import traceback
 
-kivy.require('1.4.1')
+kivy.require('1.8.0')
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.layout import Layout
@@ -16,6 +16,7 @@ from kivy.clock import Clock
 from kivy.uix import actionbar
 from kivy.garden.filebrowser import FileBrowser
 from kivy.uix.popup import Popup
+from kivy.uix.label import Label
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.lang import Builder
 from kivy.uix.carousel import Carousel
@@ -508,17 +509,33 @@ class Designer(FloatLayout):
         '''Event Handler for 'on_select' event of self._select_class
         '''
 
-        selection = self._select_class.listview.adapter.selection[0].text
-
-        with self.ui_creator.playground.sandbox:
-            root_widget = self.project_loader.set_root_widget(selection)
-            self.ui_creator.playground.add_widget_to_parent(root_widget,
-                                                            None,
-                                                            from_undo=True)
-            self.ui_creator.kv_code_input.text = \
-                self.project_loader.get_root_str()
-
-        self._select_class_popup.dismiss()
+        try:
+            selection = self._select_class.listview.adapter.selection[0].text
+            
+            with self.ui_creator.playground.sandbox:
+                root_widget = self.project_loader.set_root_widget(selection)
+                self.ui_creator.playground.add_widget_to_parent(root_widget,
+                                                                None,
+                                                                from_undo=True)
+                self.ui_creator.kv_code_input.text = \
+                    self.project_loader.get_root_str()
+                
+                self._select_class_popup.dismiss()
+                
+        except:
+            self.about_dlg = AboutDialog()
+            self._popup = Popup(title='About Kivy Designer',
+                                content=self.about_dlg,
+                                size_hint=(None, None), size=(600, 400),
+                                auto_dismiss=False)
+            self._popup.open()
+            self.about_dlg.bind(on_cancel=self._cancel_popup)
+            
+            invalid_selection = Popup(title='Invalid Selection',
+                                      content=Label(text='Please Choose a Valid Root Widget'),
+                                      auto_dismiss=True,
+                                      size_hint=(.5,.5))
+            invalid_selection.open()
 
     def _select_class_cancel(self, *args):
         '''Event Handler for 'on_cancel' event of self._select_class
@@ -533,8 +550,20 @@ class Designer(FloatLayout):
             return
 
         file_path = instance.selection[0]
+        file_extension = instance.selection[0].split('.')
+        
         self._popup.dismiss()
-        self._perform_open(file_path)
+        try:
+            if file_extension[1] == 'py':
+                self._perform_open(file_path)
+            else: 
+                error = 'Cannot load file type: .%s, Please load a .py file' % \
+                    (file_extension[1])
+        except:
+            error = 'Cannot load empty file type'
+    
+        self.statusbar.show_message(error)
+                
 
     def _perform_open(self, file_path):
         '''To open a project given by file_path
