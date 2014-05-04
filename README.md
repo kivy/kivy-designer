@@ -28,5 +28,7 @@ With the prequisites installed, you can use the designer:
     cd kivy-designer
     python main.py
 
+On OsX you might need to use `kivy` command insteaad of `Python` if you are using our portable package.
+
 
 ![ScreenShot](https://raw.github.com/kivy/kivy-designer/master/kivy_designer.png)
