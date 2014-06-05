@@ -28,11 +28,8 @@ With the prequisites installed, you can use the designer:
     cd kivy-designer
     python main.py
 
-Or alternative without git
-download and extract:
+without git download, extract and execute main.py:
 https://github.com/kivy/kivy-designer/archive/master.zip
-And execute main.py
-
 
 
 On OsX you might need to use `kivy` command instead of `Python` if you are using our portable package.
