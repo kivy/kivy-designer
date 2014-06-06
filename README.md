@@ -17,7 +17,7 @@ Prequisites:
 - The Python watchdog module, http://pythonhosted.org/watchdog/
 - The FileBrowser widget from the [Kivy garden](http://kivy.org/docs/api-kivy.garden.html)
 
-To install the FileBrowser start kivy.bat (in the kivy folder) and enter:
+To install the FileBrowser enter the console (on winodws use kivy.bat in the kivy folder):
 
     pip install kivy-garden
     garden install filebrowser
