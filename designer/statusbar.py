@@ -1,4 +1,5 @@
 from kivy.properties import ObjectProperty
+from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -55,6 +56,10 @@ class StatusBar(BoxLayout):
        :class:`~kivy.properties.ObjectProperty`
     '''
 
+    def __init__(self, **kwargs):
+        super(StatusBar, self).__init__(**kwargs)
+        self.update_navbar = Clock.create_trigger(self._update_navbar)
+
     def show_message(self, message):
         '''To show a message in StatusBar
         '''
@@ -74,7 +79,7 @@ class StatusBar(BoxLayout):
     def on_app(self, instance, app):
         app.bind(widget_focused=self.update_navbar)
 
-    def update_navbar(self, *largs):
+    def _update_navbar(self, *largs):
         '''To update navbar with the parents of currently selected Widget.
         '''
 

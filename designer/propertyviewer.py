@@ -168,6 +168,10 @@ class PropertyViewer(ScrollView):
        :data:`kv_code_input` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
+    def __init__(self, **kwargs):
+        super(PropertyViewer, self).__init__(**kwargs)
+        self._label_cache = {}
+
     def on_widget(self, instance, value):
         '''Default handler for 'on_widget'.
         '''
@@ -189,14 +193,22 @@ class PropertyViewer(ScrollView):
         '''
 
         add = self.prop_list.add_widget
+        get_label = self._get_label
         props = value.properties().keys()
         props.sort()
         for prop in props:
             ip = self.build_for(prop)
             if not ip:
                 continue
-            add(PropertyLabel(text=prop))
+            add(get_label(prop))
             add(ip)
+
+    def _get_label(self, prop):
+        try:
+            return self._label_cache[prop]
+        except KeyError:
+            lbl = self._label_cache[prop] = PropertyLabel(text=prop)
+            return lbl
 
     def build_for(self, name):
         '''To create :class:`~designer.propertyviewer.PropertyBoolean`

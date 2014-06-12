@@ -44,6 +44,11 @@ class WidgetsTree(ScrollView):
        :data:`dragging` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
+    def __init__(self, **kwargs):
+        super(WidgetsTree, self).__init__(**kwargs)
+        self.refresh = Clock.create_trigger(self._refresh)
+        self._widget_cache = {}
+
     def recursive_insert(self, node, treenode):
         '''This function will add a node to TreeView, by recursively travelling
            through the Root Widget's Tree.
@@ -52,7 +57,7 @@ class WidgetsTree(ScrollView):
         if node is None:
             return
 
-        b = WidgetTreeElement(node=node)
+        b = self._get_widget(node)
         self.tree.add_node(b, treenode)
         class_rules = self.project_loader.class_rules
         root_widget = self.project_loader.root_rule.widget
@@ -81,11 +86,23 @@ class WidgetsTree(ScrollView):
         '''This function will insert nodes in tree specially for TabbedPanel.
         '''
         for tab in node.tab_list:
-            b = WidgetTreeElement(node=tab)
+            b = self._get_widget(tab)
             self.tree.add_node(b, treenode)
             self.recursive_insert(tab.content, b)
 
-    def refresh(self, *l):
+    def _get_widget(self, node):
+        try:
+            wid = self._widget_cache[node]
+            if not wid:
+                raise KeyError()
+        except KeyError:
+            wid = WidgetTreeElement(node=node)
+            self._widget_cache[node] = wid.proxy_ref
+        if wid.parent_node:
+            self.tree.remove_node(wid)
+        return wid
+
+    def _refresh(self, *l):
         '''This function will refresh the tree. It will first remove all nodes
            and then insert them using recursive_insert
         '''
@@ -93,6 +110,12 @@ class WidgetsTree(ScrollView):
             self.tree.remove_node(node)
 
         self.recursive_insert(self.playground.root, self.tree.root)
+        self._clean_cache()
+    
+    def _clean_cache(self):
+        for node, wid in self._widget_cache.items():
+            if not node or not node.parent or not wid or not wid.parent_node:
+                del self._widget_cache[node]
 
     def on_touch_up(self, touch):
         '''Default event handler for 'on_touch_up' event.
