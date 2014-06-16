@@ -14,7 +14,10 @@ Installation
 Prequisites:
 
 - Kivy 1.8+
-- The Python watchdog module, http://pythonhosted.org/watchdog/
+- The following Python modules (available via pip)
+    - watchdog, http://pythonhosted.org/watchdog/
+    - pygments
+    - docutils
 - The FileBrowser widget from the [Kivy garden](http://kivy.org/docs/api-kivy.garden.html)
 
 To install the FileBrowser:
