@@ -30,6 +30,14 @@ from designer.undo_manager import WidgetOperation, WidgetDragOperation
 from designer.uix.designer_sandbox import DesignerSandbox
 
 
+def widget_contains(container, child):
+    '''Search recursively for child in container
+    '''
+    for w in container.children:
+        if w == child or widget_contains(w, child):
+            return True
+    return False
+
 class PlaygroundDragElement(BoxLayout):
     '''An instance of this class is the drag element shown when user tries to
        add a widget to :class:`~designer.playground.Playground` by dragging
@@ -197,7 +205,7 @@ class PlaygroundDragElement(BoxLayout):
 
                                     node = node.parent_node
 
-                if target == self.child:
+                if target == self.child or widget_contains(self.child, target):
                     return True
 
                 if self.child.parent:
