@@ -102,13 +102,17 @@ class WidgetsTree(ScrollView):
             self.tree.remove_node(wid)
         return wid
 
+    def _clear_tree(self, tree, node):
+        remove_node = tree.remove_node
+        for n in node.nodes[:]:
+            self._clear_tree(tree, n)
+            remove_node(n)
+
     def _refresh(self, *l):
         '''This function will refresh the tree. It will first remove all nodes
            and then insert them using recursive_insert
         '''
-        for node in self.tree.root.nodes:
-            self.tree.remove_node(node)
-
+        self._clear_tree(self.tree, self.tree.root)
         self.recursive_insert(self.playground.root, self.tree.root)
         self._clean_cache()
     
