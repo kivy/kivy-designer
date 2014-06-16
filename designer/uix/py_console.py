@@ -280,6 +280,7 @@ class PythonConsole(BoxLayout):
         super(PythonConsole, self).__init__()
         self.sh = Shell(self)
         self._thread = InteractiveThread(self.sh)
+        self._thread.setDaemon(True)
 
         Clock.schedule_once(self.run_sh, 0)
         self._ready_to_input = False
