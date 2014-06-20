@@ -731,48 +731,76 @@
                 min_size: 170
                 width: 250
                 pos_hint: {'y': 0, 'right': 1}
-                GridLayout:
-                    cols: 1
-                    spacing: .5
-
-                    canvas:
-                        Color:
-                            rgb: titlecolor
-                        Rectangle:
-                            pos: self.pos
-                            size: self.size
-
+                
+                BoxLayout:
+                    orientation: 'vertical'
+                    
+                    BoxLayout:
+                        size_hint_y: None
+                        height: sp(48)
+                        
+                        canvas.before:
+                            Color:
+                                rgb: bgcolor
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+                        
+                        Label:
+                            text: 'Zoom: %d%%' % (zoom_slider.value * 100)
+                            size_hint_x: None
+                            width: sp(96)
+                        
+                        Slider:
+                            id: zoom_slider
+                            min: 0.25
+                            max: 1.5
+                            step: 0.05
+                            value: playground.scale
+                            on_value: playground.scale = args[1]
+                    
                     GridLayout:
-                        id: grid_widget_tree
                         cols: 1
                         spacing: .5
-                        Label:
-                            text: 'Widget Navigator'
-                            font_size: '10pt'
-                            height: '20pt'
+    
+                        canvas:
+                            Color:
+                                rgb: titlecolor
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+    
+                        GridLayout:
+                            id: grid_widget_tree
+                            cols: 1
+                            spacing: .5
+                            Label:
+                                text: 'Widget Navigator'
+                                font_size: '10pt'
+                                height: '20pt'
+                                size_hint_y: None
+    
+                            WidgetsTree:
+                                id: widgettree
+                                playground: playground
+    
+                        Splitter:
+                            id: splitter_property
+                            sizable_from: 'top'
                             size_hint_y: None
-
-                        WidgetsTree:
-                            id: widgettree
-                            playground: playground
-
-                    Splitter:
-                        id: splitter_property
-                        sizable_from: 'top'
-                        size_hint_y: None
-                        height: 300
-                        max_size: 500
-                        DesignerTabbedPanel:
-                            do_default_tab: False
-                            DesignerTabbedPanelItem:
-                                text: '   Properties'
-                                PropertyViewer:
-                                    id: propertyviewer
-
-                            DesignerTabbedPanelItem:
-                                text: 'Events'
-                                EventViewer:
-                                    id: eventviewer
+                            height: 300
+                            max_size: 500
+                            DesignerTabbedPanel:
+                                do_default_tab: False
+                                DesignerTabbedPanelItem:
+                                    text: '   Properties'
+                                    PropertyViewer:
+                                        id: propertyviewer
+    
+                                DesignerTabbedPanelItem:
+                                    text: 'Events'
+                                    EventViewer:
+                                        id: eventviewer
                                     
 
 <DesignerContent>:
