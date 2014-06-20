@@ -535,7 +535,7 @@
     do_scroll_x: False
     prop_list: prop_list
 
-    canvas:
+    canvas.before:
         Color:
             rgb: bgcolor
         Rectangle:
@@ -589,7 +589,7 @@
 <WidgetsTree>:
     do_scroll_x: False
     tree: tree
-    canvas:
+    canvas.before:
         Color:
             rgb: bgcolor
         Rectangle:
@@ -601,7 +601,7 @@
         height: self.minimum_height
         size_hint_y: None
         hide_root: True
-        on_selected_node: app.focus_widget(args[1].node)
+        on_selected_node: args[1] and app.focus_widget(args[1].node)
 
 <WidgetTreeElement>:
     is_open: True
@@ -628,6 +628,19 @@
         pos: root.pos
         cols: 1
         splitter_widget_tree: splitter_widget_tree
+
+        canvas.before:
+            StencilPush
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            StencilUse
+        canvas.after:
+            StencilUnUse
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            StencilPop
 
         FloatLayout:
             size_hint: 1,1
