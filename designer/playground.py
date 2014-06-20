@@ -33,8 +33,10 @@ from designer.uix.designer_sandbox import DesignerSandbox
 def widget_contains(container, child):
     '''Search recursively for child in container
     '''
+    if container == child:
+        return True
     for w in container.children:
-        if w == child or widget_contains(w, child):
+        if widget_contains(w, child):
             return True
     return False
 
@@ -205,7 +207,7 @@ class PlaygroundDragElement(BoxLayout):
 
                                     node = node.parent_node
 
-                if target == self.child or widget_contains(self.child, target):
+                if widget_contains(self.child, target):
                     return True
 
                 if self.child.parent:
