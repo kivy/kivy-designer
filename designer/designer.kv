@@ -14,21 +14,21 @@
 # - spacing is 4sp
 # - button / label / widget are 40sp height
 <DesignerButton@Button,DesignerLabel@Label>:
-	size_hint_y: None
-	height: '40sp'
+    size_hint_y: None
+    height: '40sp'
 
 <DesignerButtonFit@DesignerButton>
-	size_hint_x: None
-	width: self.texture_size[0] + sp(32)
+    size_hint_x: None
+    width: self.texture_size[0] + sp(32)
 
 <DesignerLabelFit@DesignerLabel>:
-	text_size: self.width - sp(32), None
+    text_size: self.width - sp(32), None
 
 <DesignerListItemButton@ListItemButton>:
-	size_hint: None, None
-	size: self.texture_size[0] + sp(32), '40sp'
-	selected_color: 1, 1, 1, 1
-	deselected_color: .8, .8, .8, .5
+    size_hint: None, None
+    size: self.texture_size[0] + sp(32), '40sp'
+    selected_color: 1, 1, 1, 1
+    deselected_color: .8, .8, .8, .5
 
 
 #
@@ -115,12 +115,12 @@
 <DesignerStartPage>:
     cols: 1
     padding: '4sp'
-	spacing: '4sp'
+    spacing: '4sp'
     btn_open: btn_open
     btn_new: btn_new
     recent_files_box: recent_files_box
 
-	# XXX should not be needed
+    # XXX should not be needed
     Widget:
         size_hint: None, None
         height: '10sp'
@@ -130,7 +130,7 @@
         orientation: 'horizontal'
         height: btn_open.height
         padding: '4sp'
-		spacing: '4sp'
+        spacing: '4sp'
         DesignerButtonFit:
             id: btn_open
             text: 'Open Project'
@@ -145,28 +145,28 @@
         text: 'Getting Started'
         bold: True
 
-	GridLayout:
-		kivy_label: kivy_label
-		cols: 1
-		size_hint_y: None
-		height: self.minimum_height
-		row_force_default: True
-		row_default_height: '40sp'
-		spacing: '4sp'
-		padding: '16sp', '0sp'
+    GridLayout:
+        kivy_label: kivy_label
+        cols: 1
+        size_hint_y: None
+        height: self.minimum_height
+        row_force_default: True
+        row_default_height: '40sp'
+        spacing: '4sp'
+        padding: '16sp', '0sp'
 
 
-		DesignerLinkLabel:
-			id: kivy_label
-			text: ' Kivy'
-			text_size: self.width, None
-			link: 'http://kivy.org'
+        DesignerLinkLabel:
+            id: kivy_label
+            text: ' Kivy'
+            text_size: self.width, None
+            link: 'http://kivy.org'
 
-		DesignerLinkLabel:
-			text: ' Kivy Designer Help'
-			size_hint_y: None
-			text_size: self.width, None
-			on_release: root.dispatch('on_help')
+        DesignerLinkLabel:
+            text: ' Kivy Designer Help'
+            size_hint_y: None
+            text_size: self.width, None
+            on_release: root.dispatch('on_help')
 
     DesignerLabelFit:
         text: 'Recent Projects'
