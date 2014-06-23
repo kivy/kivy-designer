@@ -8,6 +8,7 @@ import traceback
 
 kivy.require('1.4.1')
 from kivy.app import App
+from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.layout import Layout
 from kivy.factory import Factory
@@ -20,6 +21,7 @@ from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.lang import Builder
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
+from kivy.config import Config
 
 import designer
 from designer.uix.actioncheckbutton import ActionCheckButton
@@ -138,6 +140,13 @@ class Designer(FloatLayout):
        :data:`recent_files_cont_menu` is a
        :class:`~kivy.properties.ObjectProperty`
     '''
+    
+    @property
+    def save_window_size(self):
+        '''Save window size on exit.
+        '''
+        return bool(int(self.designer_settings.config_parser.getdefault(
+            'desktop', 'save_window_size', 1))) if Config.getboolean('kivy', 'desktop') else False
 
     def __init__(self, **kwargs):
         super(Designer, self).__init__(**kwargs)
@@ -156,6 +165,22 @@ class Designer(FloatLayout):
             self.project_loader.perform_auto_save,
             int(self.designer_settings.config_parser.getdefault(
                 'global', 'auto_save_time', 5))*60)
+        
+        Window.bind(on_resize=self._write_window_size)
+
+    def _write_window_size(self, *_):
+        '''Write updated window size to config
+        '''
+        self.designer_settings.config_parser.set('internal', 'window_width', Window.size[0])
+        self.designer_settings.config_parser.set('internal', 'window_height', Window.size[1])
+        self.designer_settings.config_parser.write()
+
+    def restore_window_size(self, *_):
+        '''Restore window size from previous application run
+        '''
+        width = int(self.designer_settings.config_parser.getdefault('internal', 'window_width', 800))
+        height = int(self.designer_settings.config_parser.getdefault('internal', 'window_height', 600))
+        Window.size = width, height
 
     def show_help(self, *args):
         '''Event handler for 'on_help' event of self.start_page
@@ -188,6 +213,9 @@ class Designer(FloatLayout):
         self.recent_manager.max_recent_files = \
             int(self.designer_settings.config_parser.getdefault(
                 'global', 'num_recent_files', 5))
+        
+        if self.save_window_size:
+            self._write_window_size()
 
     def _add_designer_content(self):
         '''Add designer_content to Designer, when a project is loaded
@@ -1172,6 +1200,9 @@ class DesignerApp(App):
     def _setup(self, *args):
         '''To setup the properties of different classes
         '''
+
+        if self.root.save_window_size:
+            Clock.schedule_once(self.root.restore_window_size, 0)
 
         self.root.proj_tree_view = self.root.designer_content.tree_view
         self.root.ui_creator = self.root.designer_content.ui_creator
