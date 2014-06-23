@@ -18,9 +18,16 @@
         "key": "num_recent_files"
     },
     {
-         "type": "numeric",
-         "title": "Auto Save current Project after every (in mins)",
-         "section": "global",
-         "key": "auto_save_time"
+        "type": "numeric",
+        "title": "Auto Save current Project after every (in mins)",
+        "section": "global",
+        "key": "auto_save_time"
+    },
+    {
+        "type": "bool",
+        "title": "Save window size on exit",
+        "desc": "Desktop Only",
+        "section": "desktop",
+        "key": "save_window_size"
     }
 ]
