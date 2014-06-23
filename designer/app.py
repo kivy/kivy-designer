@@ -195,6 +195,11 @@ class Designer(FloatLayout):
 
         self.help_dlg.rst.source = 'help.rst'
 
+    def set_escape_exit(self):
+        Config.set('kivy', 'exit_on_escape',
+                   int(self.designer_settings.config_parser.getdefault(
+                       'desktop', 'exit_on_escape', 0)))
+
     def _config_change(self, *args):
         '''Event Handler for 'on_config_change'
            event of self.designer_settings.
@@ -216,6 +221,8 @@ class Designer(FloatLayout):
         
         if self.save_window_size:
             self._write_window_size()
+
+        self.set_escape_exit()
 
     def _add_designer_content(self):
         '''Add designer_content to Designer, when a project is loaded
@@ -1203,6 +1210,7 @@ class DesignerApp(App):
 
         if self.root.save_window_size:
             Clock.schedule_once(self.root.restore_window_size, 0)
+        self.root.set_escape_exit()
 
         self.root.proj_tree_view = self.root.designer_content.tree_view
         self.root.ui_creator = self.root.designer_content.ui_creator

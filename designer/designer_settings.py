@@ -15,6 +15,24 @@ import designer
 DESIGNER_CONFIG_FILE_NAME = 'config.ini'
 
 
+# monkey backport! (https://github.com/kivy/kivy/pull/2288)
+if not hasattr(ConfigParser, 'upgrade'):
+    try:
+        from ConfigParser import ConfigParser as PythonConfigParser
+    except ImportError:
+        from configparser import RawConfigParser as PythonConfigParser
+
+    def upgrade(self, default_config_file):
+        '''Upgrade the configuration based on a new default config file.
+        '''
+        pcp = PythonConfigParser()
+        pcp.read(default_config_file)
+        for section in pcp.sections():
+            self.setdefaults(section, dict(pcp.items(section)))
+        self.write()
+    
+    ConfigParser.upgrade = upgrade
+
 class DesignerSettings(Settings):
     '''Subclass of :class:`kivy.uix.settings.Settings` responsible for
        showing settings of Kivy Designer.
@@ -35,12 +53,13 @@ class DesignerSettings(Settings):
         _dir = os.path.dirname(designer.__file__)
         _dir = os.path.split(_dir)[0]
 
+        DEFAULT_CONFIG = os.path.join(_dir, DESIGNER_CONFIG_FILE_NAME)
         if not os.path.exists(DESIGNER_CONFIG):
-            shutil.copyfile(os.path.join(_dir,
-                                         DESIGNER_CONFIG_FILE_NAME),
+            shutil.copyfile(DEFAULT_CONFIG,
                             DESIGNER_CONFIG)
 
         self.config_parser.read(DESIGNER_CONFIG)
+        self.config_parser.upgrade(DEFAULT_CONFIG)
         self.add_json_panel('Kivy Designer Settings', self.config_parser,
                             os.path.join(_dir, 'designer', 'settings', 'designer_settings.json'))
 

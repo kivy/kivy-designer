@@ -29,5 +29,12 @@
         "desc": "Desktop Only",
         "section": "desktop",
         "key": "save_window_size"
+    },
+    {
+        "type": "bool",
+        "title": "Exit application on Escape key",
+        "desc": "Desktop Only",
+        "section": "desktop",
+        "key": "exit_on_escape"
     }
 ]
