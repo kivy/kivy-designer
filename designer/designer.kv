@@ -735,29 +735,68 @@
                 BoxLayout:
                     orientation: 'vertical'
                     
-                    BoxLayout:
+                    GridLayout:
+                        id: grid_playground_settings
+                        cols: 1
+                        spacing: .5
+                        height: self.minimum_height
                         size_hint_y: None
-                        height: sp(48)
                         
-                        canvas.before:
+                        canvas:
                             Color:
-                                rgb: bgcolor
+                                rgb: titlecolor
                             Rectangle:
                                 pos: self.pos
                                 size: self.size
                         
                         Label:
-                            text: 'Zoom: %d%%' % (zoom_slider.value * 100)
-                            size_hint_x: None
-                            width: sp(96)
+                            text: 'Playground Settings'
+                            font_size: '10pt'
+                            height: '20pt'
+                            size_hint_y: None
                         
-                        Slider:
-                            id: zoom_slider
-                            min: 0.25
-                            max: 1.5
-                            step: 0.05
-                            value: playground.scale
-                            on_value: playground.scale = args[1]
+                        BoxLayout:
+                            size_hint_y: None
+                            height: sp(48)
+                            
+                            canvas.before:
+                                Color:
+                                    rgb: bgcolor
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+                            
+                            Label:
+                                text: 'Size:'
+                                size_hint_x: None
+                                width: sp(52)
+                            
+                            PlaygroundSizeSelector:
+                                playground: playground
+                        
+                        BoxLayout:
+                            size_hint_y: None
+                            height: sp(48)
+                            
+                            canvas.before:
+                                Color:
+                                    rgb: bgcolor
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+                            
+                            Label:
+                                text: 'Zoom: %d%%' % (zoom_slider.value * 100)
+                                size_hint_x: None
+                                width: sp(96)
+                            
+                            Slider:
+                                id: zoom_slider
+                                min: 0.25
+                                max: 1.5
+                                step: 0.05
+                                value: playground.scale
+                                on_value: playground.scale = args[1]
                     
                     GridLayout:
                         cols: 1
@@ -801,7 +840,38 @@
                                     text: 'Events'
                                     EventViewer:
                                         id: eventviewer
-                                    
+
+
+<PlaygroundSizeSelector>:
+    markup: True
+
+<PlaygroundSizeView>:
+    accordion: accordion
+    
+    BoxLayout:
+        orientation: 'vertical'
+        
+        BoxLayout:
+            size_hint_y: None
+            height: sp(48)
+            Label:
+                text: 'Playground Size'
+                bold: True
+            
+            Label:
+                text: 'Portrait'
+                halign: 'right'
+                valign: 'middle'
+                text_size: self.size
+            Switch:
+                size_hint_x: None
+                width: sp(128)
+                active: root.selected_orientation == 'portrait'
+                on_active: root.selected_orientation = ('portrait' if self.active else 'landscape')
+        
+        Accordion:
+            id: accordion
+
 
 <DesignerContent>:
     ui_creator: ui_creator
