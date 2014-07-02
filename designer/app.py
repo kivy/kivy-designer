@@ -1199,6 +1199,7 @@ class DesignerApp(App):
         Factory.register('DesignerLinkLabel', module='designer.start_page')
         Factory.register('RecentFilesBox', module='designer.start_page')
         Factory.register('ContextMenu', module='designer.uix.contextual')
+        Factory.register('PlaygroundSizeSelector', module='designer.uix.playground_size_selector')
 
         self._widget_focused = None
         self.root = Designer()
