@@ -1,8 +1,7 @@
 Kivy Designer
 =============
 
-**WARNING::This is Alpha grade software, don't blame us if it eats
-  your kittens**
+**WARNING:: This software was part of GSOC 2013, and searching for a maintainer.**
 
 Kivy Designer is Kivy's tool for designing Graphical User Interfaces
 (GUIs) from Kivy Widgets. You can compose and customize widgets, and
