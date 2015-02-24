@@ -597,7 +597,7 @@ class Designer(FloatLayout):
         except:
             error = 'Cannot load empty file type'
     
-        self.statusbar.show_message(error)
+            self.statusbar.show_message(error)
                 
 
     def _perform_open(self, file_path):

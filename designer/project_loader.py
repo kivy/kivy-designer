@@ -113,8 +113,8 @@ class ProjectLoader(object):
             if os.path.isdir(file_path):
                 file_list += self._get_file_list(file_path)
             else:
-                #Consider only kv and py files
-                if file_path[file_path.rfind('.'):] == '.py':
+                # Consider only kv, py and buildozer(spec) files
+                if file_path[file_path.rfind('.'):] in [".py", ".spec"]:
                     if os.path.dirname(file_path) == self.proj_dir:
                         file_list.insert(0, file_path)
                     else:

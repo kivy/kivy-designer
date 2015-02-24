@@ -100,10 +100,11 @@ class DesignerContent(FloatLayout):
                     break
 
             if not found:
-                for component in list_path_components:
-                    _node = TreeViewLabel(text=component)
-                    self.tree_view.add_node(_node, node)
-                    node = _node
+                # Weird path mixup when reloading project from dir changes
+                # for component in list_path_components:
+                #     _node = TreeViewLabel(text=component)
+                #     self.tree_view.add_node(_node, node)
+                #     node = _node
                 list_path_components = []
             else:
                 del list_path_components[0]
