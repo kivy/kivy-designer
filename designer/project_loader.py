@@ -636,7 +636,6 @@ class ProjectLoader(object):
                     f = open(_rule.file, 'r')
                     s = f.read()
                     f.close()
-
                     self._import_module(s, _rule.file, _fromlist=[_rule.name])
 
                 relative_path = self.root_rule.kv_file[
@@ -676,7 +675,9 @@ class ProjectLoader(object):
                 if self.root_rule.file == path:
                     _from_list.append(self.root_rule.name)
 
-            self._import_module(_code_input.text, path, _fromlist=_from_list)
+            if path.endswith(".py"):
+                self._import_module(_code_input.text, path,
+                                    _fromlist=_from_list)
 
         #Save all class rules
         text = self.kv_code_input.text
