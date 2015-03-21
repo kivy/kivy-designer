@@ -675,6 +675,7 @@ class ProjectLoader(object):
                 if self.root_rule.file == path:
                     _from_list.append(self.root_rule.name)
 
+            # Ignore all types that are not .py
             if path.endswith(".py"):
                 self._import_module(_code_input.text, path,
                                     _fromlist=_from_list)
