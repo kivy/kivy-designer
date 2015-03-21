@@ -586,19 +586,20 @@ class Designer(FloatLayout):
 
         file_path = instance.selection[0]
         file_extension = instance.selection[0].split('.')
-        
+
         self._popup.dismiss()
+        error = None
         try:
             if file_extension[1] == 'py':
                 self._perform_open(file_path)
-            else: 
+            else:
                 error = 'Cannot load file type: .%s, Please load a .py file' % \
                     (file_extension[1])
         except:
             error = 'Cannot load empty file type'
-    
-        self.statusbar.show_message(error)
-                
+
+        if error:
+            self.statusbar.show_message(error)
 
     def _perform_open(self, file_path):
         '''To open a project given by file_path

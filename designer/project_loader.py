@@ -113,8 +113,8 @@ class ProjectLoader(object):
             if os.path.isdir(file_path):
                 file_list += self._get_file_list(file_path)
             else:
-                #Consider only kv and py files
-                if file_path[file_path.rfind('.'):] == '.py':
+                # Consider only kv, py and buildozer(spec) files
+                if file_path[file_path.rfind('.'):] in [".py", ".spec"]:
                     if os.path.dirname(file_path) == self.proj_dir:
                         file_list.insert(0, file_path)
                     else:
@@ -636,7 +636,6 @@ class ProjectLoader(object):
                     f = open(_rule.file, 'r')
                     s = f.read()
                     f.close()
-
                     self._import_module(s, _rule.file, _fromlist=[_rule.name])
 
                 relative_path = self.root_rule.kv_file[
@@ -676,7 +675,10 @@ class ProjectLoader(object):
                 if self.root_rule.file == path:
                     _from_list.append(self.root_rule.name)
 
-            self._import_module(_code_input.text, path, _fromlist=_from_list)
+            # Ignore all types that are not .py
+            if path.endswith(".py"):
+                self._import_module(_code_input.text, path,
+                                    _fromlist=_from_list)
 
         #Save all class rules
         text = self.kv_code_input.text
