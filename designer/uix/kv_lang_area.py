@@ -725,7 +725,7 @@ class KVLangArea(DesignerCodeInput):
                 _line_end_pos = get_line_end_pos(self.text, lineno)
 
             if proptype == 'StringProperty':
-                value = "'"+value+"'"
+                value = "'{}'".format(value.replace("'", "\\'"))
 
             self.text = self.text[:_pos_prop_value] + ' ' + str(value) + \
                 self.text[_line_end_pos:]
@@ -737,7 +737,7 @@ class KVLangArea(DesignerCodeInput):
             _line_start_pos = get_line_start_pos(self.text, widget_lineno)
             _line_end_pos = get_line_end_pos(self.text, widget_lineno)
             if proptype == 'StringProperty':
-                value = "'"+value+"'"
+                value = "'{}'".format(value.replace("'", "\\'"))
 
             indent_str = '\n'
             for i in range(indent + 4):
