@@ -17,7 +17,7 @@ class InfoBubble(Bubble):
         '''Animate the bubble into position'''
         if width:
             self.width = width
-        #wait for the bubble to adjust it's size according to text then animate
+        # wait for the bubble to adjust it's size according to text then animate
         Clock.schedule_once(lambda dt: self._show(pos, duration))
 
     def _show(self, pos, duration):
@@ -30,9 +30,9 @@ class InfoBubble(Bubble):
         self.opacity = 0
         arrow_pos = self.arrow_pos
         if arrow_pos[0] in ('l', 'r'):
-            pos = pos[0], pos[1] - (self.height/2)
+            pos = pos[0], pos[1] - (self.height / 2)
         else:
-            pos = pos[0] - (self.width/2), pos[1]
+            pos = pos[0] - (self.width / 2), pos[1]
 
         self.limit_to = Window
         self.pos = pos

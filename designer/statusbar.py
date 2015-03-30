@@ -67,9 +67,9 @@ class StatusBar(BoxLayout):
         self.app.widget_focused = None
         if (self.gridlayout.children or not
                 isinstance(self.gridlayout.children[0], Label)):
-            #Create navbar again, as doing clear_widgets
-            #will make its reference
-            #count to 0 and it will be destroyed
+            # Create navbar again, as doing clear_widgets
+            # will make its reference
+            # count to 0 and it will be destroyed
             self.navbar = GridLayout(rows=1)
 
         self.gridlayout.clear_widgets()

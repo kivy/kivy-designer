@@ -11,20 +11,20 @@ from kivy.uix.togglebutton import ToggleButton
 class PlaygroundSizeSelector(Button):
     '''Button to open playground size selection view
     '''
-    
+
     view = ObjectProperty()
     '''This property refers to the
        :class:`~designer.uix.playground_size_selector.PlaygroundSizeView`
        instance.
        :data:`view` is an :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     playground = ObjectProperty()
     '''This property holds a reference to the
        :class:`~designer.playground.Playground` instance.
        :data:`playground` is an :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     def on_playground(self, *_):
         '''Create a
            :class:`~designer.uix.playground_size_selector.PlaygroundSizeView`
@@ -34,7 +34,7 @@ class PlaygroundSizeSelector(Button):
         self.view.bind(selected_size=self._update_playground)
         self.view.bind(selected_size_name=self.setter('text'))
         self.text = self.view.selected_size_name
-    
+
     def _update_playground(self, _, size):
         '''Callback to update the playground size on :data:`selected_size`
            changes
@@ -43,7 +43,7 @@ class PlaygroundSizeSelector(Button):
             self.playground.size = size
             if self.playground.root:
                 self.playground.root.size = size
-    
+
     def on_press(self):
         '''Open the
            :class:`~designer.uix.playground_size_selector.PlaygroundSizeView`
@@ -54,31 +54,35 @@ class PlaygroundSizeSelector(Button):
         self.view.attach_to = self
         self.view.open()
 
+
 class PlaygroundSizeView(ModalView):
     '''Dialog for playground size selection
     '''
-    
+
     accordion = ObjectProperty()
     '''This property holds a reference to the
        :class:`~kivy.uix.accordion.Accordion` inside the dialog.
        :data:`accordion` is an :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     selected_size = ObjectProperty()
     '''This property contains the currently selected playground size.
        :data:`selected_size` is an :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     selected_size_name = StringProperty('')
     '''This property contains the name associated with :data:`selected_size`.
        :data:`selected_size_name` is a :class:`~kivy.properties.StringProperty`
     '''
-    
-    selected_orientation = OptionProperty('landscape', options=('portrait', 'landscape'))
+
+    selected_orientation = OptionProperty(
+        'landscape', options=('portrait', 'landscape')
+    )
     '''This property contains the screen orientation for :data:`selected_size`.
-       :data:`selected_orientation` is an :class:`~kivy.properties.OptionProperty`
+       :data:`selected_orientation` is an
+       :class:`~kivy.properties.OptionProperty`
     '''
-    
+
     default_sizes = (
         ('Desktop - SD', (
             ('Default', (550, 350)),
@@ -136,15 +140,15 @@ class PlaygroundSizeView(ModalView):
     )
     '''Ordered map of default selectable sizes.
     '''
-    
+
     def __init__(self, **kwargs):
         self._buttons = {}
-        
+
         super(PlaygroundSizeView, self).__init__(**kwargs)
-        
+
         for title, values in self.default_sizes:
             grid = GridLayout(rows=4)
-            
+
             def sort_sizes(a, b):
                 sa, sb = a[1], b[1]
                 if sa[1] > sb[1]:
@@ -157,24 +161,25 @@ class PlaygroundSizeView(ModalView):
                     elif sa[0] < sb[0]:
                         return 1
                     return 0
-            
+
             values = sorted(values, sort_sizes)
             for name, size in values:
                 btn = ToggleButton(text='', markup=True)
-                btntext = '%s\n[color=777777][size=%d]%dx%d[/size][/color]' % (name, btn.font_size * 0.8, size[0], size[1])
+                btntext = ('%s\n[color=777777][size=%d]%dx%d[/size][/color]' %
+                           (name, btn.font_size * 0.8, size[0], size[1]))
                 btn.text = btntext
                 btn.bind(on_press=partial(self.set_size, size))
                 grid.add_widget(btn)
                 self._buttons[name] = btn
-            
+
             item = AccordionItem(title=title)
             item.add_widget(grid)
             self.accordion.add_widget(item)
-        
+
         self.accordion.select(self.accordion.children[-1])
-        
+
         self.update_buttons()
-    
+
     def find_size(self):
         '''Find the size name and orientation for the current size.
         '''
@@ -185,7 +190,7 @@ class PlaygroundSizeView(ModalView):
                 if check_size(size):
                     return name, size, orientation
         return 'Custom', self.selected_size, orientation
-    
+
     def check_orientation(self, size):
         '''Determine if the provided size is portrait or landscape.
         '''
@@ -208,7 +213,9 @@ class PlaygroundSizeView(ModalView):
         '''Callback to update properties on changes to :data:`selected_size`.
         '''
         size_info = self.find_size()
-        self.selected_size_name = '%s\n[color=777777](%s, %dx%d)[/color]' % (size_info[0], size_info[2], size_info[1][0], size_info[1][1])
+        self.selected_size_name = ('%s\n[color=777777](%s, %dx%d)[/color]' %
+                                   (size_info[0], size_info[2],
+                                    size_info[1][0], size_info[1][1]))
         self.selected_orientation = size_info[2]
 
         self.update_buttons(size_info[0])
@@ -224,9 +231,8 @@ class PlaygroundSizeView(ModalView):
         '''
         self.update_size(size)
         self.dismiss()
-    
+
     def on_selected_orientation(self, _, value):
         '''Callback to update size on changes to :data:`selected_orientation`.
         '''
         self.update_size(self.selected_size)
-    

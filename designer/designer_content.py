@@ -56,7 +56,7 @@ class DesignerContent(FloatLayout):
 
         self.proj_loader = proj_loader
 
-        #Fill nodes with file and directories
+        # Fill nodes with file and directories
         self._root_node = self.tree_view.root
         for _file in proj_loader.file_list:
             self.add_file_to_tree_view(_file)
@@ -69,12 +69,12 @@ class DesignerContent(FloatLayout):
         self.tree_view.root_options = dict(text='')
         dirname = os.path.dirname(_file)
         dirname = dirname.replace(self.proj_loader.proj_dir, '')
-        #The way os.path.dirname works, there will never be '/' at the end
-        #of a directory. So, there will always be '/' at the starting
-        #of 'dirname' variable after removing proj_dir
+        # The way os.path.dirname works, there will never be '/' at the end
+        # of a directory. So, there will always be '/' at the starting
+        # of 'dirname' variable after removing proj_dir
 
-        #This algorithm first breaks path into its components
-        #and creates a list of these components.
+        # This algorithm first breaks path into its components
+        # and creates a list of these components.
         _dirname = dirname
         _basename = 'a'
         list_path_components = []
@@ -87,9 +87,9 @@ class DesignerContent(FloatLayout):
         if list_path_components[0] == '':
             del list_path_components[0]
 
-        #Then it traverses from root_node to its children searching from
-        #each component in the path. If it doesn't find any component
-        #related with node then it creates it.
+        # Then it traverses from root_node to its children searching from
+        # each component in the path. If it doesn't find any component
+        # related with node then it creates it.
         node = self._root_node
         while list_path_components != []:
             found = False
@@ -108,7 +108,7 @@ class DesignerContent(FloatLayout):
             else:
                 del list_path_components[0]
 
-        #Finally add file_node with node as parent.
+        # Finally add file_node with node as parent.
         file_node = TreeViewLabel(text=os.path.basename(_file))
         file_node.bind(on_touch_down=self._file_node_clicked)
         self.tree_view.add_node(file_node, node)
@@ -122,7 +122,7 @@ class DesignerContent(FloatLayout):
            editing that py file.
         '''
 
-        #Travel upwards and find the path of instance clicked
+        # Travel upwards and find the path of instance clicked
         path = instance.text
         parent = instance.parent_node
         while parent != self._root_node:

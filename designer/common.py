@@ -32,7 +32,7 @@ widgets = [
     ('ActionButton', 'complex'),
     ('ActionPrevious', 'complex'),
     ('ScrollView', 'behavior'),
-    #('VKeybord', 'complex'),
-    #('Scatter', 'behavior'),
-    #('StencilView', 'behavior'),
+    # ('VKeybord', 'complex'),
+    # ('Scatter', 'behavior'),
+    # ('StencilView', 'behavior'),
 ]

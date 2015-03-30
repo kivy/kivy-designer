@@ -35,12 +35,12 @@ class RecentManager(object):
             _file_index = -1
 
         if _file_index != -1:
-            #If _file is already present in list_files, then move it to 0 index
+            # If _file is already present in list_files, then move it to 0 index
             self.list_files.remove(_file)
 
         self.list_files.insert(0, _file)
 
-        #Recent files should not be greater than max_recent_files
+        # Recent files should not be greater than max_recent_files
         while len(self.list_files) > self.max_recent_files:
             self.list_files.pop()
 

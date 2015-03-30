@@ -68,14 +68,14 @@ class AddFileDialog(BoxLayout):
 
             if self.always_check.active:
                 self.proj_loader.add_dir_for_file_type(
-                    self.text_file.text[self.text_file.text.rfind('.')+1:],
+                    self.text_file.text[self.text_file.text.rfind('.') + 1:],
                     self.text_folder.text)
 
             self.proj_loader.proj_watcher.start_watching(
                 self.proj_loader.proj_dir)
             self.dispatch('on_added')
 
-        except OSError, IOError:
+        except (OSError, IOError):
             self.dispatch('on_error')
 
     def update_from_file(self, *args):

@@ -30,8 +30,9 @@ if not hasattr(ConfigParser, 'upgrade'):
         for section in pcp.sections():
             self.setdefaults(section, dict(pcp.items(section)))
         self.write()
-    
+
     ConfigParser.upgrade = upgrade
+
 
 class DesignerSettings(Settings):
     '''Subclass of :class:`kivy.uix.settings.Settings` responsible for
@@ -61,7 +62,8 @@ class DesignerSettings(Settings):
         self.config_parser.read(DESIGNER_CONFIG)
         self.config_parser.upgrade(DEFAULT_CONFIG)
         self.add_json_panel('Kivy Designer Settings', self.config_parser,
-                            os.path.join(_dir, 'designer', 'settings', 'designer_settings.json'))
+                            os.path.join(_dir, 'designer',
+                                         'settings', 'designer_settings.json'))
 
         path = self.config_parser.getdefault(
             'global', 'python_shell_path', '')

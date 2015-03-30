@@ -84,7 +84,7 @@ class Tree(object):
             for _node in self.list_root_nodes:
                 self.traverse_tree(_node)
         else:
-            #Add traverse code here
+            # Add traverse code here
             for child in node.list_children:
                 self.traverse_tree(child)
 

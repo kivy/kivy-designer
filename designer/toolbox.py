@@ -80,12 +80,12 @@ class Toolbox(BoxLayout):
         for category in categories:
             toolbox_category = ToolboxCategory(title=category)
             self.accordion.add_widget(toolbox_category)
-            
+
             cat_widgets = []
             for widget in widgets:
                 if widget[1] == category:
                     cat_widgets.append(widget)
-            
+
             cat_widgets.sort()
             for widget in cat_widgets:
                 toolbox_category.gridlayout.add_widget(
@@ -102,10 +102,10 @@ class Toolbox(BoxLayout):
             self.custom_category = ToolboxCategory(title='custom')
             self._list.append(self.custom_category)
 
-            #FIXME: ToolboxCategory keeps on adding more scrollview,
-            #if they are initialized again, unable to find the cause of problem
-            #I just decided to delete those scrollview whose childs are not
-            #self.gridlayout.
+            # FIXME: ToolboxCategory keeps on adding more scrollview,
+            # if they are initialized again, unable to find the cause of problem
+            # I just decided to delete those scrollview whose childs are not
+            # self.gridlayout.
             _scrollview_parent = self.custom_category.gridlayout.parent.parent
             for child in _scrollview_parent.children[:]:
                 if child.children[0] != self.custom_category.gridlayout:
@@ -119,18 +119,18 @@ class Toolbox(BoxLayout):
         self._list.append(self.custom_category)
 
         self.accordion.add_widget(self.custom_category)
-        
+
         custom_widgets = []
         for widget in widgets:
             if widget[1] == 'custom':
                 custom_widgets.append(widget)
-        
+
         custom_widgets.sort()
         for widget in custom_widgets:
             self.custom_category.gridlayout.add_widget(
                 ToolboxButton(text=widget[0]))
 
-        #Setting appropriate height to gridlayout to enable scrolling
+        # Setting appropriate height to gridlayout to enable scrolling
         self.custom_category.gridlayout.size_hint_y = None
         self.custom_category.gridlayout.height = \
-            (len(self.custom_category.gridlayout.children)+5)*pt(22)
+            (len(self.custom_category.gridlayout.children) + 5) * pt(22)

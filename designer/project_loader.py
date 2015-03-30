@@ -131,7 +131,7 @@ class ProjectLoader(object):
         py_string = f.read()
         f.close()
 
-        #Find path to kv. py file will have Builder.load_file('path/to/kv')
+        # Find path to kv. py file will have Builder.load_file('path/to/kv')
         _r = re.findall(r'Builder\.load_file\s*\(\s*.+\s*\)', py_string)
         if _r == []:
             raise ProjectLoaderException('Cannot find widget\'s kv file.')
@@ -145,7 +145,7 @@ class ProjectLoader(object):
         kv_string = f.read()
         f.close()
 
-        #Remove all the 'app' lines
+        # Remove all the 'app' lines
         for app_str in re.findall(r'.+app+.+', kv_string):
             kv_string = kv_string.replace(
                 app_str,
@@ -157,7 +157,7 @@ class ProjectLoader(object):
 
         _to_check = []
 
-        #Get all the class_rules
+        # Get all the class_rules
         for class_str in re.findall(r'<+([\w_]+)>', kv_string):
             if re.search(r'\bclass\s+%s+.+:' % class_str, py_string):
                 module = imp.new_module('CustomWidget')
@@ -178,13 +178,13 @@ class ProjectLoader(object):
             kv_str = f.read()
             f.close()
 
-        #Find the start position of root_rule
+        # Find the start position of root_rule
         start_pos = kv_str.find(self.root_rule.name)
         if start_pos == -1:
             raise ProjectLoaderException(
                 'Cannot find root rule in its file')
 
-        #Get line for start_pos
+        # Get line for start_pos
         _line = 0
         _line_pos = 0
         _line_pos = kv_str.find('\n', _line_pos + 1)
@@ -192,8 +192,8 @@ class ProjectLoader(object):
             _line_pos = kv_str.find('\n', _line_pos + 1)
             _line += 1
 
-        #Find the end position of root_rule, where indentation becomes 0
-        #or file ends
+        # Find the end position of root_rule, where indentation becomes 0
+        # or file ends
         _line += 1
         lines = kv_str.splitlines()
         _total_lines = len(lines)
@@ -237,7 +237,7 @@ class ProjectLoader(object):
 
         ret = self._load_project(kv_path)
         self.new_project = False
-        #Add project_dir to watch
+        # Add project_dir to watch
         self.proj_watcher.start_watching(self.proj_dir)
         return ret
 
@@ -258,7 +258,7 @@ class ProjectLoader(object):
         _file = None
 
         for _file in os.listdir(self.proj_dir):
-            #Load each kv file in the directory
+            # Load each kv file in the directory
             _file = os.path.join(self.proj_dir, _file)
             if _file[_file.rfind('.'):] != '.kv':
                 continue
@@ -269,14 +269,14 @@ class ProjectLoader(object):
             kv_string = f.read()
             f.close()
 
-            #Remove all the 'app' lines
+            # Remove all the 'app' lines
             for app_str in re.findall(r'.+app+.+', kv_string):
                 kv_string = kv_string.replace(
                     app_str,
                     app_str[:get_indentation(app_str)] +
                     '#' + app_str.lstrip())
 
-            #Get all the class_rules
+            # Get all the class_rules
             for class_str in re.findall(r'<+([\w_]+)>', kv_string):
                 class_rule = ClassRule(class_str)
                 class_rule.kv_file = _file
@@ -287,15 +287,15 @@ class ProjectLoader(object):
                                        re.MULTILINE)
 
                 if root_name != []:
-                    #It will occur when there is a root rule and it can't
-                    #be loaded by Builder because the its file
-                    #has been imported
+                    # It will occur when there is a root rule and it can't
+                    # be loaded by Builder because the its file
+                    # has been imported
                     root_name = root_name[0]
                     if not hasattr(Factory, root_name):
                         match = re.search(r'^([\w\d_]+)\:', kv_string,
                                           re.MULTILINE)
                         kv_string = kv_string[:match.start()] + \
-                            '<'+root_name+'>:' + kv_string[match.end():]
+                            '<' + root_name + '>:' + kv_string[match.end():]
                         self.root_rule = RootRule(root_name, None)
                         self.root_rule.kv_file = _file
                         self._root_rule = self.root_rule
@@ -328,7 +328,7 @@ class ProjectLoader(object):
             f.close()
 
             _file_is_valid = True
-            #Checking if the file is valid
+            # Checking if the file is valid
             if proj_str == '' or\
                     proj_str.count('<files>') != proj_str.count('</files>') or\
                     proj_str.count('<file>') != proj_str.count('</file>') or\
@@ -343,8 +343,8 @@ class ProjectLoader(object):
                 projdir_time = float(projdir_time.strip())
 
             if _file_is_valid and projdir_mtime <= projdir_time:
-                #Project Directory folder hasn't been modified,
-                #file list will remain same
+                # Project Directory folder hasn't been modified,
+                # file list will remain same
                 self.file_list = []
                 un_modified_files = []
                 start_pos = proj_str.find('<files>')
@@ -367,7 +367,7 @@ class ProjectLoader(object):
                         if _dir not in sys.path:
                             sys.path.insert(0, _dir)
 
-                #Reload information for app
+                # Reload information for app
                 start_pos = proj_str.find('<app>')
                 end_pos = proj_str.find('</app>')
                 if start_pos != -1 and end_pos != -1:
@@ -382,7 +382,7 @@ class ProjectLoader(object):
                                                            self._app_file)
                     f.close()
 
-                #Reload information for the files which haven't been modified
+                # Reload information for the files which haven't been modified
                 start_pos = proj_str.find('<classes>')
                 end_pos = proj_str.find('</classes>')
 
@@ -396,8 +396,8 @@ class ProjectLoader(object):
                             proj_str.find('</file>', start_pos)].strip()
 
                         if _file in un_modified_files:
-                            #If _file is un modified then assign it to
-                            #class rule with _name
+                            # If _file is un modified then assign it to
+                            # class rule with _name
                             _name = proj_str[
                                 proj_str.find('<name>', start_pos) +
                                 len('<name>'):
@@ -417,11 +417,11 @@ class ProjectLoader(object):
         if self.file_list == []:
             self.file_list = self._get_file_list(self.proj_dir)
 
-        #Get all files corresponding to each class
+        # Get all files corresponding to each class
         self._get_class_files()
 
-        #If root widget is not created but root class is known
-        #then create widget
+        # If root widget is not created but root class is known
+        # then create widget
         if self.root_rule and not self.root_rule.widget and \
                 self.root_rule.name:
             self.root_rule.widget = self.get_widget_of_class(
@@ -530,7 +530,7 @@ class ProjectLoader(object):
         f.write(_file_str)
         f.close()
 
-        #For custom widgets copy py and kv file
+        # For custom widgets copy py and kv file
         for widget in self.custom_widgets:
             custom_kv = os.path.join(auto_save_dir,
                                      os.path.basename(widget.kv_file))
@@ -549,12 +549,12 @@ class ProjectLoader(object):
            current directory.
         '''
 
-        #To stop ProjectWatcher from emitting event when project is saved
+        # To stop ProjectWatcher from emitting event when project is saved
         self.proj_watcher.allow_event_dispatch = False
         proj_dir_changed = False
 
         if self.new_project:
-            #Create dir and copy new_proj.kv and new_proj.py to new directory
+            # Create dir and copy new_proj.kv and new_proj.py to new directory
             if not os.path.exists(proj_dir):
                 os.mkdir(proj_dir)
 
@@ -589,16 +589,16 @@ class ProjectLoader(object):
             if proj_dir != '' and proj_dir != self.proj_dir:
                 proj_dir_changed = True
 
-                #Remove previous project directories from sys.path
+                # Remove previous project directories from sys.path
                 for _dir in self._dir_list:
                     try:
                         sys.path.remove(_dir)
                     except:
                         pass
 
-                #if proj_dir and self.proj_dir differs then user wants to save
-                #an already opened project to somewhere else
-                #Copy all the files
+                # if proj_dir and self.proj_dir differs then user wants to save
+                # an already opened project to somewhere else
+                # Copy all the files
                 if not os.path.exists(proj_dir):
                     os.mkdir(proj_dir)
 
@@ -612,8 +612,8 @@ class ProjectLoader(object):
 
                 self.file_list = self._get_file_list(proj_dir)
 
-                #Change the path of all files in the class rules,
-                #root rule and app
+                # Change the path of all files in the class rules,
+                # root rule and app
                 relative_path = self._app_file[
                     self._app_file.find(self.proj_dir):]
                 self._app_file = os.path.join(proj_dir, relative_path)
@@ -648,7 +648,7 @@ class ProjectLoader(object):
 
                 self.proj_dir = proj_dir
 
-        #For custom widgets copy py and kv file to project directory
+        # For custom widgets copy py and kv file to project directory
         for widget in self.custom_widgets:
             custom_kv = os.path.join(self.proj_dir,
                                      os.path.basename(widget.kv_file))
@@ -660,7 +660,7 @@ class ProjectLoader(object):
             if not os.path.exists(custom_py):
                 shutil.copy(widget.py_file, custom_py)
 
-        #Saving all opened py files and also reimport them
+        # Saving all opened py files and also reimport them
         for _code_input in self.tab_pannel.list_py_code_inputs:
             path = os.path.join(self.proj_dir, _code_input.rel_file_path)
             f = open(path, 'w')
@@ -680,10 +680,10 @@ class ProjectLoader(object):
                 self._import_module(_code_input.text, path,
                                     _fromlist=_from_list)
 
-        #Save all class rules
+        # Save all class rules
         text = self.kv_code_input.text
         for _rule in self.class_rules:
-            #Get the kv text from KVLangArea and write it to class rule's file
+            # Get the kv text from KVLangArea and write it to class rule's file
             f = open(_rule.kv_file, 'r')
             _file_str = f.read()
             f.close()
@@ -696,9 +696,9 @@ class ProjectLoader(object):
             f.write(_file_str)
             f.close()
 
-        #If root widget is not changed
+        # If root widget is not changed
         if self._root_rule.name == self.root_rule.name:
-            #Save root widget's rule
+            # Save root widget's rule
             is_root_class = False
             for _rule in self.class_rules:
                 if _rule.name == self.root_rule.name:
@@ -722,8 +722,8 @@ class ProjectLoader(object):
                 f.close()
 
         else:
-            #If root widget is changed
-            #Root Widget changes, there can be these cases:
+            # If root widget is changed
+            # Root Widget changes, there can be these cases:
             root_name = self.root_rule.name
             f = open(self._app_file, 'r')
             file_str = f.read()
@@ -731,10 +731,10 @@ class ProjectLoader(object):
             self._root_rule = self.root_rule
 
             if self.is_root_a_class_rule() and self._app_file:
-                #Root Widget's class rule is a custom class
-                #and its rule is class rule. So, it already have been saved
-                #the string of App's build() function will be changed to
-                #return new root widget's class
+                # Root Widget's class rule is a custom class
+                # and its rule is class rule. So, it already have been saved
+                # the string of App's build() function will be changed to
+                # return new root widget's class
 
                 if self._app_class != 'runTouchApp':
                     s = re.search(r'class\s+%s.+:' % self._app_class, file_str)
@@ -750,7 +750,7 @@ class ProjectLoader(object):
                         if build_searchiter:
                             indent = get_indentation(build_searchiter.group(0))
                             file_str = file_str[:build_searchiter.end()] +\
-                                '\n' + get_indent_str(2*indent) + "return " +\
+                                '\n' + get_indent_str(2 * indent) + "return " +\
                                 root_name + "()\n" + \
                                 file_str[build_searchiter.end():]
 
@@ -761,17 +761,18 @@ class ProjectLoader(object):
 
                 else:
                     file_str = re.sub(r'runTouchApp\s*\(.+\)',
-                                      'runTouchApp('+root_name+'())', file_str)
+                                      'runTouchApp(' + root_name + '())',
+                                      file_str)
 
                 f = open(self._app_file, 'w')
                 f.write(file_str)
                 f.close()
 
             else:
-                #Root Widget's rule is not a custom class
-                #and its rule is root rule
-                #Its kv_file should be of App's class name
-                #and App's build() function should be cleared
+                # Root Widget's rule is not a custom class
+                # and its rule is root rule
+                # Its kv_file should be of App's class name
+                # and App's build() function should be cleared
                 if not self.root_rule.kv_file:
                     s = self._app_class.replace('App', '').lower()
                     root_file = None
@@ -834,7 +835,7 @@ class ProjectLoader(object):
                             f.write(file_str)
                             f.close()
 
-        #Allow Project Watcher to emit events
+        # Allow Project Watcher to emit events
         Clock.schedule_once(self._allow_proj_watcher_dispatch, 1)
 
     def get_class_str_from_text(self, class_name, _file_str, is_class=True):
@@ -842,14 +843,14 @@ class ProjectLoader(object):
         '''
         _file_str += '\n'
         start_pos = -1
-        #Find the start position of class_name
+        # Find the start position of class_name
         if is_class:
-            start_pos = _file_str.find('<'+class_name+'>:')
+            start_pos = _file_str.find('<' + class_name + '>:')
         else:
             while True:
-                start_pos = _file_str.find(class_name, start_pos+1)
-                if start_pos == 0 or not (_file_str[start_pos-1].isalnum() and
-                                          _file_str[start_pos-1] != ''):
+                start_pos = _file_str.find(class_name, start_pos + 1)
+                if start_pos == 0 or not (_file_str[start_pos - 1].isalnum() and
+                                          _file_str[start_pos - 1] != ''):
                     break
 
         _line = 0
@@ -859,8 +860,8 @@ class ProjectLoader(object):
             _line_pos = _file_str.find('\n', _line_pos + 1)
             _line += 1
 
-        #Find the end position of class_name, where indentation becomes 0
-        #or file ends
+        # Find the end position of class_name, where indentation becomes 0
+        # or file ends
         _line += 1
         lines = _file_str.splitlines()
         _total_lines = len(lines)
@@ -892,7 +893,7 @@ class ProjectLoader(object):
         '''
 
         self.proj_watcher.allow_event_dispatch = True
-        #self.proj_watcher.start_watching(self.proj_dir)
+        # self.proj_watcher.start_watching(self.proj_dir)
 
     def _app_in_string(self, s):
         '''To determine if there is an App class or runTouchApp
@@ -907,7 +908,7 @@ class ProjectLoader(object):
             for _class in re.findall(r'\bclass\b.+:', s):
                 b_index1 = _class.find('(')
                 b_index2 = _class.find(')')
-                if _class[b_index1+1:b_index2].strip() == 'App':
+                if _class[b_index1 + 1:b_index2].strip() == 'App':
                     self._app_class = _class[_class.find(' '):b_index1].strip()
                     return True
 
@@ -918,9 +919,9 @@ class ProjectLoader(object):
            their python files and to search for app.
         '''
         if self._app_file is None:
-            #Search for main.py
+            # Search for main.py
             for _file in self.file_list:
-                if _file[_file.rfind('/')+1:] == 'main.py':
+                if _file[_file.rfind('/') + 1:] == 'main.py':
                     f = open(_file, 'r')
                     s = f.read()
                     f.close()
@@ -928,7 +929,7 @@ class ProjectLoader(object):
                         self._app_module = self._import_module(s, _file)
                         self._app_file = _file
 
-            #Search for a file with app in its name
+            # Search for a file with app in its name
             if not self._app_class:
                 for _file in self.file_list:
                     if 'app' in _file[_file.rfind('/'):]:
@@ -947,7 +948,7 @@ class ProjectLoader(object):
         if self.root_rule:
             to_find.append(self.root_rule)
 
-        #If cannot find due to above methods, search every file
+        # If cannot find due to above methods, search every file
         for _file in self.file_list:
             f = open(_file, 'r')
             s = f.read()
@@ -967,17 +968,17 @@ class ProjectLoader(object):
                         to_find.remove(_rule)
                         _rule.module = mod
 
-        #Cannot Find App, So, use default runTouchApp
+        # Cannot Find App, So, use default runTouchApp
         if not self._app_file:
             self._app_class = 'runTouchApp'
 
-        #Root Widget may be in Factory not in file
+        # Root Widget may be in Factory not in file
         if self.root_rule:
             if not self.root_rule.file and\
                     hasattr(Factory, self.root_rule.name):
                 to_find.remove(self.root_rule)
 
-        #to_find should be empty, if not some class's files are not detected
+        # to_find should be empty, if not some class's files are not detected
         if to_find != []:
             raise ProjectLoaderException(
                 'Cannot find class files for all classes')
@@ -1013,7 +1014,7 @@ class ProjectLoader(object):
             sys.modules['AppModule'] = module
             return module
 
-        module_name = _file[_file.rfind(os.sep)+1:].replace('.py', '')
+        module_name = _file[_file.rfind(os.sep) + 1:].replace('.py', '')
         if module_name in sys.modules:
             del sys.modules[module_name]
 
@@ -1027,7 +1028,7 @@ class ProjectLoader(object):
         if stop_watcher:
             self.proj_watcher.stop()
 
-        #Remove all class rules and root rules of previous project
+        # Remove all class rules and root rules of previous project
         rules = []
 
         try:
@@ -1052,7 +1053,7 @@ class ProjectLoader(object):
         self._app_class = None
         self._app_module = None
         self._app = None
-        #Remove previous project directories
+        # Remove previous project directories
         for _dir in self._dir_list:
             try:
                 sys.path.remove(_dir)
@@ -1084,7 +1085,7 @@ class ProjectLoader(object):
                 self._app = obj()
                 return self._app
 
-        #if still couldn't get app, although that shouldn't happen
+        # if still couldn't get app, although that shouldn't happen
         return None
 
     def reload_from_str(self, root_str):
@@ -1092,7 +1093,7 @@ class ProjectLoader(object):
         '''
 
         rules = []
-        #Cleaning root rules
+        # Cleaning root rules
         try:
             rules = Builder.match(self.root_rule.widget)
             for _rule in rules:
@@ -1102,7 +1103,7 @@ class ProjectLoader(object):
         except:
             pass
 
-        #Cleaning class rules
+        # Cleaning class rules
         for _rule in self.class_rules:
             for rule in Builder.rules[:]:
                 if rule[1].name == '<'+_rule.name+'>':
@@ -1110,7 +1111,7 @@ class ProjectLoader(object):
                     break
 
         root_widget = None
-        #Remove all the 'app' lines
+        # Remove all the 'app' lines
         root_str = re.sub(r'.+app+.+', '', root_str)
 
         root_widget = Builder.load_string(root_str)
@@ -1232,7 +1233,7 @@ class ProjectLoader(object):
         proj_file_str += '<files>\n'
         for _file in self.file_list:
             proj_file_str += '    <file>\n'
-            proj_file_str += '        '+_file
+            proj_file_str += '        ' + _file
             proj_file_str += '\n    </file>\n'
 
         proj_file_str += '</files>\n'
@@ -1241,10 +1242,10 @@ class ProjectLoader(object):
         for _rule in self.class_rules:
             proj_file_str += '    <class>\n'
             proj_file_str += '         <name>\n'
-            proj_file_str += '             '+_rule.name
+            proj_file_str += '             ' + _rule.name
             proj_file_str += '\n         </name>\n'
             proj_file_str += '         <file>\n'
-            proj_file_str += '             '+_rule.file
+            proj_file_str += '             ' + _rule.file
             proj_file_str += '\n         </file>\n'
             proj_file_str += '\n    </class>\n'
 
@@ -1253,10 +1254,10 @@ class ProjectLoader(object):
         if self._app_class and self._app_file:
             proj_file_str += '<app>\n'
             proj_file_str += '    <class>\n'
-            proj_file_str += '         '+self._app_class
+            proj_file_str += '         ' + self._app_class
             proj_file_str += '\n    </class>\n'
             proj_file_str += '    <file>\n'
-            proj_file_str += '         '+self._app_file
+            proj_file_str += '         ' + self._app_file
             proj_file_str += '\n    </file>\n'
             proj_file_str += '</app>\n'
 

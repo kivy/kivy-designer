@@ -149,12 +149,12 @@ class ContextMenu(TabbedPanel):
            the height of the dropdown, the placement might be
            lower or higher off that widget.
         '''
-        #ensure we are not already attached
+        # ensure we are not already attached
         if self.attach_to is not None:
             self.dismiss()
 
-        #we will attach ourself to the main window, so ensure the widget we are
-        #looking for have a window
+        # we will attach ourself to the main window, so ensure the widget we are
+        # looking for have a window
         self._win = widget.get_parent_window()
         if self._win is None:
             raise ContextMenuException(
@@ -226,7 +226,7 @@ class ContextMenu(TabbedPanel):
 
         # set width and x
         if self.auto_width:
-            #Calculate minimum required width
+            # Calculate minimum required width
             if len(self.container.children) == 1:
                 self.bubble.width = max(self.main_tab.parent.parent.width,
                                         self.container.children[0].width)
@@ -246,7 +246,7 @@ class ContextMenu(TabbedPanel):
             x = 0
         self.bubble.x = x
 
-        #determine if we display the dropdown upper or lower to the widget
+        # determine if we display the dropdown upper or lower to the widget
         h_bottom = wy - self.bubble.height
         h_top = win.height - (wtop + self.bubble.height)
         if h_bottom > 0:
@@ -256,8 +256,8 @@ class ContextMenu(TabbedPanel):
             self.bubble.y = wtop
             self.bubble.arrow_pos = 'bottom_mid'
         else:
-            #none of both top/bottom have enough place to display the widget at
-            #the current size. Take the best side, and fit to it.
+            # none of both top/bottom have enough place to display the widget at
+            # the current size. Take the best side, and fit to it.
             height = max(h_bottom, h_top)
             if height == h_bottom:
                 self.bubble.top = wy

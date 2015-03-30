@@ -195,7 +195,7 @@ class InteractiveShellInput(TextInput):
         '''Override of _keyboard_on_key_down.
         '''
         if keycode[0] == 13:
-            #For enter
+            # For enter
             self.last_line = self.text[self._cursor_pos:]
             self.dispatch('on_ready_to_input')
 
