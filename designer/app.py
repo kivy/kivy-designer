@@ -791,6 +791,23 @@ class Designer(FloatLayout):
         '''Event Handler when ActionButton "Quit" is pressed.
         '''
 
+        if not self._curr_proj_changed:
+            self._perform_quit()
+            return
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
+                                               ' lost.\n'
+                                               'Do you want to quit?')
+        self._confirm_dlg.bind(on_ok=self._perform_quit,
+                               on_cancel=self._cancel_popup)
+
+        self._popup = Popup(title='Quit', content=self._confirm_dlg,
+                            size_hint=(None, None), size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+
+    def _perform_quit(self, *args):
+        '''Perform Application qui.Application
+        '''
         App.get_running_app().stop()
 
     def action_btn_undo_pressed(self, *args):
