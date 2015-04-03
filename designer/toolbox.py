@@ -77,6 +77,7 @@ class Toolbox(BoxLayout):
         # just do manual discovery, and tagging.
 
         categories = list(set([x[1] for x in widgets]))
+        categories.sort()
         for category in categories:
             toolbox_category = ToolboxCategory(title=category)
             self.accordion.add_widget(toolbox_category)

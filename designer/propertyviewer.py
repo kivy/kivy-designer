@@ -108,7 +108,7 @@ class PropertyOptions(PropertyBase, Spinner):
     '''
 
     def __init__(self, prop, **kwargs):
-        PropertyBase.__init__(self, **kwargs)
+        PropertyBase.__init__(self)
         Spinner.__init__(self, values=prop.options, **kwargs)
 
     def on_propvalue(self, *args):
@@ -194,7 +194,7 @@ class PropertyViewer(ScrollView):
 
         add = self.prop_list.add_widget
         get_label = self._get_label
-        props = value.properties().keys()
+        props = list(value.properties().keys())
         props.sort()
         for prop in props:
             ip = self.build_for(prop)

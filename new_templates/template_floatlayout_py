@@ -35,7 +35,7 @@ class MainApp(App):
         '''Your app will be build from here.
            Return your root widget here.
         '''
-        print 'build running'
+        print('build running')
         return RootWidget()
 
     def on_pause(self):

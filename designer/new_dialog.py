@@ -68,7 +68,8 @@ class NewProjectDialog(BoxLayout):
 
     def __init__(self, **kwargs):
         super(NewProjectDialog, self).__init__(**kwargs)
-        item_strings = NEW_PROJECTS.keys()
+        item_strings = list(NEW_PROJECTS.keys())
+        item_strings.sort()
         self.adapter = ListAdapter(cls=Factory.DesignerListItemButton,
                                    data=item_strings,
                                    selection_mode='single',

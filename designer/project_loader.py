@@ -7,6 +7,8 @@ import functools
 import shutil
 import imp
 
+from six import exec_
+
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -161,7 +163,7 @@ class ProjectLoader(object):
         for class_str in re.findall(r'<+([\w_]+)>', kv_string):
             if re.search(r'\bclass\s+%s+.+:' % class_str, py_string):
                 module = imp.new_module('CustomWidget')
-                exec py_string in module.__dict__
+                exec_(py_string, module.__dict__)
                 sys.modules['AppModule'] = module
                 class_rule = CustomWidgetRule(class_str, kv_path, py_path)
                 class_rule.file = py_path
@@ -1010,7 +1012,7 @@ class ProjectLoader(object):
                 del sys.modules['AppModule']
 
             module = imp.new_module('AppModule')
-            exec s in module.__dict__
+            exec_(s, module.__dict__)
             sys.modules['AppModule'] = module
             return module
 
