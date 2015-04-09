@@ -6,7 +6,7 @@ import os
 import shutil
 import traceback
 
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
@@ -168,6 +168,7 @@ class Designer(FloatLayout):
                 'global', 'auto_save_time', 5))*60)
         
         Window.bind(on_resize=self._write_window_size)
+        Window.bind(on_request_close=self.on_request_close)
 
     def _write_window_size(self, *_):
         '''Write updated window size to config
@@ -787,10 +788,45 @@ class Designer(FloatLayout):
         '''
         self._perform_open(instance.text)
 
+    def on_request_close(self, *args):
+        '''Event Handler for 'on_request_close' event of Window.
+           Check if the project was saved before exit
+        '''
+        if not self._curr_proj_changed:
+            self._perform_quit()
+            return False
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
+                                               ' lost.\n'
+                                               'Do you want to quit?')
+        self._confirm_dlg.bind(on_ok=self._perform_quit,
+                               on_cancel=self._cancel_popup)
+
+        self._popup = Popup(title='Quit', content=self._confirm_dlg,
+                            size_hint=(None, None), size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+        return True
+
     def action_btn_quit_pressed(self, *args):
         '''Event Handler when ActionButton "Quit" is pressed.
         '''
+        if not self._curr_proj_changed:
+            self._perform_quit()
+            return
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
+                                               ' lost.\n'
+                                               'Do you want to quit?')
+        self._confirm_dlg.bind(on_ok=self._perform_quit,
+                               on_cancel=self._cancel_popup)
 
+        self._popup = Popup(title='Quit', content=self._confirm_dlg,
+                            size_hint=(None, None), size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+
+    def _perform_quit(self, *args):
+        '''Perform Application qui.Application
+        '''
         App.get_running_app().stop()
 
     def action_btn_undo_pressed(self, *args):
