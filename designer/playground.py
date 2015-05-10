@@ -40,6 +40,7 @@ def widget_contains(container, child):
             return True
     return False
 
+
 class PlaygroundDragElement(BoxLayout):
     '''An instance of this class is the drag element shown when user tries to
        add a widget to :class:`~designer.playground.Playground` by dragging
@@ -186,9 +187,9 @@ class PlaygroundDragElement(BoxLayout):
                         self.child, self.center_x, self.y - 20)
 
                 else:
-                    #self.widgettree.collide_point(self.center_x, self.y)
-                    #not working :(
-                    #had to use this method
+                    # self.widgettree.collide_point(self.center_x, self.y)
+                    # not working :(
+                    # had to use this method
                     if self.is_intersecting_widgettree(self.center_x, self.y):
                         node = self.widgettree.tree.get_node_at_pos(
                             (self.center_x, touch.y))
@@ -306,9 +307,9 @@ class PlaygroundDragElement(BoxLayout):
                     widget_from = 'playground'
 
                 else:
-                    #self.widgettree.collide_point(self.center_x, self.y)
-                    #not working :(
-                    #had to use this method
+                    # self.widgettree.collide_point(self.center_x, self.y)
+                    # not working :(
+                    # had to use this method
                     if self.is_intersecting_widgettree(self.center_x, self.y):
                         node = self.widgettree.tree.get_node_at_pos(
                             (self.center_x, touch.y))
@@ -375,9 +376,9 @@ class PlaygroundDragElement(BoxLayout):
                                 child, self.center_x, self.y - 20)
 
                         else:
-                            #playground.add_widget_to_parent(child,target)
-                            #doesn't work, don't know why :/.
-                            #so, has to use this
+                            # playground.add_widget_to_parent(child,target)
+                            # doesn't work, don't know why :/.
+                            # so, has to use this
                             self.playground.add_widget_to_parent(type(child)(),
                                                                  target)
 
@@ -503,8 +504,8 @@ class Playground(ScatterPlane):
             target = self.find_target(local_x, local_y, self.root, widget)
 
         if not self.from_drag:
-            #wx, wy = target.to_widget(x, y)
-            #widget.pos = wx, wy
+            # wx, wy = target.to_widget(x, y)
+            # widget.pos = wx, wy
             widget.pos = 0, 0
             self.add_widget_to_parent(widget, target)
 
@@ -532,7 +533,7 @@ class Playground(ScatterPlane):
             local_x, local_y = widget.x - target.x, widget.y - target.y
             self.kv_code_input.set_property_value(
                 widget, 'pos_hint', "{'x': %f, 'y': %f}" % (
-                    local_x/target.width, local_y/target.height),
+                    local_x / target.width, local_y / target.height),
                 'ListPropery')
 
             if not from_undo:
@@ -635,8 +636,8 @@ class Playground(ScatterPlane):
            the changes done by currently opened project.
         '''
 
-        #Cleanup is called when project is created or loaded
-        #so this operation shouldn't be recorded in Undo
+        # Cleanup is called when project is created or loaded
+        # so this operation shouldn't be recorded in Undo
         if self.root:
             self.remove_widget_from_parent(self.root, from_undo=True,
                                            from_kv=True)
@@ -674,7 +675,7 @@ class Playground(ScatterPlane):
             self.root.parent.remove_widget(self.root)
             self.root = None
 
-        #self.tree.delete(widget)
+        # self.tree.delete(widget)
         root.ui_creator.widgettree.refresh()
         if not from_undo:
             root.undo_manager.push_operation(
@@ -703,7 +704,7 @@ class Playground(ScatterPlane):
                     is_child_complex = True
                     break
 
-            #if point lies in custom wigdet's child then return custom widget
+            # if point lies in custom wigdet's child then return custom widget
             if is_child_custom or is_child_complex:
                 if not widget and self._custom_widget_collides(child, x, y):
                     return child
@@ -859,7 +860,7 @@ class Playground(ScatterPlane):
                     is_child_custom = True
                     break
 
-            #find appropriate parent to add widget_to_paste
+            # find appropriate parent to add widget_to_paste
             while parent:
                 if isinstance(parent, Layout) and (not is_child_custom
                                                    or root_widget == parent):
@@ -943,8 +944,8 @@ class Playground(ScatterPlane):
         '''
         if not self.dragging and not self.drag_operation and\
                 self.selected_widget:
-            #x, y = self.to_local(*touch.pos)
-            #target = self.find_target(x, y, self.root)
+            # x, y = self.to_local(*touch.pos)
+            # target = self.find_target(x, y, self.root)
             drag_widget = self.selected_widget
             self._widget_x, self._widget_y = drag_widget.x, drag_widget.y
             index = self.selected_widget.parent.children.index(drag_widget)

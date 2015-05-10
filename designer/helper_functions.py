@@ -54,7 +54,7 @@ def get_indent_level(string):
     indent = 0
     total_lines = len(lines)
     while line < total_lines and indent == 0:
-        indent = len(line)-len(line.lstrip())
+        indent = len(line) - len(line.lstrip())
         line = lines[lineno]
         line += 1
 

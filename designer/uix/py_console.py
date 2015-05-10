@@ -85,11 +85,11 @@ class Shell(code.InteractiveConsole):
         """Execute a code object.
 
         When an exception occurs, self.showtraceback() is called to
-        display a traceback.  All exceptions are caught except
+        display a traceback. All exceptions are caught except
         SystemExit, which is reraised.
 
         A note about KeyboardInterrupt: this exception may occur
-        elsewhere in this code, and may not always be caught.  The
+        elsewhere in this code, and may not always be caught. The
         caller should be prepared to deal with it.
 
         """
@@ -195,7 +195,7 @@ class InteractiveShellInput(TextInput):
         '''Override of _keyboard_on_key_down.
         '''
         if keycode[0] == 13:
-            #For enter
+            # For enter
             self.last_line = self.text[self._cursor_pos:]
             self.dispatch('on_ready_to_input')
 

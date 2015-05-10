@@ -26,7 +26,7 @@ class DesignerSandbox(Sandbox):
         '''Override of __exit__
         '''
         self._context.pop()
-        #print 'EXITING THE SANDBOX', (self, _type, value, tb)
+        # print 'EXITING THE SANDBOX', (self, _type, value, tb)
         if _type is not None:
             return self.on_exception(value, tb=tb)
 

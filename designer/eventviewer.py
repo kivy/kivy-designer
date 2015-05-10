@@ -139,7 +139,7 @@ class NewEventTextInput(TextInput):
         '''Override of 'insert_text' of :class:`kivy.uix.textinput.TextInput`
         '''
         if '\n' in substring:
-            #Enter pressed create a new event
+            # Enter pressed create a new event
             substring = substring.replace('\n', '')
             if self.text[:3] == 'on_':
                 self.dispatch('on_create_event')
@@ -211,7 +211,7 @@ class EventViewer(PropertyViewer):
             add(ip)
 
         if self.project_loader.is_widget_custom(self.widget):
-            #Allow adding a new event only if current widget is a custom rule
+            # Allow adding a new event only if current widget is a custom rule
             add(EventLabel(text='Type and press enter to \n'
                            'create a new event'))
             txt = NewEventTextInput(
@@ -223,14 +223,14 @@ class EventViewer(PropertyViewer):
     def create_event(self, txt):
         '''This function will create a new event given by 'txt' to the widget.
         '''
-        #Find the python file of widget
+        # Find the python file of widget
         py_file = None
         for rule in self.project_loader.class_rules:
             if rule.name == type(self.widget).__name__:
                 py_file = rule.file
                 break
 
-        #Open it in DesignerTabbedPannel
+        # Open it in DesignerTabbedPannel
         rel_path = py_file.replace(self.project_loader.proj_dir, '')
         if rel_path[0] == '/' or rel_path[0] == '\\':
             rel_path = rel_path[1:]
@@ -244,7 +244,7 @@ class EventViewer(PropertyViewer):
     def _add_event(self, *args):
         '''This function will create a new event given by 'txt' to the widget.
         '''
-        #Find the class definition
+        # Find the class definition
         py_code_input = None
         txt = self.txt
         rel_path = self.rel_path

@@ -234,7 +234,7 @@ class KivyConsole(GridLayout):
     def __init__(self, **kwargs):
         self.register_event_type('on_subprocess_done')
         super(KivyConsole, self).__init__(**kwargs)
-        #initialisations
+        # initialisations
         self.txtinput_command_line_refocus = False
         self.txtinput_run_command_refocus = False
         self.win = None
@@ -245,7 +245,7 @@ class KivyConsole(GridLayout):
         self.cur_dir = os.getcwdu()
         self.stdout = std_in_out(self, 'stdout')
         self.stdin = std_in_out(self, 'stdin')
-        #self.stderror = stderror(self)
+        # self.stderror = stderror(self)
         # delayed initialisation
         Clock.schedule_once(self._initialize)
         self_change_txtcache = self._change_txtcache
@@ -304,11 +304,11 @@ class KivyConsole(GridLayout):
         if txt == '':
             return
         try:
-            #self._skip_textcache = True
+            # self._skip_textcache = True
             self.textcache = self.textcache[-self.cached_history:]
         except IndexError:
             pass
-            #self._skip_textcache = False
+            # self._skip_textcache = False
 
     def on_keyboard(self, *l):
         ticl = self.txtinput_command_line
@@ -513,8 +513,8 @@ class KivyConsole(GridLayout):
                 instance.text = u''
 
     def add_to_cache(self, _string):
-        #os.write(self.stdout.stdout_pipe, _string.encode('utf-8'))
-        #self.stdout.flush()
+        # os.write(self.stdout.stdout_pipe, _string.encode('utf-8'))
+        # self.stdout.flush()
         self.textcache.append(_string)
         _string = None
 
@@ -524,7 +524,7 @@ class KivyConsole(GridLayout):
         command_history = self.command_history
 
         def remove_command_interaction_widgets(*l):
-            #command finished:remove widget responsible for interaction with it
+            # command finished:remove widget responsible for interaction with it
             parent.remove_widget(self.interact_layout)
             self.interact_layout = None
             # enable running a new command
@@ -554,7 +554,7 @@ class KivyConsole(GridLayout):
                 sys.stdout = self.stdout
                 Clock_schedule_once = Clock.schedule_once
                 try:
-                    #execute command
+                    # execute command
                     self.popen_obj = popen = subprocess.Popen(
                         cmd,
                         bufsize=0,
@@ -780,7 +780,7 @@ class std_in_out(object):
                 Logger.Debug('console_shell: no more data')
                 return
             self.textcache = txt[x:]
-            ###self. write to ...
+            # ##self. write to ...
             return txt[:x]
 
     def flush(self):

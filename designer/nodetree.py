@@ -115,7 +115,7 @@ class WidgetsTree(ScrollView):
         self._clear_tree(self.tree, self.tree.root)
         self.recursive_insert(self.playground.root, self.tree.root)
         self._clean_cache()
-    
+
     def _clean_cache(self):
         for node, wid in self._widget_cache.items():
             try:

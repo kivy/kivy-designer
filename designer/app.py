@@ -141,13 +141,14 @@ class Designer(FloatLayout):
        :data:`recent_files_cont_menu` is a
        :class:`~kivy.properties.ObjectProperty`
     '''
-    
+
     @property
     def save_window_size(self):
         '''Save window size on exit.
         '''
         return bool(int(self.designer_settings.config_parser.getdefault(
-            'desktop', 'save_window_size', 1))) if Config.getboolean('kivy', 'desktop') else False
+            'desktop', 'save_window_size', 1
+        ))) if Config.getboolean('kivy', 'desktop') else False
 
     def __init__(self, **kwargs):
         super(Designer, self).__init__(**kwargs)
@@ -165,23 +166,31 @@ class Designer(FloatLayout):
         Clock.schedule_interval(
             self.project_loader.perform_auto_save,
             int(self.designer_settings.config_parser.getdefault(
-                'global', 'auto_save_time', 5))*60)
-        
+                'global', 'auto_save_time', 5)) * 60)
+
         Window.bind(on_resize=self._write_window_size)
         Window.bind(on_request_close=self.on_request_close)
 
     def _write_window_size(self, *_):
         '''Write updated window size to config
         '''
-        self.designer_settings.config_parser.set('internal', 'window_width', Window.size[0])
-        self.designer_settings.config_parser.set('internal', 'window_height', Window.size[1])
+        self.designer_settings.config_parser.set(
+            'internal', 'window_width', Window.size[0]
+        )
+        self.designer_settings.config_parser.set(
+            'internal', 'window_height', Window.size[1]
+        )
         self.designer_settings.config_parser.write()
 
     def restore_window_size(self, *_):
         '''Restore window size from previous application run
         '''
-        width = int(self.designer_settings.config_parser.getdefault('internal', 'window_width', 800))
-        height = int(self.designer_settings.config_parser.getdefault('internal', 'window_height', 600))
+        width = int(self.designer_settings.config_parser.getdefault(
+            'internal', 'window_width', 800
+        ))
+        height = int(self.designer_settings.config_parser.getdefault(
+            'internal', 'window_height', 600
+        ))
         Window.size = width, height
 
     def show_help(self, *args):
@@ -211,7 +220,7 @@ class Designer(FloatLayout):
         Clock.schedule_interval(
             self.project_loader.perform_auto_save,
             int(self.designer_settings.config_parser.getdefault(
-                'global', 'auto_save_time', 5))*60)
+                'global', 'auto_save_time', 5)) * 60)
 
         self.ui_creator.kv_code_input.reload_kv = \
             bool(self.designer_settings.config_parser.getdefault(
@@ -220,7 +229,7 @@ class Designer(FloatLayout):
         self.recent_manager.max_recent_files = \
             int(self.designer_settings.config_parser.getdefault(
                 'global', 'num_recent_files', 5))
-        
+
         if self.save_window_size:
             self._write_window_size()
 
@@ -276,7 +285,7 @@ class Designer(FloatLayout):
         '''Event Handler called when Project is modified outside Kivy Designer
         '''
 
-        #To dispatch modified event only once for all files/folders of proj_dir
+        # To dispatch modified event only once for all files/folders of proj_dir
         if self._proj_modified_outside:
             return
 
@@ -296,7 +305,7 @@ class Designer(FloatLayout):
         '''Perform reload of project after it is modified
         '''
 
-        #Perform reload of project after it is modified
+        # Perform reload of project after it is modified
         self._popup.dismiss()
         self.project_watcher.allow_event_dispatch = False
         self._perform_open(self.project_loader.proj_dir)
@@ -547,7 +556,7 @@ class Designer(FloatLayout):
 
         try:
             selection = self._select_class.listview.adapter.selection[0].text
-            
+
             with self.ui_creator.playground.sandbox:
                 root_widget = self.project_loader.set_root_widget(selection)
                 self.ui_creator.playground.add_widget_to_parent(root_widget,
@@ -555,9 +564,9 @@ class Designer(FloatLayout):
                                                                 from_undo=True)
                 self.ui_creator.kv_code_input.text = \
                     self.project_loader.get_root_str()
-                
+
                 self._select_class_popup.dismiss()
-                
+
         except:
             self.about_dlg = AboutDialog()
             self._popup = Popup(title='About Kivy Designer',
@@ -566,11 +575,13 @@ class Designer(FloatLayout):
                                 auto_dismiss=False)
             self._popup.open()
             self.about_dlg.bind(on_cancel=self._cancel_popup)
-            
+
             invalid_selection = Popup(title='Invalid Selection',
-                                      content=Label(text='Please Choose a Valid Root Widget'),
+                                      content=Label(text=(
+                                          'Please Choose a'
+                                          'Valid Root Widget')),
                                       auto_dismiss=True,
-                                      size_hint=(.5,.5))
+                                      size_hint=(.5, .5))
             invalid_selection.open()
 
     def _select_class_cancel(self, *args):
@@ -626,12 +637,12 @@ class Designer(FloatLayout):
 
                     self.designer_content.toolbox.add_custom()
 
-                #to test listview
-                #root_wigdet = None
+                # to test listview
+                # root_wigdet = None
                 root_wigdet = self.project_loader.get_root_widget()
 
                 if not root_wigdet:
-                    #Show list box showing widgets
+                    # Show list box showing widgets
                     self._select_class = SelectClass(
                         self.project_loader.class_rules)
 
@@ -653,7 +664,7 @@ class Designer(FloatLayout):
                         self.project_loader.get_full_str()
 
                 self.recent_manager.add_file(file_path)
-                #Record everything for later use
+                # Record everything for later use
                 self.project_loader.record()
                 self.designer_content.update_tree_view(self.project_loader)
                 self._add_designer_content()
@@ -1178,7 +1189,7 @@ class Designer(FloatLayout):
                 'env variables', 'env', '')
             for env in envs.split(' '):
                 self.ui_creator.kivy_console.environment[
-                    env[:env.find('=')]] = env[env.find('=')+1:]
+                    env[:env.find('=')]] = env[env.find('=') + 1:]
 
         for _file in self.project_loader.file_list:
             if 'main.py' in os.path.basename(_file):
@@ -1265,7 +1276,8 @@ class DesignerApp(App):
         Factory.register('DesignerLinkLabel', module='designer.start_page')
         Factory.register('RecentFilesBox', module='designer.start_page')
         Factory.register('ContextMenu', module='designer.uix.contextual')
-        Factory.register('PlaygroundSizeSelector', module='designer.uix.playground_size_selector')
+        Factory.register('PlaygroundSizeSelector',
+                         module='designer.uix.playground_size_selector')
 
         self._widget_focused = None
         self.root = Designer()
@@ -1311,10 +1323,12 @@ class DesignerApp(App):
         self.root.ui_creator.playground.sandbox.bind(
             on_getting_exception=self.root.on_sandbox_getting_exception)
 
-        self.bind(widget_focused=
-                  self.root.ui_creator.propertyviewer.setter('widget'))
-        self.bind(widget_focused=
-                  self.root.ui_creator.eventviewer.setter('widget'))
+        self.bind(
+            widget_focused=self.root.ui_creator.propertyviewer.setter('widget')
+        )
+        self.bind(
+            widget_focused=self.root.ui_creator.eventviewer.setter('widget')
+        )
 
         self.focus_widget(self.root.ui_creator.playground.root)
 

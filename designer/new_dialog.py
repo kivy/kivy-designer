@@ -69,7 +69,8 @@ class NewProjectDialog(BoxLayout):
     def __init__(self, **kwargs):
         super(NewProjectDialog, self).__init__(**kwargs)
         item_strings = NEW_PROJECTS.keys()
-        self.adapter = ListAdapter(cls=Factory.DesignerListItemButton, data=item_strings,
+        self.adapter = ListAdapter(cls=Factory.DesignerListItemButton,
+                                   data=item_strings,
                                    selection_mode='single',
                                    allow_empty_selection=False)
         self.adapter.bind(on_selection_change=self.on_adapter_selection_change)
