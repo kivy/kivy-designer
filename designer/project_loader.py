@@ -1106,7 +1106,7 @@ class ProjectLoader(object):
         # Cleaning class rules
         for _rule in self.class_rules:
             for rule in Builder.rules[:]:
-                if rule[1].name == '<'+_rule.name+'>':
+                if rule[1].name == '<' + _rule.name + '>':
                     Builder.rules.remove(rule)
                     break
 

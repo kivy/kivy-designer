@@ -85,11 +85,11 @@ class Shell(code.InteractiveConsole):
         """Execute a code object.
 
         When an exception occurs, self.showtraceback() is called to
-        display a traceback.  All exceptions are caught except
+        display a traceback. All exceptions are caught except
         SystemExit, which is reraised.
 
         A note about KeyboardInterrupt: this exception may occur
-        elsewhere in this code, and may not always be caught.  The
+        elsewhere in this code, and may not always be caught. The
         caller should be prepared to deal with it.
 
         """

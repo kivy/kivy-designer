@@ -10,3 +10,15 @@ hook:
 	# consistency.
 	cp tools/pep8checker/pre-commit.githook .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
+
+style:
+	$(PYTHON) $(CHECKSCRIPT) .
+
+stylereport:
+	$(PYTHON) $(CHECKSCRIPT) -html .
+
+help:
+	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  hook           add Pep-8 checking as a git precommit hook"
+	@echo "  style          to check Python code for style hints."
+	@echo "  style-report   make html version of style hints"
