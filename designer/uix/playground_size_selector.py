@@ -149,7 +149,7 @@ class PlaygroundSizeView(ModalView):
             grid = GridLayout(rows=4)
 
             def sort_sizes(item):
-                return item[1][1]*item[1][0]
+                return item[1][1] * item[1][0]
 
             values = sorted(values, key=sort_sizes, reverse=True)
             for name, size in values:

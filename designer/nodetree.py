@@ -128,7 +128,6 @@ class WidgetsTree(ScrollView):
         for widget in list_to_del:
             del self._widget_cache[widget]
 
-
     def on_touch_up(self, touch):
         '''Default event handler for 'on_touch_up' event.
         '''
