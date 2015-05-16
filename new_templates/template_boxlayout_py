@@ -1,12 +1,14 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 
+
 class RootWidget(BoxLayout):
     '''This the class representing your root widget.
        By default it is inherited from BoxLayout,
        you can use any other layout/widget depending on your usage.
     '''
     pass
+
 
 class MainApp(App):
     '''This is the main class of your app.
@@ -20,7 +22,8 @@ class MainApp(App):
        in kv language::
 
          on_release: print(app.title)
-       Name of the .kv file that is auto-loaded is derived from the name of this cass::
+       Name of the .kv file that is auto-loaded is derived from the name
+       of this class::
 
          MainApp = main.kv
          MainClass = mainclass.kv

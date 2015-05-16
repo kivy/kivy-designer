@@ -3,12 +3,14 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import NumericProperty
 from kivy.lang import Builder
 
+
 class RootWidget(ScreenManager):
     '''This the class representing your root widget.
        By default it is inherited from ScreenManager,
        you can use any other layout/widget depending on your usage.
     '''
     pass
+
 
 class MainApp(App):
     '''This is the main class of your app.
@@ -22,13 +24,15 @@ class MainApp(App):
        in kv language::
 
          on_release: print(app.title)
-       Name of the .kv file that is auto-loaded is derived from the name of this cass::
+       Name of the .kv file that is auto-loaded is derived from the name
+       of this class::
 
          MainApp = main.kv
          MainClass = mainclass.kv
 
        The App part is auto removed and the whole name is lowercased.
     '''
+
     def build(self):
         '''Your app will be build from here.
            Return your widget here.
