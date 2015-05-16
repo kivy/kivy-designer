@@ -117,16 +117,13 @@ class WidgetsTree(ScrollView):
         self._clean_cache()
 
     def _clean_cache(self):
-        list_to_del = []
-        for node, wid in self._widget_cache.items():
+        for node, wid in list(self._widget_cache.items()):
             try:
                 if node and node.parent and wid and wid.parent_node:
                     continue
             except ReferenceError:
                 pass
-            list_to_del.append(node)
-        for widget in list_to_del:
-            del self._widget_cache[widget]
+            del self._widget_cache[node]
 
     def on_touch_up(self, touch):
         '''Default event handler for 'on_touch_up' event.

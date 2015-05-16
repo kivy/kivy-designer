@@ -388,7 +388,7 @@ class KivyConsole(GridLayout):
                     starts_with_is_not_None = starts_with is not None
                     try:
                         dir_list = os.listdir(cur_dir)
-                    except (OSError) as err:
+                    except OSError as err:
                         self.add_to_cache(u''.join((err.strerror, '\n')))
                         return
                     if starts_with_is_not_None:
@@ -640,7 +640,7 @@ class KivyConsole(GridLayout):
                     else:
                         os.chdir(self.cur_dir + os.sep + command[3:])
                     self.cur_dir = os.getcwdu()
-                except (OSError) as err:
+                except OSError as err:
                     Logger.debug('Shell Console: err:' + err.strerror +
                                  ' directory:' + command[3:])
                     add_to_cache(u''.join((err.strerror, '\n')))
@@ -731,7 +731,7 @@ class std_in_out(object):
                             partial(self_update_cache, txt_line, obj), 0)
                         self_flush()
                     txt_line = ''
-        except (OSError) as e:
+        except OSError as e:
             Logger.exception(e)
 
     def close(self):
