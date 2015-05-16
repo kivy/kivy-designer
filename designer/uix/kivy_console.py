@@ -251,6 +251,17 @@ class KivyConsole(GridLayout):
         self_change_txtcache = self._change_txtcache
         _trig = Clock.create_trigger(self_change_txtcache)
         self.bind(textcache=_trig)
+        self._hostname = 'unknown'
+        try:
+            if hasattr(os, 'uname'):
+                self._hostname = os.uname()[1]
+            else:
+                self._hostname = os.environ.get('COMPUTERNAME', 'unknown')
+        except Exception:
+            pass
+        self._username = os.environ.get('USER', '')
+        if not self._username:
+            self._username = os.environ.get('USERNAME', 'unknown')
 
     def clear(self, *args):
         self.txtinput_history_box.text = ''
@@ -281,13 +292,8 @@ class KivyConsole(GridLayout):
             widg.focus = t_f
 
     def prompt(self, *args):
-        _platform = ''
-        if hasattr(os, 'uname'):
-            _platform = os.uname()
-        else:
-            _platform = os.environ.get('COMPUTERNAME')
         return "[%s@%s %s]>> " % (
-            os.environ.get('USERNAME', 'UNKNOWN'), _platform[1],
+            self._username, self._hostname,
             os.path.basename(str(self.cur_dir)))
 
     def _change_txtcache(self, *args):
