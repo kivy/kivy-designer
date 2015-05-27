@@ -2,6 +2,8 @@ import code
 import sys
 import threading
 
+from six import exec_
+
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
@@ -96,7 +98,7 @@ class Shell(code.InteractiveConsole):
         org_stdout = sys.stdout
         sys.stdout = PseudoFile(self)
         try:
-            exec _code in self.locals
+            exec(_code, self.locals)
         except SystemExit:
             raise
         except:

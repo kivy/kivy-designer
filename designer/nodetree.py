@@ -117,7 +117,7 @@ class WidgetsTree(ScrollView):
         self._clean_cache()
 
     def _clean_cache(self):
-        for node, wid in self._widget_cache.items():
+        for node, wid in list(self._widget_cache.items()):
             try:
                 if node and node.parent and wid and wid.parent_node:
                     continue

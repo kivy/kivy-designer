@@ -85,7 +85,10 @@ __all__ = ('KivyConsole', )
 
 import shlex
 import subprocess
-import thread
+try:
+    import thread
+except ImportError:
+    import _thread as thread
 import os
 import sys
 from functools import partial
@@ -242,7 +245,10 @@ class KivyConsole(GridLayout):
         self.command_history = []
         self.command_history_pos = 0
         self.command_status = 'closed'
-        self.cur_dir = os.getcwdu()
+        if sys.version_info >= (3, 0):
+            self.cur_dir = os.getcwd()
+        else:
+            self.cur_dir = os.getcwdu()
         self.stdout = std_in_out(self, 'stdout')
         self.stdin = std_in_out(self, 'stdin')
         # self.stderror = stderror(self)
@@ -382,7 +388,7 @@ class KivyConsole(GridLayout):
                     starts_with_is_not_None = starts_with is not None
                     try:
                         dir_list = os.listdir(cur_dir)
-                    except OSError, err:
+                    except OSError as err:
                         self.add_to_cache(u''.join((err.strerror, '\n')))
                         return
                     if starts_with_is_not_None:
@@ -585,7 +591,7 @@ class KivyConsole(GridLayout):
                             popen_stdout_flush()
                         add_to_cache(txt.decode('utf8'))
                         txt = popen_stdout_r()
-                except OSError or ValueError, err:
+                except (OSError, ValueError) as err:
                     add_to_cache(u''.join((str(err.strerror),
                                            ' < ', command, ' >\n')))
                 sys.stdout = prev_stdout
@@ -634,7 +640,7 @@ class KivyConsole(GridLayout):
                     else:
                         os.chdir(self.cur_dir + os.sep + command[3:])
                     self.cur_dir = os.getcwdu()
-                except OSError, err:
+                except OSError as err:
                     Logger.debug('Shell Console: err:' + err.strerror +
                                  ' directory:' + command[3:])
                     add_to_cache(u''.join((err.strerror, '\n')))
@@ -725,7 +731,7 @@ class std_in_out(object):
                             partial(self_update_cache, txt_line, obj), 0)
                         self_flush()
                     txt_line = ''
-        except OSError, e:
+        except OSError as e:
             Logger.exception(e)
 
     def close(self):

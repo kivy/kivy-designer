@@ -1,7 +1,6 @@
 from functools import partial
 from kivy.properties import ObjectProperty, StringProperty, OptionProperty
 from kivy.uix.accordion import AccordionItem
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.modalview import ModalView
@@ -149,20 +148,10 @@ class PlaygroundSizeView(ModalView):
         for title, values in self.default_sizes:
             grid = GridLayout(rows=4)
 
-            def sort_sizes(a, b):
-                sa, sb = a[1], b[1]
-                if sa[1] > sb[1]:
-                    return -1
-                elif sa[1] < sb[1]:
-                    return 1
-                else:
-                    if sa[0] > sb[0]:
-                        return -1
-                    elif sa[0] < sb[0]:
-                        return 1
-                    return 0
+            def sort_sizes(item):
+                return item[1][1] * item[1][0]
 
-            values = sorted(values, sort_sizes)
+            values = sorted(values, key=sort_sizes, reverse=True)
             for name, size in values:
                 btn = ToggleButton(text='', markup=True)
                 btntext = ('%s\n[color=777777][size=%d]%dx%d[/size][/color]' %
@@ -202,7 +191,7 @@ class PlaygroundSizeView(ModalView):
         '''
         if not size_name:
             size_name = self.find_size()[0]
-        for name, btn in self._buttons.iteritems():
+        for name, btn in list(self._buttons.items()):
             if name == size_name:
                 btn.state = 'down'
                 self.accordion.select(btn.parent.parent.parent.parent.parent)
