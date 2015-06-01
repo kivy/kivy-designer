@@ -2,16 +2,12 @@ import code
 import sys
 import threading
 
-from six import exec_
-
 from kivy.uix.textinput import TextInput
-from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.base import runTouchApp
 from kivy.clock import Clock
-from kivy.base import EventLoop
 from kivy.properties import ObjectProperty, ListProperty,\
-    StringProperty, NumericProperty
+    StringProperty, NumericProperty, partial
 from kivy.lang import Builder
 
 Builder.load_string('''
@@ -100,12 +96,10 @@ class Shell(code.InteractiveConsole):
         try:
             exec(_code, self.locals)
         except SystemExit:
-            raise
+            print('It\'s not possible to exit from Kivy Designer'
+                                                    ' Python console')
         except:
             self.showtraceback()
-        else:
-            if code.softspace(sys.stdout, 0):
-                print
 
         sys.stdout = org_stdout
 
@@ -154,7 +148,7 @@ class Shell(code.InteractiveConsole):
                         continue
                     # Can be None if sys.stdin was redefined
                     encoding = getattr(sys.stdin, "encoding", None)
-                    if encoding and not isinstance(line, unicode):
+                    if encoding and isinstance(line, bytes):
                         line = line.decode(encoding)
                 except EOFError:
                     self.write("\n")
@@ -193,15 +187,33 @@ class InteractiveShellInput(TextInput):
         super(InteractiveShellInput, self).__init__(**kwargs)
         self.last_line = None
 
-    def _keyboard_on_key_down(self, window, keycode, text, modifiers):
+    def keyboard_on_key_down(self, window, keycode, text, modifiers):
         '''Override of _keyboard_on_key_down.
         '''
-        if keycode[0] == 13:
+        if keycode[0] == 9:
+            # tab, check if completer is available
+            try:
+                from rlcompleter import Completer
+                txt = self.text[self._cursor_pos:]
+
+                if txt.strip():
+                    suggestion = Completer(self.sh.locals).complete(txt, 0)
+                    if suggestion:
+                        self.select_text(self._cursor_pos,
+                                              self._cursor_pos + len(txt))
+                        self.delete_selection()
+                        Clock.schedule_once(
+                            partial(self.insert_text, suggestion))
+                    return False
+            except ImportError:
+                pass
+
+        elif keycode[0] == 13:
             # For enter
             self.last_line = self.text[self._cursor_pos:]
             self.dispatch('on_ready_to_input')
 
-        return super(InteractiveShellInput, self)._keyboard_on_key_down(
+        return super(InteractiveShellInput, self).keyboard_on_key_down(
             window, keycode, text, modifiers)
 
     def insert_text(self, substring, from_undo=False):
@@ -284,7 +296,8 @@ class PythonConsole(BoxLayout):
         self._thread = InteractiveThread(self.sh)
         self._thread.setDaemon(True)
 
-        Clock.schedule_once(self.run_sh, 0)
+        Clock.schedule_once(self.run_sh)
+        self.text_input.sh = self.sh
         self._ready_to_input = False
         self._exit = False
 
