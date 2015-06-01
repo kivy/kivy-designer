@@ -1,0 +1,10 @@
+[
+  {
+    "type": "options",
+    "title": "Log level",
+    "section": "buildozer",
+    "desc": "Buildozer Log Level",
+    "key": "ios.codesign.debug",
+    "options": ["Error Only", "Info", "Debug (with command output)"]
+  }
+]

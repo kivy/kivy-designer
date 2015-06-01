@@ -1,0 +1,172 @@
+[
+  {
+    "type": "numeric",
+    "title": "Android API",
+    "section": "app",
+    "desc": "Android API Level",
+    "key": "android.api"
+  },
+  {
+    "type": "numeric",
+    "title": "Android Minimum API",
+    "section": "app",
+    "desc": "Android Minimum API Level",
+    "key": "android.mimapi"
+  },
+  {
+    "type": "numeric",
+    "title": "Android SDK",
+    "section": "app",
+    "desc": "Android SDK version to use",
+    "key": "android.sdk"
+  },
+  {
+    "type": "string",
+    "title": "Android NDK",
+    "section": "app",
+    "desc": "Android NDK to use",
+    "key": "android.ndk"
+  },
+  {
+    "type": "string",
+    "title": "Android Permissions",
+    "section": "app",
+    "desc": "Application required permissions. Example: INTERNET,BLUETOOTH,CAMERA",
+    "key": "android.permissions"
+  },
+  {
+    "type": "bool",
+    "title": "Android Storage",
+    "section": "app",
+    "desc": "Android private/public storage",
+    "key": "android.permissions",
+    "values": ["Private", "Public"]
+  },
+  {
+    "type": "string",
+    "title": "Android NDK Path",
+    "section": "app",
+    "desc": "Custom Android NDK path. If empty, it will be automatically downloaded",
+    "key": "android.ndk_path"
+  },
+  {
+    "type": "string",
+    "title": "Android SDK Path",
+    "section": "app",
+    "desc": "Custom Android SDK path. If empty, it will be automatically downloaded",
+    "key": "android.sdk_path"
+  },
+  {
+    "type": "string",
+    "title": "python-for-android git clone path",
+    "section": "app",
+    "desc": "python-for-android git clone path (if empty, it will be automatically cloned from Github)",
+    "key": "android.p4a_dir"
+  },
+  {
+    "type": "string",
+    "title": "python-for-android whitelist",
+    "section": "app",
+    "desc": "python-for-android whitelist",
+    "key": "android.p4a_whitelist"
+  },
+  {
+    "type": "string",
+    "title": "Android entry point",
+    "section": "app",
+    "desc": "Main activity of your app. Default is ok for Kivy-based app",
+    "key": "android.entrypoint"
+  },
+  {
+    "type": "string",
+    "title": "External libraries",
+    "section": "app",
+    "desc": "List of extra Java .jar files to add to the libs. Example: foo.jar,bar.jar,path/to/more/*.jar",
+    "key": "android.add_jars"
+  },
+  {
+    "type": "string",
+    "title": "External Java files",
+    "section": "app",
+    "desc": "List of Java files to add to the android project (can be .java or a  directory containing the files)",
+    "key": "android.add_src"
+  },
+  {
+    "type": "string",
+    "title": "python-for-android branch",
+    "section": "app",
+    "desc": "Set a custom python-for-android branch",
+    "key": "android.branch"
+  },
+  {
+    "type": "string",
+    "title": "OUYA Console category",
+    "section": "app",
+    "desc": "OUYA Console category. Should be one of GAME or APP. If you leave this blank, OUYA support will not be enabled",
+    "key": "android.ouya.category"
+  },
+  {
+    "type": "string",
+    "title": "OUYA Console icon",
+    "section": "app",
+    "desc": "Filename of OUYA Console icon. It must be a 732x412 png image. Example: %(source.dir)s/data/ouya_icon.png",
+    "key": "android.ouya.icon.filename"
+  },
+  {
+    "type": "string",
+    "title": "Extra XMLs",
+    "section": "app",
+    "desc": "Extra XML file to include as an intent filters in <activity> tag",
+    "key": "android.manifest.intent_filters"
+  },
+  {
+    "type": "string",
+    "title": "Android additional libraries to copy into libs/armeabi - armeabi",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi. Example: libs/android/*.so",
+    "key": "android.add_libs_armeabi"
+  },
+  {
+    "type": "string",
+    "title": "Android additional libraries to copy into libs/armeabi - armeabi v7a",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi. Example: libs/android-v7/*.so",
+    "key": "android.add_libs_armeabi_v7a"
+  },
+  {
+    "type": "string",
+    "title": "Android additional libraries to copy into libs/armeabi - x86",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi. Example: libs/android-x86/*.so",
+    "key": "android.add_libs_x86"
+  },
+  {
+    "type": "string",
+    "title": "Android additional libraries to copy into libs/armeabi - mips",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi. Example: libs/android-mips/*.so",
+    "key": "android.add_libs_mips"
+  },
+  {
+    "type": "bool",
+    "title": "Screen wake lock",
+    "section": "app",
+    "desc": "Indicate whether the screen should stay on. Don't forget to add the WAKE_LOCK permission if you set this to True",
+    "key": "android.wakelock",
+    "values": ["Disabled", "Enabled"]
+  },
+  {
+    "type": "string",
+    "title": "Application meta-data",
+    "section": "app",
+    "desc": "Application meta-data to set (key=value format)",
+    "key": "android.meta_data"
+  },
+  {
+    "type": "string",
+    "title": "Add library project",
+    "section": "app",
+    "desc": "Android library project to add (will be added in the project.properties automatically.)",
+    "key": "android.library_references"
+  }
+]

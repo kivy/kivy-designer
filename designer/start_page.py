@@ -5,10 +5,12 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
+from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.metrics import pt
 from kivy.clock import Clock
+from designer.buildozer_spec_editor import BuildozerSpecEditor
 
 
 class DesignerLinkLabel(Button):
@@ -24,6 +26,15 @@ class DesignerLinkLabel(Button):
     def on_release(self, *args):
         '''Default event handler for 'on_release' event.
         '''
+        spec = BuildozerSpecEditor()
+        spec.load_settings('/home/neo/Programacao/OpenSource/github/Kivy-'
+                                'Tutorials/3_Introduction_Kivy_Designer/intro')
+        self._popup = Popup(title="Buildozer Spec",
+                            content=spec,
+                            size_hint=(0.9, 0.9),
+                            auto_dismiss=False)
+
+        self._popup.open()
         if self.link:
             webbrowser.open(self.link)
 

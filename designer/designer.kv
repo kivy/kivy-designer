@@ -493,6 +493,44 @@
             size: self.size
             source: self.background_normal
 
+#
+# Buildozer Spec Editor
+#
+
+<BuildozerSpecEditor>:
+    interface_cls: 'SpecEditorInterface'
+
+<-SpecEditorInterface>:
+    orientation: 'horizontal'
+    menu: menu
+    content: content
+    button_bar: button_bar
+    SpecMenuSidebar:
+        id: menu
+    GridLayout:
+        id: button_bar
+        cols: 1
+        Label:
+            text: 'Buildozer Spec Editor'
+            font_size: '16pt'
+            halign: 'center'
+            size_hint_y: None
+            height: '25pt'
+        Label:
+            text: 'GUI editor to buildozer.spec'
+            text_size: self.size
+            font_size: '11pt'
+            halign: 'center'
+            valign: 'top'
+            size_hint_y: None
+            height: '25pt'
+        SpecContentPanel:
+            id: content
+            current_uid: menu.selected_uid
+
+<SpecMenuSidebar>:
+<SpecContentPanel>:
+
 <EditContView>:
     ActionPrevious:
         title: "Edit"
