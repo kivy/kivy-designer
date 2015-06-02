@@ -438,6 +438,13 @@ class ContextSubMenu(MenuButton):
         if hasattr(widget, 'cont_menu'):
             widget.cont_menu = self.cont_menu
 
+    def remove_children(self):
+        '''Clear _list_children[]
+        '''
+        for child, index in self._list_children:
+            self.container.remove_widget(child)
+        self._list_children = []
+
     def on_cont_menu(self, *args):
         '''Default handler for cont_menu.
         '''

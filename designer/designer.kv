@@ -128,6 +128,91 @@
         size: '44pt', '22pt'
         on_release: root.dispatch('on_cancel')
 
+#
+# Profile Settings
+#
+
+<ProfileSettings>:
+    interface_cls: 'ProfileSettingsInterface'
+
+<-ProfileSettingsInterface>:
+    orientation: 'horizontal'
+    menu: menu
+    content: content
+    button_bar: button_bar
+    ProfileMenuSidebar:
+        id: menu
+    GridLayout:
+        id: button_bar
+        btn_delete_prof: btn_delete_prof
+        btn_select_prof: btn_select_prof
+        cols: 1
+        GridLayout:
+            cols: 2
+            size_hint_y: None
+            height: 50
+            spacing: 5
+            padding: 5
+            Button:
+                id: btn_select_prof
+                text: 'Use this Profile'
+                size_hint: 0.5, None
+                height: 40
+            Button:
+                id: btn_delete_prof
+                disabled: True
+                text: 'Delete Profile'
+                size_hint: 0.5, None
+                height: 40
+        ProfileContentPanel:
+            id: content
+            current_uid: menu.selected_uid
+
+<-ProfileMenuSidebar>:
+    size_hint_x: None
+    width: '200dp'
+    buttons_layout: menu
+    close_button: button_close
+    new_button: button_new
+    ScrollView:
+        id: e_scroll
+        y: root.y + 70
+        x: root.x
+        width: root.width
+        size_hint_y: None
+        height: root.height - 75
+        GridLayout:
+            size_hint_y: None
+            height: max(e_scroll.height, self.minimum_height)
+            cols: 1
+            id: menu
+            orientation: 'vertical'
+            padding: 5
+            spacing: 5
+            canvas.after:
+                Color:
+                    rgb: .2, .2, .2
+                Rectangle:
+                    pos: self.right - 1, self.y
+                    size: 1, self.height
+    Button:
+        text: 'New'
+        id: button_new
+        size_hint: None, None
+        width: root.width - dp(20)
+        height: 30
+        pos: root.x + dp(10), root.y + 40
+        font_size: '15sp'
+    Button:
+        text: 'Close'
+        id: button_close
+        size_hint: None, None
+        width: root.width - dp(20)
+        height: 30
+        pos: root.x + dp(10), root.y + 5
+        font_size: '15sp'
+
+<ProfileContentPanel>:
 
 <MenuHeader>
     color: (1, 1, 1, 1) if self.state == 'normal' else (0, 0, 0, 1)

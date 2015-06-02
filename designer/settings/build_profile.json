@@ -1,0 +1,54 @@
+[
+  {
+    "type": "string",
+    "title": "Name",
+    "section": "profile",
+    "desc": "Profile Name",
+    "key": "name"
+  },
+  {
+    "type": "options",
+    "title": "Builder",
+    "section": "profile",
+    "desc": "Select the builder.",
+    "options": ["Desktop", "Buildozer", "Hanga"],
+    "key": "builder"
+  },
+  {
+    "type": "options",
+    "title": "Target",
+    "section": "profile",
+    "desc": "Select the build target",
+    "options": ["Desktop", "Android", "iOS"],
+    "key": "target"
+  },
+  {
+    "type": "options",
+    "title": "Mode",
+    "section": "profile",
+    "desc": "Select the build mode.\nUsed with Android and iOS only.",
+    "options": ["Debug", "Release"],
+    "key": "mode"
+  },
+  {
+    "type": "bool",
+    "title": "Install on Device",
+    "section": "profile",
+    "desc": "Automatically install on device. \nUsed with Android and iOS only.",
+    "key": "install"
+  },
+  {
+    "type": "bool",
+    "title": "Debug",
+    "section": "profile",
+    "desc": "Show application output on console. \nUsed with Android(logcat)",
+    "key": "debug"
+  },
+  {
+    "type": "bool",
+    "title": "Verbose",
+    "section": "profile",
+    "desc": "Show verbose information while building the app. \nUsed with Android and iOS only.",
+    "key": "verbose"
+  }
+]

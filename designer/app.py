@@ -1,5 +1,6 @@
 import webbrowser
 from designer.input_dialog import InputDialog
+from designer.profile_settings import ProfileSettings
 
 __all__ = ('DesignerApp', )
 
@@ -46,10 +47,11 @@ from designer.designer_content import DesignerContent
 from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
 from designer.designer_settings import DesignerSettings
-from designer.helper_functions import get_kivy_designer_dir
+from designer.helper_functions import get_kivy_designer_dir, show_alert
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
-from designer.uix.designer_action_items import DesignerActionButton
+from designer.uix.designer_action_items import DesignerActionButton, \
+    DesignerActionProfileCheck
 from designer.help_dialog import HelpDialog, AboutDialog
 from designer.uix.bug_reporter import BugReporterApp
 
@@ -172,6 +174,13 @@ class Designer(FloatLayout):
         self.designer_settings.bind(on_config_change=self._config_change)
         self.designer_settings.load_settings()
         self.designer_settings.bind(on_close=self._cancel_popup)
+
+        self.prof_settings = ProfileSettings()
+        self.prof_settings.bind(on_close=self._cancel_popup)
+        self.prof_settings.bind(on_changed=self.on_profiles_changed)
+        self.prof_settings.bind(
+            on_use_this_profile=self._perform_use_this_prof)
+        self.prof_settings.load_profiles()
 
         Clock.schedule_interval(
             self.project_loader.perform_auto_save,
@@ -921,6 +930,70 @@ class Designer(FloatLayout):
 
         self._popup.open()
 
+    def action_btn_select_prof_project_pressed(self, *args):
+        '''Event handler for "Select Profile" menu
+        '''
+        pass
+
+    def on_profiles_changed(self, *args):
+        '''Callback when there is a modification in the profile settings
+        '''
+        self.prof_settings.load_profiles()
+        self.fill_select_profile_menu()
+
+    def _perform_use_this_prof(self, *args):
+        '''Callback to "Use this Profile" button
+        '''
+        _config = args[0].selected_config
+        _config_path = _config.filename
+        self.designer_settings.config_parser.set('internal',
+                                                'default_profile',
+                                                _config_path)
+        self.designer_settings.config_parser.write()
+
+    def fill_select_profile_menu(self, *args):
+        '''Fill self.select_profile_cont_menu with available Build Profiles
+        '''
+        prof_menu = self.select_profile_cont_menu
+        prof_menu.remove_children()
+        group = 'profile'
+        for profile in sorted(self.prof_settings.config_parsers.keys()):
+            config = self.prof_settings.config_parsers[profile]
+            config_path = config.filename
+
+            prof_name = config.getdefault('profile', 'name', 'PROFILE')
+            if not prof_name.strip():
+                prof_name = 'PROFILE'
+
+            btn = DesignerActionProfileCheck(group=group,
+                                             allow_no_selection=False)
+            btn.text = prof_name
+            btn.checkbox.active = False
+
+            if self.designer_settings.config_parser.getdefault('internal',
+                                        'default_profile', '') == config_path:
+                btn.checkbox.active = True
+                self.selected_profile = config_path
+
+            btn.config_key = profile
+            btn.bind(on_active=self._perform_profile_selected)
+            prof_menu.add_widget(btn)
+
+        prof_menu._add_widget()
+
+    def _perform_profile_selected(self, *args):
+        '''Event handler to select profile radio button.
+        Save the selected config_parser path to the config
+        '''
+        if args[2]:
+            _config = self.prof_settings.config_parsers[args[0].config_key]
+            _config_path = _config.filename
+            self.designer_settings.config_parser.set('internal',
+                                                     'default_profile',
+                                                     _config_path)
+            self.designer_settings.config_parser.write()
+            self.selected_profile = _config_path
+
     def action_btn_recent_files_pressed(self, *args):
         '''Event Handler when ActionButton "Recent Projects" is pressed.
         '''
@@ -1323,6 +1396,32 @@ class Designer(FloatLayout):
 
         self._popup.open()
 
+    def action_btn_edit_prof_project_pressed(self, *args):
+        '''Event Handler when ActionButton "Edit Profiles" is pressed.
+        '''
+        self.prof_settings.parent = None
+        self.prof_settings.load_profiles()
+        self._popup = Popup(title="Build Profiles",
+                            content=self.prof_settings,
+                            size_hint=(None, None),
+                            size=(720, 480),
+                            auto_dismiss=False)
+        self._popup.open()
+
+    def check_selected_prof(self, *args):
+        '''Check if there is a selected build profile.
+        :return: True if ok. Show an alert and returns false if not.
+        '''
+        if self.selected_profile == '' or not \
+                        os.path.isfile(self.selected_profile):
+            show_alert('Profiler error', 'Please, select a build profile on'
+                            '\'Run\' -> \'Select Profile\' menu')
+            return False
+
+        self.profiler.load_profile(self.selected_profile,
+                                   self.project_loader.proj_dir)
+        return True
+
     def action_btn_run_project_pressed(self, *args):
         '''Event Handler when ActionButton "Run" is pressed.
         '''
@@ -1507,6 +1606,8 @@ class DesignerApp(App):
         self.create_kivy_designer_dir()
         self.root.start_page.recent_files_box.add_recent(
             self.root.recent_manager.list_files)
+
+        self.root.fill_select_profile_menu()
 
     def create_kivy_designer_dir(self):
         '''To create the ~/.kivy-designer dir
