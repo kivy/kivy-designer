@@ -1,0 +1,8 @@
+[
+  {
+    "type": "string",
+    "title": "Hanga API Key",
+    "section": "hanga",
+    "key": "hanga_api_key"
+  }
+]

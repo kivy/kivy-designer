@@ -1,4 +1,5 @@
 import os
+import designer
 
 from kivy.properties import ObjectProperty
 from kivy.config import ConfigParser
@@ -47,13 +48,17 @@ env =
             f.close()
 
         self.config_parser.read(file_path)
-        proj_prop_panel = self.create_json_panel(
-            'Project Properties', self.config_parser,
-            './designer/settings/proj_settings_proj_prop.json')
-        self.add_widget(proj_prop_panel)
-        self.add_json_panel(
-            'Shell Environment', self.config_parser,
-            './designer/settings/proj_settings_shell_env.json')
+        _dir = os.path.dirname(designer.__file__)
+        _dir = os.path.split(_dir)[0]
+        settings_dir = os.path.join(_dir, 'designer', 'settings')
+        self.add_json_panel('Shell Environment',
+                            self.config_parser,
+                            os.path.join(settings_dir,
+                                         'proj_settings_shell_env.json'))
+        self.add_json_panel('Project Properties',
+                            self.config_parser,
+                            os.path.join(settings_dir,
+                                         'proj_settings_proj_prop.json'))
 
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.

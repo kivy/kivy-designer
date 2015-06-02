@@ -1,0 +1,15 @@
+[
+  {
+    "type": "string",
+    "title": "Buildozer Path",
+    "section": "buildozer",
+    "key": "buildozer_path"
+  },
+  {
+    "type": "bool",
+    "title": "Create buildozer.spec Automatically",
+    "desc": "Create the spec file with the project",
+    "section": "buildozer",
+    "key": "create_buildozer_prj"
+  }
+]

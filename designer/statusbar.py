@@ -60,7 +60,7 @@ class StatusBar(BoxLayout):
         super(StatusBar, self).__init__(**kwargs)
         self.update_navbar = Clock.create_trigger(self._update_navbar)
 
-    def show_message(self, message):
+    def show_message(self, message, duration=None):
         '''To show a message in StatusBar
         '''
 
@@ -75,6 +75,14 @@ class StatusBar(BoxLayout):
         self.gridlayout.clear_widgets()
         self.gridlayout.add_widget(Label(text=message))
         self.gridlayout.children[0].text = message
+        Clock.unschedule(self._clear_message)
+        if duration:
+            Clock.schedule_once(self._clear_message, duration)
+
+    def _clear_message(self, *args):
+        '''Clear the status_bar message
+        '''
+        self.gridlayout.children[0].text = ''
 
     def on_app(self, instance, app):
         app.bind(widget_focused=self.update_navbar)

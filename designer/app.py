@@ -1,3 +1,6 @@
+import webbrowser
+from designer.input_dialog import InputDialog
+
 __all__ = ('DesignerApp', )
 
 import kivy
@@ -12,7 +15,7 @@ from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.layout import Layout
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.clock import Clock
 from kivy.uix import actionbar
 from kivy.garden.filebrowser import FileBrowser
@@ -135,11 +138,15 @@ class Designer(FloatLayout):
        :data:`start_page` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    recent_files_cont_menu = ObjectProperty(None)
-    '''The context sub menu, containing the recently opened/saved projects.
-       Reference of :class:`~designer.uix.contextual.ContextSubMenu`.
-       :data:`recent_files_cont_menu` is a
-       :class:`~kivy.properties.ObjectProperty`
+    select_profile_cont_menu = ObjectProperty(None)
+    '''Reference of
+        :class:`~designer.uix.designer_action_items.DesignerActionSubMenu`.
+       :data:`start_page` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    selected_profile = StringProperty('')
+    '''Selected profile settings path
+    :class:`~kivy.properties.StringProperty` and defaults to ''.
     '''
 
     @property
@@ -157,6 +164,7 @@ class Designer(FloatLayout):
         self.recent_manager = RecentManager()
         self.widget_to_paste = None
         self.designer_content = DesignerContent(size_hint=(1, None))
+        self.designer_content = self.designer_content.__self__
 
         self.designer_settings = DesignerSettings()
         self.designer_settings.bind(on_config_change=self._config_change)
@@ -182,6 +190,48 @@ class Designer(FloatLayout):
         )
         self.designer_settings.config_parser.write()
 
+    def load_view_settings(self, *args):
+        '''Load "View" menu saved settings
+        '''
+        proj_tree = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_proj_tree', True
+        )
+        if proj_tree == 'False':
+            self.ids.actn_chk_proj_tree.checkbox.active = False
+
+        props_events = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_prop_event', True
+        )
+        if props_events == 'False':
+            self.ids.actn_chk_prop_event.checkbox.active = False
+
+        wid_tree = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_widget_tree', True
+        )
+        if wid_tree == 'False':
+            self.ids.actn_chk_widget_tree.checkbox.active = False
+
+        status_bar = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_status_bar', True
+        )
+        if status_bar == 'False':
+            self.ids.actn_chk_status_bar.checkbox.active = False
+
+        kv_lang_area = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_kv_lang_area', True
+        )
+        if kv_lang_area == 'False':
+            self.ids.actn_chk_kv_lang_area.checkbox.active = False
+
+    def toggle_fullscreen(self, check, **kwargs):
+        '''
+        Event Handler when ActionCheckButton "Fullscreen" is changed.
+        '''
+        if check.checkbox.active is True:
+            Window.fullscreen = "auto"
+        else:
+            Window.fullscreen = False
+
     def restore_window_size(self, *_):
         '''Restore window size from previous application run
         '''
@@ -191,7 +241,19 @@ class Designer(FloatLayout):
         height = int(self.designer_settings.config_parser.getdefault(
             'internal', 'window_height', 600
         ))
-        Window.size = width, height
+        Window.size = max(width, 800), max(height, 600)
+
+    def open_repo(self, *args):
+        '''
+        Open the Kivy Designer repository
+        '''
+        webbrowser.open("https://github.com/kivy/kivy-designer")
+
+    def open_docs(self, *args):
+        '''
+        Open the Kivy docs
+        '''
+        webbrowser.open("http://kivy.org/docs/")
 
     def show_help(self, *args):
         '''Event handler for 'on_help' event of self.start_page
@@ -244,19 +306,21 @@ class Designer(FloatLayout):
                 return
 
         self.remove_widget(self.start_page)
+        self.start_page.parent = None
         self.add_widget(self.designer_content, 1)
 
+        self.ids['actn_btn_new_file'].disabled = False
         self.ids['actn_btn_save'].disabled = False
         self.ids['actn_btn_save_as'].disabled = False
-        self.ids['actn_chk_proj_tree'].disabled = False
-        self.ids['actn_chk_prop_event'].disabled = False
-        self.ids['actn_chk_widget_tree'].disabled = False
-        self.ids['actn_chk_status_bar'].disabled = False
-        self.ids['actn_chk_kv_lang_area'].disabled = False
-        self.ids['actn_btn_add_file'].disabled = False
-        self.ids['actn_btn_custom_widget'].disabled = False
-        self.ids['actn_btn_proj_pref'].disabled = False
-        self.ids['actn_btn_run_proj'].disabled = False
+        self.ids['actn_btn_close_proj'].disabled = False
+        self.ids['actn_menu_view'].disabled = False
+        self.ids['actn_menu_proj'].disabled = False
+        self.ids['actn_menu_run'].disabled = False
+
+        self.proj_settings = ProjectSettings(proj_loader=self.project_loader)
+        self.proj_settings.load_proj_settings()
+
+        Clock.schedule_once(self.load_view_settings, 0)
 
     def on_statusbar_height(self, *args):
         '''Callback for statusbar.height
@@ -402,7 +466,40 @@ class Designer(FloatLayout):
 
         return super(FloatLayout, self).on_touch_down(touch)
 
-    def action_btn_new_pressed(self, *args):
+    def action_btn_new_file_pressed(self, *args):
+        '''Event Handler when ActionButton "New Project" is pressed.
+        '''
+        self._input_dialog = InputDialog("File name:")
+
+        self._input_dialog.bind(on_confirm=self._perform_new_file,
+                                on_cancel=self._cancel_popup)
+        self._popup = Popup(title="Add new File", content=self._input_dialog,
+                            size_hint=(None, None), size=('200pt', '150pt'),
+                            auto_dimiss=False)
+        self._popup.open()
+
+    def _perform_new_file(self, *args):
+        '''
+        Create a new file in the project folder
+        '''
+        file_name = self._input_dialog.get_user_input()
+        if file_name.find('.') == -1:
+            file_name += '.py'
+        new_file = os.path.join(self.project_loader.proj_dir, file_name)
+        if os.path.exists(new_file):
+            self._input_dialog.lbl_error.text = 'File exists'
+            return
+
+        self.project_loader.proj_watcher.stop()
+        open(new_file, 'a').close()
+        self.project_loader.proj_watcher.start_watching(
+                self.project_loader.proj_dir)
+
+        self.designer_content.update_tree_view(self.project_loader)
+
+        self._cancel_popup()
+
+    def action_btn_new_project_pressed(self, *args):
         '''Event Handler when ActionButton "New" is pressed.
         '''
 
@@ -479,6 +576,7 @@ class Designer(FloatLayout):
                 self.designer_content.toolbox.add_custom()
 
         self.ui_creator.playground.sandbox.error_active = False
+        self.statusbar.show_message('Project created successfully', 5)
 
     def cleanup(self):
         '''To cleanup everything loaded by the current project before loading
@@ -523,6 +621,49 @@ class Designer(FloatLayout):
                             size_hint=(None, None), size=('200pt', '150pt'),
                             auto_dismiss=False)
         self._popup.open()
+
+    def action_btn_close_proj_pressed(self, *args):
+        '''
+        Event Handler when ActionButton "Close Project" is pressed.
+        '''
+        if not self._curr_proj_changed:
+            self._perform_close_project()
+            return
+
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be '
+                                               'lost.\n'
+                                               'Do you want to continue?')
+
+        self._confirm_dlg.bind(on_ok=self._perform_close_project,
+                               on_cancel=self._cancel_popup)
+
+        self._popup = Popup(title='Kivy Designer', content=self._confirm_dlg,
+                            size_hint=(None, None), size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+
+    def _perform_close_project(self, *args):
+        '''
+        Close the current project and go to the start page
+        '''
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
+
+        self.remove_widget(self.designer_content)
+        self.designer_content.parent = None
+        self.add_widget(self.start_page, 1)
+
+        self.ids['actn_btn_new_file'].disabled = True
+        self.ids['actn_btn_save'].disabled = True
+        self.ids['actn_btn_save_as'].disabled = True
+        self.ids['actn_btn_close_proj'].disabled = True
+        self.ids['actn_menu_view'].disabled = True
+        self.ids['actn_menu_proj'].disabled = True
+        self.ids['actn_menu_run'].disabled = True
+
+        self.project_watcher.stop()
+
+        self._curr_proj_changed = False
 
     def _show_open_dialog(self, *args):
         '''To show FileBrowser to "Open" a project
@@ -680,7 +821,6 @@ class Designer(FloatLayout):
            emits 'on_cancel' or equivalent.
         '''
 
-        self._proj_modified_outside = False
         self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
@@ -775,29 +915,25 @@ class Designer(FloatLayout):
         self._popup = Popup(title="Kivy Designer Settings",
                             content=self.designer_settings,
                             size_hint=(None, None),
-                            size=(600, 400), auto_dismiss=False)
+                            size=(720, 480), auto_dismiss=False)
 
         self._popup.open()
 
     def action_btn_recent_files_pressed(self, *args):
-        '''Event Handler when ActionButton "Recent Files" is pressed.
+        '''Event Handler when ActionButton "Recent Projects" is pressed.
         '''
-        pass
-
-    def fill_recent_menu(self, *args):
-        '''Fill self.recent_files_cont_menu with DesignerActionButton
-           of all Recent Files
-        '''
-        recent_menu = self.recent_files_cont_menu
-        for _file in self.recent_manager.list_files:
-            act_btn = DesignerActionButton(text=_file, shorten=True)
-            recent_menu.add_widget(act_btn)
-            act_btn.bind(on_release=self._recent_file_release)
+        self._recent_dlg = RecentDialog(self.recent_manager.list_files)
+        self._recent_dlg.bind(on_cancel=self._cancel_popup,
+                              on_select=self._recent_file_release)
+        self._popup = Popup(title='Recent Projects', content=self._recent_dlg,
+                            size_hint=(0.5, 0.5), auto_dismiss=False)
+        self._popup.open()
 
     def _recent_file_release(self, instance, *args):
         '''Event Handler for 'on_select' event of self._recent_dlg.
         '''
-        self._perform_open(instance.text)
+        self._perform_open(instance.get_selected_project())
+        self._cancel_popup(instance, args)
 
     def on_request_close(self, *args):
         '''Event Handler for 'on_request_close' event of Window.
@@ -971,7 +1107,9 @@ class Designer(FloatLayout):
     def _custom_browser_load(self, instance):
         '''Event Handler for 'on_success' event of self._custom_browser
         '''
-
+        # if there is no selected file
+        if len(instance.selection) < 1:
+            return
         file_path = instance.selection[0]
         self._popup.dismiss()
 
@@ -995,6 +1133,10 @@ class Designer(FloatLayout):
     def action_chk_btn_toolbox_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Toolbox" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                    'actn_chk_proj_tree',
+                                                    chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._toolbox_parent.add_widget(
@@ -1011,6 +1153,10 @@ class Designer(FloatLayout):
     def action_chk_btn_property_viewer_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Property Viewer" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                    'actn_chk_prop_event',
+                                                    chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._toggle_splitter_widget_tree()
@@ -1043,6 +1189,10 @@ class Designer(FloatLayout):
     def action_chk_btn_widget_tree_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Widget Tree" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                 'actn_chk_widget_tree',
+                                                 chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._toggle_splitter_widget_tree()
@@ -1091,6 +1241,10 @@ class Designer(FloatLayout):
     def action_chk_btn_status_bar_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "StatusBar" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                 'actn_chk_status_bar',
+                                                 chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._statusbar_parent.add_widget(self.statusbar)
@@ -1104,6 +1258,10 @@ class Designer(FloatLayout):
     def action_chk_btn_kv_area_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "KVLangArea" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                 'actn_chk_kv_lang_area',
+                                                 chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self.ui_creator.splitter_kv_code_input.height = \
@@ -1130,11 +1288,9 @@ class Designer(FloatLayout):
         '''Event Handler for 'on_added' event of self._add_file_dlg
         '''
 
-        self.statusbar.show_message('File successfully added to project')
+        self.statusbar.show_message('File successfully added to project', 5)
         self._popup.dismiss()
-        if self._add_file_dlg.target_file[3:] == '.py':
-            self.designer_content.add_file_to_tree_view(
-                self._add_file_dlg.target_file)
+        self.designer_content.update_tree_view(self.project_loader)
 
     def action_btn_add_file_pressed(self, *args):
         '''Event Handler when ActionButton "Add File" is pressed.
@@ -1148,20 +1304,20 @@ class Designer(FloatLayout):
         self._popup = Popup(title="Add File",
                             content=self._add_file_dlg,
                             size_hint=(None, None),
-                            size=(400, 300), auto_dismiss=False)
+                            size=(480, 320), auto_dismiss=False)
 
         self._popup.open()
 
-    def action_btn_project_pref_pressed(self, *args):
-        '''Event Handler when ActionButton "Project Prefences" is pressed.
+    def action_btn_project_settings_pressed(self, *args):
+        '''Event Handler when ActionButton "Project Settings" is pressed.
         '''
         self.proj_settings = ProjectSettings(proj_loader=self.project_loader)
         self.proj_settings.load_proj_settings()
         self.proj_settings.bind(on_close=self._cancel_popup)
-        self._popup = Popup(title="Project Preferences",
+        self._popup = Popup(title="Project Settings",
                             content=self.proj_settings,
                             size_hint=(None, None),
-                            size=(600, 400), auto_dismiss=False)
+                            size=(720, 480), auto_dismiss=False)
 
         self._popup.open()
 
@@ -1335,8 +1491,6 @@ class DesignerApp(App):
         self.create_kivy_designer_dir()
         self.root.start_page.recent_files_box.add_recent(
             self.root.recent_manager.list_files)
-
-        self.root.fill_recent_menu()
 
     def create_kivy_designer_dir(self):
         '''To create the ~/.kivy-designer dir

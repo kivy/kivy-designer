@@ -44,8 +44,79 @@
     Button:
         text: 'Close'
         size_hint: None, None
-        size: '44pt', '22pt'
+        size: '60pt', '30pt'
+        pos_hint: {'right': 1}
         on_release: root.dispatch('on_cancel')
+
+<InputDialog>:
+    orientation: 'vertical'
+    user_input: user_input
+    btn_confirm: btn_confirm
+    lbl_error: lbl_error
+    Label:
+        text: root.message
+        size_hint_x: None
+        halign: 'left'
+    Label:
+        id: lbl_error
+        text: ""
+        size_hint_x: None
+        halign: 'left'
+        color: [1, 0, 0, 1]
+    UserTextInput:
+        id: user_input
+        focus: True
+    Widget:
+
+    BoxLayout:
+        size_hint_y: None
+        height: '25pt'
+        Button:
+            id: btn_confirm
+            text: 'Confirm'
+            disabled: True
+            on_press: root.dispatch('on_confirm')
+        Button:
+            text: 'Cancel'
+            on_press: root.dispatch('on_cancel')
+
+<AboutDialog>:
+    Image:
+        source: 'data/logo/kivy-icon-512.png'
+        pos: root.pos
+        opacity: 0.2
+    BoxLayout:
+        orientation: 'vertical'
+        pos: root.pos
+        background_color: 0, 1, 0
+        padding: 10
+        Label:
+            id: title
+            text: 'Kivy Designer'
+            font_size: '26pt'
+            halign: 'center'
+            size_hint_y: None
+            height: '30pt'
+        Label:
+            id: subtitle
+            markup: True
+            text: '[i]Innovative User Interfaces, Desktop and Mobile Development Made Easy.[/i]'
+            font_size: '10pt'
+            halign: 'center'
+            size_hint_y: None
+            height: '15pt'
+        Label:
+            text_size: self.size
+            padding: 30, 20
+            text: '    Kivy Designer is Kivy\'s tool for designing Graphical User Interfaces (GUIs) from Kivy Widgets. \nYou can compose and customize widgets, and test them. It is completely written in Python using Kivy. \nKivy Designer is integrated with Buildozer and Hanga, so you can easily develop and publish your applications to Desktop and Mobile devices.'
+            font_size: '12pt'
+            valign: 'top'
+        Button:
+            text: 'Close'
+            size_hint: None, None
+            size: '60pt', '30pt'
+            pos_hint: {'right': 1}
+            on_release: root.dispatch('on_cancel')
 
 <AboutDialog>:
     Label:
@@ -64,7 +135,7 @@
     shorten: True
     text_size: self.size
     padding: '2dp', '2dp'
-    background_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
     background_disabled_normal: 'atlas://data/images/defaulttheme/action_item'
     background_down: 'atlas://data/images/defaulttheme/action_item_down' if self.color[3] == 1 else 'atlas://data/images/defaulttheme/action_item'
     background_disabled_down: 'atlas://data/images/defaulttheme/action_item_down'
@@ -95,6 +166,7 @@
 
 <MenuBubble>:
     background_image: 'atlas://data/images/defaulttheme/action_item'
+    background_color: 3, 3, 3, 1
 
 <DesignerLinkLabel>:
     color: 0, 0, 1, 1
@@ -236,16 +308,21 @@
     text_file: text_file
     text_folder: text_folder
     always_check: always_check
+    lbl_error: lbl_error
     orientation: 'vertical'
 
     Label:
-        text: 'File:'
+        id: lbl_error
+        size_hint_x: 1
+        color: [1, 0, 0, 1]
+
+    Label:
+        text: 'Select the File:'
         size_hint_x: None
-        width: '20pt'
 
     BoxLayout:
         size_hint_y: None
-        height: 'DesignerActionButton24pt'
+        height: '24pt'
         TextInput:
             id: text_file
             multiline: False
@@ -254,11 +331,10 @@
             size_hint_x: None
             text: 'Open File'
             on_press: root.open_file_btn_pressed()
-            
+
     Label:
-        text: 'Add File to:'
+        text: 'Target Folder:'
         size_hint_x: None
-        width: '55pt'
 
     BoxLayout:
         size_hint_y: None
@@ -266,6 +342,7 @@
         TextInput:
             id: text_folder
             multiline: False
+            focus: True
         Button:
             size_hint_x: None
             text: 'Open Folder'
@@ -361,24 +438,32 @@
 <RecentDialog>:
     select_button: select
     cancel_button: cancel
+    listview: listview
     orientation: 'vertical'
-    padding: '2sp'
-    
-    GridLayout:
-        rows: 1
+    padding: '5sp'
+
+    BoxLayout:
+        padding: 0, 15
+        ListView:
+            id: listview
+
+    BoxLayout:
         size_hint_y: None
-        height: '25pt'
-        padding: '4sp'
+        height: 35
         Button:
             id: select
-            text: 'Open'
-            size_hint_x: None
-            width: '90pt'
+            text: 'Open Selected'
         Button:
             id: cancel
             text: 'Cancel'
-            size_hint_x: None
-            width: '90pt'
+
+<RecentItemButton>:
+    height: '30sp'
+    text_size: self.width - 50, None
+    shorten: True
+    size_hint_x: 1
+    selected_color: .4, 1.5, 2., 1.
+    deselected_color: 1, 1, 1, 1
 
 <ConfirmationDialog>:
     orientation: 'vertical'
@@ -398,7 +483,8 @@
     
 <ActionCheckButton>:
     orientation: 'horizontal'
-    background_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+    minimum_width: 200
     canvas.before:
         Color:
             rgba: 1,1,1,1
@@ -919,8 +1005,8 @@
 <Designer>:
     statusbar: statusbar
     actionbar: actionbar
-    start_page: start_page
-    recent_files_cont_menu: recent_files_cont_menu
+    start_page: start_page.__self__
+    select_profile_cont_menu: select_profile_cont_menu
 
     ActionBar:
         id: actionbar
@@ -932,14 +1018,21 @@
                 with_previous: False
             ActionOverflow:
             DesignerActionGroup:
+                id: actn_menu_file
                 text: 'File'
                 mode: 'spinner'
+                size_hint_x: None
                 dropdown_cls: ContextMenu
                 DesignerActionButton:
-                    text: 'New'
-                    on_release: root.action_btn_new_pressed()
+                    id: actn_btn_new_file
+                    text: 'New File'
+                    disabled: True
+                    on_release: root.action_btn_new_file_pressed()
                 DesignerActionButton:
-                    text: 'Open'
+                    text: 'New Project'
+                    on_release: root.action_btn_new_project_pressed()
+                DesignerActionButton:
+                    text: 'Open Project'
                     on_release: root.action_btn_open_pressed()
                 DesignerActionButton:
                     id: actn_btn_save
@@ -951,9 +1044,14 @@
                     disabled: True
                     text: 'Save As'
                     on_release: root.action_btn_save_as_pressed()
-                DesignerActionSubMenu:
-                    id: recent_files_cont_menu
-                    text: 'Recent Files'
+                DesignerActionButton:
+                    id: actn_btn_close_proj
+                    text: 'Close Project'
+                    disabled: True
+                    on_release: root.action_btn_close_proj_pressed()
+                DesignerActionButton:
+                    id: actn_btn_recent
+                    text: 'Recent Projects'
                     on_release: root.action_btn_recent_files_pressed()
                 DesignerActionButton:
                     text: 'Settings'
@@ -962,87 +1060,107 @@
                     text: 'Quit'
                     on_release: root.action_btn_quit_pressed()
 
-            ActionGroup:
+            DesignerActionGroup:
+                id: actn_menu_view
                 text: 'View'
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
                 dropdown_cls: ContextMenu
+                disabled: True
                 ActionCheckButton:
                     id: actn_chk_proj_tree
-                    disabled: True
                     text: 'Project Tree and Toolbox'
-                    minimum_width: 200
                     on_active: root.action_chk_btn_toolbox_active(self)
 
                 ActionCheckButton:
                     id: actn_chk_prop_event
-                    disabled: True
                     text: 'Properties and Events'
-                    minimum_width: 200
                     on_active: root.action_chk_btn_property_viewer_active(self)
 
                 ActionCheckButton:
                     id: actn_chk_widget_tree
-                    disabled: True
                     text: 'Widget Tree'
-                    minimum_width: 200
                     on_active: root.action_chk_btn_widget_tree_active(self)
 
                 ActionCheckButton:
                     id: actn_chk_status_bar
-                    disabled: True
                     text: 'StatusBar'
-                    minimum_width: 200
                     on_active: root.action_chk_btn_status_bar_active(self)
 
                 ActionCheckButton:
                     id: actn_chk_kv_lang_area
-                    disabled: True
                     text: 'KV Lang Area'
-                    minimum_width: 200
                     on_active: root.action_chk_btn_kv_area_active(self)
+                ActionCheckButton:
+                    id: actn_chk_fullscreen
+                    checkbox_active: False
+                    text: 'Fullscreen'
+                    on_active: root.toggle_fullscreen(self)
 
-            ActionGroup:
+            DesignerActionGroup:
+                id: actn_menu_proj
                 text: 'Project'
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
                 dropdown_cls: ContextMenu
+                disabled: True
                 DesignerActionButton:
                     id: actn_btn_add_file
-                    disabled: True
                     text: 'Add File'
-                    minimum_width: 150
                     on_press: root.action_btn_add_file_pressed()
-                
+
                 DesignerActionButton:
                     id: actn_btn_custom_widget
-                    disabled: True
                     text: 'Add Custom Widget'
                     on_press: root.action_btn_add_custom_widget_press()
-            
+
                 DesignerActionButton:
                     id: actn_btn_proj_pref
-                    disabled: True
-                    text: 'Project Preferences'
-                    minimum_width: 150
-                    on_press: root.action_btn_project_pref_pressed()
+                    text: 'Project Settings'
+                    on_press: root.action_btn_project_settings_pressed()
 
-            ActionGroup:
+            DesignerActionGroup:
+                id: actn_menu_run
                 text: 'Run'
                 mode: 'spinner'
                 size_hint_x: None
                 width: 90
                 dropdown_cls: ContextMenu
+                disabled: True
                 DesignerActionButton:
                     id: actn_btn_run_proj
-                    disabled: True
-                    text: 'Run Project'
-                    minimum_width: 150
+                    text: 'Run'
                     on_release: root.action_btn_run_project_pressed()
-            
-            ActionGroup:
+                DesignerActionButton:
+                    id: actn_btn_stop_proj
+                    disabled: True
+                    text: 'Stop'
+                    on_release: root.action_btn_stop_project_pressed()
+                DesignerActionButton:
+                    id: actn_btn_clean_proj
+                    text: 'Clean'
+                    on_release: root.action_btn_clean_project_pressed()
+                DesignerActionButton:
+                    id: actn_btn_build_proj
+                    text: 'Build'
+                    on_release: root.action_btn_build_project_pressed()
+                DesignerActionButton:
+                    id: actn_btn_rebuild_proj
+                    text: 'Rebuild'
+                    on_release: root.action_btn_rebuild_project_pressed()
+                DesignerActionSubMenu:
+                    id: select_profile_cont_menu
+                    text: 'Select Profile'
+                    on_release: root.action_btn_select_prof_project_pressed()
+                DesignerActionButton:
+                    id: actn_btn_edit_prof_proj
+                    text: 'Edit Profiles...'
+                    on_release: root.action_btn_edit_prof_project_pressed()
+
+            DesignerActionGroup:
+                id: actn_menu_help
                 text: 'Help'
                 mode: 'spinner'
                 size_hint_x: None
@@ -1050,14 +1168,22 @@
                 dropdown_cls: ContextMenu
                 DesignerActionButton:
                     id: actn_btn_help
-                    text: 'Kivy Designer Help'
-                    minimum_width: 150
+                    text: 'Help'
                     on_release: root.show_help()
-                
+
+                DesignerActionButton:
+                    id: actn_btn_wiki
+                    text: 'Kivy Docs'
+                    on_release: root.open_docs()
+
+                DesignerActionButton:
+                    id: actn_btn_page
+                    text: 'Kivy Designer repo'
+                    on_release: root.open_repo()
+
                 DesignerActionButton:
                     id: actn_btn_about
-                    text: 'About Kivy Designer'
-                    minimum_width: 150
+                    text: 'About...'
                     on_release: root.action_btn_about_pressed()
 
     DesignerStartPage:
@@ -1066,7 +1192,7 @@
         height: root.height - actionbar.height - statusbar.height
         top: root.height - actionbar.height
         on_open_down: root.action_btn_open_pressed()
-        on_new_down: root.action_btn_new_pressed()
+        on_new_down: root.action_btn_new_project_pressed()
         on_help: root.show_help()
 
     StatusBar:

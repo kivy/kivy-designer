@@ -179,7 +179,7 @@ class ContextMenu(TabbedPanel):
         pass
 
     def dismiss(self, *largs):
-        '''Remove the dropdown widget from the iwndow, and detach itself from
+        '''Remove the dropdown widget from the window, and detach itself from
         the attached widget.
         '''
         if self.bubble.parent:
@@ -239,22 +239,40 @@ class ContextMenu(TabbedPanel):
         Clock.schedule_once(self._set_width_to_bubble, 0.01)
         # ensure the dropdown list doesn't get out on the X axis, with a
         # preference to 0 in case the list is too wide.
-        x = wx
+        # try to center bubble with parent position
+        x = wx - self.bubble.width / 4
         if x + self.bubble.width > win.width:
             x = win.width - self.bubble.width
         if x < 0:
             x = 0
         self.bubble.x = x
+        # bubble position relative with the parent center
+        x_relative = x - (wx - self.bubble.width / 4)
+        x_range = self.bubble.width / 4  # consider 25% as the range
 
         # determine if we display the dropdown upper or lower to the widget
         h_bottom = wy - self.bubble.height
         h_top = win.height - (wtop + self.bubble.height)
+
+        def _get_hpos():
+            '''Compare the position of the widget with the parent
+            to display the arrow in the correct position
+            '''
+            _pos = 'mid'
+            if x_relative == 0:
+                _pos = 'mid'
+            elif x_relative < -x_range:
+                _pos = 'right'
+            elif x_relative > x_range:
+                _pos = 'left'
+            return _pos
+
         if h_bottom > 0:
             self.bubble.top = wy
-            self.bubble.arrow_pos = 'top_mid'
+            self.bubble.arrow_pos = 'top_' + _get_hpos()
         elif h_top > 0:
             self.bubble.y = wtop
-            self.bubble.arrow_pos = 'bottom_mid'
+            self.bubble.arrow_pos = 'bottom_' + _get_hpos()
         else:
             # none of both top/bottom have enough place to display the widget at
             # the current size. Take the best side, and fit to it.
@@ -262,11 +280,11 @@ class ContextMenu(TabbedPanel):
             if height == h_bottom:
                 self.bubble.top = wy
                 self.bubble.height = wy
-                self.bubble.arrow_pos = 'top_mid'
+                self.bubble.arrow_pos = 'top_' + _get_hpos()
             else:
                 self.bubble.y = wtop
                 self.bubble.height = win.height - wtop
-                self.bubble.arrow_pos = 'bottom_mid'
+                self.bubble.arrow_pos = 'bottom_' + _get_hpos()
 
     def on_touch_down(self, touch):
         '''Default Handler for 'on_touch_down'
@@ -326,7 +344,7 @@ class ContextMenu(TabbedPanel):
         if not self.container:
             return
 
-        self.container.height = max(self.container.height,
+        self.container.height = max(self.container.minimum_height,
                                     self.main_tab.content.height)
 
     def on_main_box_height(self, *args):
@@ -453,7 +471,7 @@ class ContextSubMenu(MenuButton):
     def on_container_height(self, *args):
         '''Handler for container's height.
         '''
-        self.container.height = max(self.container.height,
+        self.container.height = max(self.container.minimum_height,
                                     self.attached_menu.content.height)
 
     def on_child_height(self, *args):

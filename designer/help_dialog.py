@@ -1,5 +1,6 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
+from kivy.uix.floatlayout import FloatLayout
 
 
 class HelpDialog(BoxLayout):
@@ -20,7 +21,7 @@ class HelpDialog(BoxLayout):
         pass
 
 
-class AboutDialog(BoxLayout):
+class AboutDialog(FloatLayout):
     '''AboutDialog, to display about information.
        It emits 'on_cancel' event when 'Cancel' button is released.
     '''
