@@ -497,6 +497,12 @@
 # Buildozer Spec Editor
 #
 
+<SpecSettingDict>:
+    Label:
+        text: root.options[root.value] if root.value and root.value in root.options else ''
+        pos: root.pos
+        font_size: '15sp'
+
 <BuildozerSpecEditor>:
     interface_cls: 'SpecEditorInterface'
 
@@ -516,14 +522,17 @@
             halign: 'center'
             size_hint_y: None
             height: '25pt'
-        Label:
-            text: 'GUI editor to buildozer.spec'
+        Button:
+            background_normal: 'atlas://data/images/defaulttheme/action_item'
+            background_down: 'atlas://data/images/defaulttheme/action_item'
+            text: 'GUI editor to buildozer.spec.\nRead more at http://buildozer.readthedocs.org'
             text_size: self.size
             font_size: '11pt'
             halign: 'center'
             valign: 'top'
             size_hint_y: None
-            height: '25pt'
+            height: '30pt'
+            on_press: root.open_buildozer_docs()
         SpecContentPanel:
             id: content
             current_uid: menu.selected_uid

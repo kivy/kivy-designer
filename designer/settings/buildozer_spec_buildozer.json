@@ -1,10 +1,14 @@
 [
   {
-    "type": "options",
+    "type": "title",
+    "title": "Logs"
+  },
+  {
+    "type": "dict",
     "title": "Log level",
     "section": "buildozer",
     "desc": "Buildozer Log Level",
-    "key": "ios.codesign.debug",
-    "options": ["Error Only", "Info", "Debug (with command output)"]
+    "key": "loglevel",
+    "options": {"0": "Error only", "1": "Info", "2": "debug (with command output)"}
   }
 ]

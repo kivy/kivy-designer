@@ -1,5 +1,9 @@
 [
   {
+    "type": "title",
+    "title": "Application"
+  },
+  {
     "type": "string",
     "title": "Application Name",
     "section": "app",
@@ -10,15 +14,53 @@
     "type": "string",
     "title": "Package Name",
     "section": "app",
-    "desc": "Aplication package name. Example exampleapp.apps",
+    "desc": "Application package name.\nExample exampleapp.apps",
     "key": "package.name"
   },
   {
     "type": "string",
     "title": "Package domain",
     "section": "app",
-    "desc": "Application package domain. Example com.mycompany",
+    "desc": "Application package domain.\nExample com.mycompany",
     "key": "package.domain"
+  },
+  {
+    "type": "string",
+    "title": "Presplash of the application",
+    "section": "app",
+    "desc": "Presplash image of the application.\nExample %(source.dir)s/data/logo.png",
+    "key": "presplash.filename"
+  },
+  {
+    "type": "string",
+    "title": "Icon of the application",
+    "section": "app",
+    "desc": "Icon of the application.\nExample %(source.dir)s/data/icon.png",
+    "key": "icon.filename"
+  },
+  {
+    "type": "title",
+    "title": "Screen Behavior"
+  },
+  {
+    "type": "dict",
+    "title": "Orientation",
+    "section": "app",
+    "desc": "Application orientation",
+    "key": "orientation",
+    "options": {"landscape": "Landscape", "portrait": "Portrait", "all": "Auto"}
+  },
+  {
+    "type": "bool",
+    "title": "Fullscreen",
+    "section": "app",
+    "desc": "Fullscreen mode",
+    "values": ["Disabled", "Enabled"],
+    "key": "fullscreen"
+  },
+  {
+    "type": "title",
+    "title": "Source Code"
   },
   {
     "type": "string",
@@ -38,43 +80,51 @@
     "type": "string",
     "title": "Source files to exclude",
     "section": "app",
-    "desc": "Source files to exclude (let empty to not exclude anything). Example: spec, zip, rar",
+    "desc": "Source files to exclude (let empty to not exclude anything).\nExample: spec, zip, rar",
     "key": "source.exclude_exts"
   },
   {
     "type": "string",
     "title": "List of directory to exclude",
     "section": "app",
-    "desc": "List of directory to exclude (let empty to not exclude anything). Example: tests, bin",
+    "desc": "List of directory to exclude (let empty to not exclude anything).\nExample: tests, bin",
     "key": "source.exclude_dirs"
   },
   {
     "type": "string",
     "title": "List of exclusions using pattern matching",
     "section": "app",
-    "desc": "List of exclusions using pattern matching. Example: license,images/*/*.jpg",
+    "desc": "List of exclusions using pattern matching.\nExample: license,images/*/*.jpg",
     "key": "source.exclude_patterns"
+  },
+  {
+    "type": "title",
+    "title": "Application Version"
   },
   {
     "type": "string",
     "title": "Application versioning (method 1)",
     "section": "app",
-    "desc": "Application versioning with regex. Example: ['\"](.*)'['\"]",
+    "desc": "Application versioning with regex.\nExample: ['\"](.*)'['\"]",
     "key": "version.regex"
   },
   {
     "type": "string",
     "title": "Application versioning file name",
     "section": "app",
-    "desc": "File name to use the versioning regex. Example: %(source.dir)s/main.py",
+    "desc": "File name to use the versioning regex.\nExample: %(source.dir)s/main.py",
     "key": "version.filename"
   },
   {
     "type": "string",
     "title": "Application versioning (method 2)",
     "section": "app",
-    "desc": "Application version. Example: 1.0",
+    "desc": "Application version.\nExample: 1.0",
     "key": "version"
+  },
+  {
+    "type": "title",
+    "title": "Application Requirements"
   },
   {
     "type": "string",
@@ -89,36 +139,5 @@
     "section": "app",
     "desc": "Application garden requirements.",
     "key": "garden_requirements"
-  },
-  {
-    "type": "string",
-    "title": "Presplash of the application",
-    "section": "app",
-    "desc": "Presplash image of the application. Example %(source.dir)s/data/logo.png",
-    "key": "presplash.filename"
-  },
-  {
-    "type": "string",
-    "title": "Icon of the application",
-    "section": "app",
-    "desc": "Icon of the application. Example %(source.dir)s/data/icon.png",
-    "key": "icon.filename"
-  },
-  {
-    "type": "options",
-    "title": "Supported orientation",
-    "section": "app",
-    "desc": "Application orientation",
-    "key": "icon.filename",
-    "options": ["landscape", "portrait", "all"]
-  },
-  {
-    "type": "bool",
-    "title": "Fullscreen",
-    "section": "app",
-    "desc": "Application orientation",
-    "values": ["Disabled", "Enabled"],
-    "key": "fullscreen"
   }
-
 ]
