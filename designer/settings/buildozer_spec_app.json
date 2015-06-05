@@ -63,39 +63,47 @@
     "title": "Source Code"
   },
   {
-    "type": "string",
+    "type": "path",
     "title": "Source directory",
     "section": "app",
     "desc": "Source code where the main.py live",
     "key": "source.dir"
   },
   {
-    "type": "string",
+    "type": "list",
     "title": "Source files to include",
     "section": "app",
     "desc": "Source files to include (let empty to include all the files)",
-    "key": "source.include_exts"
+    "key": "source.include_exts",
+    "allow_custom": true,
+    "items": ["py","png","jpg","kv","atlas"]
   },
   {
-    "type": "string",
+    "type": "list",
     "title": "Source files to exclude",
     "section": "app",
-    "desc": "Source files to exclude (let empty to not exclude anything).\nExample: spec, zip, rar",
-    "key": "source.exclude_exts"
+    "desc": "Source files to exclude (let empty to not exclude anything)",
+    "key": "source.exclude_exts",
+    "allow_custom": true,
+    "items": ["rar", "zip", "spec"]
   },
   {
-    "type": "string",
+    "type": "list",
     "title": "List of directory to exclude",
     "section": "app",
-    "desc": "List of directory to exclude (let empty to not exclude anything).\nExample: tests, bin",
-    "key": "source.exclude_dirs"
+    "desc": "List of directory to exclude (let empty to not exclude anything)",
+    "key": "source.exclude_dirs",
+    "allow_custom": true,
+    "items": ["tests", "test", "bin"]
   },
   {
-    "type": "string",
+    "type": "list",
     "title": "List of exclusions using pattern matching",
     "section": "app",
-    "desc": "List of exclusions using pattern matching.\nExample: license,images/*/*.jpg",
-    "key": "source.exclude_patterns"
+    "desc": "List of exclusions using pattern matching",
+    "key": "source.exclude_patterns",
+    "allow_custom": true,
+    "items": ["license","images/*/*.jpg"]
   },
   {
     "type": "title",

@@ -179,7 +179,7 @@ class SettingListContent(BoxLayout):
         super(SettingListContent, self).__init__(**kwargs)
         if not self.setting.allow_custom:
             self.remove_widget(self.custom_item_layout)
-        self.input_filter_pattern = re.compile(r'[^\w\s\.\-]')
+        self.input_filter_pattern = re.compile(r'[^\w\s\.\-=]')
 
     def show_items(self, *args):
         '''Update the list of items
@@ -213,7 +213,7 @@ class SettingListContent(BoxLayout):
                 self.selected_items.append(str(child.item_text))
 
     def input_filter(self, text, *args):
-        '''Filter the custom item name. Replaces [^\w\s\.\-] with ''
+        '''Filter the custom item name. Replaces [^\w\s\.\-=] with ''
         '''
         pattern = self.input_filter_pattern
         return re.sub(pattern, '', text)
@@ -280,7 +280,8 @@ class SpecSettingList(SettingItem):
         selected_items = self.value.split(',')
         # update the item list with custom values
         for item in selected_items:
-            if not item in self.items:
+            item = item.strip()
+            if item and not item in self.items:
                 self.items.append(item)
         # list of items saved in the property
         content.selected_items = selected_items
