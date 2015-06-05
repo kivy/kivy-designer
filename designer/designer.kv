@@ -540,6 +540,91 @@
 <SpecMenuSidebar>:
 <SpecContentPanel>:
 
+<SettingListCheckItem>:
+    item_check: item_check
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: 50
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.2
+        Rectangle:
+            pos: self.x, self.top - 1
+            size: self.width, 1
+    CheckBox:
+        id: item_check
+        size_hint_x: 0.1
+        active: root.active
+        on_active: root.on_active(self)
+    Button:
+        text: root.item_text
+        background_normal: 'atlas://data/images/defaulttheme/action_item'
+        background_down: 'atlas://data/images/defaulttheme/action_item'
+        size_hint_x: 0.9
+        text_size: self.size
+        shorten: True
+        valign: 'middle'
+        on_press: root.item_check._toggle_active()
+
+<SettingListContent>:
+    item_list: item_list
+    custom_item_layout: custom_item_layout
+    txt_custom_item: txt_custom_item
+    orientation: 'vertical'
+    spacing: '10dp'
+    Label:
+        text: root.setting.desc
+        text_size: self.size
+        font_size: '11pt'
+        halign: 'center'
+        valign: 'middle'
+        size_hint_y: None
+        height: '30pt'
+        shorten: True
+        shorten_from: 'right'
+    ScrollView:
+        id: i_scroll
+        GridLayout:
+            id: item_list
+            cols: 1
+            size_hint_y: None
+            height: max(i_scroll.height, self.minimum_height)
+    BoxLayout:
+        id: custom_item_layout
+        orientation: 'vertical'
+        size_hint_y: None
+        height: dp(30) + pt(15)
+        Label:
+            text: 'Custom item:'
+            size_hint_y: None
+            height: '15pt'
+            text_size: self.size
+            font_size: '11pt'
+            valign: 'middle'
+        BoxLayout:
+            size_hint_y: None
+            height: '30dp'
+            orientation: 'horizontal'
+            TextInput:
+                id: txt_custom_item
+                size_hint_x: 0.7
+                input_filter: root.input_filter
+                multiline: False
+                on_text_validate: root.add_custom_item()
+            Button:
+                text: 'Add'
+                size_hint_x: 0.3
+                on_press: root.add_custom_item()
+    BoxLayout:
+        size_hint_y: None
+        height: '40dp'
+        Button:
+            text: 'Apply'
+            on_press: root.on_apply_pressed()
+        Button:
+            text: 'Cancel'
+            on_press: root.dispatch('on_cancel')
+
 <EditContView>:
     ActionPrevious:
         title: "Edit"
