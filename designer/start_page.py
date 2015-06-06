@@ -26,15 +26,6 @@ class DesignerLinkLabel(Button):
     def on_release(self, *args):
         '''Default event handler for 'on_release' event.
         '''
-        spec = BuildozerSpecEditor()
-        spec.load_settings('/home/neo/Programacao/OpenSource/github/Kivy-'
-                                'Tutorials/3_Introduction_Kivy_Designer/intro')
-        self._popup = Popup(title="Buildozer Spec",
-                            content=spec,
-                            size_hint=(0.9, 0.9),
-                            auto_dismiss=False)
-
-        self._popup.open()
         if self.link:
             webbrowser.open(self.link)
 

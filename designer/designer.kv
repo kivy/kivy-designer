@@ -497,6 +497,42 @@
 # Buildozer Spec Editor
 #
 
+<SpecCodeInput>:
+    text_input: text_input
+    lbl_error: lbl_error
+	orientation: 'vertical'
+	spacing: 10
+	padding: 10
+    Label:
+        text: "Edit the buildozer.spec file"
+        size_hint_y: None
+        text_size: self.size
+        font_size: '11pt'
+        height: '20pt'
+    Label:
+        id: lbl_error
+        text: 'There is something wrong with your .spec file...'
+        size_hint_y: None
+        text_size: self.size
+        font_size: '11pt'
+        halign: 'center'
+        height: '0pt'
+    ScrollView:
+        id: spec_scroll
+        CodeInput:
+            id: text_input
+            size_hint_y: None
+            height: max(spec_scroll.height, self.minimum_height)
+    BoxLayout:
+        size_hint_y: None
+        height: '40dp'
+        Button:
+            text: 'Apply modifications'
+            on_press: root._save_spec()
+        Button:
+            text: 'Cancel modifications'
+            on_press: root.load_spec()
+
 <SpecSettingDict>:
     Label:
         text: root.options[root.value] if root.value and root.value in root.options else ''
@@ -539,6 +575,13 @@
 
 <SpecMenuSidebar>:
 <SpecContentPanel>:
+    do_scroll_x: False
+    container: content
+    GridLayout:
+        id: content
+        cols: 1
+        size_hint_y: None
+        height: max(self.minimum_height, root.height)
 
 <SettingListCheckItem>:
     item_check: item_check
@@ -606,7 +649,6 @@
             TextInput:
                 id: txt_custom_item
                 size_hint_x: 0.7
-                input_filter: root.input_filter
                 multiline: False
                 on_text_validate: root.add_custom_item()
             Button:

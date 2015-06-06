@@ -4,6 +4,7 @@ from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.factory import Factory
 from kivy.properties import ObjectProperty, ListProperty
+from kivy.uix.popup import Popup
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.treeview import TreeViewLabel
 from designer.uix.py_code_input import PyCodeInput, PyScrollView
@@ -141,7 +142,25 @@ class DesignerContent(FloatLayout):
             parent = parent.parent_node
 
         full_path = os.path.join(self.proj_loader.proj_dir, path)
-        self.tab_pannel.open_file(full_path, path)
+        if os.path.basename(full_path) == 'buildozer.spec':
+            spec_editor = App.get_running_app().root.spec_editor
+
+            spec_editor.load_settings(self.proj_loader.proj_dir)
+            self._popup = Popup(title="Buildozer Spec", content=spec_editor,
+                                size_hint=(0.9, 0.9), auto_dismiss=False)
+            spec_editor.bind(on_close=self.cancel_spec_editor)
+            self._popup.open()
+        else:
+            self.tab_pannel.open_file(full_path, path)
+
+    def cancel_spec_editor(self, *args):
+        '''Close the BuildozerSpecEditor
+        '''
+        spec_editor = App.get_running_app().root.spec_editor
+        self._popup.dismiss()
+        if spec_editor.parent:
+            spec_editor.parent.remove_widget(spec_editor)
+            spec_editor.parent = None
 
 
 class DesignerTabbedPanel(TabbedPanel):
