@@ -382,12 +382,22 @@
 <PyScrollView>:
     id: scroll
     code_input: code_input
-    PyCodeInput:
-        id: code_input
-        font_name: 'data/fonts/DroidSansMono.ttf'
-        auto_indent: True
-        size_hint_y: None
+    line_number: line_number
+    GridLayout:
+        cols: 2
+        size_hint: 1, None
         height: max(scroll.height, self.minimum_height)
+        TextInput:
+            id: line_number
+            size_hint: None, 1
+            readonly: True
+            background_color: 1, 1, 1, 0
+            foreground_color: 1, 1, 1, 1
+        PyCodeInput:
+            id: code_input
+            auto_indent: True
+            size_hint_y: None
+            height: self.minimum_height
 
 <AddFileDialog>:
     text_file: text_file
