@@ -344,7 +344,7 @@ class ContextMenu(TabbedPanel):
         if not self.container:
             return
 
-        self.container.height = max(self.container.minimum_height,
+        self.container.height = max(self.container.height,
                                     self.main_tab.content.height)
 
     def on_main_box_height(self, *args):
@@ -465,7 +465,7 @@ class ContextSubMenu(MenuButton):
     def on_scroll_height(self, *args):
         '''Handler for scrollview's height.
         '''
-        self.container.height = max(self.container.height,
+        self.container.height = max(self.container.minimum_height,
                                     self.attached_menu.content.height)
 
     def on_container_height(self, *args):
