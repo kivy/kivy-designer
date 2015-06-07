@@ -23,6 +23,7 @@ from kivy.lang import Builder
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
 from kivy.config import Config
+from kivy.base import ExceptionHandler, ExceptionManager
 
 import designer
 from designer.uix.actioncheckbutton import ActionCheckButton
@@ -47,6 +48,7 @@ from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton
 from designer.help_dialog import HelpDialog, AboutDialog
+from designer.uix.bug_reporter import BugReporterApp
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -1238,6 +1240,19 @@ class Designer(FloatLayout):
         self.about_dlg.bind(on_cancel=self._cancel_popup)
 
 
+class DesignerException(ExceptionHandler):
+
+    def handle_exception(self, inst):
+        App.get_running_app().stop()
+        if isinstance(inst, KeyboardInterrupt):
+            return ExceptionManager.PASS
+        else:
+            for child in Window.children:
+                Window.remove_widget(child)
+            BugReporterApp(traceback.format_exc()).run()
+            return ExceptionManager.PASS
+
+
 class DesignerApp(App):
 
     widget_focused = ObjectProperty(allownone=True)
@@ -1250,6 +1265,7 @@ class DesignerApp(App):
         self.root.ui_creator.py_console.exit()
 
     def build(self):
+        ExceptionManager.add_handler(DesignerException())
         Factory.register('Playground', module='designer.playground')
         Factory.register('Toolbox', module='designer.toolbox')
         Factory.register('StatusBar', module='designer.statusbar')
