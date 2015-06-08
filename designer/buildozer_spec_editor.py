@@ -386,10 +386,6 @@ class BuildozerSpecEditor(Settings):
         self.proj_dir = proj_dir
         self.SPEC_PATH = os.path.join(proj_dir, 'buildozer.spec')
 
-        if not os.path.isfile(self.SPEC_PATH):
-            pass
-            # TODO show an alert from helper_functions after merge first PR
-
         _dir = os.path.dirname(designer.__file__)
         _dir = os.path.split(_dir)[0]
 
