@@ -169,6 +169,7 @@ class Designer(FloatLayout):
         self.project_watcher = ProjectWatcher(self.project_modified)
         self.project_loader = ProjectLoader(self.project_watcher)
         self.recent_manager = RecentManager()
+        self.spec_editor = BuildozerSpecEditor()
         self.widget_to_paste = None
         self.designer_content = DesignerContent(size_hint=(1, None))
         self.designer_content = self.designer_content.__self__
@@ -822,7 +823,6 @@ class Designer(FloatLayout):
                                             (str(e)))
 
         self.ui_creator.playground.sandbox.error_active = False
-        self.spec_editor = BuildozerSpecEditor()
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content
