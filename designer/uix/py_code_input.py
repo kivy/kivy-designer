@@ -1,8 +1,16 @@
+import jedi
+from kivy.app import App
+from kivy.uix.label import Label
+from kivy.core.window import Window
+from kivy.uix.bubble import Bubble, BubbleButton
+
 from kivy.uix.codeinput import CodeInput
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.uix.scrollview import ScrollView
 
 from designer.uix.designer_code_input import DesignerCodeInput
+
+MarkupLabel = None
 
 
 class PyCodeInput(DesignerCodeInput):
@@ -24,12 +32,18 @@ class PyScrollView(ScrollView):
     '''
 
     code_input = ObjectProperty(None)
-    '''Reference to the :class:`~designer.uix.py_code_input.PyCodeInput`.
+    '''(internal) Reference to the
+        :class:`~designer.uix.py_code_input.PyCodeInput`.
        :data:`code_input` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     line_number = ObjectProperty(None)
-    '''Text Input to display line numbers
+    '''(internal) Text Input to display line numbers
+       :data:`line_number` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    bubble = ObjectProperty(None)
+    '''(internal) Bubble to display completions suggestion
        :data:`line_number` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -39,13 +53,53 @@ class PyScrollView(ScrollView):
        and defaults to True
     '''
 
+    use_autocompletion = BooleanProperty(True)
+    '''Use autocompletion
+       :data:`use_autocompletion` is a :class:`~kivy.properties.BooleanProperty`
+       and defaults to True
+    '''
+
     def __init__(self, **kwargs):
         super(PyScrollView, self).__init__(**kwargs)
         self._max_num_of_lines = 0
+        self.bubble = CompletionBubble()
+        self.root = App.get_running_app().root
+
+        if self.use_autocompletion:
+            self.code_input.bind(focus=self.on_code_input_focus)
+
         if not self.show_line_number:
             self.line_number.parent.remove_widget(self.line_number)
         else:
             self.code_input.bind(_lines=self.on_lines_changed)
+
+    def on_code_input_focus(self, *args):
+        '''Focus on CodeInput, to enable/disable keyboard listener
+        '''
+        if args[1]:
+            Window.bind(on_keyboard=self.on_keyboard)
+        else:
+            Window.unbind(on_keyboard=self.on_keyboard)
+
+    def on_keyboard(self, instance, key, scancode, codepoint, modifier):
+        if key == 32 and modifier == ['ctrl']:
+            code = self.code_input
+            src = code.text
+            line = code.cursor_row + 1
+            col = code.cursor_col
+            script = jedi.Script(src, line, col)
+            completions = script.completions()
+            if len(completions) > 0:
+                cmd_list = []
+                for c in completions:
+                    cmd_list.append(c.complete)
+                self.show_completion(cmd_list)
+
+    def show_completion(self, completions):
+        '''Display the bubble with the completions
+        '''
+        self.bubble.show_completions(completions)
+        self.root.add_widget(self.bubble)
 
     def on_lines_changed(self, *args):
         '''Event handler that listen the line modifications to update

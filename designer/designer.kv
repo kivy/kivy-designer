@@ -397,7 +397,7 @@
             id: code_input
             auto_indent: True
             size_hint_y: None
-            height: self.minimum_height
+            height: max(self.minimum_height, scroll.height)
 
 <AddFileDialog>:
     text_file: text_file
