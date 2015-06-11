@@ -7,6 +7,7 @@ from kivy.uix.bubble import Bubble, BubbleButton
 from kivy.uix.codeinput import CodeInput
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.uix.scrollview import ScrollView
+from designer.uix.completion_bubble import CompletionBubble
 
 from designer.uix.designer_code_input import DesignerCodeInput
 
@@ -47,6 +48,11 @@ class PyScrollView(ScrollView):
        :data:`line_number` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
+    is_bubble_visible = BooleanProperty(False)
+    '''(internal) If bubble is visible in the screen
+       :data:`line_number` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
     show_line_number = BooleanProperty(True)
     '''Display line number on left
        :data:`show_line_number` is a :class:`~kivy.properties.BooleanProperty`
@@ -63,6 +69,8 @@ class PyScrollView(ScrollView):
         super(PyScrollView, self).__init__(**kwargs)
         self._max_num_of_lines = 0
         self.bubble = CompletionBubble()
+        self.bubble.bind(on_cancel=self.cancel_completion)
+        self.bubble.bind(on_complete=self.on_complete)
         self.root = App.get_running_app().root
 
         if self.use_autocompletion:
@@ -78,8 +86,10 @@ class PyScrollView(ScrollView):
         '''
         if args[1]:
             Window.bind(on_keyboard=self.on_keyboard)
+            Window.bind(on_key_down=self.on_keyboard_down)
         else:
             Window.unbind(on_keyboard=self.on_keyboard)
+            Window.unbind(on_key_down=self.on_keyboard_down)
 
     def on_keyboard(self, instance, key, scancode, codepoint, modifier):
         if key == 32 and modifier == ['ctrl']:
@@ -89,17 +99,31 @@ class PyScrollView(ScrollView):
             col = code.cursor_col
             script = jedi.Script(src, line, col)
             completions = script.completions()
-            if len(completions) > 0:
-                cmd_list = []
-                for c in completions:
-                    cmd_list.append(c.complete)
-                self.show_completion(cmd_list)
+            self.show_completion(completions)
+
+    def on_keyboard_down(self, instance, key, *args):
+        if self.is_bubble_visible:
+            return self.bubble.on_keyboard_down(instance, key, args)
+
+    def on_complete(self, instance, completion):
+        self.code_input.text = self.code_input.text.strip() + completion
+        self.cancel_completion()
 
     def show_completion(self, completions):
         '''Display the bubble with the completions
         '''
         self.bubble.show_completions(completions)
+        self.bubble.reposition(self.code_input.cursor_pos)
         self.root.add_widget(self.bubble)
+        self.is_bubble_visible = True
+
+    def cancel_completion(self, *args):
+        '''Event handler to cancel the completion
+        '''
+        if self.bubble.parent is not None:
+            self.bubble.show_completions([])
+            self.bubble.parent.remove_widget(self.bubble)
+            self.is_bubble_visible = False
 
     def on_lines_changed(self, *args):
         '''Event handler that listen the line modifications to update
