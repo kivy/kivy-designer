@@ -1,13 +1,11 @@
 from kivy.adapters.listadapter import ListAdapter
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, StringProperty
+from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.uix.bubble import Bubble
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.label import Label
-from kivy.uix.listview import ListView, ListItemLabel, ListItemButton
-from math import ceil, floor
-from kivy.uix.widget import Widget
+from kivy.uix.listview import ListView, ListItemButton
+
 
 Builder.load_string('''
 
@@ -38,14 +36,28 @@ class SuggestionItem(ListItemButton):
     '''Completion text
     '''
 
+    selected_by_touch = ObjectProperty(None)
+    '''Callback function to a item selected by touch
+    '''
+    def on_press(self):
+        if self.is_selected:
+            self.selected_by_touch()
+
 
 class CompletionListView(ListView):
-    pass
+
+    scrolled = BooleanProperty(False)
+    '''(internal) Identify if the user had scrolled the list with the mouse
+    '''
+
+    def _scroll(self, scroll_y):
+        self.scrolled = True
+        super(CompletionListView, self)._scroll(scroll_y)
 
 
 class CompletionBubble(Bubble):
 
-    list_view = ObjectProperty(None)
+    list_view = ObjectProperty(None, allownone=True)
     '''(internal) Reference a ListView with a list of SuggestionItems
        :data:`list_view` is a :class:`~kivy.properties.ObjectProperty`
     '''
@@ -59,11 +71,13 @@ class CompletionBubble(Bubble):
 
     def __init__(self, **kwargs):
         super(CompletionBubble, self).__init__(**kwargs)
-        Window.bind(on_touch_down=self.on_touch_down)
+        Window.bind(on_touch_down=self.on_window_touch_down)
 
-    def on_touch_down(self, *args):
-        print(1)
-
+    def on_window_touch_down(self, win, touch):
+        '''Disable the completion if the user clicks anywhere
+        '''
+        if not self.collide_point(*touch.pos):
+            self.dispatch('on_cancel')
 
     def _create_list_view(self, data):
         '''Create the ListAdapter
@@ -82,7 +96,8 @@ class CompletionBubble(Bubble):
     def _args_converter(self, index, completion):
         return {'text': completion.name,
                 'is_selected': False,
-                'complete': completion.complete}
+                'complete': completion.complete,
+                'selected_by_touch': self.selected_by_touch}
 
     def show_completions(self, completions):
         '''Update the Completion ListView with completions
@@ -91,7 +106,7 @@ class CompletionBubble(Bubble):
             fake_completion = type('obj', (object,),
                                    {'name': 'No suggestions', 'complete': ''})
             completions.append(fake_completion)
-        Window.bind(on_keyboard_down=self.on_keyboard_down)
+        Window.bind(on_key_down=self.on_key_down)
         if not self.list_view:
             self._create_list_view(completions)
         else:
@@ -108,12 +123,19 @@ class CompletionBubble(Bubble):
         if new_index > 2 and new_index < len(self.adapter.data) - 1:
             self.list_view.scroll_to(new_index - 3)
 
-    def on_keyboard_down(self, instance, key, *args):
+    def on_key_down(self, instance, key, *args):
         '''Keyboard listener to grab key codes and interact with the
         Completion box
         '''
         selected_item = self.adapter.selection[0]
         selected_index = selected_item.index
+        if self.list_view.scrolled:
+            # recreate list view after mouse scroll due to the bug kivy/#3418
+            self.remove_widget(self.list_view)
+            self.list_view = None
+            self.show_completions(self.adapter.data)
+            return self.on_key_down(instance, key, args)
+
         if key == 273:
             # up
             if selected_index > 0:
@@ -149,18 +171,16 @@ class CompletionBubble(Bubble):
     def on_complete(self, *args):
         '''Dispatch a completion selection
         '''
-        pass
+        Window.unbind(on_key_down=self.on_key_down)
 
     def on_cancel(self, *args):
-        '''Dispatch the ESC button to cancel the completion
+        '''Disable key listener on cancel
         '''
-        Window.unbind(on_keyboard_down=self.on_keyboard_down)
-
+        Window.unbind(on_key_down=self.on_key_down)
 
 if __name__ == '__main__':
     from kivy.app import App
     import jedi
-
 
     Builder.load_string('''
 <Test>:
@@ -181,7 +201,6 @@ if __name__ == '__main__':
         on_press: root.show_bubble()
 ''')
 
-
     class Test(FloatLayout):
         def __init__(self, **kwargs):
             super(Test, self).__init__(**kwargs)
@@ -193,9 +212,8 @@ import datetime
 datetime.da'''
             script = jedi.Script(source, 3, len('datetime.da'))
             completions = script.completions()
-            self.bubble.show_completions(completions*10)
+            self.bubble.show_completions(completions * 10)
             self.add_widget(self.bubble)
-
 
     class MyApp(App):
         def build(self):

@@ -1,10 +1,7 @@
 import jedi
-from kivy.app import App
-from kivy.uix.label import Label
-from kivy.core.window import Window
-from kivy.uix.bubble import Bubble, BubbleButton
 
-from kivy.uix.codeinput import CodeInput
+from kivy.app import App
+from kivy.core.window import Window
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.uix.scrollview import ScrollView
 from designer.uix.completion_bubble import CompletionBubble
@@ -86,10 +83,8 @@ class PyScrollView(ScrollView):
         '''
         if args[1]:
             Window.bind(on_keyboard=self.on_keyboard)
-            Window.bind(on_key_down=self.on_keyboard_down)
         else:
             Window.unbind(on_keyboard=self.on_keyboard)
-            Window.unbind(on_key_down=self.on_keyboard_down)
 
     def on_keyboard(self, instance, key, scancode, codepoint, modifier):
         if key == 32 and modifier == ['ctrl']:
@@ -101,11 +96,9 @@ class PyScrollView(ScrollView):
             completions = script.completions()
             self.show_completion(completions)
 
-    def on_keyboard_down(self, instance, key, *args):
-        if self.is_bubble_visible:
-            return self.bubble.on_keyboard_down(instance, key, args)
-
     def on_complete(self, instance, completion):
+        '''Add the completion to the current cursor position
+        '''
         self.code_input.text = self.code_input.text.strip() + completion
         self.cancel_completion()
 
