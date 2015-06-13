@@ -41,7 +41,7 @@ class SuggestionItem(ListItemButton):
     '''
     def on_press(self):
         if self.is_selected:
-            self.selected_by_touch()
+            self.selected_by_touch(self)
 
 
 class CompletionListView(ListView):
@@ -98,6 +98,9 @@ class CompletionBubble(Bubble):
                 'is_selected': False,
                 'complete': completion.complete,
                 'selected_by_touch': self.selected_by_touch}
+
+    def selected_by_touch(self, item):
+        self.dispatch('on_complete', item.complete)
 
     def show_completions(self, completions):
         '''Update the Completion ListView with completions
