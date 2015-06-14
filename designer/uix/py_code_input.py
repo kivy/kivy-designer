@@ -99,7 +99,7 @@ class PyScrollView(ScrollView):
     def on_complete(self, instance, completion):
         '''Add the completion to the current cursor position
         '''
-        self.code_input.text = self.code_input.text.strip() + completion
+        self.code_input.insert_text(completion)
         self.cancel_completion()
 
     def show_completion(self, completions):

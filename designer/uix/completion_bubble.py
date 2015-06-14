@@ -6,7 +6,6 @@ from kivy.uix.bubble import Bubble
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.listview import ListView, ListItemButton
 
-
 Builder.load_string('''
 
 <CompletionBubble>
@@ -21,13 +20,19 @@ Builder.load_string('''
     background_normal: ''
     background_down: ''
     height: 35
-    selected_color: 0, 0, 0, 0.5
-    deselected_color: 0, 0, 0, 0.7
+    selected_color: 1, 1, 1, 0.1
+    deselected_color: 0, 0, 0, 0
     halign: 'left'
     valign: 'middle'
     text_size: self.width - 20, self.height
     shorten: True
     shorten_from: 'right'
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 0.8
+        Rectangle:
+            pos: self.pos
+            size: self.size
 ''')
 
 
@@ -165,11 +170,50 @@ class CompletionBubble(Bubble):
         '''Update the Bubble position. Try to display it in the best place of
         the screen
         '''
-
-        # FIXME check why +20
-        # TODO update bubble size, position depending the content and screen
+        win = Window
         self.x = pos[0] + self.width / 2 + 20
         self.y = pos[1] - self.height
+
+        # fit in the screen horizontally
+        if self.right > win.width:
+            self.x = win.width - self.width
+        if self.x < 0:
+            self.x = 0
+
+        # fit in the screen vertically
+        if self.y < 0:
+            diff = abs(self.y)
+            # check if we can move it to top
+            new_y = pos[1] + 30
+            if new_y + self.height < win.height:  # fit in the screen
+                self.y = new_y
+            else:  # doesnt fit on top neither on bottom. Check the best place
+                new_diff = abs(new_y + self.height - win.height)
+                if new_diff < diff:  # if we lose lest moving it to top
+                    self.y = new_y
+
+        # compare the desired position with the actual position
+        x_relative = self.x - (pos[0] + self.width / 2 + 20)
+
+        x_range = self.width / 4  # consider 25% as the range
+
+        def _get_hpos():
+            '''Compare the position of the widget with the parent
+            to display the arrow in the correct position
+            '''
+            _pos = 'mid'
+            if x_relative == 0:
+                _pos = 'mid'
+            elif x_relative < -x_range:
+                _pos = 'right'
+            elif x_relative > x_range:
+                _pos = 'left'
+            return _pos
+
+        if self.y == pos[1] - self.height:
+            self.arrow_pos = 'top_' + _get_hpos()
+        else:
+            self.arrow_pos = 'bottom_' + _get_hpos()
 
     def on_complete(self, *args):
         '''Dispatch a completion selection
@@ -208,6 +252,9 @@ if __name__ == '__main__':
         def __init__(self, **kwargs):
             super(Test, self).__init__(**kwargs)
             self.bubble = CompletionBubble()
+            self.bubble.pos_hint = {'center_x': 0.5, 'y': 0}
+            self.bubble.bind(on_cancel=self.on_cancel)
+            self.bubble.bind(on_complete=self.on_cancel)
 
         def show_bubble(self):
             source = '''
@@ -217,6 +264,12 @@ datetime.da'''
             completions = script.completions()
             self.bubble.show_completions(completions * 10)
             self.add_widget(self.bubble)
+
+        def on_cancel(self, *args):
+            if self.bubble.parent is not None:
+                self.bubble.show_completions([])
+                self.bubble.parent.remove_widget(self.bubble)
+                self.is_bubble_visible = False
 
     class MyApp(App):
         def build(self):
