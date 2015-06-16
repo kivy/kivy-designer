@@ -48,7 +48,7 @@ class DesignerSettings(Settings):
     def load_settings(self):
         '''This function loads project settings
         '''
-        self.config_parser = ConfigParser()
+        self.config_parser = ConfigParser(name='DesignerSettings')
         DESIGNER_CONFIG = os.path.join(get_kivy_designer_dir(),
                                        DESIGNER_CONFIG_FILE_NAME)
 
