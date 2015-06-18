@@ -10,6 +10,8 @@ from kivy.uix.settings import Settings, SettingTitle
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 
+from pygments import styles
+
 from designer.helper_functions import get_kivy_designer_dir
 import designer
 
@@ -62,6 +64,19 @@ class DesignerSettings(Settings):
 
         self.config_parser.read(DESIGNER_CONFIG)
         self.config_parser.upgrade(DEFAULT_CONFIG)
+
+        panel = self.create_json_panel('Kivy Designer Settings',
+                                        self.config_parser,
+                            os.path.join(_dir, 'designer',
+                                         'settings', 'designer_settings.json'))
+        uid = panel.uid
+        if self.interface is not None:
+            self.interface.add_panel(panel, 'Kivy Designer Settings', uid)
+
+        for child in panel.children:
+            if child.id == 'code_input_theme_options':
+                child.options = styles.get_all_styles()
+        # TODO change code_input_theme_options to SettingsList after merge
 
         path = self.config_parser.getdefault(
             'global', 'python_shell_path', '')

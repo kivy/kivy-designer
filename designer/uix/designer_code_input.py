@@ -3,7 +3,7 @@ from kivy.uix.codeinput import CodeInput
 from kivy.properties import BooleanProperty, ConfigParserProperty
 from kivy.utils import get_color_from_hex
 
-from pygments import styles
+from pygments import styles, highlight
 
 
 class DesignerCodeInput(CodeInput):
@@ -42,6 +42,27 @@ class DesignerCodeInput(CodeInput):
         super(DesignerCodeInput, self).on_style_name(*args)
         self.background_color = get_color_from_hex(self.style.background_color)
         self._trigger_refresh_text()
+
+    def _get_bbcode(self, ntext):
+        # override the default method to fix bug with custom themes
+        # get bbcoded text for python
+        try:
+            ntext[0]
+            # replace brackets with special chars that aren't highlighted
+            # by pygment. can't use &bl; ... cause & is highlighted
+            ntext = ntext.replace(u'[', u'\x01').replace(u']', u'\x02')
+            ntext = highlight(ntext, self.lexer, self.formatter)
+            ntext = ntext.replace(u'\x01', u'&bl;').replace(u'\x02', u'&br;')
+            # replace special chars with &bl; and &br;
+            ntext = ''.join((u'[color=', str(self.text_color), u']',
+                             ntext, u'[/color]'))
+            ntext = ntext.replace(u'\n', u'')
+            # remove possible extra highlight options
+            ntext = ntext.replace(u'[u]', '').replace(u'[/u]', '')
+
+            return ntext
+        except IndexError:
+            return ''
 
     def on_show_edit(self, *args):
         pass
