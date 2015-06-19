@@ -107,7 +107,7 @@ class CompletionBubble(Bubble):
     def selected_by_touch(self, item):
         self.dispatch('on_complete', item.complete)
 
-    def show_completions(self, completions):
+    def show_completions(self, completions, force_scroll = False):
         '''Update the Completion ListView with completions
         '''
         if completions == []:
@@ -119,6 +119,8 @@ class CompletionBubble(Bubble):
             self._create_list_view(completions)
         else:
             self.adapter.data = completions
+        if force_scroll:
+            self.list_view.scroll_to(0)
 
     def on_selection_change(self, *args):
         pass
@@ -127,9 +129,10 @@ class CompletionBubble(Bubble):
         '''Update the scroll view position to display the new_index item
         '''
         item = self.adapter.get_view(new_index)
-        item.trigger_action(0)
-        if new_index > 2 and new_index < len(self.adapter.data) - 1:
-            self.list_view.scroll_to(new_index - 3)
+        if item:
+            item.trigger_action(0)
+            if new_index > 2 and new_index < len(self.adapter.data) - 1:
+                self.list_view.scroll_to(new_index - 3)
 
     def on_key_down(self, instance, key, *args):
         '''Keyboard listener to grab key codes and interact with the
