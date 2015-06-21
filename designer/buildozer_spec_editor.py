@@ -5,12 +5,13 @@ import webbrowser
 import designer
 
 from kivy.app import App
-
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty, ConfigParser, StringProperty
 from kivy.uix.settings import Settings, InterfaceWithSidebar, MenuSidebar,\
     ContentPanel, SettingsPanel
 from designer.uix.settings import SettingList, SettingDict
+
+from pygments.lexers.configs import IniLexer
 
 
 class SpecContentPanel(ContentPanel):
@@ -86,7 +87,7 @@ class SpecCodeInput(BoxLayout):
 
     def __init__(self, **kwargs):
         super(SpecCodeInput, self).__init__(**kwargs)
-        # self.text_input.lexer = IniLexer()
+        self.text_input.lexer = IniLexer()
 
     def load_spec(self, *args):
         '''Read the buildozer.spec and update the CodeInput
@@ -222,6 +223,5 @@ class BuildozerSpecEditor(Settings):
 
         self.config_parser.write()
         super(BuildozerSpecEditor, self).on_config_change(*args)
-        
         designer.project_watcher.start_watching(
                                             designer.project_loader.proj_dir)
