@@ -1,3 +1,4 @@
+from distutils.spawn import find_executable
 import os
 import os.path
 import shutil
@@ -61,17 +62,35 @@ class DesignerSettings(Settings):
 
         self.config_parser.read(DESIGNER_CONFIG)
         self.config_parser.upgrade(DEFAULT_CONFIG)
-        self.add_json_panel('Kivy Designer Settings', self.config_parser,
-                            os.path.join(_dir, 'designer',
-                                         'settings', 'designer_settings.json'))
 
         path = self.config_parser.getdefault(
             'global', 'python_shell_path', '')
 
-        if path == "":
+        if path.strip() == '':
             self.config_parser.set('global', 'python_shell_path',
                                    sys.executable)
             self.config_parser.write()
+
+        buildozer_path = self.config_parser.getdefault('buildozer',
+                                                       'buildozer_path', '')
+
+        if buildozer_path.strip() == '':
+            buildozer_path = find_executable('buildozer')
+            if buildozer_path:
+                self.config_parser.set('buildozer',
+                                       'buildozer_path',
+                                        buildozer_path)
+                self.config_parser.write()
+
+        self.add_json_panel('Kivy Designer', self.config_parser,
+                            os.path.join(_dir, 'designer', 'settings',
+                                         'designer_settings.json'))
+        self.add_json_panel('Buildozer', self.config_parser,
+                            os.path.join(_dir, 'designer', 'settings',
+                                         'buildozer_settings.json'))
+        self.add_json_panel('Hanga', self.config_parser,
+                            os.path.join(_dir, 'designer', 'settings',
+                                         'hanga_settings.json'))
 
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.

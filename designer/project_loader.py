@@ -99,6 +99,13 @@ class ProjectLoader(object):
         self.proj_dir = ""
         self._is_root_already_in_factory = False
 
+    def update_file_list(self):
+        '''
+        Update and return the file_list object
+        '''
+        self.file_list = self._get_file_list(self.proj_dir)
+        return self.file_list
+
     def _get_file_list(self, path):
         '''This function is recursively called for loading all py file files
            in the current directory.

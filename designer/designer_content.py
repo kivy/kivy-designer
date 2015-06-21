@@ -55,11 +55,21 @@ class DesignerContent(FloatLayout):
         '''
 
         self.proj_loader = proj_loader
+        self.proj_loader.update_file_list()
 
         # Fill nodes with file and directories
         self._root_node = self.tree_view.root
-        for _file in proj_loader.file_list:
+        self.clear_tree_view()
+        for _file in sorted(proj_loader.file_list):
             self.add_file_to_tree_view(_file)
+
+    def clear_tree_view(self):
+        '''
+        Clear the TreeView
+        '''
+        temp = list(self.tree_view.iterate_all_nodes())
+        for node in temp:
+            self.tree_view.remove_node(node)
 
     def add_file_to_tree_view(self, _file):
         '''This function is used to insert py file given by it's path argument
