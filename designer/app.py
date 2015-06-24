@@ -941,10 +941,10 @@ class Designer(FloatLayout):
         self.prof_settings.load_profiles()
         self.fill_select_profile_menu()
 
-    def _perform_use_this_prof(self, *args):
+    def _perform_use_this_prof(self, instance, *args):
         '''Callback to "Use this Profile" button
         '''
-        _config = args[0].selected_config
+        _config = instance.selected_config
         _config_path = _config.filename
         self.designer_settings.config_parser.set('internal',
                                                 'default_profile',
@@ -981,12 +981,12 @@ class Designer(FloatLayout):
 
         prof_menu._add_widget()
 
-    def _perform_profile_selected(self, *args):
+    def _perform_profile_selected(self, instance, item, value, *args):
         '''Event handler to select profile radio button.
         Save the selected config_parser path to the config
         '''
-        if args[2]:
-            _config = self.prof_settings.config_parsers[args[0].config_key]
+        if value:
+            _config = self.prof_settings.config_parsers[instance.config_key]
             _config_path = _config.filename
             self.designer_settings.config_parser.set('internal',
                                                      'default_profile',

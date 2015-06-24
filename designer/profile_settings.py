@@ -174,12 +174,13 @@ class ProfileSettings(Settings):
         first_panel = self.interface.menu.buttons_layout.children[-1].uid
         self.interface.content.current_uid = first_panel
 
-    def on_config_change(self, *args):
+    def on_config_change(self, instance, section, key, value, *args):
         '''This function is default handler of on_config_change event.
         '''
-        args[0].write()
-        super(ProfileSettings, self).on_config_change(*args)
-        if args[2] == 'name':
+        super(ProfileSettings, self).on_config_change(
+            instance, section, key, value
+        )
+        if key == 'name':
             self.update_panel()
             self.settings_changed = True
 
