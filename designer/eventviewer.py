@@ -3,12 +3,9 @@ from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.clock import Clock
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
-from kivy.app import App
-from kivy.uix.scrollview import ScrollView
 
 from designer.uix.info_bubble import InfoBubble
-from designer.propertyviewer import PropertyViewer,\
-    PropertyTextInput, PropertyLabel
+from designer.propertyviewer import PropertyViewer, PropertyLabel
 
 import re
 
@@ -59,7 +56,9 @@ class EventHandlerTextInput(TextInput):
         '''
         if self.collide_point(*touch.pos):
             self.info_bubble = InfoBubble(message=self.info_message)
-            self.info_bubble.show(self.pos, 1)
+            bubble_pos = list(self.to_window(*self.pos))
+            bubble_pos[1] += self.height
+            self.info_bubble.show(bubble_pos, 1.5)
 
         return super(EventHandlerTextInput, self).on_touch_down(touch)
 
@@ -135,23 +134,18 @@ class NewEventTextInput(TextInput):
         '''
         pass
 
-    def insert_text(self, substring, from_undo=False):
-        '''Override of 'insert_text' of :class:`kivy.uix.textinput.TextInput`
+    def on_text_validate(self):
+        '''Create a new event to a CustomWidget
         '''
-        if '\n' in substring:
-            # Enter pressed create a new event
-            substring = substring.replace('\n', '')
-            if self.text[:3] == 'on_':
-                self.dispatch('on_create_event')
-
-        super(NewEventTextInput, self).insert_text(substring, from_undo)
+        if self.text[:3] == 'on_':
+            self.dispatch('on_create_event')
 
     def on_touch_down(self, touch):
         '''Default handler for 'on_touch_down' event.
         '''
         if self.collide_point(*touch.pos):
             self.info_bubble = InfoBubble(message=self.info_message)
-            self.info_bubble.show(self.pos, 1)
+            self.info_bubble.show(self.to_window(*self.pos), 1.5)
 
         return super(NewEventTextInput, self).on_touch_down(touch)
 
@@ -215,7 +209,7 @@ class EventViewer(PropertyViewer):
             add(EventLabel(text='Type and press enter to \n'
                            'create a new event'))
             txt = NewEventTextInput(
-                multiline=True,
+                multiline=False,
                 info_message='Type and press enter to create a new event')
             txt.bind(on_create_event=self.create_event)
             add(txt)
