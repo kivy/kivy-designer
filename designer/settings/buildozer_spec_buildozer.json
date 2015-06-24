@@ -1,0 +1,14 @@
+[
+  {
+    "type": "title",
+    "title": "Logs"
+  },
+  {
+    "type": "dict",
+    "title": "Log level",
+    "section": "buildozer",
+    "desc": "Buildozer Log Level",
+    "key": "log_level",
+    "options": {"0": "Error only", "1": "Info", "2": "debug (with command output)"}
+  }
+]

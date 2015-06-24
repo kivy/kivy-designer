@@ -52,6 +52,7 @@ from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton
 from designer.help_dialog import HelpDialog, AboutDialog
 from designer.uix.bug_reporter import BugReporterApp
+from designer.buildozer_spec_editor import BuildozerSpecEditor
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -64,6 +65,10 @@ class Designer(FloatLayout):
 
     designer_console = ObjectProperty(None)
     '''Instance of :class:`designer.designer_console.ConsoleDialog`
+    '''
+
+    spec_editor = ObjectProperty(None)
+    '''Instance of :class:`designer.buildozer_spec_editor.BuildozerSpecEditor`
     '''
 
     statusbar = ObjectProperty(None)
@@ -164,6 +169,7 @@ class Designer(FloatLayout):
         self.project_watcher = ProjectWatcher(self.project_modified)
         self.project_loader = ProjectLoader(self.project_watcher)
         self.recent_manager = RecentManager()
+        self.spec_editor = BuildozerSpecEditor()
         self.widget_to_paste = None
         self.designer_content = DesignerContent(size_hint=(1, None))
         self.designer_content = self.designer_content.__self__
@@ -377,6 +383,7 @@ class Designer(FloatLayout):
         self._perform_open(self.project_loader.proj_dir)
         self.project_watcher.allow_event_dispatch = True
         self._proj_modified_outside = False
+        self.spec_editor.load_settings(self.project_loader.proj_dir)
 
     def on_show_edit(self, *args):
         '''Event Handler of 'on_show_edit' event. This will show EditContView

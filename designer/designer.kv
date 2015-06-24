@@ -493,6 +493,110 @@
             size: self.size
             source: self.background_normal
 
+#
+# Buildozer Spec Editor
+#
+
+<SpecCodeInput>:
+    text_input: text_input
+    lbl_error: lbl_error
+	orientation: 'vertical'
+	spacing: 10
+	padding: 10
+    Label:
+        text: "Edit the buildozer.spec file"
+        size_hint_y: None
+        text_size: self.size
+        font_size: '11pt'
+        height: '20pt'
+    Label:
+        id: lbl_error
+        text: 'There is something wrong with your .spec file...'
+        size_hint_y: None
+        text_size: self.size
+        font_size: '11pt'
+        halign: 'center'
+        height: '0pt'
+    ScrollView:
+        id: spec_scroll
+        CodeInput:
+            id: text_input
+            size_hint_y: None
+            height: max(spec_scroll.height, self.minimum_height)
+    BoxLayout:
+        size_hint_y: None
+        height: '40dp'
+        Button:
+            text: 'Apply modifications'
+            on_press: root._save_spec()
+        Button:
+            text: 'Cancel modifications'
+            on_press: root.load_spec()
+
+<BuildozerSpecEditor>:
+    interface_cls: 'SpecEditorInterface'
+
+<-SpecEditorInterface>:
+    orientation: 'horizontal'
+    menu: menu
+    content: content
+    button_bar: button_bar
+    SpecMenuSidebar:
+        id: menu
+    GridLayout:
+        id: button_bar
+        cols: 1
+        Label:
+            text: 'Buildozer Spec Editor'
+            font_size: '16pt'
+            halign: 'center'
+            size_hint_y: None
+            height: '25pt'
+        Button:
+            background_normal: 'atlas://data/images/defaulttheme/action_item'
+            background_down: 'atlas://data/images/defaulttheme/action_item'
+            text: 'GUI editor to buildozer.spec.\nRead more at http://buildozer.readthedocs.org'
+            text_size: self.size
+            font_size: '11pt'
+            halign: 'center'
+            valign: 'top'
+            size_hint_y: None
+            height: '30pt'
+            on_press: root.open_buildozer_docs()
+        SpecContentPanel:
+            id: content
+            current_uid: menu.selected_uid
+
+<-MenuSidebar>:
+    size_hint_x: None
+    width: '200dp'
+    buttons_layout: menu
+    close_button: button
+    GridLayout:
+        pos: root.pos
+        cols: 1
+        id: menu
+        orientation: 'vertical'
+        padding: 5
+
+        canvas.after:
+            Color:
+                rgb: .2, .2, .2
+            Rectangle:
+                pos: self.right - 1, self.y
+                size: 1, self.height
+    Button:
+        id: button
+
+<SpecContentPanel>:
+    do_scroll_x: False
+    container: content
+    GridLayout:
+        id: content
+        cols: 1
+        size_hint_y: None
+        height: max(self.minimum_height, root.height)
+
 <EditContView>:
     ActionPrevious:
         title: "Edit"
