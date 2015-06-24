@@ -3,6 +3,11 @@ language: python
 python:
   - 3.4
 
+install:
+  # prevent implicit requirements.txt installation
+  # http://docs.travis-ci.com/user/languages/python/#Travis-CI-uses-pip
+  - pip --version &> /dev/null
+
 script:
   - make style
 
