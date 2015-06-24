@@ -506,6 +506,8 @@ class ContextSubMenu(MenuButton):
                 tab.show_arrow = False
 
         except:
+            if not self.cont_menu.current_tab in self.cont_menu.tab_list:
+                return
             curr_index = self.cont_menu.tab_list.index(
                 self.cont_menu.current_tab)
             for i in range(curr_index - 1, -1, -1):
