@@ -8,7 +8,7 @@
     "title": "Log level",
     "section": "buildozer",
     "desc": "Buildozer Log Level",
-    "key": "loglevel",
+    "key": "log_level",
     "options": {"0": "Error only", "1": "Info", "2": "debug (with command output)"}
   }
 ]

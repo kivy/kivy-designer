@@ -383,6 +383,7 @@ class Designer(FloatLayout):
         self._perform_open(self.project_loader.proj_dir)
         self.project_watcher.allow_event_dispatch = True
         self._proj_modified_outside = False
+        self.spec_editor.load_settings(self.project_loader.proj_dir)
 
     def on_show_edit(self, *args):
         '''Event Handler of 'on_show_edit' event. This will show EditContView

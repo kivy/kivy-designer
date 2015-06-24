@@ -567,7 +567,27 @@
             id: content
             current_uid: menu.selected_uid
 
-<SpecMenuSidebar>:
+<-MenuSidebar>:
+    size_hint_x: None
+    width: '200dp'
+    buttons_layout: menu
+    close_button: button
+    GridLayout:
+        pos: root.pos
+        cols: 1
+        id: menu
+        orientation: 'vertical'
+        padding: 5
+
+        canvas.after:
+            Color:
+                rgb: .2, .2, .2
+            Rectangle:
+                pos: self.right - 1, self.y
+                size: 1, self.height
+    Button:
+        id: button
+
 <SpecContentPanel>:
     do_scroll_x: False
     container: content
