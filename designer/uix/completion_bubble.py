@@ -33,6 +33,11 @@ Builder.load_string('''
         Rectangle:
             pos: self.pos
             size: self.size
+        Color:
+            rgb: 0.2, 0.2, 0.2
+        Rectangle:
+            pos: self.pos
+            size: self.width, 1
 ''')
 
 
