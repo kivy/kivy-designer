@@ -39,11 +39,12 @@
     },
     {
         "id": "code_input_theme_options",
-        "type": "options",
+        "type": "list",
         "title": "Code Input Theme",
         "desc": "Select the Code Input theme",
         "section": "global",
         "key": "code_input_theme",
-        "options": ["emacs"]
+        "items": [],
+        "group": "code_input_theme"
     }
 ]
