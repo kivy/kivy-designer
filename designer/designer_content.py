@@ -202,6 +202,5 @@ class DesignerTabbedPanel(TabbedPanel):
         self.list_py_code_inputs.append(spec_editor)
 
 
-
 class DesignerTabbedPanelItem(TabbedPanelItem):
     pass

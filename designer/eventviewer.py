@@ -145,7 +145,9 @@ class NewEventTextInput(TextInput):
         '''
         if self.collide_point(*touch.pos):
             self.info_bubble = InfoBubble(message=self.info_message)
-            self.info_bubble.show(self.to_window(*self.pos), 1.5)
+            bubble_pos = list(self.to_window(*self.pos))
+            bubble_pos[1] += self.height
+            self.info_bubble.show(bubble_pos, 1.5)
 
         return super(NewEventTextInput, self).on_touch_down(touch)
 
@@ -220,7 +222,7 @@ class EventViewer(PropertyViewer):
         # Find the python file of widget
         py_file = None
         for rule in self.project_loader.class_rules:
-            if rule.name == type(self.widget).__name__:
+            if self.widget.__class__.__name__ == rule.name:
                 py_file = rule.file
                 break
 
@@ -230,7 +232,7 @@ class EventViewer(PropertyViewer):
             rel_path = rel_path[1:]
 
         self.designer_tabbed_panel.open_file(py_file, rel_path,
-                                             switch_to=False)
+                                             switch_to=True)
         self.rel_path = rel_path
         self.txt = txt
         Clock.schedule_once(self._add_event)
@@ -255,11 +257,12 @@ class EventViewer(PropertyViewer):
 
         if pos != -1:
             col, row = py_code_input.get_cursor_from_index(pos)
+            row += 1
             lines = py_code_input.text.splitlines()
             found_events = False
             events_row = row
             for i in range(row, len(lines)):
-                if re.match(r'__events__\s*=\s*\(.+\)', lines[i]):
+                if re.match(r'\s+__events__\s*=\s*\(.+\)', lines[i]):
                     found_events = True
                     events_row = i
                     break
@@ -272,13 +275,17 @@ class EventViewer(PropertyViewer):
 
             if found_events:
                 events_col = lines[events_row].rfind(')') - 1
-                py_code_input.cursor = events_row, events_col
-                py_code_input.insert_text(txt.text)
+                py_code_input.cursor = events_col, events_row
+                py_code_input.insert_text(', "%s" ' % txt.text)
 
+                py_code_input.cursor = 0, events_row + 1
+                py_code_input.insert_text(
+                    '\n    def %s(self, *args):\n        pass\n' % txt.text
+                )
             else:
                 py_code_input.text = py_code_input.text[:pos] + \
-                    '\n    __events__=("%s",)\n'\
-                    '    def %s(self, *args):\n        pass' % \
+                    '\n\n    __events__=("%s",)\n\n'\
+                    '    def %s(self, *args):\n        pass\n' % \
                     (txt.text, txt.text) +\
                     py_code_input.text[pos:]
             self.statusbar.show_message('New Event Created you must save '
