@@ -983,14 +983,25 @@
                         text: 'KV Lang Area'
                         BoxLayout:
                             orientation: 'vertical'
-                            ScrollView:
+                            KVLangAreaScroll:
                                 id: scroll
-                                KVLangArea:
-                                    id: code_input
-                                    size_hint_y: None
+                                kv_lang_area: code_input
+                                line_number: line_number
+                                GridLayout:
+                                    cols: 2
+                                    size_hint: 1, None
                                     height: max(scroll.height, self.minimum_height)
-                                    on_show_edit: root.on_show_edit()
-                            
+                                    TextInput:
+                                        id: line_number
+                                        size_hint: None, 1
+                                        readonly: True
+                                        background_color: 1, 1, 1, 0
+                                        foreground_color: 1, 1, 1, 1
+                                    KVLangArea:
+                                        id: code_input
+                                        size_hint_y: None
+                                        height: max(scroll.height, self.minimum_height)
+                                        on_show_edit: root.on_show_edit()
                             Button:
                                 size_hint_y: None
                                 size_hint_x: 0.1
