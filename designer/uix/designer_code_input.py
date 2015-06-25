@@ -4,6 +4,7 @@ from kivy.properties import BooleanProperty, ConfigParserProperty
 from kivy.utils import get_color_from_hex
 
 from pygments import styles, highlight
+from designer.helper_functions import show_alert
 
 
 class DesignerCodeInput(CodeInput):
@@ -31,12 +32,11 @@ class DesignerCodeInput(CodeInput):
             self.style_name = parser.getdefault('global', 'code_input_theme',
                                                 'emacs')
 
-    def on_codeinput_theme(self, *args):
-        if not args[2] in styles.get_all_styles():
-            # TODO shows an alert - add after merge with utils alert
-            pass
+    def on_codeinput_theme(self, section, key, value, *args):
+        if not value in styles.get_all_styles():
+            show_alert("Error", "This theme is not available")
         else:
-            self.style_name = args[2]
+            self.style_name = value
 
     def on_style_name(self, *args):
         super(DesignerCodeInput, self).on_style_name(*args)

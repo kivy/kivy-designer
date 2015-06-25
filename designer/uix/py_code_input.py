@@ -106,7 +106,10 @@ class PyScrollView(ScrollView):
         '''Display the bubble with the completions
         '''
         self.bubble.show_completions(completions, force_scroll=True)
-        self.bubble.reposition(self.code_input.cursor_pos)
+        self.bubble.reposition(
+            self.code_input.to_window(*self.code_input.cursor_pos),
+            self.code_input.line_height + self.code_input.line_spacing
+        )
         self.root.add_widget(self.bubble)
         self.is_bubble_visible = True
 

@@ -107,7 +107,7 @@ class CompletionBubble(Bubble):
     def selected_by_touch(self, item):
         self.dispatch('on_complete', item.complete)
 
-    def show_completions(self, completions, force_scroll = False):
+    def show_completions(self, completions, force_scroll=False):
         '''Update the Completion ListView with completions
         '''
         if completions == []:
@@ -169,13 +169,13 @@ class CompletionBubble(Bubble):
             self.dispatch('on_cancel')
             return False
 
-    def reposition(self, pos):
+    def reposition(self, pos, line_height):
         '''Update the Bubble position. Try to display it in the best place of
         the screen
         '''
         win = Window
-        self.x = pos[0] + self.width / 2 + 20
-        self.y = pos[1] - self.height
+        self.x = pos[0] - self.width / 2
+        self.y = pos[1] - self.height - line_height
 
         # fit in the screen horizontally
         if self.right > win.width:
@@ -187,7 +187,7 @@ class CompletionBubble(Bubble):
         if self.y < 0:
             diff = abs(self.y)
             # check if we can move it to top
-            new_y = pos[1] + 30
+            new_y = pos[1] + line_height
             if new_y + self.height < win.height:  # fit in the screen
                 self.y = new_y
             else:  # doesnt fit on top neither on bottom. Check the best place
@@ -196,7 +196,7 @@ class CompletionBubble(Bubble):
                     self.y = new_y
 
         # compare the desired position with the actual position
-        x_relative = self.x - (pos[0] + self.width / 2 + 20)
+        x_relative = self.x - (pos[0] - self.width / 2)
 
         x_range = self.width / 4  # consider 25% as the range
 
@@ -213,7 +213,7 @@ class CompletionBubble(Bubble):
                 _pos = 'left'
             return _pos
 
-        if self.y == pos[1] - self.height:
+        if self.y == pos[1] - self.height - line_height:
             self.arrow_pos = 'top_' + _get_hpos()
         else:
             self.arrow_pos = 'bottom_' + _get_hpos()
