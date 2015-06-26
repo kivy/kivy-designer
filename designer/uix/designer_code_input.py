@@ -1,10 +1,9 @@
 from kivy import Config
 from kivy.uix.codeinput import CodeInput
-from kivy.properties import BooleanProperty, ConfigParserProperty
 from kivy.utils import get_color_from_hex
-
 from pygments import styles, highlight
 from designer.helper_functions import show_alert
+from kivy.properties import BooleanProperty
 
 
 class DesignerCodeInput(CodeInput):
