@@ -1082,8 +1082,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.do_undo()
+                    break
 
     def action_btn_redo_pressed(self, *args):
         '''Event Handler when ActionButton "Redo" is pressed.
@@ -1096,8 +1097,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.do_redo()
+                    break
 
     def action_btn_cut_pressed(self, *args):
         '''Event Handler when ActionButton "Cut" is pressed.
@@ -1112,8 +1114,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.cut()
+                    break
 
     def action_btn_copy_pressed(self, *args):
         '''Event Handler when ActionButton "Copy" is pressed.
@@ -1128,8 +1131,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.copy()
+                    break
 
     def action_btn_paste_pressed(self, *args):
         '''Event Handler when ActionButton "Paste" is pressed.
@@ -1144,8 +1148,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.paste()
+                    break
 
     def action_btn_delete_pressed(self, *args):
         '''Event Handler when ActionButton "Delete" is pressed.
@@ -1160,8 +1165,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.delete_selection()
+                    break
 
     def action_btn_select_all_pressed(self, *args):
         '''Event Handler when ActionButton "Select All" is pressed.
@@ -1176,8 +1182,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     Clock.schedule_once(code_input.do_select_all)
+                    break
 
     def action_btn_add_custom_widget_press(self, *args):
         '''Event Handler when ActionButton "Add Custom Widget" is pressed.
