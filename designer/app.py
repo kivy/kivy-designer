@@ -404,6 +404,8 @@ class Designer(FloatLayout):
             return
 
         if self.editcontview is None:
+            select_all_trigger = Clock.create_trigger(
+                self.action_btn_select_all_pressed)
             self.editcontview = EditContView(
                 on_undo=self.action_btn_undo_pressed,
                 on_redo=self.action_btn_redo_pressed,
@@ -411,9 +413,10 @@ class Designer(FloatLayout):
                 on_copy=self.action_btn_copy_pressed,
                 on_paste=self.action_btn_paste_pressed,
                 on_delete=self.action_btn_delete_pressed,
-                on_selectall=self.action_btn_select_all_pressed,
+                on_selectall=select_all_trigger,
                 on_next_screen=self._next_screen,
-                on_prev_screen=self._prev_screen)
+                on_prev_screen=self._prev_screen,
+                on_touch_up=self.on_editcontview_release)
 
         self.actionbar.add_widget(self.editcontview)
 
@@ -435,6 +438,15 @@ class Designer(FloatLayout):
 
         self.ui_creator.playground.clicked = False
         self.ui_creator.kv_code_input.clicked = False
+
+    def on_editcontview_release(self, instance, touch):
+        if self._edit_selected == 'Py':
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if code_input.clicked is True:
+                    Clock.schedule_once(code_input._do_focus)
+                    return True
+        return self.editcontview.on_touch_up(touch)
 
     def _prev_screen(self, *args):
         '''Event handler for 'on_prev_screen' for self.editcontview
@@ -1071,7 +1083,6 @@ class Designer(FloatLayout):
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
                 if code_input.clicked is True:
-                    code_input.clicked = False
                     code_input.do_undo()
 
     def action_btn_redo_pressed(self, *args):
@@ -1086,7 +1097,6 @@ class Designer(FloatLayout):
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
                 if code_input.clicked is True:
-                    code_input.clicked = False
                     code_input.do_redo()
 
     def action_btn_cut_pressed(self, *args):
@@ -1097,14 +1107,13 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_cut()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_cut()
+            self.ui_creator.kv_code_input.cut()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
                 if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_cut()
+                    code_input.cut()
 
     def action_btn_copy_pressed(self, *args):
         '''Event Handler when ActionButton "Copy" is pressed.
@@ -1114,14 +1123,13 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_copy()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_copy()
+            self.ui_creator.kv_code_input.copy()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
                 if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_copy()
+                    code_input.copy()
 
     def action_btn_paste_pressed(self, *args):
         '''Event Handler when ActionButton "Paste" is pressed.
@@ -1131,14 +1139,13 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_paste()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_paste()
+            self.ui_creator.kv_code_input.paste()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
                 if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_paste()
+                    code_input.paste()
 
     def action_btn_delete_pressed(self, *args):
         '''Event Handler when ActionButton "Delete" is pressed.
@@ -1148,14 +1155,13 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_delete()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_delete()
+            self.ui_creator.kv_code_input.delete_selection()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
                 if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_delete()
+                    code_input.delete_selection()
 
     def action_btn_select_all_pressed(self, *args):
         '''Event Handler when ActionButton "Select All" is pressed.
@@ -1165,14 +1171,13 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_select_all()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_select_all()
+            Clock.schedule_once(self.ui_creator.kv_code_input.do_select_all)
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
                 if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_select_all()
+                    Clock.schedule_once(code_input.do_select_all)
 
     def action_btn_add_custom_widget_press(self, *args):
         '''Event Handler when ActionButton "Add Custom Widget" is pressed.
