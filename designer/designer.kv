@@ -1175,6 +1175,7 @@
         x: splitter_tree.width
         width: root.width - splitter_tree.width
         do_default_tab: False
+        tab_width: None
 
         DesignerTabbedPanelItem:
             text: 'UI Creator'
@@ -1202,6 +1203,35 @@
                 Toolbox:
                     id: toolbox
 
+<DesignerCloseableTab>:
+    color: 0,0,0,0
+    disabled_color: self.color
+    # variable tab_width
+    text: root.title
+    size_hint_x: None
+    width: min(self.texture_size[0] + 40, 200)
+    BoxLayout:
+        pos: root.pos
+        size_hint: None, None
+        size: root.size
+        padding: 3
+        Label:
+            id: lbl
+            text: root.text
+            shorten: True
+            shorten_from: 'right'
+            text_size: self.size
+            valign: 'middle'
+            halign: 'center'
+            markup: True
+        BoxLayout:
+            size_hint: None, 1
+            orientation: 'vertical'
+            width: 22
+            Image:
+                source: 'atlas://data/images/defaulttheme/close'
+                on_touch_down:
+                    if self.collide_point(*args[1].pos) : root.dispatch('on_close')
 <Designer>:
     statusbar: statusbar
     actionbar: actionbar
