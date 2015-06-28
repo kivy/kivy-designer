@@ -77,3 +77,12 @@ class ProjectWatcher(object):
         '''join observer after unschedulling it
         '''
         self._observer.join()
+
+    def resume_watching(self):
+        '''Resume watching the project if self._project_dir exists
+        '''
+        if self._project_dir:
+            self.start_watching(self._project_dir)
+            return True
+        else:
+            return False

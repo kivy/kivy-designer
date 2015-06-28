@@ -1,4 +1,5 @@
 import webbrowser
+from designer.designer_tools import DesignerTools
 from designer.input_dialog import InputDialog
 from designer.profile_settings import ProfileSettings
 from designer.profiler import Profiler
@@ -73,6 +74,10 @@ class Designer(FloatLayout):
 
     spec_editor = ObjectProperty(None)
     '''Instance of :class:`designer.buildozer_spec_editor.BuildozerSpecEditor`
+    '''
+
+    designer_tools = ObjectProperty(None)
+    '''Instance of :class:`designer.designer_tools.DesignerTools`
     '''
 
     statusbar = ObjectProperty(None)
@@ -202,6 +207,8 @@ class Designer(FloatLayout):
         self.profiler.bind(on_message=self.on_profiler_message)
         self.profiler.bind(on_run=self.on_profiler_run)
         self.profiler.bind(on_stop=self.on_profiler_stop)
+
+        self.designer_tools = DesignerTools(designer=self)
 
         Window.bind(on_resize=self._write_window_size)
         Window.bind(on_request_close=self.on_request_close)
@@ -365,6 +372,7 @@ class Designer(FloatLayout):
         self.ids['actn_menu_view'].disabled = False
         self.ids['actn_menu_proj'].disabled = False
         self.ids['actn_menu_run'].disabled = False
+        self.ids['actn_menu_tools'].disabled = False
 
         self.proj_settings = ProjectSettings(proj_loader=self.project_loader)
         self.proj_settings.load_proj_settings()
@@ -726,6 +734,7 @@ class Designer(FloatLayout):
         self.ids['actn_menu_view'].disabled = True
         self.ids['actn_menu_proj'].disabled = True
         self.ids['actn_menu_run'].disabled = True
+        self.ids['actn_menu_tools'].disabled = True
 
         self.project_watcher.stop()
 

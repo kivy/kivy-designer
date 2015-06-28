@@ -94,3 +94,14 @@ def show_alert(title, msg, width=500, height=200):
                         size_hint=(None, None),
                         size=(width, height))
     popup.open()
+
+
+def ignore_proj_watcher(f):
+    '''Function decorator to makes project watcher ignores file modification
+    '''
+    def wrapper(*args, **kwargs):
+        watcher = App.get_running_app().root.project_watcher
+        watcher.stop()
+        f(*args, **kwargs)
+        return watcher.resume_watching()
+    return  wrapper
