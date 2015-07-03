@@ -189,7 +189,7 @@ class SettingListCheckItem(BoxLayout):
     defaults to False
     '''
 
-    group = StringProperty('')
+    group = StringProperty(None)
     '''CheckBox group name. If the CheckBox is in a Group,
     it becomes a Radio button.
     :attr:`group` is a :class:`~kivy.properties.StringProperty` and
@@ -313,7 +313,7 @@ class SettingList(SettingItem):
     and defaults to False
     '''
 
-    group = StringProperty('')
+    group = StringProperty(None)
     '''CheckBox group name. If the CheckBox is in a Group,
     it becomes a Radio button.
     :attr:`group` is a :class:`~kivy.properties.StringProperty` and

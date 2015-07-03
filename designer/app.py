@@ -179,7 +179,6 @@ class Designer(FloatLayout):
         self.designer_settings.load_settings()
         self.designer_settings.bind(on_close=self._cancel_popup)
 
-
         self.prof_settings = ProfileSettings()
         self.prof_settings.bind(on_close=self._cancel_popup)
         self.prof_settings.bind(on_changed=self.on_profiles_changed)
