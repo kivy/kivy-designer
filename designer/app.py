@@ -488,12 +488,12 @@ class Designer(FloatLayout):
         '''Override of FloatLayout.on_touch_down. Used to determine where
            touch is down and to call self.actionbar.on_previous
         '''
-
         if not isinstance(self.actionbar.children[0], EditContView) or\
            self.actionbar.collide_point(*touch.pos):
             return super(FloatLayout, self).on_touch_down(touch)
 
         self.actionbar.on_previous(self)
+        self.ui_creator.playground.clicked = False
 
         return super(FloatLayout, self).on_touch_down(touch)
 
