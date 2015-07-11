@@ -89,3 +89,12 @@ The ``Run`` menu provides you some options. Take a look in the table bellow to s
 +-----------+---------------------------------------+--------------------------------------------+------------------------------------------+
 |**Rebuild**| Run ``Clean`` and the ``Build``       | Run ``Clean`` and the ``Build``            | Not yet implemented                      |
 +-----------+---------------------------------------+--------------------------------------------+------------------------------------------+
+
+Emulating different screen devices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While developing your application, it's really important to see it running in different screen sizes. Kivy Designer provides a simple interface to the `Screen Module <http://kivy.org/docs/api-kivy.modules.screen.html#module-kivy.modules.screen>`_.
+
+To use it, you must to target the Desktop, and then select the desired device on ``Run -> Screen Emulation``, and the orientation on ``Run -> Screen Orientation``.
+
+And then just use ``Run -> Run`` to run the application in the selected simulated screen device.
