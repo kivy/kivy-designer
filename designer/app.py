@@ -2,6 +2,7 @@ import webbrowser
 from designer.input_dialog import InputDialog
 from designer.profile_settings import ProfileSettings
 from designer.profiler import Profiler
+from designer.uix.modules_contview import ModulesContView
 
 __all__ = ('DesignerApp', )
 
@@ -36,6 +37,7 @@ from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
 from designer.uix.editcontview import EditContView
+from designer.uix.modules_contview import ModulesContView
 from designer.uix.kv_lang_area import KVLangArea
 from designer.undo_manager import WidgetOperation, UndoManager
 from designer.project_loader import ProjectLoader, ProjectLoaderException
@@ -53,7 +55,7 @@ from designer.helper_functions import get_kivy_designer_dir, show_alert
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton, \
-    DesignerActionProfileCheck
+    DesignerActionProfileCheck, DesignerActionSubMenu
 from designer.help_dialog import HelpDialog, AboutDialog
 from designer.uix.bug_reporter import BugReporterApp
 from designer.buildozer_spec_editor import BuildozerSpecEditor
@@ -82,7 +84,12 @@ class Designer(FloatLayout):
 
     editcontview = ObjectProperty(None)
     '''Reference to the :class:`~designer.uix.EditContView` instance.
-       :data:`v` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`editcontview` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    modulescontview = ObjectProperty(None)
+    '''Reference to the :class:`~designer.uix.modules_contview.ModulesContView`.
+       :data:`modulescontview` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     actionbar = ObjectProperty(None)
@@ -152,7 +159,8 @@ class Designer(FloatLayout):
     select_profile_cont_menu = ObjectProperty(None)
     '''Reference of
         :class:`~designer.uix.designer_action_items.DesignerActionSubMenu`.
-       :data:`start_page` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`select_profile_cont_menu` is a
+       :class:`~kivy.properties.ObjectProperty`
     '''
 
     selected_profile = StringProperty('')
@@ -1028,18 +1036,20 @@ class Designer(FloatLayout):
             btn.text = prof_name
             btn.checkbox.active = False
 
+            btn.config_key = profile
+            btn.bind(on_active=self._perform_profile_selected)
+
             if self.designer_settings.config_parser.getdefault('internal',
                                         'default_profile', '') == config_path:
                 btn.checkbox.active = True
                 self.selected_profile = config_path
+                self._perform_profile_selected(btn, btn.checkbox, True)
 
-            btn.config_key = profile
-            btn.bind(on_active=self._perform_profile_selected)
             prof_menu.add_widget(btn)
 
         prof_menu._add_widget()
 
-    def _perform_profile_selected(self, instance, item, value, *args):
+    def _perform_profile_selected(self, instance, checkbox, value, *args):
         '''Event handler to select profile radio button.
         Save the selected config_parser path to the config
         '''
@@ -1051,6 +1061,13 @@ class Designer(FloatLayout):
                                                      _config_path)
             self.designer_settings.config_parser.write()
             self.selected_profile = _config_path
+
+            target = _config.getdefault('profile', 'target', '')
+
+            if target == 'Desktop':
+                self.ids.actn_btn_run_module.disabled = False
+            else:
+                self.ids.actn_btn_run_module.disabled = True
 
     def action_btn_recent_files_pressed(self, *args):
         '''Event Handler when ActionButton "Recent Projects" is pressed.
@@ -1441,6 +1458,15 @@ class Designer(FloatLayout):
 
         self._popup.open()
 
+    def action_btn_run_module_pressed(self, *args):
+
+        if self.modulescontview is None:
+            self.modulescontview = ModulesContView()
+            self.modulescontview.bind(
+                on_module=self.action_btn_run_project_pressed)
+
+        self.actionbar.add_widget(self.modulescontview)
+
     def action_btn_project_settings_pressed(self, *args):
         '''Event Handler when ActionButton "Project Settings" is pressed.
         '''
@@ -1508,7 +1534,7 @@ class Designer(FloatLayout):
             return
         self.profiler.rebuild()
 
-    def action_btn_run_project_pressed(self, *args):
+    def action_btn_run_project_pressed(self, *args, **kwargs):
         '''Event Handler when ActionButton "Run" is pressed.
         '''
         if not self.check_selected_prof():
@@ -1516,7 +1542,7 @@ class Designer(FloatLayout):
         if self.project_loader.file_list == []:
             return
 
-        self.profiler.run()
+        self.profiler.run(*args, **kwargs)
 
     def on_sandbox_getting_exception(self, *args):
         '''Event Handler for
