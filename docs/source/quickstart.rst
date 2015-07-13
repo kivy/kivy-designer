@@ -80,7 +80,7 @@ The ``Run`` menu provides you some options. Take a look in the table bellow to s
 +-----------+---------------------------------------+--------------------------------------------+------------------------------------------+
 | **Run**   | Run *main.py* with Python interpreter | Build, install and run on target device    | Not yet implemented                      |
 +-----------+---------------------------------------+--------------------------------------------+------------------------------------------+
-| **Stop**  | Stop the Python interpreter           | If running a command, it's it.             | Not yet implemented                      |
+| **Stop**  | Stop the Python interpreter           | Nothing                                    | Not yet implemented                      |
 +-----------+---------------------------------------+--------------------------------------------+------------------------------------------+
 | **Clean** | Removes all .pyc and __pycache__      | Clean the Buildozer build                  | Not yet implemented                      |
 +-----------+---------------------------------------+--------------------------------------------+------------------------------------------+
@@ -90,11 +90,58 @@ The ``Run`` menu provides you some options. Take a look in the table bellow to s
 |**Rebuild**| Run ``Clean`` and the ``Build``       | Run ``Clean`` and the ``Build``            | Not yet implemented                      |
 +-----------+---------------------------------------+--------------------------------------------+------------------------------------------+
 
-Emulating different screen devices
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Modules
+-------
 
-While developing your application, it's really important to see it running in different screen sizes. Kivy Designer provides a simple interface to the `Screen Module <http://kivy.org/docs/api-kivy.modules.screen.html#module-kivy.modules.screen>`_.
+While developing your application, Kivy provides some `extra modules <http://kivy.org/docs/api-kivy.modules.html>`_ to help you.
 
-To use it, you must to target the Desktop, and then select the desired device on ``Run -> Screen Emulation``, and the orientation on ``Run -> Screen Orientation``.
+Kivy Designer has an interface to some of `these modules <http://kivy.org/docs/api-kivy.modules.html>`_ .
 
-And then just use ``Run -> Run`` to run the application in the selected simulated screen device.
+To use Kivy Modules you must target Desktop, select the desired module at ``Run -> Run with module...``.
+
+Screen Emulation
+~~~~~~~~~~~~~~~~
+
+It's really important to see your application running in different screen sizes, dimensions and orientations.
+
+Kivy Designer provides a simple interface to the `Screen Module <http://kivy.org/docs/api-kivy.modules.screen.html#module-kivy.modules.screen>`_.
+
+This module provides some settings. You can change the ``Device``, ``Orientation`` and ``Scale``. And the just press ``Run`` to run your application with Screen Module.
+
+Touchring
+~~~~~~~~~
+
+The `Touchring Module <http://kivy.org/docs/api-kivy.modules.touchring.html#module-kivy.modules.touchring>`_ shows rings around every touch on the surface / screen.
+
+You can use this module to check that you don’t have any calibration issues with touches.
+
+Monitor
+~~~~~~~
+
+The `Monitor Module <http://kivy.org/docs/api-kivy.modules.monitor.html#module-kivy.modules.monitor>`_ is a toolbar that shows the activity of your current application.
+
+Inspector
+~~~~~~~~~
+
+`This module is highly experimental, use it with care.`
+
+The `Inspector Module <http://kivy.org/docs/api-kivy.modules.inspector.html#module-kivy.modules.inspector>`_ is a tool for finding a widget in the widget tree by clicking or tapping on it.
+
+After running your app, you can access the Inspector with:
+
+    - "Ctrl + e": activate / deactivate the inspector view
+    - "Escape": cancel widget lookup first, then hide the inspector view
+
+Available inspector interactions:
+
+    - tap once on a widget to select it without leaving inspect mode
+    - double tap on a widget to select and leave inspect mode (then you can manipulate the widget again)
+
+Some properties can be edited live. However, due to the delayed usage of some properties, it might crash if you don’t handle all the cases.
+
+Web Debugger
+~~~~~~~~~~~~
+
+The `Web Debugger Module <http://kivy.org/docs/api-kivy.modules.webdebugger.html#module-kivy.modules.webdebugger>`_ starts a webserver and run in the background. You can see how your application evolves during runtime, examine the internal cache etc.
+
+To access the debugger, Kivy Designer will open http://localhost:5000/
