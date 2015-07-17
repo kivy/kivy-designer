@@ -438,6 +438,13 @@ class ContextSubMenu(MenuButton):
         if hasattr(widget, 'cont_menu'):
             widget.cont_menu = self.cont_menu
 
+    def remove_children(self):
+        '''Clear _list_children[]
+        '''
+        for child, index in self._list_children:
+            self.container.remove_widget(child)
+        self._list_children = []
+
     def on_cont_menu(self, *args):
         '''Default handler for cont_menu.
         '''
@@ -499,6 +506,8 @@ class ContextSubMenu(MenuButton):
                 tab.show_arrow = False
 
         except:
+            if not self.cont_menu.current_tab in self.cont_menu.tab_list:
+                return
             curr_index = self.cont_menu.tab_list.index(
                 self.cont_menu.current_tab)
             for i in range(curr_index - 1, -1, -1):
