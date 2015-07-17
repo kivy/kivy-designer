@@ -828,12 +828,17 @@
 <PropertyLabel>:
     font_size: '10pt'
     valign: 'middle'
-    size_hint_x: None
-    width: '90sp'
+    size_hint_x: 0.5
     text_size: self.size
     halign: 'left'
     valign: 'middle'
     shorten: True
+    canvas.before:
+        Color:
+            rgb: .2, .2, .2
+        Rectangle:
+            pos: self.x, self.y - 1
+            size: self.width, 1
 
 <PropertyBase>:
     propvalue: getattr(self.propwidget, self.propname)
@@ -846,6 +851,12 @@
             points: [self.x, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
             close: True
             width: 2
+    canvas.before:
+        Color:
+            rgb: .2, .2, .2
+        Rectangle:
+            pos: self.x, self.y - 1
+            size: self.width, 1
 
 <PropertyTextInput>:
     border: 8, 8, 8, 8
