@@ -274,18 +274,24 @@ class KivyConsole(GridLayout):
 
     def run_command(self, command, *args):
         '''Run a command using Kivy Console.
-        The output will be visible in the Kivy console
+        The output will be visible in the Kivy console.
+        Returns False if there is a command running and stops. Otherwise
+        start the execution of the commands and returns True
         '''
+        if self.popen_obj:
+            return False
+
         if isinstance(command, list):
             self.command_list = command
         else:
             self.command_list = [command]
         self._run_command_list()
 
+        return True
+
     def _run_command_list(self, *kwargs):
         '''Runs a list of commands
         '''
-        self.kill_process()
         if self.command_list:
             self.stdin.write(self.command_list.pop(0))
             self.bind(on_subprocess_done=self._run_command_list)
