@@ -1,18 +1,13 @@
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty, OptionProperty
 from kivy.clock import Clock
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.tabbedpanel import TabbedPanelContent, TabbedPanelHeader,\
-    TabbedPanel
-
-from kivy.uix.sandbox import SandboxContent
 
 
 class StatusNavBarButton(Button):
     '''StatusNavBarButton is a :class:`~kivy.uix.button` representing
-       the Widgets in the Widget heirarchy of currently selected widget.
+       the Widgets in the Widget hierarchy of currently selected widget.
     '''
 
     node = ObjectProperty()
@@ -26,8 +21,42 @@ class StatusNavBarSeparator(Label):
     pass
 
 
+class StatusNavbar(BoxLayout):
+    pass
+
+
+class StatusMessage(BoxLayout):
+
+    message = StringProperty('bbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacc' * 10)
+    '''Message visible on the status bar
+       :data:`message` is an
+       :class:`~kivy.properties.StringProperty` and defaults to ''
+    '''
+
+    icon = StringProperty('')
+    '''Message icon path
+       :data:`icon` is an
+       :class:`~kivy.properties.StringProperty` and defaults to ''
+    '''
+
+    type = OptionProperty(None, options=['info', 'alert', 'error'])
+    '''Shortcut to usual message icons
+       :data:`type` is an
+       :class:`~kivy.properties.ObjectProperty` and defaults to None
+    '''
+
+
+class StatusInfo(BoxLayout):
+
+    message = StringProperty('')
+    '''Message visible on the status bar
+       :data:`message` is an
+       :class:`~kivy.properties.StringProperty` and defaults to ''
+    '''
+
+
 class StatusBar(BoxLayout):
-    '''StatusBar used to display Widget heirarchy of currently selected
+    '''StatusBar used to display Widget hierarchy of currently selected
        widget and to display messages.
     '''
 
@@ -44,9 +73,13 @@ class StatusBar(BoxLayout):
        :class:`~kivy.properties.ObjectProperty`
     '''
 
-    gridlayout = ObjectProperty()
-    '''Parent of :data:`navbar`.
-       :data:`gridlayout` is an
+    status_message = ObjectProperty()
+    '''Instance of :class:`~designer.statusbar.StatusMessage`
+       :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    status_info = ObjectProperty()
+    '''Instance of :class:`~designer.statusbar.StatusInfo`
        :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -60,74 +93,26 @@ class StatusBar(BoxLayout):
         super(StatusBar, self).__init__(**kwargs)
         self.update_navbar = Clock.create_trigger(self._update_navbar)
 
-    def show_message(self, message, duration=None):
-        '''To show a message in StatusBar
-        '''
-
-        self.app.widget_focused = None
-        if (self.gridlayout.children or not
-                isinstance(self.gridlayout.children[0], Label)):
-            # Create navbar again, as doing clear_widgets
-            # will make its reference
-            # count to 0 and it will be destroyed
-            self.navbar = GridLayout(rows=1)
-
-        self.gridlayout.clear_widgets()
-        self.gridlayout.add_widget(Label(text=message))
-        self.gridlayout.children[0].text = message
-        Clock.unschedule(self._clear_message)
-        if duration:
-            Clock.schedule_once(self._clear_message, duration)
-
-    def _clear_message(self, *args):
-        '''Clear the status_bar message
-        '''
-        self.gridlayout.children[0].text = ''
-
-    def on_app(self, instance, app):
-        app.bind(widget_focused=self.update_navbar)
-
     def _update_navbar(self, *largs):
         '''To update navbar with the parents of currently selected Widget.
         '''
 
-        if self.gridlayout.children and\
-                isinstance(self.gridlayout.children[0], Label):
-            self.gridlayout.clear_widgets()
-            self.gridlayout.add_widget(self.navbar)
+        pass
 
-        self.navbar.clear_widgets()
-        wid = self.app.widget_focused
-        if not wid:
-            return
-
-        # get parent list, until app.root.playground.root
-        children = []
-        while wid:
-            if wid == self.playground.sandbox or\
-                    wid == self.playground.sandbox.children[0]:
-                break
-
-            if isinstance(wid, TabbedPanelContent):
-                _wid = wid
-                wid = wid.parent.current_tab
-                children.append(StatusNavBarButton(node=wid))
-                wid = _wid.parent
-
-            elif isinstance(wid, TabbedPanelHeader):
-                children.append(StatusNavBarButton(node=wid))
-                _wid = wid
-                while _wid and not isinstance(_wid, TabbedPanel):
-                    _wid = _wid.parent
-                wid = _wid
-
-            children.append(StatusNavBarButton(node=wid))
-            wid = wid.parent
-
-        count = len(children)
-        for index, child in enumerate(reversed(children)):
-            self.navbar.add_widget(child)
-            if index < count - 1:
-                self.navbar.add_widget(StatusNavBarSeparator())
-            else:
-                child.state = 'down'
+    def _update_content_width(self, *args):
+        '''Updates the statusbar's children sizes to save space
+        '''
+        nav = self.navbar
+        nav_c = self.navbar.children
+        mes = self.status_message
+        if nav_c == 0:
+            mes.size_hint_x = 0.9
+            nav.size_hint_x = None
+            nav.width = 0
+        elif mes.message:
+            mes.size_hint_x = 0.4
+            nav.size_hint_x = 0.5
+        elif not mes.message:
+            mes.size_hint_x = None
+            mes.width = 0
+            nav.size_hint_x = 0.9
