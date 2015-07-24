@@ -18,7 +18,8 @@ from designer.uix.designer_action_items import DesignerActionSubMenu, \
 from git import Repo, RemoteProgress, GitCommandError
 from designer.uix.py_code_input import PyScrollView
 from designer.uix.settings import SettingListContent
-
+from kivy.app import App
+import subprocess
 
 class FakeSettingList(EventDispatcher):
     '''Fake Kivy Setting to use SettingList
@@ -88,7 +89,6 @@ class GitRemoteProgress(RemoteProgress):
 
 class DesignerGit(DesignerActionSubMenu):
 
-    ## TODO implement non-Unix OS version
     is_repo = BooleanProperty(False)
     '''Indicates if it's representing a valid git repository
     :data:`is_repo` is a :class:`~kivy.properties.BooleanProperty`, defaults
@@ -127,8 +127,9 @@ class DesignerGit(DesignerActionSubMenu):
 
             _dir = os.path.dirname(designer.__file__)
             _dir = os.path.split(_dir)[0]
-            script = os.path.join(_dir, 'tools', 'ssh-agent', 'ssh.sh')
-            self.repo.git.update_environment(GIT_SSH_COMMAND=script)
+            if os.name == 'posix':
+                script = os.path.join(_dir, 'tools', 'ssh-agent', 'ssh.sh')
+                self.repo.git.update_environment(GIT_SSH_COMMAND=script)
         except InvalidGitRepositoryError:
             self.is_repo = False
         self._update_menu()
@@ -139,36 +140,66 @@ class DesignerGit(DesignerActionSubMenu):
         Is not a git repo, git init is available.
         '''
         self.remove_children()
-        if self.is_repo:
-            btn_commit = DesignerSubActionButton(text='Commit')
-            btn_commit.bind(on_press=self.do_commit)
+        designer = App.get_running_app().root
+        loader = None
+        if designer:
+            loader = designer.project_watcher._project_dir
 
-            btn_add = DesignerSubActionButton(text='Add...')
-            btn_add.bind(on_press=self.do_add)
+        if loader:
+            self.disabled = False
+            if self.is_repo:
+                btn_commit = DesignerSubActionButton(text='Commit')
+                btn_commit.bind(on_press=self.do_commit)
 
-            btn_branches = DesignerSubActionButton(text='Branches...')
-            btn_branches.bind(on_press=self.do_branches)
+                btn_add = DesignerSubActionButton(text='Add...')
+                btn_add.bind(on_press=self.do_add)
 
-            btn_diff = DesignerSubActionButton(text='Diff')
-            btn_diff.bind(on_press=self.do_diff)
+                btn_branches = DesignerSubActionButton(text='Branches...')
+                btn_branches.bind(on_press=self.do_branches)
 
-            btn_push = DesignerSubActionButton(text='Push')
-            btn_push.bind(on_press=self.do_push)
+                btn_diff = DesignerSubActionButton(text='Diff')
+                btn_diff.bind(on_press=self.do_diff)
 
-            btn_pull = DesignerSubActionButton(text='Pull')
-            btn_pull.bind(on_press=self.do_pull)
+                btn_push = DesignerSubActionButton(text='Push')
+                btn_push.bind(on_press=self.do_push)
 
-            self.add_widget(btn_commit)
-            self.add_widget(btn_add)
-            self.add_widget(btn_branches)
-            self.add_widget(btn_diff)
-            self.add_widget(btn_push)
-            self.add_widget(btn_pull)
+                btn_pull = DesignerSubActionButton(text='Pull')
+                btn_pull.bind(on_press=self.do_pull)
+
+                self.add_widget(btn_commit)
+                self.add_widget(btn_add)
+                self.add_widget(btn_branches)
+                self.add_widget(btn_diff)
+                self.add_widget(btn_push)
+                self.add_widget(btn_pull)
+            else:
+                btn_init = DesignerSubActionButton(text='Init repo')
+                btn_init.bind(on_press=self.do_init)
+                self.add_widget(btn_init)
+            self._add_widget()
         else:
-            btn_init = DesignerSubActionButton(text='Init repo')
-            btn_init.bind(on_press=self.do_init)
-            self.add_widget(btn_init)
-        self._add_widget()
+            self.disabled = True
+
+    def validate_remote(self):
+        '''Validates Git remote auth. If system if posix, returns True.
+        If on NT, reads tools/ssh-agent/ssh_status.txt, if equals 1, 
+        returns True else runs the tools/ssh-agent/ssh.bat and returns False
+        '''
+        if os.name == 'nt':
+            _dir = os.path.dirname(designer.__file__)
+            _dir = os.path.split(_dir)[0]
+            script = os.path.join(_dir, 'tools', 'ssh-agent', 'ssh.bat')
+            status_txt = os.path.join(_dir, 'tools', 'ssh-agent', 
+                                                        'ssh_status.txt')
+            status = open(status_txt, 'r').read()
+            status = status.strip()
+            if status == '1':
+                return True
+            else:
+                subprocess.call(script, shell=True)
+                return False
+        else:
+            return True
 
     @ignore_proj_watcher
     def do_init(self, *args):
@@ -343,6 +374,10 @@ class DesignerGit(DesignerActionSubMenu):
         '''Open a list of remotes to push repository data.
         If there is not remote, shows an alert
         '''
+        if not self.validate_remote():
+            show_alert('Git - Remote Authentication', 
+                'To use Git remote you need to enter your ssh password')
+            return
         remotes = []
         for r in self.repo.remotes:
             remotes.append(r.name)
@@ -410,6 +445,10 @@ class DesignerGit(DesignerActionSubMenu):
         '''Open a list of remotes to pull remote data.
         If there is not remote, shows an alert
         '''
+        if not self.validate_remote():
+            show_alert('Git - Remote Authentication', 
+                'To use Git remote you need to enter your ssh password')
+            return
         remotes = []
         for r in self.repo.remotes:
             remotes.append(r.name)
