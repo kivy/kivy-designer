@@ -7,8 +7,8 @@ Welcome to Kivy Designer's documentation!
 =========================================
 
 .. image:: https://raw.githubusercontent.com/kivy/kivy/master/kivy/data/logo/kivy-icon-256.png
-	:width: 256px
-	:align: center
+    :width: 256px
+    :align: center
 
 
 Kivy Designer is Kivy's tool for designing Graphical User Interfaces (GUIs) from Kivy Widgets. 
@@ -19,6 +19,7 @@ Kivy Designer is integrated with Buildozer and Hanga, so you can easily develop 
 .. toctree::
    :maxdepth: 2
 
+   Home <self>
    installation
    quickstart
    tools

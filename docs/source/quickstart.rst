@@ -123,7 +123,8 @@ The `Monitor Module <http://kivy.org/docs/api-kivy.modules.monitor.html#module-k
 Inspector
 ~~~~~~~~~
 
-`This module is highly experimental, use it with care.`
+.. note::
+    `This module is highly experimental, use it with care.`
 
 The `Inspector Module <http://kivy.org/docs/api-kivy.modules.inspector.html#module-kivy.modules.inspector>`_ is a tool for finding a widget in the widget tree by clicking or tapping on it.
 
@@ -137,7 +138,8 @@ Available inspector interactions:
     - tap once on a widget to select it without leaving inspect mode
     - double tap on a widget to select and leave inspect mode (then you can manipulate the widget again)
 
-Some properties can be edited live. However, due to the delayed usage of some properties, it might crash if you don’t handle all the cases.
+.. warning::
+    Some properties can be edited live. However, due to the delayed usage of some properties, it might crash if you don’t handle all the cases.
 
 Web Debugger
 ~~~~~~~~~~~~

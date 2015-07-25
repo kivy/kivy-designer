@@ -53,11 +53,14 @@ Shows the project's modification on a Code Input
 
 Pull/Push
 ~~~~~~~~~
-**IMPORTANT**: Not yet compatible with Windows
 
 To work with remote repositories, you'll need to generate and configure a SSH key. `Read more about it here. <https://help.github.com/articles/generating-ssh-keys>`_
 
 If you have a SSH key working, you can pull and push data from remote repositories. These buttons will display a list of available remotes. Select a remote to pull or push data.
+
+.. note::
+
+    If you are using Windows, you may see a CMD window asking for SSH password before remote actions.
 
 
 Bug Reporter
