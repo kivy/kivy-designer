@@ -344,10 +344,34 @@
     valign: 'middle'
 
 <DesignerActionButton>:
-    text_size: (self.width - sp(24), self.size[1])
-    valign: 'middle'
-    size_hint_y: None
-    height: '40sp'
+    info: info
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+
+    canvas.before:
+        Color:
+            rgba: [1, 1, 1, .5] if self.disabled else [1, 1, 1, 1]
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: self.background_normal
+    Label:
+        pos: root.pos
+        text_size: (self.width - sp(24), self.size[1])
+        valign: 'middle'
+        size_hint_y: None
+        height: '40sp'
+        text: root.text
+    Label:
+        id: info
+        text: root.desc
+        pos: root.pos
+        size: root.size
+        opacity: 0.3
+        text_size: self.size
+        valign: 'bottom'
+        halign: 'right'
+        padding: 5, 5
+
 
 <DesignerActionSubMenu>:
     text_size: (self.width - sp(24), self.size[1])
