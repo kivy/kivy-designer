@@ -135,17 +135,21 @@
     "title": "Application Requirements"
   },
   {
-    "type": "string",
+    "type": "list",
     "title": "Requirements",
     "section": "app",
     "desc": "Application requirements.",
-    "key": "requirements"
+    "key": "requirements",
+    "items": ["apsw", "audiostream", "bidi", "boost", "c_igraph", "cherrypy", "cprotobuf", "cymunk", "django", "docutils", "ecdsa", "enum34", "evdev", "ffmpeg", "ffmpeg2", "ffpyplayer", "freetype", "gevent", "greenlet", "harfbuzz", "hostpython", "igraph", "jpeg", "kivent_core", "kivent_cymunk", "kivy", "leveldb", "libevent", "libpq", "libsodium", "libswift", "libtorrent", "libxml2", "libxslt", "libyaml", "lxml", "m2crypto", "midistream", "msgpack", "mysql_connector", "netifaces", "numpy", "opencv", "openssl", "paramiko", "pil", "plyer", "plyvel", "png", "polygon", "protobuf", "psutil", "psycopg2", "pyasn1", "pycrypto", "pygame", "pyjnius", "pylibpd", "pyopenssl", "pyparsing", "pyqrcode", "python", "pyyaml", "sdl", "setuptools", "six", "sqlalchemy", "sqlite3", "storm", "swift", "thrift", "twisted", "txws", "wokkel", "zeroconf", "zope"],
+    "allow_custom": true
   },
   {
-    "type": "string",
+    "type": "list",
     "title": "Garden requirements",
     "section": "app",
     "desc": "Application garden requirements.",
-    "key": "garden_requirements"
+    "key": "garden_requirements",
+    "allow_custom": true,
+    "items": ["androidtabs", "cefpython", "collider", "datetimepicker", "ddd", "desktopvideoplayer", "filebrowser", "filechooserthumbview", "gauge", "geartick", "graph", "knob", "magnet", "mapview", "modernmenu", "moretransitions", "navigationdrawer", "pagecurl", "particlesystem", "pizza", "progressspinner", "qrcode", "recycleview", "roulette", "roulettescroll", "scrolllabel", "segment", "smaa", "stiffscroll", "texturestack", "tickline", "tickmarker", "timeline"]
   }
 ]
