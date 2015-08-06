@@ -284,7 +284,9 @@ class Designer(FloatLayout):
         self._popup.open()
         self.help_dlg.bind(on_cancel=self._cancel_popup)
 
-        self.help_dlg.rst.source = 'help.rst'
+        _dir = os.path.dirname(designer.__file__)
+        _dir = os.path.split(_dir)[0]
+        self.help_dlg.rst.source = os.path.join(_dir, 'help.rst')
 
     def set_escape_exit(self):
         Config.set('kivy', 'exit_on_escape',
