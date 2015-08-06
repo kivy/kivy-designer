@@ -147,7 +147,6 @@ class Buildozer(Builder):
                                'Updating project dependencies...')
         self.ui_creator.kivy_console.bind(on_command_list_done=self.build)
 
-
     def run(self, *args):
         '''Run the build command and then run the application on the device
         '''
@@ -302,6 +301,13 @@ class Desktop(Builder):
 
         self.can_run = True
 
+    def _perform_kill_run(self, *args):
+        '''Stop the running project/command and then run the project
+        '''
+        self._popup.dismiss()
+        self.stop()
+        self.run()
+
     def run(self):
         '''Run the project using Python
         '''
@@ -315,8 +321,24 @@ class Desktop(Builder):
             self.profiler.dispatch('on_error', 'Cannot find main.py')
             return
 
-        self.run_command(
+        status = self.run_command(
                     '%s %s %s' % (self.python_path, py_main, self.args))
+
+        # popen busy
+        if status is False:
+            self._confirm_dlg = ConfirmationDialog(
+                message="There is another command running.\n"
+                        "Do you want to stop it to run your project?")
+            self._popup = Popup(title='Kivy Designer',
+                                content=self._confirm_dlg,
+                                size_hint=(None, None),
+                                size=('300pt', '150pt'),
+                                auto_dismiss=False)
+            self._confirm_dlg.bind(on_ok=self._perform_kill_run,
+                                   on_cancel=self._popup.dismiss)
+            self._popup.open()
+            return
+
         self.ui_creator.tab_pannel.switch_to(
             self.ui_creator.tab_pannel.tab_list[2])
 
@@ -501,7 +523,10 @@ class Profiler(EventDispatcher):
             if self.pro_builder == 'Buildozer':
                 self.builder = Buildozer(self)
             elif self.pro_builder == 'Hanga':
-                self.builder = Hanga(self)
+                # TODO implement hanga
+                self.builder = Desktop(self)
+                self.dispatch('on_error', 'Hanga Builder not yet implemented!\n'
+                              'Using Desktop')
             else:
                 self.builder = Desktop(self)
 

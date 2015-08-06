@@ -1469,46 +1469,6 @@ class Designer(FloatLayout):
                                    self.project_loader.proj_dir)
         return True
 
-    def action_btn_run_project_pressed(self, *args):
-        '''Event Handler when ActionButton "Run" is pressed.
-        '''
-        if self.project_loader.file_list == []:
-            return
-        args = ''
-        envs = ''
-
-        python_path = self.designer_settings.config_parser.getdefault(
-            'global', 'python_shell_path', '')
-
-        if python_path == '':
-            self.statusbar.show_message("Python Shell Path not specified,"
-                                        " please specify it before running"
-                                        " project")
-            return
-
-        if self.proj_settings and self.proj_settings.config_parser:
-            args = self.proj_settings.config_parser.getdefault('arguments',
-                                                               'arg', '')
-            envs = self.proj_settings.config_parser.getdefault(
-                'env variables', 'env', '')
-            for env in envs.split(' '):
-                self.ui_creator.kivy_console.environment[
-                    env[:env.find('=')]] = env[env.find('=') + 1:]
-
-        for _file in self.project_loader.file_list:
-            if 'main.py' in os.path.basename(_file):
-                self.ui_creator.kivy_console.stdin.write(
-                    '"%s" "%s" %s' % (python_path, _file, args))
-                self.ui_creator.tab_pannel.switch_to(
-                    self.ui_creator.tab_pannel.tab_list[2])
-                return
-
-        self.ui_creator.kivy_console.stdin.write(
-            '"%s" "%s" %s' % (python_path, self.project_loader._app_file, args))
-
-        self.ui_creator.tab_pannel.switch_to(
-            self.ui_creator.tab_pannel.tab_list[2])
-
     def action_btn_stop_project_pressed(self, *args):
         '''Event handler when ActionButton "Stop" is pressed.
         '''
