@@ -13,6 +13,41 @@ from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.uix.scrollview import ScrollView
 from kivy.clock import Clock
+from kivy.uix.actionbar import ActionItem, ActionView
+
+
+class DesignerActionView(ActionView):
+    '''Custom ActionView to support custom action group
+    '''
+
+    def _layout_random(self):
+        '''Handle custom action group
+        '''
+        self.overflow_group.show_group = self.show_group
+        super(DesignerActionView, self)._layout_random()
+
+    def show_group(self, *l):
+        '''Show custom groups
+        '''
+        over = self.overflow_group
+        over.clear_widgets()
+        for item in over._list_overflow_items + over.list_action_item:
+            item.inside_group = True
+            if item.parent is not None:
+                item.parent.remove_widget(item)
+            group = self.get_group(item)
+            if group is not None and group.disabled:
+                continue
+            if not isinstance(item, ContextSubMenu):
+                over._dropdown.add_widget(item)
+
+    def get_group(self, item):
+        '''Get the ActionGroup of an item
+        '''
+        for group in self._list_action_group:
+            if item in group.list_action_item:
+                return group
+        return None
 
 
 class MenuBubble(Bubble):
@@ -149,6 +184,10 @@ class ContextMenu(TabbedPanel):
            the height of the dropdown, the placement might be
            lower or higher off that widget.
         '''
+        # if trying to open a non-visible widget
+        if widget.parent is None:
+            return
+
         # ensure we are not already attached
         if self.attach_to is not None:
             self.dismiss()
@@ -306,6 +345,12 @@ class ContextMenu(TabbedPanel):
     def add_widget(self, widget, index=0):
         '''Add a widget.
         '''
+        if self.content is None:
+            return
+
+        if widget.parent is not None:
+            widget.parent.remove_widget(widget)
+
         if self.tab_list and widget == self.tab_list[0].content or\
                 widget == self._current_tab.content or \
                 self.content == widget or\
@@ -539,8 +584,6 @@ class ContextSubMenu(MenuButton):
 if __name__ == '__main__':
     from kivy.app import App
 
-    from kivy.uix.actionbar import ActionItem
-
     class ActionContext(ContextSubMenu, ActionItem):
         pass
 
@@ -548,10 +591,11 @@ if __name__ == '__main__':
 #:import ContextMenu contextual.ContextMenu
 
 <ContextMenu>:
+<DesignerActionView>:
 <Test>:
     ActionBar:
         pos_hint: {'top':1}
-        ActionView:
+        DesignerActionView:
             use_separator: True
             ActionPrevious:
                 title: 'Action Bar'
