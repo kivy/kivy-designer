@@ -36,5 +36,15 @@
         "desc": "Desktop Only",
         "section": "desktop",
         "key": "exit_on_escape"
+    },
+    {
+        "id": "code_input_theme_options",
+        "type": "list",
+        "title": "Code Input Theme",
+        "desc": "Select the Code Input theme",
+        "section": "global",
+        "key": "code_input_theme",
+        "items": [],
+        "group": "code_input_theme"
     }
 ]

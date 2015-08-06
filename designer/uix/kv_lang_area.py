@@ -9,12 +9,70 @@ from kivy.factory import Factory
 from kivy.clock import Clock
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.tabbedpanel import TabbedPanelContent, \
     TabbedPanel, TabbedPanelHeader
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
     get_line_start_pos, get_indent_level, get_indentation
 from designer.uix.designer_code_input import DesignerCodeInput
+
+
+class KVLangAreaScroll(ScrollView):
+    '''KVLangAreaScroll used as a :class:`~kivy.scrollview.ScrollView`
+       for adding :class:`~designer.uix.kv_lang_area.KVLangArea`.
+    '''
+
+    kv_lang_area = ObjectProperty(None)
+    '''(internal) Reference to the
+        :class:`~designer.uix.kv_lang_area.KVLangArea`.
+       :data:`kv_lang_area` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    line_number = ObjectProperty(None)
+    '''(internal) Text Input to display line numbers
+       :data:`line_number` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    show_line_number = BooleanProperty(True)
+    '''Display line number on left
+       :data:`show_line_number` is a :class:`~kivy.properties.BooleanProperty`
+       and defaults to True
+    '''
+
+    def __init__(self, **kwargs):
+        super(KVLangAreaScroll, self).__init__(**kwargs)
+
+        self._max_num_of_lines = 0
+        # identify if the line number binding is already running
+        self._line_number_handled = False
+
+    def on_width(self, *args):
+        if not self._line_number_handled:
+            if self.show_line_number:
+                self.kv_lang_area.bind(_lines=self.on_lines_changed)
+            else:
+                self.line_number.parent.remove_widget(self.line_number)
+            self._line_number_handled = True
+
+    def on_lines_changed(self, *args):
+        '''Event handler that listen the line modifications to update
+        line_number
+        '''
+        n = len(self.kv_lang_area._lines)
+        if n > self._max_num_of_lines:
+            self.update_line_number(self._max_num_of_lines, n)
+
+    def update_line_number(self, old, new):
+        '''Analyze the difference between old and new number of lines
+        to update the text input
+        '''
+        self._max_num_of_lines = new
+        self.line_number.text += \
+                    '\n'.join([str(i) for i in range(old + 1, new + 1)]) + '\n'
+        self.line_number.width = self.line_number._label_cached.get_extents(
+            str(self._max_num_of_lines))[0] + (self.line_number.padding[0] * 2)
+        # not removing lines, as long as extra lines will not be visible
 
 
 class KVLangArea(DesignerCodeInput):

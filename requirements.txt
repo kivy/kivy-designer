@@ -2,3 +2,4 @@ kivy >= 1.8
 pygments
 docutils
 watchdog
+jedi

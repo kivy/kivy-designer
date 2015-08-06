@@ -173,8 +173,6 @@ class Designer(FloatLayout):
         self.recent_manager = RecentManager()
         self.spec_editor = BuildozerSpecEditor()
         self.widget_to_paste = None
-        self.designer_content = DesignerContent(size_hint=(1, None))
-        self.designer_content = self.designer_content.__self__
 
         self.designer_settings = DesignerSettings()
         self.designer_settings.bind(on_config_change=self._config_change)
@@ -187,6 +185,9 @@ class Designer(FloatLayout):
         self.prof_settings.bind(
             on_use_this_profile=self._perform_use_this_prof)
         self.prof_settings.load_profiles()
+
+        self.designer_content = DesignerContent(size_hint=(1, None))
+        self.designer_content = self.designer_content.__self__
 
         Clock.schedule_interval(
             self.project_loader.perform_auto_save,

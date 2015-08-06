@@ -46,6 +46,7 @@ Builder.load_string('''
         size_hint_x: 0.1
         active: root.active
         on_active: root.on_active(self)
+        group: root.group
     Button:
         text: root.item_text
         background_normal: 'atlas://data/images/defaulttheme/action_item'
@@ -188,6 +189,13 @@ class SettingListCheckItem(BoxLayout):
     defaults to False
     '''
 
+    group = StringProperty(None)
+    '''CheckBox group name. If the CheckBox is in a Group,
+    it becomes a Radio button.
+    :attr:`group` is a :class:`~kivy.properties.StringProperty` and
+    defaults to ''
+    '''
+
     def __init__(self, **kwargs):
         super(SettingListCheckItem, self).__init__(**kwargs)
 
@@ -243,7 +251,7 @@ class SettingListContent(BoxLayout):
         self.clear_items()
         self.setting.items.sort()
         for item in self.setting.items:
-            i = SettingListCheckItem(item_text=item)
+            i = SettingListCheckItem(item_text=item, group=self.setting.group)
             if item in self.selected_items:
                 i.active = True
             self.item_list.add_widget(i)
@@ -303,6 +311,13 @@ class SettingList(SettingItem):
     '''Allow/disallow a custom item to the list
     :attr:`allow_custom` is a :class:`~kivy.properties.BooleanProperty`
     and defaults to False
+    '''
+
+    group = StringProperty(None)
+    '''CheckBox group name. If the CheckBox is in a Group,
+    it becomes a Radio button.
+    :attr:`group` is a :class:`~kivy.properties.StringProperty` and
+    defaults to ''
     '''
 
     popup = ObjectProperty(None, allownone=True)
