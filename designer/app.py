@@ -324,18 +324,15 @@ class Designer(FloatLayout):
 
         self.set_escape_exit()
 
-    def on_profiler_error(self, *args):
+    def on_profiler_error(self, instance, message):
         '''Display an alert if get an error
         '''
-        show_alert('Profile error', args[1])
+        show_alert('Profile error', message)
 
-    def on_profiler_message(self, *args):
+    def on_profiler_message(self, instance, message, duration=0):
         '''Display a message in the status bar
         '''
-        duration = None
-        if len(args) > 2:
-            duration = args[2]
-        self.statusbar.show_message(args[1], duration)
+        self.statusbar.show_message(message, duration)
 
     def on_profiler_run(self, *args):
         '''When a new process starts
