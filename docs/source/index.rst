@@ -6,7 +6,7 @@
 Welcome to Kivy Designer's documentation!
 =========================================
 
-.. image:: https://raw.githubusercontent.com/kivy/kivy/master/kivy/data/logo/kivy-icon-256.png
+.. image:: img/logo.png
     :width: 256px
     :align: center
 

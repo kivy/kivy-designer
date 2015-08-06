@@ -69,7 +69,7 @@ We hope that you never use this tool, but let's know about it.
 
 If Kivy Designer finds a bug, you'll see the following screen:
 
-.. image:: https://cloud.githubusercontent.com/assets/4960137/7895419/d67dc712-0662-11e5-8415-fb83e636ca29.png
+.. image:: img/kd_bug_reporter.png
 
 The  ``Copy to clipboard`` button copies the traceback message to the clipboard. 
 

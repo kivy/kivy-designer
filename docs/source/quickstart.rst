@@ -16,17 +16,32 @@ Kivy Designer Interface
 This is a list and overview of some Kivy Designer's components
 
 After opening a project, you will see following:
-    * **Project Tree** on the left side, shows files and folders inside the project's directory.
-    * **Toolbox** contains widgets which could be drag-drop to the required positions.
-    * **UI Creator** is place where you will be designing your project. 
-    * **Widget Tree** shows the Widget hierarchy of the project.
-    * **Property Viewer** shows properties, their values and allows changing the values.
-    * **Events** shows the available events and their event handler. You can change/set an event handler and add an event.
-    * **KV Lang Area** shows what your kv file would be consisting.
-    * **Kivy Console** is a console just like xterm, GNOME Terminal. You can enter commands and execute them.
-    * **Python Shell** is an interactive Python Shell.
-    * **Error Console** shows errors which may occur in the user code, while opening a project or creating custom widget.
+    1. **Project Tree** on the left side, shows files and folders inside the project's directory.
+    2. **Toolbox** contains widgets which could be drag-drop to the required positions.
+    3. **UI Creator** is place where you will be designing your project.
+    4. **Widget Tree** shows the Widget hierarchy of the project.
+    5. **Property Viewer** shows properties, their values and allows changing the values.
+    6. **Events** shows the available events and their event handler. You can change/set an event handler and add an event.
+    7. **KV Lang Area** shows what your kv file would be consisting.
+    8. **Kivy Console** is a console just like xterm, GNOME Terminal. You can enter commands and execute them.
+    9. **Python Shell** is an interactive Python Shell.
+    10. **Error Console** shows errors which may occur in the user code, while opening a project or creating custom widget.
+    11. **Playground Settings** you can change the playground screen size, orientation and zoom to help the UI development
+    12. **Status Bar** The status bar helps you displaying the selected widget hierarchy and messages.
 
+.. image:: img/kd_interface.png
+
+
+UI Creator
+----------
+
+You'll probably spend a big part of your time designing the app interface; so the UI creator is the right place for you :)
+
+When designing the UI, you can get Widget from **Widget Tree** or you insert the KV Lang code in **KV Lang Area**
+
+If you want to change the size or orientaiton of the emulated interface, you can set it on **Playground Settings**
+
+.. image:: img/kd_playground_settings.png
 
 Building
 --------
@@ -47,7 +62,7 @@ Build Profiles
 ~~~~~~~~~~~~~~
 You can select and configure your Builder using Build Profiles. 
 
-.. image:: https://cloud.githubusercontent.com/assets/4960137/8321449/648a15ee-19fd-11e5-9836-9cc715b8dbd7.png
+.. image:: img/kd_build_profiles.png
 
 Kivy Designer already provides 3 defaults profiles:
 
