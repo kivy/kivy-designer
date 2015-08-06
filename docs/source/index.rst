@@ -22,6 +22,7 @@ Kivy Designer is integrated with Buildozer and Hanga, so you can easily develop 
    Home <self>
    installation
    quickstart
+   buildozer
    tools
    contribute
 
