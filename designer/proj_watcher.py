@@ -55,8 +55,10 @@ class ProjectWatcher(object):
         '''To dispatch event to self._callback.
         '''
         self.proj_event = event
-        # Do not dispatch event if '.designer' is modified
-        if '.designer' not in event.src_path and self.allow_event_dispatch:
+        # Do not dispatch event if '.designer' or '.buildozer' is modified
+        if '.designer' not in event.src_path \
+                and '.buildozer' not in event.src_path \
+                and self.allow_event_dispatch:
             self._callback(event)
 
     def stop(self):

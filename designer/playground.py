@@ -676,8 +676,9 @@ class Playground(ScatterPlane):
             self.root = None
 
         # self.tree.delete(widget)
-        root.ui_creator.widgettree.refresh()
-        if not from_undo:
+        if root is not None:
+            root.ui_creator.widgettree.refresh()
+        if not from_undo and root is not None:
             root.undo_manager.push_operation(
                 WidgetOperation('remove', widget, parent, self, removed_str))
 
