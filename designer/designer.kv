@@ -344,10 +344,34 @@
     valign: 'middle'
 
 <DesignerActionButton>:
-    text_size: (self.width - sp(24), self.size[1])
-    valign: 'middle'
-    size_hint_y: None
-    height: '40sp'
+    info: info
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+
+    canvas.before:
+        Color:
+            rgba: [1, 1, 1, .5] if self.disabled else [1, 1, 1, 1]
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: self.background_normal
+    Label:
+        pos: root.pos
+        text_size: (self.width - sp(24), self.size[1])
+        valign: 'middle'
+        size_hint_y: None
+        height: '40sp'
+        text: root.text
+    Label:
+        id: info
+        text: root.desc
+        pos: root.pos
+        size: root.size
+        opacity: 0.3
+        text_size: self.size
+        valign: 'bottom'
+        halign: 'right'
+        padding: 5, 5
+
 
 <DesignerActionSubMenu>:
     text_size: (self.width - sp(24), self.size[1])
@@ -575,11 +599,15 @@
         Button:
             text: 'No'
             on_press: root.dispatch('on_cancel')
-    
+
 <ActionCheckButton>:
-    orientation: 'horizontal'
+    btn_layout: btn_layout
+    _label: _label
+    checkbox: checkbox
     background_normal: 'atlas://data/images/defaulttheme/action_bar'
     minimum_width: 200
+    size_hint_y: None
+    height: sp(50)
     canvas.before:
         Color:
             rgba: 1,1,1,1
@@ -587,6 +615,36 @@
             pos: self.pos
             size: self.size
             source: self.background_normal
+    BoxLayout:
+        id: btn_layout
+        pos: root.pos
+        padding: 5, 0, 5, 0
+        spacing: 10
+        CheckBox:
+            id: checkbox
+            size_hint_x: None
+            width: '20sp'
+            pos: root.x + 2, root.y
+            active: True
+            group: root.group
+            allow_no_selection: root.allow_no_selection
+            on_active: root.dispatch('on_active', *args)
+        Label:
+            id: _label
+            text_size: self.size
+            valign: 'middle'
+            text: root.text
+    Label:
+        id: info
+        text: root.desc
+        pos: root.pos
+        size: root.size
+        opacity: 0.3
+        text_size: self.size
+        valign: 'bottom'
+        halign: 'right'
+        padding: 5, 5
+
 
 #
 # Buildozer Spec Editor
