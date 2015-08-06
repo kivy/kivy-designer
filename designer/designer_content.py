@@ -2,13 +2,12 @@ import os
 
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
-from kivy.factory import Factory
-from kivy.properties import ObjectProperty, ListProperty
-from kivy.uix.popup import Popup
-from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
+from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, \
+    OptionProperty, StringProperty
+from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem, TabbedPanelHeader
 from kivy.uix.treeview import TreeViewLabel
 from designer.buildozer_spec_editor import BuildozerSpecEditor
-from designer.uix.py_code_input import PyCodeInput, PyScrollView
+from designer.uix.py_code_input import PyScrollView
 
 
 class DesignerContent(FloatLayout):
@@ -170,7 +169,8 @@ class DesignerTabbedPanel(TabbedPanel):
                 self.switch_to(self.tab_list[len(self.tab_list) - i - 2])
                 return
 
-        panel_item = DesignerTabbedPanelItem(text=os.path.basename(path))
+        panel_item = DesignerCloseableTab(title=os.path.basename(path))
+        panel_item.bind(on_close=self.on_close_tab)
         f = open(path, 'r')
         scroll = PyScrollView()
         _py_code_input = scroll.code_input
@@ -194,13 +194,71 @@ class DesignerTabbedPanel(TabbedPanel):
         spec_editor = App.get_running_app().root.spec_editor
         spec_editor.load_settings(proj_loader.proj_dir)
 
-        panel_spec_item = DesignerTabbedPanelItem(text="Spec")
+        panel_spec_item = DesignerCloseableTab(title="Spec Editor")
+        panel_spec_item.bind(on_close=self.on_close_tab)
         panel_spec_item.content = spec_editor
         self.add_widget(panel_spec_item)
         self.switch_to(self.tab_list[0])
         spec_editor.rel_file_path = 'buildozer.spec'
         self.list_py_code_inputs.append(spec_editor)
 
+    def on_close_tab(self, instance, *args):
+        '''Event handler to close icon
+        '''
+        if instance.has_modification:
+            # TODO implement modification listener
+            pass
+        else:
+            self._perform_close_tab(instance)
+
+    def _perform_close_tab(self, tab):
+        content = tab.content
+        if isinstance(content, PyScrollView):
+            self.list_py_code_inputs.remove(content.code_input)
+        elif content in self.list_py_code_inputs:
+            self.list_py_code_inputs.remove(content)
+        self.remove_widget(tab)
+        if self.tab_list:
+            self.switch_to(self.tab_list[0])
+
 
 class DesignerTabbedPanelItem(TabbedPanelItem):
     pass
+
+
+class DesignerCloseableTab(TabbedPanelHeader):
+    '''Custom TabbedPanelHeader with close button
+    '''
+    # TODO implement modification/error/git status listener to change label
+    # style. Eg. red label to file with wrong python syntax
+
+    has_modification = BooleanProperty(False)
+    '''Indicates if this tab has unsaved content
+        :data:`has_modification` is a :class:`~kivy.properties.BooleanProperty`
+    '''
+
+    style = OptionProperty('default',
+                           options=['default', 'modificated', 'error'])
+    '''Available tab custom styles
+    :data:`style` is a :class:`~kivy.properties.OptionProperty`
+    '''
+
+    title = StringProperty('')
+    '''Tab header title
+    :data:`title` is a :class:`~kivy.properties.StringProperty`
+    '''
+
+    __events__ = ('on_close', )
+
+    def on_close(self, *args):
+        pass
+
+    def on_style(self, instance, style, *args):
+        '''Update the tab style
+        '''
+        if style == 'default':
+            self.text = self.title
+        elif style == 'modificated':
+            self.text = '[i]%s[i]' % self.title
+        elif style == 'error':
+            self.text = '[color=#e51919]%s[/color]' % self.title
