@@ -9,6 +9,21 @@ How it works
 
 Kivy Designer organizes some open source tools to help you to create Kivy UI easily, develop your applications and target multiple platforms.
 
+Creating a new project
+~~~~~~~~~~~~~~~~~~~~~~
+
+To create a new project, you can use:
+    * In **Start Page**, there is a ``New Project`` button.
+    * In the menu ``File -> New Project``
+
+This is the **New Project** wizard:
+
+.. image:: img/kd_new_project.png
+
+Where you can select an initial template for your project.
+
+After creating it, you'll see the UI Creator. You can start editing the app UI, or edit the ``main.py``.
+
 
 Kivy Designer Interface
 -----------------------

@@ -11,6 +11,8 @@ This is a helper to auto create a setup.py file in the root of the project.
 
 You can access it in the menu ``Tools -> Create setup.py``
 
+.. image:: img/kd_setup_y.png
+
 
 Check PEP8
 ----------
