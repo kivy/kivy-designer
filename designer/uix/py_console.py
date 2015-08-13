@@ -282,11 +282,11 @@ class PythonConsole(BoxLayout):
     :data:`foreground_color` is an :class:`~kivy.properties.ListProperty`,
     Default to '(0, 0, 0, 1)'''
 
-    font_name = StringProperty('data/fonts/DroidSansMono.ttf')
+    font_name = StringProperty('data/fonts/Roboto-Regular.ttf')
     '''Indicates the font Style used in the console
 
     :data:`font` is a :class:`~kivy.properties.StringProperty`,
-    Default to 'DroidSansMono'
+    Default to 'Roboto'
     '''
 
     font_size = NumericProperty(14)
