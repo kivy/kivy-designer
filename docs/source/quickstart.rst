@@ -62,6 +62,7 @@ Building
 --------
 
 To build, and run your project, you'll need to configure the Kivy Designer Builder. The Builder will help you to target your application to the desired platforms.
+You can access Builder settings at ``Run -> Edit Profiles...``
 
 .. _Builder:
 
@@ -85,7 +86,7 @@ Kivy Designer already provides 3 defaults profiles:
     * Android - Buildozer
     * iOS - Buildozer
 
-You can edit/delete these templates or create new ones. To use a profile, click in the button ``Use this profile`` or select the profile from the menu ``Run -> Select Profile``
+You can edit/delete these profiles and create new ones. To use a profile, click in the button ``Use this profile`` or select the profile from the menu ``Run -> Select Profile``
 
 Editing a profile
 ~~~~~~~~~~~~~~~~~
