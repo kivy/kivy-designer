@@ -5,6 +5,15 @@ Kivy Designer provides a GUI editor to Buildozer Spec files.
 
 .. image:: img/kd_buildozer_editor.png
 
+Settings
+~~~~~~~~
+
+You can edit Buildozer Settings at ``File -> Settings -> Buildozer``.
+You may see the following keys:
+
+* **Buildozer Path** - indicates the path of Buildozer executable. Kivy Designer finds it automatically if it's on the system path.
+* **Create buildozer.spec automatically** - This option allow Kivy Designer to create a basic spec while creating a new project.
+
 Creating a new Buildozer Project
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
