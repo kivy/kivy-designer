@@ -77,39 +77,12 @@ class DesignerCodeInput(CodeInput):
 
         return super(DesignerCodeInput, self).on_touch_down(touch)
 
-    def do_copy(self):
-        '''Function to do copy operation
+    def _do_focus(self, *args):
+        '''Force the focus on this widget
         '''
+        self.focus = True
 
-        if self.selection_text == '':
-            return
-
-        self._copy(self.selection_text)
-
-    def do_cut(self):
-        '''Function to do cut operation
-        '''
-
-        if self.selection_text == '':
-            return
-
-        self._cut(self.selection_text)
-
-    def do_paste(self):
-        '''Function to do paste operation
-        '''
-
-        self._paste()
-
-    def do_select_all(self):
+    def do_select_all(self, *args):
         '''Function to select all text
         '''
-
-        self.select_text(0, len(self.text))
-
-    def do_delete(self):
-        '''Function to delete selected text
-        '''
-
-        if self.selection_text != '':
-            self.do_backspace()
+        self.select_all()

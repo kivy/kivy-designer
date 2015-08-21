@@ -758,25 +758,25 @@
     ActionOverflow:
     ActionButton:
         text: 'Undo'
-        on_release: root.dispatch('on_undo')
+        on_press: root.dispatch('on_undo')
     ActionButton:
         text: 'Redo'
-        on_release: root.dispatch('on_redo')
+        on_press: root.dispatch('on_redo')
     ActionButton:
         text: 'Cut'
-        on_release: root.dispatch('on_cut')
+        on_press: root.dispatch('on_cut')
     ActionButton:
         text: 'Copy'
-        on_release: root.dispatch('on_copy')
+        on_press: root.dispatch('on_copy')
     ActionButton:
         text: 'Paste'
-        on_release: root.dispatch('on_paste')
+        on_press: root.dispatch('on_paste')
     ActionButton:
         text: 'Select All'
-        on_release: root.dispatch('on_selectall')
+        on_touch_up: root.dispatch('on_selectall')
     ActionButton:
         text: 'Delete'
-        on_release: root.dispatch('on_delete')
+        on_press: root.dispatch('on_delete')
 
 <Playground>:
     do_scale: False
