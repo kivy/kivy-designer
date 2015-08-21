@@ -182,11 +182,12 @@ class KivyConsole(GridLayout):
     :data:`cached_commands` is a :class:`~kivy.properties.NumericProperty`,
     Default to '90'
     '''
-    font_name = StringProperty('data/fonts/DroidSansMono.ttf')
+
+    font_name = StringProperty('data/fonts/RobotoMono-Regular.ttf')
     '''Indicates the font Style used in the console
 
     :data:`font` is a :class:`~kivy.properties.StringProperty`,
-    Default to 'DroidSansMono'
+    Default to 'Roboto'
     '''
 
     environment = DictProperty(os.environ.copy())
