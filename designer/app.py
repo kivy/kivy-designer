@@ -620,6 +620,7 @@ class Designer(FloatLayout):
         self.ui_creator.cleanup()
         self.undo_manager.cleanup()
         self.designer_content.toolbox.cleanup()
+        self.designer_content.tab_pannel.cleanup()
 
         for node in self.proj_tree_view.root.nodes[:]:
             self.proj_tree_view.remove_node(node)
@@ -630,10 +631,6 @@ class Designer(FloatLayout):
 
         self._curr_proj_changed = False
         self.ui_creator.kv_code_input.text = ""
-
-        self.designer_content.tab_pannel.list_py_code_inputs = []
-        for th in self.designer_content.tab_pannel.tab_list[:-1]:
-            self.designer_content.tab_pannel.remove_widget(th)
 
     def action_btn_open_pressed(self, *args):
         '''Event Handler when ActionButton "Open" is pressed.
