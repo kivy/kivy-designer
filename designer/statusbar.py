@@ -52,7 +52,7 @@ class StatusMessage(BoxLayout):
         self.message = message
         self.type = type
 
-        if duration >= 0:
+        if duration > 0:
             Clock.schedule_once(self.clear_message, duration)
 
     def clear_message(self, *args):

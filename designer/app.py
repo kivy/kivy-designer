@@ -1,6 +1,7 @@
 import webbrowser
 from designer.input_dialog import InputDialog
 from designer.profile_settings import ProfileSettings
+from designer.profiler import Profiler
 
 __all__ = ('DesignerApp', )
 
@@ -16,7 +17,8 @@ from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.layout import Layout
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
+from kivy.properties import ObjectProperty, BooleanProperty, StringProperty, \
+    partial
 from kivy.clock import Clock
 from kivy.uix import actionbar
 from kivy.garden.filebrowser import FileBrowser
@@ -194,6 +196,13 @@ class Designer(FloatLayout):
             int(self.designer_settings.config_parser.getdefault(
                 'global', 'auto_save_time', 5)) * 60)
 
+        self.profiler = Profiler()
+        self.profiler.designer = self
+        self.profiler.bind(on_error=self.on_profiler_error)
+        self.profiler.bind(on_message=self.on_profiler_message)
+        self.profiler.bind(on_run=self.on_profiler_run)
+        self.profiler.bind(on_stop=self.on_profiler_stop)
+
         Window.bind(on_resize=self._write_window_size)
         Window.bind(on_request_close=self.on_request_close)
 
@@ -316,6 +325,26 @@ class Designer(FloatLayout):
             self._write_window_size()
 
         self.set_escape_exit()
+
+    def on_profiler_error(self, instance, message):
+        '''Display an alert if get an error
+        '''
+        show_alert('Profile error', message)
+
+    def on_profiler_message(self, instance, message, duration=0):
+        '''Display a message in the status bar
+        '''
+        self.statusbar.show_message(message, duration)
+
+    def on_profiler_run(self, *args):
+        '''When a new process starts
+        '''
+        self.ids.actn_btn_stop_proj.disabled = False
+
+    def on_profiler_stop(self, *args):
+        '''When a process is stopped or finished
+        '''
+        self.ids.actn_btn_stop_proj.disabled = True
 
     def _add_designer_content(self):
         '''Add designer_content to Designer, when a project is loaded
@@ -591,6 +620,13 @@ class Designer(FloatLayout):
         shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
 
+        create_buildozer_prj = self.designer_settings.config_parser.getdefault(
+                                            'buildozer',
+                                            'create_buildozer_prj', False)
+        if create_buildozer_prj:
+            shutil.copy(os.path.join(templates_dir, 'default.spec'),
+                        os.path.join(new_proj_dir, 'buildozer.spec'))
+
         self.ui_creator.playground.sandbox.error_active = True
         with self.ui_creator.playground.sandbox:
             self.project_loader.load_new_project(os.path.join(new_proj_dir,
@@ -845,6 +881,9 @@ class Designer(FloatLayout):
                                             (str(e)))
 
         self.ui_creator.playground.sandbox.error_active = False
+        Clock.schedule_once(partial(self.ui_creator.kivy_console.run_command,
+            'cd %s' % (self.project_loader.proj_dir)
+        ), 1)
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content
@@ -1441,45 +1480,43 @@ class Designer(FloatLayout):
                                    self.project_loader.proj_dir)
         return True
 
+    def action_btn_stop_project_pressed(self, *args):
+        '''Event handler when ActionButton "Stop" is pressed.
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.stop()
+
+    def action_btn_clean_project_pressed(self, *args):
+        '''Event handler when ActionButton "Clean" is pressed
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.clean()
+
+    def action_btn_build_project_pressed(self, *args):
+        '''Event handler when ActionButton "Build" is pressed
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.build()
+
+    def action_btn_rebuild_project_pressed(self, *args):
+        '''Event handler when ActionButton "Build" is pressed
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.rebuild()
+
     def action_btn_run_project_pressed(self, *args):
         '''Event Handler when ActionButton "Run" is pressed.
         '''
+        if not self.check_selected_prof():
+            return
         if self.project_loader.file_list == []:
             return
-        args = ''
-        envs = ''
 
-        python_path = self.designer_settings.config_parser.getdefault(
-            'global', 'python_shell_path', '')
-
-        if python_path == '':
-            self.statusbar.show_message("Python Shell Path not specified,"
-                                        " please specify it before running"
-                                        " project")
-            return
-
-        if self.proj_settings and self.proj_settings.config_parser:
-            args = self.proj_settings.config_parser.getdefault('arguments',
-                                                               'arg', '')
-            envs = self.proj_settings.config_parser.getdefault(
-                'env variables', 'env', '')
-            for env in envs.split(' '):
-                self.ui_creator.kivy_console.environment[
-                    env[:env.find('=')]] = env[env.find('=') + 1:]
-
-        for _file in self.project_loader.file_list:
-            if 'main.py' in os.path.basename(_file):
-                self.ui_creator.kivy_console.stdin.write(
-                    '"%s" "%s" %s' % (python_path, _file, args))
-                self.ui_creator.tab_pannel.switch_to(
-                    self.ui_creator.tab_pannel.tab_list[2])
-                return
-
-        self.ui_creator.kivy_console.stdin.write(
-            '"%s" "%s" %s' % (python_path, self.project_loader._app_file, args))
-
-        self.ui_creator.tab_pannel.switch_to(
-            self.ui_creator.tab_pannel.tab_list[2])
+        self.profiler.run()
 
     def on_sandbox_getting_exception(self, *args):
         '''Event Handler for
