@@ -36,6 +36,7 @@ class ProjectWatcher(object):
         self._event_handler = None
         self._callback = callback
         self.allow_event_dispatch = True
+        self._project_dir = None
 
     def start_watching(self, project_dir):
         '''To start watching project_dir.
