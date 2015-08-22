@@ -58,7 +58,7 @@ class DesignerContent(FloatLayout):
         defaults to False
     '''
 
-    current_codeinput = ObjectProperty(None)
+    current_codeinput = ObjectProperty(None, allownone=True)
     '''Instance of the current PythonCodeInput
         :data:`current_codeinput` is a :class:`~kivy.properties.ObjectProperty`
         and defaults to None

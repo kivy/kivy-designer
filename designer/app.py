@@ -480,7 +480,7 @@ class Designer(FloatLayout):
         if self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     Clock.schedule_once(code_input._do_focus)
                     return True
         return self.editcontview.on_touch_up(touch)

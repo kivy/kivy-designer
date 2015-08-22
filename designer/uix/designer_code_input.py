@@ -147,36 +147,37 @@ class DesignerCodeInput(CodeInput):
 
         col = self.cursor_col
         row = self.cursor_row
+        lines = lines[:row + 1]
+        lines.reverse()
+        line_number = len(lines)
 
         found = -1
-        size = 0  # size of string before selection
         line = None
         search_size = len(search)
 
         for i, line in enumerate(lines):
-            if i <= row:
-                if use_regex:
-                    if i == row:
-                        line_find = line[:col]
-                    else:
-                        line_find = line[:]
-                    found = re.search(search, line_find)
-                    if found:
-                        search_size = len(found.group(0))
-                        found = found.start()
-                    else:
-                        found = -1
+            i = line_number - i - 1
+            if use_regex:
+                if i == row:
+                    line_find = line[:col]
                 else:
-                    # if on current line, consider col
-                    if i == row:
-                        found = line.find(search[:col])
-                    else:
-                        found = line.find(search)
-                # has found the string. found variable indicates the initial po
-                if found != -1:
-                    self.cursor = (found, i)
-                    break
-            size += len(line)
+                    line_find = line[:]
+                found = re.search(search, line_find)
+                if found:
+                    search_size = len(found.group(0))
+                    found = found.start()
+                else:
+                    found = -1
+            else:
+                # if on current line, consider col
+                if i == row:
+                    found = line[:col].find(search)
+                else:
+                    found = line.find(search)
+            # has found the string. found variable indicates the initial po
+            if found != -1:
+                self.cursor = (found, i)
+                break
 
         if found != -1:
             pos = text.find(line) + found
