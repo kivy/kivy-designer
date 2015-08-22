@@ -623,7 +623,7 @@
             size_hint_x: None
             width: '20sp'
             pos: root.x + 2, root.y
-            active: True
+            active: root.checkbox_active
             group: root.group
             allow_no_selection: root.allow_no_selection
             on_active: root.dispatch('on_active', *args)

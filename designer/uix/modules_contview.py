@@ -70,15 +70,15 @@ class ModScreenContView(ContextualActionView):
             btn.bind(on_active=self.on_module_settings)
 
             if first:
-                btn.checkbox_active = first
+                btn.checkbox_active = True
                 first_btn = btn
                 first = False
-
-            if device == saved_device:
-                first_btn.checkbox_active = False
-                btn.checkbox_active = True
             else:
-                btn.checkbox_active = False
+                if device == saved_device:
+                    first_btn.checkbox.active = False
+                    btn.checkbox_active = True
+                else:
+                    btn.checkbox_active = False
 
             devices.add_widget(btn)
         for orientation in self.ids.module_screen_orientation.list_action_item:
