@@ -32,7 +32,7 @@ class DesignerActionProfileCheck(ActionCheckButton):
         super(DesignerActionProfileCheck, self).__init__(**kwargs)
         self.minimum_width = 200
         self.size_hint_y = None
-        self.height = sp(48)
+        self.height = sp(49)
 
 
 class DesignerActionGroup(ActionGroup):

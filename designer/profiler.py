@@ -147,7 +147,7 @@ class Buildozer(Builder):
                                'Updating project dependencies...')
         self.ui_creator.kivy_console.bind(on_command_list_done=self.build)
 
-    def run(self, *args):
+    def run(self, *args, **kwargs):
         '''Run the build command and then run the application on the device
         '''
         self.build()
@@ -306,11 +306,14 @@ class Desktop(Builder):
         '''
         self._popup.dismiss()
         self.stop()
-        self.run()
+        Clock.schedule_once(self.run)
 
-    def run(self):
+    def run(self, *args, **kwargs):
         '''Run the project using Python
         '''
+        mod = kwargs.get('mod', '')
+        data = kwargs.get('data', [])
+
         self._get_python()
         if not self.can_run:
             return
@@ -321,8 +324,17 @@ class Desktop(Builder):
             self.profiler.dispatch('on_error', 'Cannot find main.py')
             return
 
-        status = self.run_command(
-                    '%s %s %s' % (self.python_path, py_main, self.args))
+        cmd = ''
+        if mod == '':
+            cmd = '%s %s %s' % (self.python_path, py_main, self.args)
+        elif mod == 'screen':
+            cmd = '%s %s -m screen:%s %s' % (self.python_path, py_main,
+                                             data, self.args)
+        else:
+            cmd = '%s %s -m %s %s' % (self.python_path, py_main,
+                                      mod, self.args)
+
+        status = self.run_command(cmd)
 
         # popen busy
         if status is False:
@@ -484,10 +496,10 @@ class Profiler(EventDispatcher):
         super(Profiler, self).__init__(**kwargs)
         self.profile_config = ConfigParser(name='profiler')
 
-    def run(self):
+    def run(self, *args, **kwargs):
         '''Run project
         '''
-        self.builder.run()
+        self.builder.run(*args, **kwargs)
 
     def stop(self):
         '''Stop project
