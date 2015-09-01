@@ -36,6 +36,7 @@ class ProjectWatcher(object):
         self._event_handler = None
         self._callback = callback
         self.allow_event_dispatch = True
+        self._project_dir = None
 
     def start_watching(self, project_dir):
         '''To start watching project_dir.
@@ -77,3 +78,12 @@ class ProjectWatcher(object):
         '''join observer after unschedulling it
         '''
         self._observer.join()
+
+    def resume_watching(self):
+        '''Resume watching the project if self._project_dir exists
+        '''
+        if self._project_dir:
+            self.start_watching(self._project_dir)
+            return True
+        else:
+            return False

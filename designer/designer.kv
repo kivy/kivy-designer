@@ -214,6 +214,72 @@
 
 <ProfileContentPanel>:
 
+#
+# Tools
+#
+
+<SetupPyLabel@Label>:
+    text_size: self.size
+    valign: 'middle'
+    halign: 'left'
+
+<ToolSetupPy>:
+    orientation: 'vertical'
+    padding: 10
+    spacing: 15
+    BoxLayout:
+        BoxLayout:
+            size_hint_x: 0.3
+            orientation: 'vertical'
+            SetupPyLabel:
+                text: 'Package Name: '
+            SetupPyLabel:
+                text: 'Version: '
+            SetupPyLabel:
+                text: 'URL: '
+            SetupPyLabel:
+                text: 'License: '
+            SetupPyLabel:
+                text: 'Author: '
+            SetupPyLabel:
+                text: 'Author Email: '
+            SetupPyLabel:
+                text: 'Description: '
+        BoxLayout:
+            size_hint_x: 0.7
+            orientation: 'vertical'
+            TextInput:
+                id: package_name
+                multiline: False
+            TextInput:
+                id: version
+                multiline: False
+            TextInput:
+                id: url
+                multiline: False
+            TextInput:
+                id: license
+                multiline: False
+            TextInput:
+                id: author
+                multiline: False
+            TextInput:
+                id: author_email
+                multiline: False
+            TextInput:
+                id: description
+                multiline: False
+    GridLayout:
+        cols: 2
+        size_hint_y: None
+        height: self.minimum_height
+        DesignerButton:
+            text: 'Create'
+            on_press: root.create()
+        DesignerButton:
+            text: 'cancel'
+            on_press: root.dispatch('on_cancel')
+
 <MenuHeader>
     color: (1, 1, 1, 1) if self.state == 'normal' else (0, 0, 0, 1)
     font_size: '12dp'
@@ -1507,6 +1573,35 @@
                     id: actn_btn_edit_prof_proj
                     text: 'Edit Profiles...'
                     on_release: root.action_btn_edit_prof_project_pressed()
+
+            DesignerActionGroup:
+                id: actn_menu_tools
+                text: 'Tools'
+                mode: 'spinner'
+                size_hint_x: None
+                dropdown_cls: ContextMenu
+                disabled: True
+                DesignerActionButton:
+                    id: actn_btn_buildozer_init
+                    text: 'Buildozer Init'
+                    on_release: root.designer_tools.buildozer_init()
+                DesignerActionButton:
+                    id: actn_btn_export_png
+                    text: 'Export .png'
+                    on_release: root.designer_tools.export_png()
+                DesignerActionButton:
+                    id: actn_btn_check_pep8
+                    text: 'Check PEP 8'
+                    on_release: root.designer_tools.check_pep8()
+                DesignerActionButton:
+                    id: actn_btn_create_setup_py
+                    text: 'Create setup.py'
+                    on_release: root.designer_tools.create_setup_py()
+                DesignerActionButton:
+                    id: actn_btn_create_gitignore
+                    text: 'Create .gitignore'
+                    on_release: root.designer_tools.create_gitignore()
+
 
             DesignerActionGroup:
                 id: actn_menu_help
