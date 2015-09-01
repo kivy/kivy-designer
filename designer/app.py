@@ -455,7 +455,8 @@ class Designer(FloatLayout):
                 on_selectall=select_all_trigger,
                 on_next_screen=self._next_screen,
                 on_prev_screen=self._prev_screen,
-                on_touch_up=self.on_editcontview_release)
+                on_touch_up=self.on_editcontview_release,
+                on_find=partial(self.designer_content.show_findmenu, True))
 
         self.actionbar.add_widget(self.editcontview)
 
@@ -475,6 +476,11 @@ class Designer(FloatLayout):
         else:
             self._edit_selected = 'Py'
 
+        if self._edit_selected == 'Py':
+            self.editcontview.show_find(True)
+        else:
+            self.editcontview.show_find(False)
+
         self.ui_creator.playground.clicked = False
         self.ui_creator.kv_code_input.clicked = False
 
@@ -482,7 +488,7 @@ class Designer(FloatLayout):
         if self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     Clock.schedule_once(code_input._do_focus)
                     return True
         return self.editcontview.on_touch_up(touch)
@@ -527,6 +533,7 @@ class Designer(FloatLayout):
         '''Override of FloatLayout.on_touch_down. Used to determine where
            touch is down and to call self.actionbar.on_previous
         '''
+
         if not isinstance(self.actionbar.children[0], EditContView) or\
            self.actionbar.collide_point(*touch.pos):
             return super(FloatLayout, self).on_touch_down(touch)
