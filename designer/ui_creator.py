@@ -1,7 +1,8 @@
 from kivy.uix.floatlayout import FloatLayout
-from kivy.properties import ObjectProperty, NumericProperty
+from kivy.properties import ObjectProperty
 from kivy.app import App
 from kivy.clock import Clock
+from designer.helper_functions import get_designer
 
 
 class UICreator(FloatLayout):
@@ -86,7 +87,7 @@ class UICreator(FloatLayout):
     def reload_btn_pressed(self, *args):
         '''Default handler for 'on_release' event of "Reload" button.
         '''
-        self.kv_code_input.func_reload_kv()
+        self.kv_code_input.func_reload_kv(force=True)
 
     def on_touch_down(self, *args):
         '''Default handler for 'on_touch_down' event.
@@ -113,7 +114,12 @@ class UICreator(FloatLayout):
 
         self.kv_code_input.playground = self.playground
         self.playground.kv_code_input = self.kv_code_input
+        self.playground.kv_code_input.bind(
+            on_reload_kv=self.playground.on_reload_kv)
         self.playground.widgettree = self.widgettree
         self.propertyviewer.kv_code_input = self.kv_code_input
         self.eventviewer.kv_code_input = self.kv_code_input
         self.py_console.remove_widget(self.py_console.children[1])
+        d = get_designer()
+        if self.kv_code_input not in d.code_inputs:
+            d.code_inputs.append(self.kv_code_input)

@@ -41,27 +41,28 @@ class StatusMessage(BoxLayout):
        :class:`~kivy.properties.StringProperty` and defaults to ''
     '''
 
-    type = OptionProperty(None, options=['info', 'error', 'loading'],
-                          allownone=True)
+    notification_type = OptionProperty(None,
+                                    options=['info', 'error', 'loading'],
+                                    allownone=True)
     '''Shortcut to usual message icons
        :data:`type` is an
        :class:`~kivy.properties.ObjectProperty` and defaults to None
     '''
 
-    def show_message(self, message, duration=5, type=None):
+    def show_message(self, message, duration=5, notification_type=None):
         self.message = message
-        self.type = type
+        self.notification_type = notification_type
 
         if duration > 0:
             Clock.schedule_once(self.clear_message, duration)
 
     def clear_message(self, *args):
-        self.type = None
+        self.notification_type = None
         self.message = ''
 
-    def on_type(self, *args):
+    def on_notification_type(self, *args):
         icon = ''
-        type = self.type
+        type = self.notification_type
         if type == 'info':
             icon = 'icons/info.png'
         elif type == 'error':
@@ -204,11 +205,11 @@ class StatusBar(BoxLayout):
             mes.width = 0
             nav.size_hint_x = 0.9
 
-    def show_message(self, message, duration=5, type=None, *args):
+    def show_message(self, message, duration=5, notification_type=None, *args):
         '''Shows a message. Use type to change the icon and the duration
         in seconds. Set duration = -1 to undefined time
         '''
-        self.status_message.show_message(message, duration, type)
+        self.status_message.show_message(message, duration, notification_type)
 
     def update_info(self, info, branch_name=None):
         '''Updates the info message

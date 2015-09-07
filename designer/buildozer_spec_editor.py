@@ -9,6 +9,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty, ConfigParser, StringProperty
 from kivy.uix.settings import Settings, InterfaceWithSidebar, MenuSidebar,\
     ContentPanel, SettingsPanel
+
+from designer.helper_functions import ignore_proj_watcher
 from designer.uix.settings import SettingList, SettingDict
 
 from pygments.lexers.configs import IniLexer
@@ -95,12 +97,11 @@ class SpecCodeInput(BoxLayout):
         self.lbl_error.color = [0, 0, 0, 0]
         self.text_input.text = open(self.spec_path, 'r').read()
 
+    @ignore_proj_watcher
     def _save_spec(self, *args):
         '''Try to save the spec file. If there is a error, show the label.
         If not, save the file and dispatch on_change
         '''
-        designer = App.get_running_app().root
-        designer.project_watcher.stop()
         f = tempfile.NamedTemporaryFile()
         f.write(self.text_input.text)
         try:
@@ -114,8 +115,6 @@ class SpecCodeInput(BoxLayout):
             spec.close()
             self.dispatch('on_change')
         f.close()
-        designer.project_watcher.start_watching(
-                                            designer.project_loader.proj_dir)
 
     def on_change(self, *args):
         '''Event handler to dispatch a .spec modification
@@ -219,11 +218,6 @@ class BuildozerSpecEditor(Settings):
 
         return panel
 
+    @ignore_proj_watcher
     def on_config_change(self, *args):
-        designer = App.get_running_app().root
-        designer.project_watcher.stop()
-
-        self.config_parser.write()
         super(BuildozerSpecEditor, self).on_config_change(*args)
-        designer.project_watcher.start_watching(
-                                            designer.project_loader.proj_dir)

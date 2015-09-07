@@ -9,6 +9,8 @@ from kivy.clock import Clock
 from kivy.properties import ObjectProperty, ListProperty,\
     StringProperty, NumericProperty, partial
 from kivy.lang import Builder
+from designer.helper_functions import show_message
+
 try:
     from rlcompleter import Completer
 except ImportError:
@@ -100,8 +102,10 @@ class Shell(code.InteractiveConsole):
         try:
             exec(_code, self.locals)
         except SystemExit:
-            print('It\'s not possible to exit from Kivy Designer'
-                                                    ' Python console')
+            show_message(
+                'It\'s not possible to exit from Kivy Designer Python console',
+                5, 'info'
+            )
         except:
             self.showtraceback()
 

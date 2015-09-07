@@ -2,12 +2,50 @@
    module of Kivy Designer.
 '''
 import functools
+import inspect
 
 import os
+import string
 
 from kivy.app import App
+from kivy.event import EventDispatcher
+from kivy.factory import Factory, FactoryException
+from kivy.properties import ListProperty, BooleanProperty, StringProperty
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
+import sys
+from kivy.uix.widget import Widget
+
+
+class FakeSettingList(EventDispatcher):
+    '''Fake Kivy Setting to use SettingList
+    '''
+
+    items = ListProperty([])
+    '''List with default visible items
+    :attr:`items` is a :class:`~kivy.properties.ListProperty` and defaults
+    to [].
+    '''
+
+    allow_custom = BooleanProperty(False)
+    '''Allow/disallow a custom item to the list
+    :attr:`allow_custom` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to False
+    '''
+
+    group = StringProperty(None)
+    '''CheckBox group name. If the CheckBox is in a Group,
+    it becomes a Radio button.
+    :attr:`group` is a :class:`~kivy.properties.StringProperty` and
+    defaults to ''
+    '''
+
+    desc = StringProperty(None, allownone=True)
+    '''Description of the setting, rendered on the line below the title.
+
+    :attr:`desc` is a :class:`~kivy.properties.StringProperty` and defaults to
+    None.
+    '''
 
 
 def get_indent_str(indentation):
@@ -100,7 +138,19 @@ def show_alert(title, msg, width=500, height=200):
 def show_message(*args, **kwargs):
     '''Shortcut to display a message on status bar
     '''
-    App.get_running_app().root.statusbar.show_message(*args, **kwargs)
+    d = get_designer()
+    d.statusbar.show_message(*args, **kwargs)
+
+
+def show_error_console(text, append=False):
+    '''Shows a text on Error Console.
+    :param append appends the new text at the bottom of console
+    '''
+    d = get_designer()
+    error_console = d.ui_creator.error_console
+    if append:
+        text = error_console.text + text
+    error_console.text = text
 
 
 def get_designer():
@@ -109,13 +159,41 @@ def get_designer():
     return App.get_running_app().root
 
 
+def get_current_project():
+    '''Returns the current project in project_manager.
+    '''
+    d = get_designer()
+    return d.project_manager.current_project
+
+
 def ignore_proj_watcher(f):
     '''Function decorator to makes project watcher ignores file modification
     '''
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
-        watcher = App.get_running_app().root.project_watcher
-        watcher.stop()
+        watcher = get_designer().project_watcher
+        watcher.pause_watching()
         f(*args, **kwargs)
         return watcher.resume_watching()
-    return  wrapper
+    return wrapper
+
+
+def get_app_widget(target):
+    '''Creates a widget instance by it's name and module
+    '''
+    if target.is_dynamic:
+        name = target.name.split('@')[0]
+        try:
+            return Factory.get(name)()
+        except:
+            return None
+    elif target.is_root:
+        return target.instance
+    else:
+        classes = inspect.getmembers(sys.modules[target.module_name],
+                                     inspect.isclass)
+        for klass_name, klass in classes:
+            if issubclass(klass, Widget) and klass_name == target.name:
+                return klass()
+
+        return None

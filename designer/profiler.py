@@ -7,6 +7,7 @@ from kivy.properties import StringProperty, ObjectProperty, \
 from kivy.uix.popup import Popup
 import designer
 from designer.confirmation_dialog import ConfirmationDialog
+from designer.helper_functions import get_current_project
 
 
 class Builder(EventDispatcher):
@@ -91,8 +92,7 @@ class Buildozer(Builder):
         shutil.copy(os.path.join(templates_dir, 'default.spec'),
                     os.path.join(self.profiler.project_path, 'buildozer.spec'))
 
-        self.designer.designer_content.update_tree_view(
-            self.designer.project_loader)
+        self.designer.designer_content.update_tree_view(get_current_project())
         self._popup.dismiss()
         self.last_command()
 

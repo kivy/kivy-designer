@@ -11,7 +11,7 @@ from pygments.lexers.diff import DiffLexer
 import designer
 from designer.designer_content import DesignerTabbedPanelItem
 from designer.helper_functions import ignore_proj_watcher, show_alert, \
-    show_message, get_designer
+    show_message, get_designer, FakeSettingList, get_current_project
 from designer.input_dialog import InputDialog
 from designer.uix.designer_action_items import DesignerActionSubMenu, \
         DesignerSubActionButton
@@ -20,37 +20,6 @@ from designer.uix.py_code_input import PyScrollView
 from designer.uix.settings import SettingListContent
 from kivy.app import App
 import subprocess
-
-
-class FakeSettingList(EventDispatcher):
-    '''Fake Kivy Setting to use SettingList
-    '''
-
-    items = ListProperty([])
-    '''List with default visible items
-    :attr:`items` is a :class:`~kivy.properties.ListProperty` and defaults
-    to [].
-    '''
-
-    allow_custom = BooleanProperty(False)
-    '''Allow/disallow a custom item to the list
-    :attr:`allow_custom` is a :class:`~kivy.properties.BooleanProperty`
-    and defaults to False
-    '''
-
-    group = StringProperty(None)
-    '''CheckBox group name. If the CheckBox is in a Group,
-    it becomes a Radio button.
-    :attr:`group` is a :class:`~kivy.properties.StringProperty` and
-    defaults to ''
-    '''
-
-    desc = StringProperty(None, allownone=True)
-    '''Description of the setting, rendered on the line below the title.
-
-    :attr:`desc` is a :class:`~kivy.properties.StringProperty` and defaults to
-    None.
-    '''
 
 
 class GitRemoteProgress(RemoteProgress):
@@ -141,10 +110,10 @@ class DesignerGit(DesignerActionSubMenu):
         Is not a git repo, git init is available.
         '''
         self.remove_children()
-        designer = App.get_running_app().root
+        d = App.get_running_app().root
         loader = None
-        if designer:
-            loader = designer.project_watcher._project_dir
+        if d:
+            loader = get_current_project().path
 
         if loader:
             self.disabled = False

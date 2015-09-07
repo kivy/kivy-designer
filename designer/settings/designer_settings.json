@@ -6,12 +6,6 @@
         "key": "python_shell_path"
     },
     {
-        "type": "bool",
-        "title": "Reload KV Automatically",
-        "section": "global",
-        "key": "reload_kv"
-    },
-    {
         "type": "numeric",
         "title": "Number of Recent Files",
         "section": "global",

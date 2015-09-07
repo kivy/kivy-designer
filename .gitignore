@@ -1,3 +1,28 @@
 *.pyo
 *.pyc
 .*.swp
+.coverage
+.noseids
+*.so
+*.py#
+*~
+*.swp
+*.DS_Store
+*.kpf
+.designer/
+docs/source/_static
+docs/source/_templates
+docs/build/
+build/
+.idea
+
+# PyDev
+.project
+.pydevproject
+.settings/
+
+# Virtualenv
+venv
+
+# Emacs
+.projectile

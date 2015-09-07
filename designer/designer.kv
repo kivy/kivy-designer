@@ -499,7 +499,7 @@
     canvas:
         Color:
             rgb: 1, 0.5, 0.8
-        
+
         Line:
             points: self.x - 2, self.y - 2, self.right - 2, self.y - 2, self.right - 2, self.top - 2, self.x - 2, self.top - 2
             width: 2.
@@ -528,7 +528,6 @@
 <AddFileDialog>:
     text_file: text_file
     text_folder: text_folder
-    always_check: always_check
     lbl_error: lbl_error
     orientation: 'vertical'
 
@@ -547,7 +546,6 @@
         TextInput:
             id: text_file
             multiline: False
-            on_text: root.update_from_file()
         Button:
             size_hint_x: None
             text: 'Open File'
@@ -568,16 +566,6 @@
             size_hint_x: None
             text: 'Open Folder'
             on_press: root.open_folder_btn_pressed()
-
-    BoxLayout:
-        CheckBox:
-            id: always_check
-            width: '20sp'
-            size_hint_x: None
-        Label:
-            width: '120pt'
-            size_hint_x: None
-            text: 'Always use this folder'
 
     BoxLayout:
         padding: '2sp'
@@ -604,7 +592,7 @@
     cancel_button: cancel
     orientation: 'vertical'
     padding: '2sp'
-    
+
     GridLayout:
         rows: 1
         size_hint_y: None
@@ -634,7 +622,7 @@
         pos_hint: {'x': 0.1}
         height: '22pt'
         text: 'Select one of the following templates:'
-    
+
     BoxLayout:
         id: list_parent
         orientation: 'horizontal'
@@ -697,7 +685,7 @@
     padding: '5sp'
     Label:
         text: root.message
-    
+
     BoxLayout:
         size_hint_y: None
         height: '25pt'
@@ -1067,7 +1055,7 @@
             spacing: '3sp'
             size_hint_y: None
             height: max(self.parent.height, self.minimum_height)
-    
+
 <ToolboxButton>:
     size_hint_y: None
     height: '22pt'
@@ -1304,12 +1292,12 @@
                 canvas.before:
                     Color:
                         rgb: .21, .22, .22
-                    
+
                     Rectangle:
                         size: splitter_kv.size
                         pos: splitter_kv.pos
-                    
-                
+
+
                 DesignerTabbedPanel:
                     id: tab_pannel
                     do_default_tab: False
@@ -1338,23 +1326,23 @@
                                         on_show_edit: root.on_show_edit()
                             Button:
                                 size_hint_y: None
-                                size_hint_x: 0.1
-                                height: '22pt'
-                                text: 'Reload'
-                                pos_hint: {'x': 0.9}
+                                size_hint_x: 0.2
+                                height: '24pt'
+                                text: 'Reload Widgets'
+                                pos_hint: {'x': 0.8}
                                 on_release: root.reload_btn_pressed()
-                                
-                    
+                                disabled: code_input.have_error
+
                     DesignerTabbedPanelItem:
                         text: 'Kivy Console'
                         KivyConsole:
                             id: kivy_console
-                    
+
                     DesignerTabbedPanelItem:
                         text: 'Python Shell'
                         PythonConsole:
                             id: py_console
-        
+
                     DesignerTabbedPanelItem:
                         text: 'Error Console'
                         ScrollView:
@@ -1364,73 +1352,73 @@
                                 size_hint_y: None
                                 height: max(e_scroll.height, self.minimum_height)
                                 text: ''
-                                    
-   
+
+
             Splitter:
                 id: splitter_widget_tree
                 size_hint_x: None
                 min_size: 170
                 width: 250
                 pos_hint: {'y': 0, 'right': 1}
-                
+
                 BoxLayout:
                     orientation: 'vertical'
-                    
+
                     GridLayout:
                         id: grid_playground_settings
                         cols: 1
                         spacing: .5
                         height: self.minimum_height
                         size_hint_y: None
-                        
+
                         canvas:
                             Color:
                                 rgb: titlecolor
                             Rectangle:
                                 pos: self.pos
                                 size: self.size
-                        
+
                         Label:
                             text: 'Playground Settings'
                             font_size: '10pt'
                             height: '20pt'
                             size_hint_y: None
-                        
+
                         BoxLayout:
                             size_hint_y: None
                             height: sp(48)
-                            
+
                             canvas.before:
                                 Color:
                                     rgb: bgcolor
                                 Rectangle:
                                     pos: self.pos
                                     size: self.size
-                            
+
                             Label:
                                 text: 'Size:'
                                 size_hint_x: None
                                 width: sp(52)
-                            
+
                             PlaygroundSizeSelector:
                                 playground: playground
-                        
+
                         BoxLayout:
                             size_hint_y: None
                             height: sp(48)
-                            
+
                             canvas.before:
                                 Color:
                                     rgb: bgcolor
                                 Rectangle:
                                     pos: self.pos
                                     size: self.size
-                            
+
                             Label:
                                 text: 'Zoom: %d%%' % (zoom_slider.value * 100)
                                 size_hint_x: None
                                 width: sp(96)
-                            
+
                             Slider:
                                 id: zoom_slider
                                 min: 0.25
@@ -1438,18 +1426,53 @@
                                 step: 0.05
                                 value: playground.scale
                                 on_value: playground.scale = args[1]
-                    
+
                     GridLayout:
+                        id: grid_playground_widget
                         cols: 1
                         spacing: .5
-    
+                        height: self.minimum_height
+                        size_hint_y: None
+
                         canvas:
                             Color:
                                 rgb: titlecolor
                             Rectangle:
                                 pos: self.pos
                                 size: self.size
-    
+
+                        Label:
+                            text: 'Playground Widget'
+                            font_size: '10pt'
+                            height: '20pt'
+                            size_hint_y: None
+
+                        BoxLayout:
+                            size_hint_y: None
+                            height: sp(48)
+
+                            canvas.before:
+                                Color:
+                                    rgb: bgcolor
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+
+                            Button:
+                                text: playground.root_name
+                                on_press: playground.on_widget_select_pressed()
+
+                    GridLayout:
+                        cols: 1
+                        spacing: .5
+
+                        canvas:
+                            Color:
+                                rgb: titlecolor
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+
                         GridLayout:
                             id: grid_widget_tree
                             cols: 1
@@ -1459,11 +1482,11 @@
                                 font_size: '10pt'
                                 height: '20pt'
                                 size_hint_y: None
-    
+
                             WidgetsTree:
                                 id: widgettree
                                 playground: playground
-    
+
                         Splitter:
                             id: splitter_property
                             sizable_from: 'top'
@@ -1476,7 +1499,7 @@
                                     text: '   Properties'
                                     PropertyViewer:
                                         id: propertyviewer
-    
+
                                 DesignerTabbedPanelItem:
                                     text: 'Events'
                                     EventViewer:
@@ -1488,17 +1511,17 @@
 
 <PlaygroundSizeView>:
     accordion: accordion
-    
+
     BoxLayout:
         orientation: 'vertical'
-        
+
         BoxLayout:
             size_hint_y: None
             height: sp(48)
             Label:
                 text: 'Playground Size'
                 bold: True
-            
+
             Label:
                 text: 'Portrait'
                 halign: 'right'
@@ -1509,7 +1532,7 @@
                 width: sp(128)
                 active: root.selected_orientation == 'portrait'
                 on_active: root.selected_orientation = ('portrait' if self.active else 'landscape')
-        
+
         Accordion:
             id: accordion
 
@@ -1638,7 +1661,6 @@
     # variable tab_width
     text: root.title
     size_hint_x: None
-    width: min(self.texture_size[0] + 40, 200)
     BoxLayout:
         pos: root.pos
         size_hint: None, None
@@ -1760,11 +1782,6 @@
                     id: actn_btn_add_file
                     text: 'Add File'
                     on_press: root.action_btn_add_file_pressed()
-
-                DesignerActionButton:
-                    id: actn_btn_custom_widget
-                    text: 'Add Custom Widget'
-                    on_press: root.action_btn_add_custom_widget_press()
 
                 DesignerActionButton:
                     id: actn_btn_proj_pref

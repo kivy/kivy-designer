@@ -65,7 +65,7 @@ class Toolbox(BoxLayout):
 
     def __init__(self, **kwargs):
         super(Toolbox, self).__init__(**kwargs)
-        Clock.schedule_once(self.discover_widgets, 0)
+        Clock.schedule_once(self.discover_widgets)
         self.custom_category = None
         self._list = []
 
@@ -100,23 +100,27 @@ class Toolbox(BoxLayout):
         if self.custom_category:
             self.accordion.remove_widget(self.custom_category)
             Factory.register('BoxLayout', module='kivy.uix.boxlayout')
-            self.custom_category = ToolboxCategory(title='custom')
+            self.custom_category = ToolboxCategory(title='App Widgets')
             self._list.append(self.custom_category)
 
             # FIXME: ToolboxCategory keeps on adding more scrollview,
+            # TODO check, fixed?
             # if they are initialized again, unable to find the cause of problem
             # I just decided to delete those scrollview whose childs are not
             # self.gridlayout.
-            _scrollview_parent = self.custom_category.gridlayout.parent.parent
-            for child in _scrollview_parent.children[:]:
-                if child.children[0] != self.custom_category.gridlayout:
-                    _scrollview_parent.remove_widget(child)
+            # _scrollview_parent = self.custom_category.gridlayout.parent.parent
+            # for child in _scrollview_parent.children[:]:
+            #     if child.children[0] != self.custom_category.gridlayout:
+            #         _scrollview_parent.remove_widget(child)
 
-    def add_custom(self):
+    def update_app_widgets(self):
         '''To add/update self.custom_category with new custom classes loaded
            by project.
         '''
-        self.custom_category = ToolboxCategory(title='custom')
+        if self.custom_category:
+            self.accordion.remove_widget(self.custom_category)
+            self._list = []
+        self.custom_category = ToolboxCategory(title='App Widgets')
         self._list.append(self.custom_category)
 
         self.accordion.add_widget(self.custom_category)

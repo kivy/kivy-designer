@@ -7,6 +7,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
+from designer.helper_functions import ignore_proj_watcher
 
 
 class AddFileDialog(BoxLayout):
@@ -40,9 +41,9 @@ class AddFileDialog(BoxLayout):
 
     __events__ = ('on_cancel', 'on_added', 'on_error')
 
-    def __init__(self, proj_loader, **kwargs):
+    def __init__(self, project, **kwargs):
         super(AddFileDialog, self).__init__(**kwargs)
-        self.proj_loader = proj_loader
+        self.project = project
 
     def on_cancel(self):
         pass
@@ -53,6 +54,7 @@ class AddFileDialog(BoxLayout):
     def on_error(self):
         pass
 
+    @ignore_proj_watcher
     def _perform_add_file(self):
         '''To copy file from its original path to new path
         '''
@@ -61,12 +63,9 @@ class AddFileDialog(BoxLayout):
             self.lbl_error.text = "Select the File"
             return
 
-        self.proj_loader.proj_watcher.stop()
+        target_folder = self.text_folder.text
 
-        target_folder = "" if self.text_folder.text == "." \
-                                        else self.text_folder.text
-
-        folder = os.path.join(self.proj_loader.proj_dir, target_folder)
+        folder = os.path.join(self.project.path, target_folder)
         if not os.path.exists(folder):
             os.mkdir(folder)
 
@@ -80,33 +79,10 @@ class AddFileDialog(BoxLayout):
                         os.path.join(folder,
                                      os.path.basename(self.text_file.text)))
 
-            if self.always_check.active:
-                self.proj_loader.add_dir_for_file_type(
-                    self.text_file.text[self.text_file.text.rfind('.') + 1:],
-                    target_folder)
-            self.proj_loader.proj_watcher.start_watching(
-                self.proj_loader.proj_dir)
             self.dispatch('on_added')
 
         except (OSError, IOError):
             self.dispatch('on_error')
-
-    def update_from_file(self, *args):
-        '''To determine the folder associated with current file type.
-        '''
-
-        curr_type = self.text_file.text
-        curr_type = curr_type[curr_type.find('.') + 1:]
-        if curr_type == '':
-            return
-
-        try:
-            folder = self.proj_loader.dict_file_type_and_path[curr_type]
-            self.text_folder.text = folder
-            self.always_check.active = True
-
-        except KeyError:
-            pass
 
     def _cancel_popup(self, *args):
         '''To dismiss popup when cancel is pressed.
@@ -149,13 +125,13 @@ class AddFileDialog(BoxLayout):
 
         proj_dir = os.path.join(proj_dir, instance.filename)
 
-        target_dir = self.proj_loader.proj_dir
+        target_dir = self.project.path
 
         if os.path.isdir(proj_dir):
-            target_dir = os.path.relpath(proj_dir, self.proj_loader.proj_dir)
+            target_dir = os.path.relpath(proj_dir, self.project.path)
         elif os.path.isfile(proj_dir):
             proj_dir = os.path.dirname(proj_dir)
-            target_dir = os.path.relpath(proj_dir, self.proj_loader.proj_dir)
+            target_dir = os.path.relpath(proj_dir, self.project.path)
 
         self.text_folder.text = target_dir
 
@@ -165,7 +141,7 @@ class AddFileDialog(BoxLayout):
         '''
 
         self._fbrowser = FileBrowser(select_string='Open Folder')
-        self._fbrowser.ids.list_view.path = self.proj_loader.proj_dir
+        self._fbrowser.ids.list_view.path = self.project.path
         self._fbrowser.bind(on_success=self._folder_load,
                             on_canceled=self._cancel_popup)
 

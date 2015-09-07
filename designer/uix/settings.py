@@ -267,7 +267,12 @@ class SettingListCheckItem(BoxLayout):
     '''
     item_text = StringProperty('')
     '''Item text. :attr:`item_text` is a
-    :class:`~kivy.properties.ObjectProperty` and defaults to ''
+    :class:`~kivy.properties.StringProperty` and defaults to ''
+    '''
+
+    item_check = ObjectProperty(None)
+    '''Instance of checkbox. :attr:`item_check` is a
+        :class:`~kivy.properties.ObjectProperty` and defaults to None
     '''
 
     active = BooleanProperty(False)
@@ -285,6 +290,8 @@ class SettingListCheckItem(BoxLayout):
 
     def __init__(self, **kwargs):
         super(SettingListCheckItem, self).__init__(**kwargs)
+        if self.group:
+            self.item_check.allow_no_selection = False
 
     def on_active(self, instance, *args):
         '''Callback to update the active value

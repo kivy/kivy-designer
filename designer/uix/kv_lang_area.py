@@ -4,8 +4,8 @@ from kivy.uix.codeinput import CodeInput
 from kivy.properties import BooleanProperty, StringProperty,\
     NumericProperty, OptionProperty, ObjectProperty
 from kivy.app import App
-from kivy.lang import Builder
-from kivy.factory import Factory
+from kivy.lang import Builder, Parser, ParserException
+from kivy.factory import Factory, FactoryException
 from kivy.clock import Clock
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
@@ -14,7 +14,8 @@ from kivy.uix.tabbedpanel import TabbedPanelContent, \
     TabbedPanel, TabbedPanelHeader
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
-    get_line_start_pos, get_indent_level, get_indentation
+    get_line_start_pos, get_indentation, show_error_console, \
+    get_current_project
 from designer.uix.designer_code_input import DesignerCodeInput
 
 
@@ -91,18 +92,18 @@ class KVLangArea(DesignerCodeInput):
        :data:`_reload` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
-    reload_kv = BooleanProperty(True)
-
     playground = ObjectProperty()
     '''Reference to :class:`~designer.playground.Playground`
        :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    project_loader = ObjectProperty()
-    '''Reference to :class:`~designer.project_loader.ProjectLoader`
-       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
+    project = ObjectProperty()
+    '''Reference to :class:`~designer.project_manager.Project`
+       :data:`project` is a :class:`~kivy.properties.ObjectProperty`
     '''
     statusbar = ObjectProperty()
+
+    __events__ = ('on_reload_kv', )
 
     def __init__(self, **kwargs):
         super(KVLangArea, self).__init__(**kwargs)
@@ -203,7 +204,7 @@ class KVLangArea(DesignerCodeInput):
             lines = text.splitlines()
             total_lines = len(lines)
             root_lineno = 0
-            root_name = self.project_loader.root_rule.name
+            root_name = self.playground.root_name
             for lineno, line in enumerate(lines):
                 pos = line.find(root_name)
                 if pos != -1 and get_indentation(line) == 0:
@@ -238,7 +239,7 @@ class KVLangArea(DesignerCodeInput):
             path_to_widget.reverse()
 
             root_lineno = 0
-            root_name = self.project_loader.root_rule.name
+            root_name = self.playground.root_name
             for lineno, line in enumerate(lines):
                 pos = line.find(root_name)
                 if pos != -1 and get_indentation(line) == 0:
@@ -326,15 +327,16 @@ class KVLangArea(DesignerCodeInput):
             self.cursor = (0, 0)
             type_name = type(widget).__name__
             is_class = False
-            for rule in self.project_loader.class_rules:
-                if rule.name == type_name:
+            app_widgets = get_current_project().app_widgets
+            for rule_name in app_widgets:
+                if rule_name == type_name:
                     is_class = True
                     break
 
             if not is_class:
                 self.insert_text(type_name + ':\n')
 
-            self.project_loader.set_root_widget(type_name, widget)
+            self.playground.load_widget(type_name)
 
     def get_widget_text_pos_from_kv(self, widget, parent, path_to_widget=[]):
         '''To get start and end pos of widget's rule in kv text
@@ -350,7 +352,7 @@ class KVLangArea(DesignerCodeInput):
         lines = text.splitlines()
         total_lines = len(lines)
         root_lineno = 0
-        root_name = self.project_loader.root_rule.name
+        root_name = self.playground.root_name
         for lineno, line in enumerate(lines):
             pos = line.find(root_name)
             if pos != -1 and get_indentation(line) == 0:
@@ -409,23 +411,11 @@ class KVLangArea(DesignerCodeInput):
 
         self._reload = False
 
-        delete_from_kv = False
-        if type(widget).__name__ == self.project_loader.root_rule.name:
-            # If root widget is being deleted then delete its rule only if
-            # it is not in class rules.
-
-            if not self.project_loader.is_root_a_class_rule():
-                delete_from_kv = True
-
-        else:
-            delete_from_kv = True
-
-        if delete_from_kv:
-            start_pos, end_pos = self.get_widget_text_pos_from_kv(widget,
-                                                                  parent)
-            text = self.text[start_pos:end_pos]
-            self.text = self.text[:start_pos] + self.text[end_pos:]
-            return text
+        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget,
+                                                              parent)
+        text = self.text[start_pos:end_pos]
+        self.text = self.text[:start_pos] + self.text[end_pos:]
+        return text
 
     def _get_widget_from_path(self, path):
         '''This function is used to get widget given its path
@@ -453,36 +443,20 @@ class KVLangArea(DesignerCodeInput):
 
         return widget
 
-    def func_reload_kv(self, *args):
-        if not self.reload_kv:
-            return
-
-        if self.text == '':
-            return
-
+    def func_reload_kv(self, force=False, *args):
+        self.have_error = False
         if not self._reload:
             self._reload = True
             return
 
-        statusbar = self.statusbar
+        if not isinstance(force, bool):
+            force = False
+        self.dispatch('on_reload_kv', self.text, force)
 
-        playground = self.playground
-        project_loader = self.project_loader
-
-        try:
-            widget = project_loader.reload_from_str(self.text)
-
-            if widget:
-                playground.remove_widget_from_parent(playground.root,
-                                                     None, from_kv=True)
-                playground.add_widget_to_parent(widget, None, from_kv=True)
-
-            statusbar.show_message("")
-            self.have_error = False
-
-        except:
-            self.have_error = True
-            statusbar.show_message("Cannot reload from text")
+    def on_reload_kv(self, text, force, *args):
+        '''Dispatches an event with the KV lang area text
+        '''
+        pass
 
     def _get_widget_path_at_line(self, lineno, root_lineno=0):
         '''To get widget path of widget at line
@@ -557,7 +531,7 @@ class KVLangArea(DesignerCodeInput):
         lines = re.sub(r'#.+', '', self.text).splitlines()
         total_lines = len(lines)
 
-        root_name = self.project_loader.root_rule.name
+        root_name = self.playground.root_name
         total_lines = len(lines)
         root_lineno = 0
         for lineno, line in enumerate(lines):
@@ -620,7 +594,7 @@ class KVLangArea(DesignerCodeInput):
         lines = re.sub(r'#.+', '', self.text).splitlines()
         total_lines = len(lines)
 
-        root_name = self.project_loader.root_rule.name
+        root_name = self.playground.root_name
         total_lines = len(lines)
         root_lineno = 0
         for lineno, line in enumerate(lines):
@@ -722,7 +696,7 @@ class KVLangArea(DesignerCodeInput):
         lines = re.sub(r'#.+', '', self.text.rstrip()).splitlines()
         total_lines = len(lines)
 
-        root_name = self.project_loader.root_rule.name
+        root_name = self.playground.root_name
         total_lines = len(lines)
         root_lineno = 0
         for lineno, line in enumerate(lines):

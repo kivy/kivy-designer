@@ -21,6 +21,7 @@ Prerequisites
     - [kivy-garden](http://kivy.org/docs/api-kivy.garden.html)
 - The FileBrowser widget from the [Kivy garden](http://kivy.org/docs/api-kivy.garden.html)
 
+Kivy Designer is not yet fully compatible with Python 3.
 
 Installation
 ------------
