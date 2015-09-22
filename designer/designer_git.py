@@ -21,6 +21,7 @@ from designer.uix.settings import SettingListContent
 from kivy.app import App
 import subprocess
 
+
 class FakeSettingList(EventDispatcher):
     '''Fake Kivy Setting to use SettingList
     '''
@@ -182,14 +183,14 @@ class DesignerGit(DesignerActionSubMenu):
 
     def validate_remote(self):
         '''Validates Git remote auth. If system if posix, returns True.
-        If on NT, reads tools/ssh-agent/ssh_status.txt, if equals 1, 
+        If on NT, reads tools/ssh-agent/ssh_status.txt, if equals 1,
         returns True else runs the tools/ssh-agent/ssh.bat and returns False
         '''
         if os.name == 'nt':
             _dir = os.path.dirname(designer.__file__)
             _dir = os.path.split(_dir)[0]
             script = os.path.join(_dir, 'tools', 'ssh-agent', 'ssh.bat')
-            status_txt = os.path.join(_dir, 'tools', 'ssh-agent', 
+            status_txt = os.path.join(_dir, 'tools', 'ssh-agent',
                                                         'ssh_status.txt')
             status = open(status_txt, 'r').read()
             status = status.strip()
@@ -375,7 +376,7 @@ class DesignerGit(DesignerActionSubMenu):
         If there is not remote, shows an alert
         '''
         if not self.validate_remote():
-            show_alert('Git - Remote Authentication', 
+            show_alert('Git - Remote Authentication',
                 'To use Git remote you need to enter your ssh password')
             return
         remotes = []
@@ -446,7 +447,7 @@ class DesignerGit(DesignerActionSubMenu):
         If there is not remote, shows an alert
         '''
         if not self.validate_remote():
-            show_alert('Git - Remote Authentication', 
+            show_alert('Git - Remote Authentication',
                 'To use Git remote you need to enter your ssh password')
             return
         remotes = []
