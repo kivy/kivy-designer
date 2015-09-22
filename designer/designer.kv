@@ -444,6 +444,7 @@
     valign: 'middle'
     size_hint_y: None
     height: '40sp'
+    minimum_width: 200
 
 <InfoBubble>:
     size_hint: None, None
@@ -1745,9 +1746,6 @@
             DesignerActionGroup:
                 id: actn_menu_tools
                 text: 'Tools'
-                mode: 'spinner'
-                size_hint_x: None
-                dropdown_cls: ContextMenu
                 disabled: True
                 DesignerActionButton:
                     id: actn_btn_buildozer_init
