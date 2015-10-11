@@ -139,7 +139,9 @@ class BuildozerSpecEditor(Settings):
         self.register_type('list', SettingList)
         self.SPEC_PATH = ''
         self.proj_dir = ''
-        self.config_parser = ConfigParser(name="buildozer_spec")
+        self.config_parser = ConfigParser.get_configparser("buildozer_spec")
+        if self.config_parser is None:
+            self.config_parser = ConfigParser(name="buildozer_spec")
 
     def load_settings(self, proj_dir):
         '''This function loads project settings

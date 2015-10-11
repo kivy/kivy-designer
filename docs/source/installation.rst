@@ -10,6 +10,10 @@ Prerequisites
     - `watchdog <http://pythonhosted.org/watchdog/>`_
     - `Pygments <http://pygments.org/>`_
     - `docutils <http://docutils.sourceforge.net/>`_
+    - `jedi <http://jedi.jedidjah.ch/en/latest/>`_
+    - `gitpython <http://gitpython.readthedocs.org>`_
+    - `six <https://pythonhosted.org/six/>`_
+    - `kivy-garden <http://kivy.org/docs/api-kivy.garden.html>`_
 - The ``FileBrowser`` widget from the `Kivy Garden <http://kivy.org/docs/api-kivy.garden.html>`_
 
 

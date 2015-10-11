@@ -13,7 +13,6 @@ To configure, you can use
 
 cached_history  :
 cached_commands :
-font            :
 font_size       :
 shell           :
 
@@ -119,7 +118,6 @@ Builder.load_string('''
             id: history_box
             size_hint: (1, None)
             height: 801
-            font_name: root.font_name
             font_size: root.font_size
             readonly: True
             foreground_color: root.foreground_color
@@ -129,7 +127,6 @@ Builder.load_string('''
         id: command_line
         multiline: False
         size_hint: (1, None)
-        font_name: root.font_name
         font_size: root.font_size
         readonly: root.readonly
         foreground_color: root.foreground_color
@@ -181,13 +178,6 @@ class KivyConsole(GridLayout):
 
     :data:`cached_commands` is a :class:`~kivy.properties.NumericProperty`,
     Default to '90'
-    '''
-
-    font_name = StringProperty('data/fonts/RobotoMono-Regular.ttf')
-    '''Indicates the font Style used in the console
-
-    :data:`font` is a :class:`~kivy.properties.StringProperty`,
-    Default to 'Roboto'
     '''
 
     environment = DictProperty(os.environ.copy())
@@ -740,8 +730,7 @@ class KivyConsole(GridLayout):
         parent.remove_widget(txtinput_command_line)
         # add widget for interaction with the running command
         txtinput_run_command = TextInput(multiline=False,
-                                         font_size=self.font_size,
-                                         font_name=self.font_name)
+                                         font_size=self.font_size)
 
         def interact_with_command(*l):
             '''Text input to interact with the running command
