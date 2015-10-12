@@ -36,6 +36,7 @@ With the prerequisites installed, you can use the designer:
     python main.py
 
 Without git, download, extract and execute main.py:
+
 https://github.com/kivy/kivy-designer/archive/master.zip
 
 
