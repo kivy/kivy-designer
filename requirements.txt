@@ -1,4 +1,4 @@
-kivy >= 1.8
+kivy >= 1.9
 pygments
 docutils
 watchdog
