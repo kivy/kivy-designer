@@ -16,12 +16,12 @@ except ImportError:
 
 Builder.load_string('''
 <PythonConsole>:
-    text_input: text_input2
+    text_input: interactive_text_input
     scroll_view: scroll_view
     ScrollView:
         id: scroll_view
         InteractiveShellInput:
-            id: text_input2
+            id: interactive_text_input
             size_hint: (1, None)
             font_name: root.font_name
             font_size: root.font_size
@@ -29,6 +29,7 @@ Builder.load_string('''
             background_color: root.background_color
             height: max(self.parent.height, self.minimum_height)
             on_ready_to_input: root.ready_to_input()
+            sh: root.sh
 ''')
 
 
@@ -185,6 +186,11 @@ class InteractiveShellInput(TextInput):
        when it is ready to get input from user.
     '''
 
+    sh = ObjectProperty(None)
+    '''Instance of :class:`~designer.uix.py_console.Shell`
+       :data:`sh` is an :class:`~kivy.properties.ObjectProperty`
+    '''
+
     __events__ = ('on_ready_to_input',)
 
     def __init__(self, **kwargs):
@@ -276,11 +282,11 @@ class PythonConsole(BoxLayout):
     :data:`foreground_color` is an :class:`~kivy.properties.ListProperty`,
     Default to '(0, 0, 0, 1)'''
 
-    font_name = StringProperty('data/fonts/DroidSansMono.ttf')
+    font_name = StringProperty('data/fonts/Roboto-Regular.ttf')
     '''Indicates the font Style used in the console
 
     :data:`font` is a :class:`~kivy.properties.StringProperty`,
-    Default to 'DroidSansMono'
+    Default to 'Roboto'
     '''
 
     font_size = NumericProperty(14)
@@ -297,7 +303,6 @@ class PythonConsole(BoxLayout):
         self._thread.setDaemon(True)
 
         Clock.schedule_once(self.run_sh)
-        self.text_input.sh = self.sh
         self._ready_to_input = False
         self._exit = False
 

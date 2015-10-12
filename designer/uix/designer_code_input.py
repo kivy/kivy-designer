@@ -1,6 +1,11 @@
+import re
+
+from kivy import Config
+from kivy.utils import get_color_from_hex
+from pygments import styles, highlight
+from designer.helper_functions import show_alert
 from kivy.uix.codeinput import CodeInput
-from kivy.core.clipboard import Clipboard
-from kivy.properties import BooleanProperty
+from kivy.properties import BooleanProperty, Clock, partial
 
 
 class DesignerCodeInput(CodeInput):
@@ -19,6 +24,47 @@ class DesignerCodeInput(CodeInput):
        :data:`clicked` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
+    def __init__(self, **kwargs):
+        super(DesignerCodeInput, self).__init__(**kwargs)
+        parser = Config.get_configparser('DesignerSettings')
+        if parser:
+            parser.add_callback(self.on_codeinput_theme,
+                                'global', 'code_input_theme')
+            self.style_name = parser.getdefault('global', 'code_input_theme',
+                                                'emacs')
+
+    def on_codeinput_theme(self, section, key, value, *args):
+        if not value in styles.get_all_styles():
+            show_alert("Error", "This theme is not available")
+        else:
+            self.style_name = value
+
+    def on_style_name(self, *args):
+        super(DesignerCodeInput, self).on_style_name(*args)
+        self.background_color = get_color_from_hex(self.style.background_color)
+        self._trigger_refresh_text()
+
+    def _get_bbcode(self, ntext):
+        # override the default method to fix bug with custom themes
+        # get bbcoded text for python
+        try:
+            ntext[0]
+            # replace brackets with special chars that aren't highlighted
+            # by pygment. can't use &bl; ... cause & is highlighted
+            ntext = ntext.replace(u'[', u'\x01').replace(u']', u'\x02')
+            ntext = highlight(ntext, self.lexer, self.formatter)
+            ntext = ntext.replace(u'\x01', u'&bl;').replace(u'\x02', u'&br;')
+            # replace special chars with &bl; and &br;
+            ntext = ''.join((u'[color=', str(self.text_color), u']',
+                             ntext, u'[/color]'))
+            ntext = ntext.replace(u'\n', u'')
+            # remove possible extra highlight options
+            ntext = ntext.replace(u'[u]', '').replace(u'[/u]', '')
+
+            return ntext
+        except IndexError:
+            return ''
+
     def on_show_edit(self, *args):
         pass
 
@@ -26,46 +72,113 @@ class DesignerCodeInput(CodeInput):
         '''Override of CodeInput's on_touch_down event.
            Used to emit on_show_edit
         '''
-
         if self.collide_point(*touch.pos):
             self.clicked = True
             self.dispatch('on_show_edit')
 
         return super(DesignerCodeInput, self).on_touch_down(touch)
 
-    def do_copy(self):
-        '''Function to do copy operation
+    def _do_focus(self, *args):
+        '''Force the focus on this widget
         '''
+        self.focus = True
 
-        if self.selection_text == '':
-            return
-
-        self._copy(self.selection_text)
-
-    def do_cut(self):
-        '''Function to do cut operation
-        '''
-
-        if self.selection_text == '':
-            return
-
-        self._cut(self.selection_text)
-
-    def do_paste(self):
-        '''Function to do paste operation
-        '''
-
-        self._paste()
-
-    def do_select_all(self):
+    def do_select_all(self, *args):
         '''Function to select all text
         '''
+        self.select_all()
 
-        self.select_text(0, len(self.text))
-
-    def do_delete(self):
-        '''Function to delete selected text
+    def find_next(self, search, use_regex=False, case=False):
+        '''Find the next occurrence of the string according to the cursor
+        position
         '''
+        text = self.text
+        if not case:
+            text = text.upper()
+            search = search.upper()
+        lines = text.splitlines()
 
-        if self.selection_text != '':
-            self.do_backspace()
+        col = self.cursor_col
+        row = self.cursor_row
+
+        found = -1
+        size = 0  # size of string before selection
+        line = None
+        search_size = len(search)
+
+        for i, line in enumerate(lines):
+            if i >= row:
+                if use_regex:
+                    if i == row:
+                        line_find = line[col + 1:]
+                    else:
+                        line_find = line[:]
+                    found = re.search(search, line_find)
+                    if found:
+                        search_size = len(found.group(0))
+                        found = found.start()
+                    else:
+                        found = -1
+                else:
+                    # if on current line, consider col
+                    if i == row:
+                        found = line.find(search, col + 1)
+                    else:
+                        found = line.find(search)
+                # has found the string. found variable indicates the initial po
+                if found != -1:
+                    self.cursor = (found, i)
+                    break
+            size += len(line)
+
+        if found != -1:
+            pos = text.find(line) + found
+            self.select_text(pos, pos + search_size)
+
+    def find_prev(self, search, use_regex=False, case=False):
+        '''Find the previous occurrence of the string according to the cursor
+        position
+        '''
+        text = self.text
+        if not case:
+            text = text.upper()
+            search = search.upper()
+        lines = text.splitlines()
+
+        col = self.cursor_col
+        row = self.cursor_row
+        lines = lines[:row + 1]
+        lines.reverse()
+        line_number = len(lines)
+
+        found = -1
+        line = None
+        search_size = len(search)
+
+        for i, line in enumerate(lines):
+            i = line_number - i - 1
+            if use_regex:
+                if i == row:
+                    line_find = line[:col]
+                else:
+                    line_find = line[:]
+                found = re.search(search, line_find)
+                if found:
+                    search_size = len(found.group(0))
+                    found = found.start()
+                else:
+                    found = -1
+            else:
+                # if on current line, consider col
+                if i == row:
+                    found = line[:col].find(search)
+                else:
+                    found = line.find(search)
+            # has found the string. found variable indicates the initial po
+            if found != -1:
+                self.cursor = (found, i)
+                break
+
+        if found != -1:
+            pos = text.find(line) + found
+            self.select_text(pos, pos + search_size)

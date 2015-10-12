@@ -1,0 +1,155 @@
+[
+  {
+    "type": "title",
+    "title": "Application"
+  },
+  {
+    "type": "string",
+    "title": "Application Name",
+    "section": "app",
+    "desc": "Application name visible to users",
+    "key": "title"
+  },
+  {
+    "type": "string",
+    "title": "Package Name",
+    "section": "app",
+    "desc": "Application package name.\nExample exampleapp.apps",
+    "key": "package.name"
+  },
+  {
+    "type": "string",
+    "title": "Package domain",
+    "section": "app",
+    "desc": "Application package domain.\nExample com.mycompany",
+    "key": "package.domain"
+  },
+  {
+    "type": "string",
+    "title": "Presplash of the application",
+    "section": "app",
+    "desc": "Presplash image of the application.\nExample %(source.dir)s/data/logo.png",
+    "key": "presplash.filename"
+  },
+  {
+    "type": "string",
+    "title": "Icon of the application",
+    "section": "app",
+    "desc": "Icon of the application.\nExample %(source.dir)s/data/icon.png",
+    "key": "icon.filename"
+  },
+  {
+    "type": "title",
+    "title": "Screen Behavior"
+  },
+  {
+    "type": "dict",
+    "title": "Orientation",
+    "section": "app",
+    "desc": "Application orientation",
+    "key": "orientation",
+    "options": {"landscape": "Landscape", "portrait": "Portrait", "all": "Auto"}
+  },
+  {
+    "type": "bool",
+    "title": "Fullscreen",
+    "section": "app",
+    "desc": "Fullscreen mode",
+    "values": ["Disabled", "Enabled"],
+    "key": "fullscreen"
+  },
+  {
+    "type": "title",
+    "title": "Source Code"
+  },
+  {
+    "type": "path",
+    "title": "Source directory",
+    "section": "app",
+    "desc": "Source code where the main.py live",
+    "key": "source.dir"
+  },
+  {
+    "type": "list",
+    "title": "Source files to include",
+    "section": "app",
+    "desc": "Source files to include (let empty to include all the files)",
+    "key": "source.include_exts",
+    "allow_custom": true,
+    "items": ["py","png","jpg","kv","atlas"]
+  },
+  {
+    "type": "list",
+    "title": "Source files to exclude",
+    "section": "app",
+    "desc": "Source files to exclude (let empty to not exclude anything)",
+    "key": "source.exclude_exts",
+    "allow_custom": true,
+    "items": ["rar", "zip", "spec"]
+  },
+  {
+    "type": "list",
+    "title": "List of directory to exclude",
+    "section": "app",
+    "desc": "List of directory to exclude (let empty to not exclude anything)",
+    "key": "source.exclude_dirs",
+    "allow_custom": true,
+    "items": ["tests", "test", "bin"]
+  },
+  {
+    "type": "list",
+    "title": "List of exclusions using pattern matching",
+    "section": "app",
+    "desc": "List of exclusions using pattern matching",
+    "key": "source.exclude_patterns",
+    "allow_custom": true,
+    "items": ["license","images/*/*.jpg"]
+  },
+  {
+    "type": "title",
+    "title": "Application Version"
+  },
+  {
+    "type": "string",
+    "title": "Application versioning (method 1)",
+    "section": "app",
+    "desc": "Application versioning with regex.\nExample: ['\"](.*)'['\"]",
+    "key": "version.regex"
+  },
+  {
+    "type": "string",
+    "title": "Application versioning file name",
+    "section": "app",
+    "desc": "File name to use the versioning regex.\nExample: %(source.dir)s/main.py",
+    "key": "version.filename"
+  },
+  {
+    "type": "string",
+    "title": "Application versioning (method 2)",
+    "section": "app",
+    "desc": "Application version.\nExample: 1.0",
+    "key": "version"
+  },
+  {
+    "type": "title",
+    "title": "Application Requirements"
+  },
+  {
+    "type": "list",
+    "title": "Requirements",
+    "section": "app",
+    "desc": "Application requirements.",
+    "key": "requirements",
+    "items": ["apsw", "audiostream", "bidi", "boost", "c_igraph", "cherrypy", "cprotobuf", "cymunk", "django", "docutils", "ecdsa", "enum34", "evdev", "ffmpeg", "ffmpeg2", "ffpyplayer", "freetype", "gevent", "greenlet", "harfbuzz", "hostpython", "igraph", "jpeg", "kivent_core", "kivent_cymunk", "kivy", "leveldb", "libevent", "libpq", "libsodium", "libswift", "libtorrent", "libxml2", "libxslt", "libyaml", "lxml", "m2crypto", "midistream", "msgpack", "mysql_connector", "netifaces", "numpy", "opencv", "openssl", "paramiko", "pil", "plyer", "plyvel", "png", "polygon", "protobuf", "psutil", "psycopg2", "pyasn1", "pycrypto", "pygame", "pyjnius", "pylibpd", "pyopenssl", "pyparsing", "pyqrcode", "python", "pyyaml", "sdl", "setuptools", "six", "sqlalchemy", "sqlite3", "storm", "swift", "thrift", "twisted", "txws", "wokkel", "zeroconf", "zope"],
+    "allow_custom": true
+  },
+  {
+    "type": "list",
+    "title": "Garden requirements",
+    "section": "app",
+    "desc": "Application garden requirements.",
+    "key": "garden_requirements",
+    "allow_custom": true,
+    "items": ["androidtabs", "cefpython", "collider", "datetimepicker", "ddd", "desktopvideoplayer", "filebrowser", "filechooserthumbview", "gauge", "geartick", "graph", "knob", "magnet", "mapview", "modernmenu", "moretransitions", "navigationdrawer", "pagecurl", "particlesystem", "pizza", "progressspinner", "qrcode", "recycleview", "roulette", "roulettescroll", "scrolllabel", "segment", "smaa", "stiffscroll", "texturestack", "tickline", "tickmarker", "timeline"]
+  }
+]

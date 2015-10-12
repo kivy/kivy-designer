@@ -1,3 +1,10 @@
+import webbrowser
+from designer.designer_tools import DesignerTools
+from designer.input_dialog import InputDialog
+from designer.profile_settings import ProfileSettings
+from designer.profiler import Profiler
+from designer.uix.modules_contview import ModulesContView
+
 __all__ = ('DesignerApp', )
 
 import kivy
@@ -12,7 +19,8 @@ from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.layout import Layout
 from kivy.factory import Factory
-from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.properties import ObjectProperty, BooleanProperty, StringProperty, \
+    partial
 from kivy.clock import Clock
 from kivy.uix import actionbar
 from kivy.garden.filebrowser import FileBrowser
@@ -23,12 +31,14 @@ from kivy.lang import Builder
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
 from kivy.config import Config
+from kivy.base import ExceptionHandler, ExceptionManager
 
 import designer
 from designer.uix.actioncheckbutton import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
 from designer.uix.editcontview import EditContView
+from designer.uix.modules_contview import ModulesContView
 from designer.uix.kv_lang_area import KVLangArea
 from designer.undo_manager import WidgetOperation, UndoManager
 from designer.project_loader import ProjectLoader, ProjectLoaderException
@@ -42,11 +52,14 @@ from designer.designer_content import DesignerContent
 from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
 from designer.designer_settings import DesignerSettings
-from designer.helper_functions import get_kivy_designer_dir
+from designer.helper_functions import get_kivy_designer_dir, show_alert
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
-from designer.uix.designer_action_items import DesignerActionButton
+from designer.uix.designer_action_items import DesignerActionButton, \
+    DesignerActionProfileCheck, DesignerActionSubMenu
 from designer.help_dialog import HelpDialog, AboutDialog
+from designer.uix.bug_reporter import BugReporterApp
+from designer.buildozer_spec_editor import BuildozerSpecEditor
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -61,6 +74,14 @@ class Designer(FloatLayout):
     '''Instance of :class:`designer.designer_console.ConsoleDialog`
     '''
 
+    spec_editor = ObjectProperty(None)
+    '''Instance of :class:`designer.buildozer_spec_editor.BuildozerSpecEditor`
+    '''
+
+    designer_tools = ObjectProperty(None)
+    '''Instance of :class:`designer.designer_tools.DesignerTools`
+    '''
+
     statusbar = ObjectProperty(None)
     '''Reference to the :class:`~designer.statusbar.StatusBar` instance.
        :data:`statusbar` is a :class:`~kivy.properties.ObjectProperty`
@@ -68,7 +89,12 @@ class Designer(FloatLayout):
 
     editcontview = ObjectProperty(None)
     '''Reference to the :class:`~designer.uix.EditContView` instance.
-       :data:`v` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`editcontview` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    modulescontview = ObjectProperty(None)
+    '''Reference to the :class:`~designer.uix.modules_contview.ModulesContView`.
+       :data:`modulescontview` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     actionbar = ObjectProperty(None)
@@ -135,11 +161,16 @@ class Designer(FloatLayout):
        :data:`start_page` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    recent_files_cont_menu = ObjectProperty(None)
-    '''The context sub menu, containing the recently opened/saved projects.
-       Reference of :class:`~designer.uix.contextual.ContextSubMenu`.
-       :data:`recent_files_cont_menu` is a
+    select_profile_cont_menu = ObjectProperty(None)
+    '''Reference of
+        :class:`~designer.uix.designer_action_items.DesignerActionSubMenu`.
+       :data:`select_profile_cont_menu` is a
        :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    selected_profile = StringProperty('')
+    '''Selected profile settings path
+    :class:`~kivy.properties.StringProperty` and defaults to ''.
     '''
 
     @property
@@ -155,18 +186,37 @@ class Designer(FloatLayout):
         self.project_watcher = ProjectWatcher(self.project_modified)
         self.project_loader = ProjectLoader(self.project_watcher)
         self.recent_manager = RecentManager()
+        self.spec_editor = BuildozerSpecEditor()
         self.widget_to_paste = None
-        self.designer_content = DesignerContent(size_hint=(1, None))
 
         self.designer_settings = DesignerSettings()
         self.designer_settings.bind(on_config_change=self._config_change)
         self.designer_settings.load_settings()
         self.designer_settings.bind(on_close=self._cancel_popup)
 
+        self.prof_settings = ProfileSettings()
+        self.prof_settings.bind(on_close=self._cancel_popup)
+        self.prof_settings.bind(on_changed=self.on_profiles_changed)
+        self.prof_settings.bind(
+            on_use_this_profile=self._perform_use_this_prof)
+        self.prof_settings.load_profiles()
+
+        self.designer_content = DesignerContent(size_hint=(1, None))
+        self.designer_content = self.designer_content.__self__
+
         Clock.schedule_interval(
             self.project_loader.perform_auto_save,
             int(self.designer_settings.config_parser.getdefault(
                 'global', 'auto_save_time', 5)) * 60)
+
+        self.profiler = Profiler()
+        self.profiler.designer = self
+        self.profiler.bind(on_error=self.on_profiler_error)
+        self.profiler.bind(on_message=self.on_profiler_message)
+        self.profiler.bind(on_run=self.on_profiler_run)
+        self.profiler.bind(on_stop=self.on_profiler_stop)
+
+        self.designer_tools = DesignerTools(designer=self)
 
         Window.bind(on_resize=self._write_window_size)
         Window.bind(on_request_close=self.on_request_close)
@@ -182,6 +232,48 @@ class Designer(FloatLayout):
         )
         self.designer_settings.config_parser.write()
 
+    def load_view_settings(self, *args):
+        '''Load "View" menu saved settings
+        '''
+        proj_tree = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_proj_tree', True
+        )
+        if proj_tree == 'False':
+            self.ids.actn_chk_proj_tree.checkbox.active = False
+
+        props_events = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_prop_event', True
+        )
+        if props_events == 'False':
+            self.ids.actn_chk_prop_event.checkbox.active = False
+
+        wid_tree = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_widget_tree', True
+        )
+        if wid_tree == 'False':
+            self.ids.actn_chk_widget_tree.checkbox.active = False
+
+        status_bar = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_status_bar', True
+        )
+        if status_bar == 'False':
+            self.ids.actn_chk_status_bar.checkbox.active = False
+
+        kv_lang_area = self.designer_settings.config_parser.getdefault(
+            'view', 'actn_chk_kv_lang_area', True
+        )
+        if kv_lang_area == 'False':
+            self.ids.actn_chk_kv_lang_area.checkbox.active = False
+
+    def toggle_fullscreen(self, check, **kwargs):
+        '''
+        Event Handler when ActionCheckButton "Fullscreen" is changed.
+        '''
+        if check.checkbox.active is True:
+            Window.fullscreen = "auto"
+        else:
+            Window.fullscreen = False
+
     def restore_window_size(self, *_):
         '''Restore window size from previous application run
         '''
@@ -191,7 +283,19 @@ class Designer(FloatLayout):
         height = int(self.designer_settings.config_parser.getdefault(
             'internal', 'window_height', 600
         ))
-        Window.size = width, height
+        Window.size = max(width, 800), max(height, 600)
+
+    def open_repo(self, *args):
+        '''
+        Open the Kivy Designer repository
+        '''
+        webbrowser.open("https://github.com/kivy/kivy-designer")
+
+    def open_docs(self, *args):
+        '''
+        Open the Kivy docs
+        '''
+        webbrowser.open("http://kivy.org/docs/")
 
     def show_help(self, *args):
         '''Event handler for 'on_help' event of self.start_page
@@ -204,7 +308,9 @@ class Designer(FloatLayout):
         self._popup.open()
         self.help_dlg.bind(on_cancel=self._cancel_popup)
 
-        self.help_dlg.rst.source = 'help.rst'
+        _dir = os.path.dirname(designer.__file__)
+        _dir = os.path.split(_dir)[0]
+        self.help_dlg.rst.source = os.path.join(_dir, 'help.rst')
 
     def set_escape_exit(self):
         Config.set('kivy', 'exit_on_escape',
@@ -235,6 +341,26 @@ class Designer(FloatLayout):
 
         self.set_escape_exit()
 
+    def on_profiler_error(self, instance, message):
+        '''Display an alert if get an error
+        '''
+        show_alert('Profile error', message)
+
+    def on_profiler_message(self, instance, message, duration=0):
+        '''Display a message in the status bar
+        '''
+        self.statusbar.show_message(message, duration)
+
+    def on_profiler_run(self, *args):
+        '''When a new process starts
+        '''
+        self.ids.actn_btn_stop_proj.disabled = False
+
+    def on_profiler_stop(self, *args):
+        '''When a process is stopped or finished
+        '''
+        self.ids.actn_btn_stop_proj.disabled = True
+
     def _add_designer_content(self):
         '''Add designer_content to Designer, when a project is loaded
         '''
@@ -244,19 +370,22 @@ class Designer(FloatLayout):
                 return
 
         self.remove_widget(self.start_page)
+        self.start_page.parent = None
         self.add_widget(self.designer_content, 1)
 
+        self.ids['actn_btn_new_file'].disabled = False
         self.ids['actn_btn_save'].disabled = False
         self.ids['actn_btn_save_as'].disabled = False
-        self.ids['actn_chk_proj_tree'].disabled = False
-        self.ids['actn_chk_prop_event'].disabled = False
-        self.ids['actn_chk_widget_tree'].disabled = False
-        self.ids['actn_chk_status_bar'].disabled = False
-        self.ids['actn_chk_kv_lang_area'].disabled = False
-        self.ids['actn_btn_add_file'].disabled = False
-        self.ids['actn_btn_custom_widget'].disabled = False
-        self.ids['actn_btn_proj_pref'].disabled = False
-        self.ids['actn_btn_run_proj'].disabled = False
+        self.ids['actn_btn_close_proj'].disabled = False
+        self.ids['actn_menu_view'].disabled = False
+        self.ids['actn_menu_proj'].disabled = False
+        self.ids['actn_menu_run'].disabled = False
+        self.ids['actn_menu_tools'].disabled = False
+
+        self.proj_settings = ProjectSettings(proj_loader=self.project_loader)
+        self.proj_settings.load_proj_settings()
+
+        Clock.schedule_once(self.load_view_settings, 0)
 
     def on_statusbar_height(self, *args):
         '''Callback for statusbar.height
@@ -311,6 +440,7 @@ class Designer(FloatLayout):
         self._perform_open(self.project_loader.proj_dir)
         self.project_watcher.allow_event_dispatch = True
         self._proj_modified_outside = False
+        self.spec_editor.load_settings(self.project_loader.proj_dir)
 
     def on_show_edit(self, *args):
         '''Event Handler of 'on_show_edit' event. This will show EditContView
@@ -321,6 +451,8 @@ class Designer(FloatLayout):
             return
 
         if self.editcontview is None:
+            select_all_trigger = Clock.create_trigger(
+                self.action_btn_select_all_pressed)
             self.editcontview = EditContView(
                 on_undo=self.action_btn_undo_pressed,
                 on_redo=self.action_btn_redo_pressed,
@@ -328,9 +460,11 @@ class Designer(FloatLayout):
                 on_copy=self.action_btn_copy_pressed,
                 on_paste=self.action_btn_paste_pressed,
                 on_delete=self.action_btn_delete_pressed,
-                on_selectall=self.action_btn_select_all_pressed,
+                on_selectall=select_all_trigger,
                 on_next_screen=self._next_screen,
-                on_prev_screen=self._prev_screen)
+                on_prev_screen=self._prev_screen,
+                on_touch_up=self.on_editcontview_release,
+                on_find=partial(self.designer_content.show_findmenu, True))
 
         self.actionbar.add_widget(self.editcontview)
 
@@ -350,8 +484,22 @@ class Designer(FloatLayout):
         else:
             self._edit_selected = 'Py'
 
+        if self._edit_selected == 'Py':
+            self.editcontview.show_find(True)
+        else:
+            self.editcontview.show_find(False)
+
         self.ui_creator.playground.clicked = False
         self.ui_creator.kv_code_input.clicked = False
+
+    def on_editcontview_release(self, instance, touch):
+        if self._edit_selected == 'Py':
+            list_py = self.designer_content.tab_pannel.list_py_code_inputs
+            for code_input in list_py:
+                if hasattr(code_input, 'clicked') and code_input.clicked:
+                    Clock.schedule_once(code_input._do_focus)
+                    return True
+        return self.editcontview.on_touch_up(touch)
 
     def _prev_screen(self, *args):
         '''Event handler for 'on_prev_screen' for self.editcontview
@@ -399,10 +547,44 @@ class Designer(FloatLayout):
             return super(FloatLayout, self).on_touch_down(touch)
 
         self.actionbar.on_previous(self)
+        self.ui_creator.playground.clicked = False
 
         return super(FloatLayout, self).on_touch_down(touch)
 
-    def action_btn_new_pressed(self, *args):
+    def action_btn_new_file_pressed(self, *args):
+        '''Event Handler when ActionButton "New Project" is pressed.
+        '''
+        self._input_dialog = InputDialog("File name:")
+
+        self._input_dialog.bind(on_confirm=self._perform_new_file,
+                                on_cancel=self._cancel_popup)
+        self._popup = Popup(title="Add new File", content=self._input_dialog,
+                            size_hint=(None, None), size=('200pt', '150pt'),
+                            auto_dimiss=False)
+        self._popup.open()
+
+    def _perform_new_file(self, *args):
+        '''
+        Create a new file in the project folder
+        '''
+        file_name = self._input_dialog.get_user_input()
+        if file_name.find('.') == -1:
+            file_name += '.py'
+        new_file = os.path.join(self.project_loader.proj_dir, file_name)
+        if os.path.exists(new_file):
+            self._input_dialog.lbl_error.text = 'File exists'
+            return
+
+        self.project_loader.proj_watcher.stop()
+        open(new_file, 'a').close()
+        self.project_loader.proj_watcher.start_watching(
+                self.project_loader.proj_dir)
+
+        self.designer_content.update_tree_view(self.project_loader)
+
+        self._cancel_popup()
+
+    def action_btn_new_project_pressed(self, *args):
         '''Event Handler when ActionButton "New" is pressed.
         '''
 
@@ -461,6 +643,13 @@ class Designer(FloatLayout):
         shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
 
+        create_buildozer_prj = self.designer_settings.config_parser.getdefault(
+                                            'buildozer',
+                                            'create_buildozer_prj', False)
+        if create_buildozer_prj:
+            shutil.copy(os.path.join(templates_dir, 'default.spec'),
+                        os.path.join(new_proj_dir, 'buildozer.spec'))
+
         self.ui_creator.playground.sandbox.error_active = True
         with self.ui_creator.playground.sandbox:
             self.project_loader.load_new_project(os.path.join(new_proj_dir,
@@ -479,6 +668,7 @@ class Designer(FloatLayout):
                 self.designer_content.toolbox.add_custom()
 
         self.ui_creator.playground.sandbox.error_active = False
+        self.statusbar.show_message('Project created successfully', 5)
 
     def cleanup(self):
         '''To cleanup everything loaded by the current project before loading
@@ -489,6 +679,7 @@ class Designer(FloatLayout):
         self.ui_creator.cleanup()
         self.undo_manager.cleanup()
         self.designer_content.toolbox.cleanup()
+        self.designer_content.tab_pannel.cleanup()
 
         for node in self.proj_tree_view.root.nodes[:]:
             self.proj_tree_view.remove_node(node)
@@ -499,10 +690,6 @@ class Designer(FloatLayout):
 
         self._curr_proj_changed = False
         self.ui_creator.kv_code_input.text = ""
-
-        self.designer_content.tab_pannel.list_py_code_inputs = []
-        for th in self.designer_content.tab_pannel.tab_list[:-1]:
-            self.designer_content.tab_pannel.remove_widget(th)
 
     def action_btn_open_pressed(self, *args):
         '''Event Handler when ActionButton "Open" is pressed.
@@ -523,6 +710,50 @@ class Designer(FloatLayout):
                             size_hint=(None, None), size=('200pt', '150pt'),
                             auto_dismiss=False)
         self._popup.open()
+
+    def action_btn_close_proj_pressed(self, *args):
+        '''
+        Event Handler when ActionButton "Close Project" is pressed.
+        '''
+        if not self._curr_proj_changed:
+            self._perform_close_project()
+            return
+
+        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be '
+                                               'lost.\n'
+                                               'Do you want to continue?')
+
+        self._confirm_dlg.bind(on_ok=self._perform_close_project,
+                               on_cancel=self._cancel_popup)
+
+        self._popup = Popup(title='Kivy Designer', content=self._confirm_dlg,
+                            size_hint=(None, None), size=('200pt', '150pt'),
+                            auto_dismiss=False)
+        self._popup.open()
+
+    def _perform_close_project(self, *args):
+        '''
+        Close the current project and go to the start page
+        '''
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
+
+        self.remove_widget(self.designer_content)
+        self.designer_content.parent = None
+        self.add_widget(self.start_page, 1)
+
+        self.ids['actn_btn_new_file'].disabled = True
+        self.ids['actn_btn_save'].disabled = True
+        self.ids['actn_btn_save_as'].disabled = True
+        self.ids['actn_btn_close_proj'].disabled = True
+        self.ids['actn_menu_view'].disabled = True
+        self.ids['actn_menu_proj'].disabled = True
+        self.ids['actn_menu_run'].disabled = True
+        self.ids['actn_menu_tools'].disabled = True
+
+        self.project_watcher.stop()
+
+        self._curr_proj_changed = False
 
     def _show_open_dialog(self, *args):
         '''To show FileBrowser to "Open" a project
@@ -674,13 +905,15 @@ class Designer(FloatLayout):
                                             (str(e)))
 
         self.ui_creator.playground.sandbox.error_active = False
+        Clock.schedule_once(partial(self.ui_creator.kivy_console.run_command,
+            'cd %s' % (self.project_loader.proj_dir)
+        ), 1)
 
     def _cancel_popup(self, *args):
         '''EventHandler for all self._popup when self._popup.content
            emits 'on_cancel' or equivalent.
         '''
 
-        self._proj_modified_outside = False
         self._popup.dismiss()
 
     def action_btn_save_pressed(self, *args):
@@ -775,29 +1008,98 @@ class Designer(FloatLayout):
         self._popup = Popup(title="Kivy Designer Settings",
                             content=self.designer_settings,
                             size_hint=(None, None),
-                            size=(600, 400), auto_dismiss=False)
+                            size=(720, 480), auto_dismiss=False)
 
         self._popup.open()
 
-    def action_btn_recent_files_pressed(self, *args):
-        '''Event Handler when ActionButton "Recent Files" is pressed.
+    def action_btn_select_prof_project_pressed(self, *args):
+        '''Event handler for "Select Profile" menu
         '''
         pass
 
-    def fill_recent_menu(self, *args):
-        '''Fill self.recent_files_cont_menu with DesignerActionButton
-           of all Recent Files
+    def on_profiles_changed(self, *args):
+        '''Callback when there is a modification in the profile settings
         '''
-        recent_menu = self.recent_files_cont_menu
-        for _file in self.recent_manager.list_files:
-            act_btn = DesignerActionButton(text=_file, shorten=True)
-            recent_menu.add_widget(act_btn)
-            act_btn.bind(on_release=self._recent_file_release)
+        self.prof_settings.load_profiles()
+        self.fill_select_profile_menu()
+
+    def _perform_use_this_prof(self, instance, *args):
+        '''Callback to "Use this Profile" button
+        '''
+        _config = instance.selected_config
+        _config_path = _config.filename
+        self.designer_settings.config_parser.set('internal',
+                                                'default_profile',
+                                                _config_path)
+        self.designer_settings.config_parser.write()
+
+    def fill_select_profile_menu(self, *args):
+        '''Fill self.select_profile_cont_menu with available Build Profiles
+        '''
+        prof_menu = self.select_profile_cont_menu
+        prof_menu.remove_children()
+        group = 'profile'
+        for profile in sorted(self.prof_settings.config_parsers.keys()):
+            config = self.prof_settings.config_parsers[profile]
+            config_path = config.filename
+
+            prof_name = config.getdefault('profile', 'name', 'PROFILE')
+            if not prof_name.strip():
+                prof_name = 'PROFILE'
+
+            btn = DesignerActionProfileCheck(group=group,
+                                             allow_no_selection=False)
+            btn.text = prof_name
+            btn.checkbox.active = False
+
+            btn.config_key = profile
+            btn.bind(on_active=self._perform_profile_selected)
+
+            if self.designer_settings.config_parser.getdefault('internal',
+                                        'default_profile', '') == config_path:
+                btn.checkbox.active = True
+                self.selected_profile = config_path
+                self._perform_profile_selected(btn, btn.checkbox, True)
+
+            prof_menu.add_widget(btn)
+
+        prof_menu._add_widget()
+
+    def _perform_profile_selected(self, instance, checkbox, value, *args):
+        '''Event handler to select profile radio button.
+        Save the selected config_parser path to the config
+        '''
+        if value:
+            _config = self.prof_settings.config_parsers[instance.config_key]
+            _config_path = _config.filename
+            self.designer_settings.config_parser.set('internal',
+                                                     'default_profile',
+                                                     _config_path)
+            self.designer_settings.config_parser.write()
+            self.selected_profile = _config_path
+
+            target = _config.getdefault('profile', 'target', '')
+
+            if target == 'Desktop':
+                self.ids.actn_btn_run_module.disabled = False
+            else:
+                self.ids.actn_btn_run_module.disabled = True
+
+    def action_btn_recent_files_pressed(self, *args):
+        '''Event Handler when ActionButton "Recent Projects" is pressed.
+        '''
+        self._recent_dlg = RecentDialog(self.recent_manager.list_files)
+        self._recent_dlg.bind(on_cancel=self._cancel_popup,
+                              on_select=self._recent_file_release)
+        self._popup = Popup(title='Recent Projects', content=self._recent_dlg,
+                            size_hint=(0.5, 0.5), auto_dismiss=False)
+        self._popup.open()
 
     def _recent_file_release(self, instance, *args):
         '''Event Handler for 'on_select' event of self._recent_dlg.
         '''
-        self._perform_open(instance.text)
+        self._perform_open(instance.get_selected_project())
+        self._cancel_popup(instance, args)
 
     def on_request_close(self, *args):
         '''Event Handler for 'on_request_close' event of Window.
@@ -851,9 +1153,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
-                    code_input.clicked = False
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.do_undo()
+                    break
 
     def action_btn_redo_pressed(self, *args):
         '''Event Handler when ActionButton "Redo" is pressed.
@@ -866,9 +1168,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
-                    code_input.clicked = False
+                if hasattr(code_input, 'clicked') and code_input.clicked:
                     code_input.do_redo()
+                    break
 
     def action_btn_cut_pressed(self, *args):
         '''Event Handler when ActionButton "Cut" is pressed.
@@ -878,14 +1180,14 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_cut()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_cut()
+            self.ui_creator.kv_code_input.cut()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_cut()
+                if hasattr(code_input, 'clicked') and code_input.clicked:
+                    code_input.cut()
+                    break
 
     def action_btn_copy_pressed(self, *args):
         '''Event Handler when ActionButton "Copy" is pressed.
@@ -895,14 +1197,14 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_copy()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_copy()
+            self.ui_creator.kv_code_input.copy()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_copy()
+                if hasattr(code_input, 'clicked') and code_input.clicked:
+                    code_input.copy()
+                    break
 
     def action_btn_paste_pressed(self, *args):
         '''Event Handler when ActionButton "Paste" is pressed.
@@ -912,14 +1214,14 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_paste()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_paste()
+            self.ui_creator.kv_code_input.paste()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_paste()
+                if hasattr(code_input, 'clicked') and code_input.clicked:
+                    code_input.paste()
+                    break
 
     def action_btn_delete_pressed(self, *args):
         '''Event Handler when ActionButton "Delete" is pressed.
@@ -929,14 +1231,14 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_delete()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_delete()
+            self.ui_creator.kv_code_input.delete_selection()
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_delete()
+                if hasattr(code_input, 'clicked') and code_input.clicked:
+                    code_input.delete_selection()
+                    break
 
     def action_btn_select_all_pressed(self, *args):
         '''Event Handler when ActionButton "Select All" is pressed.
@@ -946,14 +1248,14 @@ class Designer(FloatLayout):
             self.ui_creator.playground.do_select_all()
 
         elif self._edit_selected == 'KV':
-            self.ui_creator.kv_code_input.do_select_all()
+            Clock.schedule_once(self.ui_creator.kv_code_input.do_select_all)
 
         elif self._edit_selected == 'Py':
             list_py = self.designer_content.tab_pannel.list_py_code_inputs
             for code_input in list_py:
-                if code_input.clicked is True:
-                    code_input.clicked = False
-                    code_input.do_select_all()
+                if hasattr(code_input, 'clicked') and code_input.clicked:
+                    Clock.schedule_once(code_input.do_select_all)
+                    break
 
     def action_btn_add_custom_widget_press(self, *args):
         '''Event Handler when ActionButton "Add Custom Widget" is pressed.
@@ -971,7 +1273,9 @@ class Designer(FloatLayout):
     def _custom_browser_load(self, instance):
         '''Event Handler for 'on_success' event of self._custom_browser
         '''
-
+        # if there is no selected file
+        if len(instance.selection) < 1:
+            return
         file_path = instance.selection[0]
         self._popup.dismiss()
 
@@ -995,6 +1299,10 @@ class Designer(FloatLayout):
     def action_chk_btn_toolbox_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Toolbox" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                    'actn_chk_proj_tree',
+                                                    chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._toolbox_parent.add_widget(
@@ -1011,6 +1319,10 @@ class Designer(FloatLayout):
     def action_chk_btn_property_viewer_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Property Viewer" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                    'actn_chk_prop_event',
+                                                    chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._toggle_splitter_widget_tree()
@@ -1043,6 +1355,10 @@ class Designer(FloatLayout):
     def action_chk_btn_widget_tree_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "Widget Tree" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                 'actn_chk_widget_tree',
+                                                 chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._toggle_splitter_widget_tree()
@@ -1091,6 +1407,10 @@ class Designer(FloatLayout):
     def action_chk_btn_status_bar_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "StatusBar" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                 'actn_chk_status_bar',
+                                                 chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self._statusbar_parent.add_widget(self.statusbar)
@@ -1104,6 +1424,10 @@ class Designer(FloatLayout):
     def action_chk_btn_kv_area_active(self, chk_btn):
         '''Event Handler when ActionCheckButton "KVLangArea" is activated.
         '''
+        self.designer_settings.config_parser.set('view',
+                                                 'actn_chk_kv_lang_area',
+                                                 chk_btn.checkbox.active)
+        self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
             self.ui_creator.splitter_kv_code_input.height = \
@@ -1130,11 +1454,9 @@ class Designer(FloatLayout):
         '''Event Handler for 'on_added' event of self._add_file_dlg
         '''
 
-        self.statusbar.show_message('File successfully added to project')
+        self.statusbar.show_message('File successfully added to project', 5)
         self._popup.dismiss()
-        if self._add_file_dlg.target_file[3:] == '.py':
-            self.designer_content.add_file_to_tree_view(
-                self._add_file_dlg.target_file)
+        self.designer_content.update_tree_view(self.project_loader)
 
     def action_btn_add_file_pressed(self, *args):
         '''Event Handler when ActionButton "Add File" is pressed.
@@ -1148,62 +1470,95 @@ class Designer(FloatLayout):
         self._popup = Popup(title="Add File",
                             content=self._add_file_dlg,
                             size_hint=(None, None),
-                            size=(400, 300), auto_dismiss=False)
+                            size=(480, 320), auto_dismiss=False)
 
         self._popup.open()
 
-    def action_btn_project_pref_pressed(self, *args):
-        '''Event Handler when ActionButton "Project Prefences" is pressed.
+    def action_btn_run_module_pressed(self, *args):
+
+        if self.modulescontview is None:
+            self.modulescontview = ModulesContView()
+            self.modulescontview.bind(
+                on_module=self.action_btn_run_project_pressed)
+
+        self.actionbar.add_widget(self.modulescontview)
+
+    def action_btn_project_settings_pressed(self, *args):
+        '''Event Handler when ActionButton "Project Settings" is pressed.
         '''
         self.proj_settings = ProjectSettings(proj_loader=self.project_loader)
         self.proj_settings.load_proj_settings()
         self.proj_settings.bind(on_close=self._cancel_popup)
-        self._popup = Popup(title="Project Preferences",
+        self._popup = Popup(title="Project Settings",
                             content=self.proj_settings,
                             size_hint=(None, None),
-                            size=(600, 400), auto_dismiss=False)
+                            size=(720, 480), auto_dismiss=False)
 
         self._popup.open()
 
-    def action_btn_run_project_pressed(self, *args):
+    def action_btn_edit_prof_project_pressed(self, *args):
+        '''Event Handler when ActionButton "Edit Profiles" is pressed.
+        '''
+        self.prof_settings.parent = None
+        self.prof_settings.load_profiles()
+        self._popup = Popup(title="Build Profiles",
+                            content=self.prof_settings,
+                            size_hint=(None, None),
+                            size=(720, 480),
+                            auto_dismiss=False)
+        self._popup.open()
+
+    def check_selected_prof(self, *args):
+        '''Check if there is a selected build profile.
+        :return: True if ok. Show an alert and returns false if not.
+        '''
+        if self.selected_profile == '' or not \
+                        os.path.isfile(self.selected_profile):
+            show_alert('Profiler error', 'Please, select a build profile on'
+                            '\'Run\' -> \'Select Profile\' menu')
+            return False
+
+        self.profiler.load_profile(self.selected_profile,
+                                   self.project_loader.proj_dir)
+        return True
+
+    def action_btn_stop_project_pressed(self, *args):
+        '''Event handler when ActionButton "Stop" is pressed.
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.stop()
+
+    def action_btn_clean_project_pressed(self, *args):
+        '''Event handler when ActionButton "Clean" is pressed
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.clean()
+
+    def action_btn_build_project_pressed(self, *args):
+        '''Event handler when ActionButton "Build" is pressed
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.build()
+
+    def action_btn_rebuild_project_pressed(self, *args):
+        '''Event handler when ActionButton "Build" is pressed
+        '''
+        if not self.check_selected_prof():
+            return
+        self.profiler.rebuild()
+
+    def action_btn_run_project_pressed(self, *args, **kwargs):
         '''Event Handler when ActionButton "Run" is pressed.
         '''
+        if not self.check_selected_prof():
+            return
         if self.project_loader.file_list == []:
             return
-        args = ''
-        envs = ''
 
-        python_path = self.designer_settings.config_parser.getdefault(
-            'global', 'python_shell_path', '')
-
-        if python_path == '':
-            self.statusbar.show_message("Python Shell Path not specified,"
-                                        " please specify it before running"
-                                        " project")
-            return
-
-        if self.proj_settings and self.proj_settings.config_parser:
-            args = self.proj_settings.config_parser.getdefault('arguments',
-                                                               'arg', '')
-            envs = self.proj_settings.config_parser.getdefault(
-                'env variables', 'env', '')
-            for env in envs.split(' '):
-                self.ui_creator.kivy_console.environment[
-                    env[:env.find('=')]] = env[env.find('=') + 1:]
-
-        for _file in self.project_loader.file_list:
-            if 'main.py' in os.path.basename(_file):
-                self.ui_creator.kivy_console.stdin.write(
-                    '"%s" "%s" %s' % (python_path, _file, args))
-                self.ui_creator.tab_pannel.switch_to(
-                    self.ui_creator.tab_pannel.tab_list[2])
-                return
-
-        self.ui_creator.kivy_console.stdin.write(
-            '"%s" "%s" %s' % (python_path, self.project_loader._app_file, args))
-
-        self.ui_creator.tab_pannel.switch_to(
-            self.ui_creator.tab_pannel.tab_list[2])
+        self.profiler.run(*args, **kwargs)
 
     def on_sandbox_getting_exception(self, *args):
         '''Event Handler for
@@ -1238,6 +1593,19 @@ class Designer(FloatLayout):
         self.about_dlg.bind(on_cancel=self._cancel_popup)
 
 
+class DesignerException(ExceptionHandler):
+
+    def handle_exception(self, inst):
+        App.get_running_app().stop()
+        if isinstance(inst, KeyboardInterrupt):
+            return ExceptionManager.PASS
+        else:
+            for child in Window.children:
+                Window.remove_widget(child)
+            BugReporterApp(traceback.format_exc()).run()
+            return ExceptionManager.PASS
+
+
 class DesignerApp(App):
 
     widget_focused = ObjectProperty(allownone=True)
@@ -1250,6 +1618,7 @@ class DesignerApp(App):
         self.root.ui_creator.py_console.exit()
 
     def build(self):
+        ExceptionManager.add_handler(DesignerException())
         Factory.register('Playground', module='designer.playground')
         Factory.register('Toolbox', module='designer.toolbox')
         Factory.register('StatusBar', module='designer.statusbar')
@@ -1336,7 +1705,7 @@ class DesignerApp(App):
         self.root.start_page.recent_files_box.add_recent(
             self.root.recent_manager.list_files)
 
-        self.root.fill_recent_menu()
+        self.root.fill_select_profile_menu()
 
     def create_kivy_designer_dir(self):
         '''To create the ~/.kivy-designer dir

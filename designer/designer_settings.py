@@ -2,15 +2,17 @@ import os
 import os.path
 import shutil
 import sys
+import designer
+
+from distutils.spawn import find_executable
+from pygments import styles
 
 from kivy.properties import ObjectProperty
 from kivy.config import ConfigParser
-from kivy.uix.settings import Settings, SettingTitle
-from kivy.uix.label import Label
-from kivy.uix.button import Button
+from kivy.uix.settings import Settings
 
 from designer.helper_functions import get_kivy_designer_dir
-import designer
+from designer.uix.settings import SettingList
 
 DESIGNER_CONFIG_FILE_NAME = 'config.ini'
 
@@ -44,10 +46,14 @@ class DesignerSettings(Settings):
        of :class:`kivy.config.ConfigParser`
     '''
 
+    def __init__(self, **kwargs):
+        super(DesignerSettings, self).__init__(*kwargs)
+        self.register_type('list', SettingList)
+
     def load_settings(self):
         '''This function loads project settings
         '''
-        self.config_parser = ConfigParser()
+        self.config_parser = ConfigParser(name='DesignerSettings')
         DESIGNER_CONFIG = os.path.join(get_kivy_designer_dir(),
                                        DESIGNER_CONFIG_FILE_NAME)
 
@@ -61,17 +67,47 @@ class DesignerSettings(Settings):
 
         self.config_parser.read(DESIGNER_CONFIG)
         self.config_parser.upgrade(DEFAULT_CONFIG)
-        self.add_json_panel('Kivy Designer Settings', self.config_parser,
+
+        # creates a panel before insert it to update code input theme list
+        panel = self.create_json_panel('Kivy Designer Settings',
+                                        self.config_parser,
                             os.path.join(_dir, 'designer',
                                          'settings', 'designer_settings.json'))
+        uid = panel.uid
+        if self.interface is not None:
+            self.interface.add_panel(panel, 'Kivy Designer Settings', uid)
 
+        # loads available themes
+        for child in panel.children:
+            if child.id == 'code_input_theme_options':
+                child.items = styles.get_all_styles()
+
+        # tries to find python and buildozer path if it's not defined
         path = self.config_parser.getdefault(
             'global', 'python_shell_path', '')
 
-        if path == "":
+        if path.strip() == '':
             self.config_parser.set('global', 'python_shell_path',
                                    sys.executable)
             self.config_parser.write()
+
+        buildozer_path = self.config_parser.getdefault('buildozer',
+                                                       'buildozer_path', '')
+
+        if buildozer_path.strip() == '':
+            buildozer_path = find_executable('buildozer')
+            if buildozer_path:
+                self.config_parser.set('buildozer',
+                                       'buildozer_path',
+                                        buildozer_path)
+                self.config_parser.write()
+
+        self.add_json_panel('Buildozer', self.config_parser,
+                            os.path.join(_dir, 'designer', 'settings',
+                                         'buildozer_settings.json'))
+        self.add_json_panel('Hanga', self.config_parser,
+                            os.path.join(_dir, 'designer', 'settings',
+                                         'hanga_settings.json'))
 
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.

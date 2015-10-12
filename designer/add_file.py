@@ -33,6 +33,11 @@ class AddFileDialog(BoxLayout):
        :data:`always_check` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
+    lbl_error = ObjectProperty()
+    '''An instance to Label to display errors.
+       :data:`lbl_error` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
     __events__ = ('on_cancel', 'on_added', 'on_error')
 
     def __init__(self, proj_loader, **kwargs):
@@ -52,14 +57,23 @@ class AddFileDialog(BoxLayout):
         '''To copy file from its original path to new path
         '''
 
-        if self.text_file.text == '' or self.text_folder.text == '':
+        if self.text_file.text == '':
+            self.lbl_error.text = "Select the File"
             return
 
         self.proj_loader.proj_watcher.stop()
 
-        folder = os.path.join(self.proj_loader.proj_dir, self.text_folder.text)
+        target_folder = "" if self.text_folder.text == "." \
+                                        else self.text_folder.text
+
+        folder = os.path.join(self.proj_loader.proj_dir, target_folder)
         if not os.path.exists(folder):
             os.mkdir(folder)
+
+        if os.path.exists(os.path.join(folder,
+                                       os.path.basename(self.text_file.text))):
+            self.lbl_error.text = "There is a file with the same name!"
+            return
 
         try:
             shutil.copy(self.text_file.text,
@@ -69,8 +83,7 @@ class AddFileDialog(BoxLayout):
             if self.always_check.active:
                 self.proj_loader.add_dir_for_file_type(
                     self.text_file.text[self.text_file.text.rfind('.') + 1:],
-                    self.text_folder.text)
-
+                    target_folder)
             self.proj_loader.proj_watcher.start_watching(
                 self.proj_loader.proj_dir)
             self.dispatch('on_added')
@@ -129,31 +142,34 @@ class AddFileDialog(BoxLayout):
         if hasattr(self, '_popup'):
             self._popup.dismiss()
 
-        proj_dir = ''
         if instance.ids.tabbed_browser.current_tab.text == 'List View':
             proj_dir = instance.ids.list_view.path
         else:
             proj_dir = instance.ids.icon_view.path
 
         proj_dir = os.path.join(proj_dir, instance.filename)
-        if proj_dir.find(self.proj_loader.proj_dir) != -1:
-            proj_dir = proj_dir.replace(self.proj_loader.proj_dir, '')
-            if proj_dir[0] == '/':
-                proj_dir = proj_dir[1:]
 
-            self.text_folder.text = proj_dir
+        target_dir = self.proj_loader.proj_dir
+
+        if os.path.isdir(proj_dir):
+            target_dir = os.path.relpath(proj_dir, self.proj_loader.proj_dir)
+        elif os.path.isfile(proj_dir):
+            proj_dir = os.path.dirname(proj_dir)
+            target_dir = os.path.relpath(proj_dir, self.proj_loader.proj_dir)
+
+        self.text_folder.text = target_dir
 
     def open_folder_btn_pressed(self, *args):
         '''To load File Browser for selected folder when 'Open Folder'
            is clicked
         '''
 
-        self._fbrowser = FileBrowser(select_string='Open')
+        self._fbrowser = FileBrowser(select_string='Open Folder')
         self._fbrowser.ids.list_view.path = self.proj_loader.proj_dir
         self._fbrowser.bind(on_success=self._folder_load,
                             on_canceled=self._cancel_popup)
 
-        self._popup = Popup(title='Open File', content=self._fbrowser,
+        self._popup = Popup(title='Open Folder', content=self._fbrowser,
                             size_hint=(0.9, 0.9), auto_dismiss=False)
 
         self._popup.open()

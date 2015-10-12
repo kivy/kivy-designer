@@ -16,14 +16,16 @@ class EditContView(ContextualActionView):
        on_delete, emitted when Delete ActionButton is clicked.
        on_selectall, emitted when Select All ActionButton is clicked.
        on_add_custom, emitted when Add Custom ActionButton is clicked.
+       on_find, emitted when Find ActionButton is clicked.
     '''
 
     __events__ = ('on_undo', 'on_redo', 'on_cut', 'on_copy',
                   'on_paste', 'on_delete', 'on_selectall',
-                  'on_next_screen', 'on_prev_screen')
+                  'on_next_screen', 'on_prev_screen', 'on_find')
 
     action_btn_next_screen = ObjectProperty(None, allownone=True)
     action_btn_prev_screen = ObjectProperty(None, allownone=True)
+    action_btn_find = ObjectProperty(None, allownone=True)
 
     def show_action_btn_screen(self, show):
         '''To add action_btn_next_screen and action_btn_prev_screen
@@ -47,6 +49,21 @@ class EditContView(ContextualActionView):
 
             self.add_widget(self.action_btn_next_screen)
             self.add_widget(self.action_btn_prev_screen)
+
+    def show_find(self, show):
+        '''Adds the find button
+        '''
+        if self.action_btn_find is None:
+            find = ActionButton(text='Find')
+            find.bind(on_release=partial(self.dispatch, 'on_find'))
+            self.action_btn_find = find
+
+        if show:
+            if not self.action_btn_find in self.children:
+                self.add_widget(self.action_btn_find)
+        else:
+            if self.action_btn_find in self.children:
+                self.remove_widget(self.action_btn_find)
 
     def on_undo(self, *args):
         pass
@@ -73,4 +90,7 @@ class EditContView(ContextualActionView):
         pass
 
     def on_prev_screen(self, *args):
+        pass
+
+    def on_find(self, *args):
         pass

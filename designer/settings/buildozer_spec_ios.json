@@ -1,0 +1,20 @@
+[
+  {
+    "type": "title",
+    "title": "Developer Certificates"
+  },
+  {
+    "type": "string",
+    "title": "Debug Certificate Name",
+    "section": "app",
+    "desc": "Name of the certificate to use for signing the debug version.\nGet a list of available identities: buildozer ios list_identities\nExample: 'iPhone Developer: <lastname> <firstname> (<hexstring>)'",
+    "key": "ios.codesign.debug"
+  },
+  {
+    "type": "string",
+    "title": "Release Certificate Name",
+    "section": "app",
+    "desc": "Name of the certificate to use for signing the release version.\nGet a list of available identities: buildozer ios list_identities\nExample: 'iPhone Developer: <lastname> <firstname> (<hexstring>)'",
+    "key": "ios.codesign.release"
+  }
+]

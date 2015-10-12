@@ -5,6 +5,8 @@
 import os
 
 from kivy.app import App
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
 
 
 def get_indent_str(indentation):
@@ -82,3 +84,24 @@ def get_kivy_designer_dir():
     if not os.path.exists(user_dir):
         os.makedirs(user_dir)
     return user_dir
+
+
+def show_alert(title, msg, width=500, height=200):
+    lbl_message = Label(text=msg)
+    lbl_message.padding = [10, 10]
+    popup = Popup(title=title,
+                        content=lbl_message,
+                        size_hint=(None, None),
+                        size=(width, height))
+    popup.open()
+
+
+def ignore_proj_watcher(f):
+    '''Function decorator to makes project watcher ignores file modification
+    '''
+    def wrapper(*args, **kwargs):
+        watcher = App.get_running_app().root.project_watcher
+        watcher.stop()
+        f(*args, **kwargs)
+        return watcher.resume_watching()
+    return  wrapper

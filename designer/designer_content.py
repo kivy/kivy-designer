@@ -2,11 +2,14 @@ import os
 
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
-from kivy.factory import Factory
-from kivy.properties import ObjectProperty, ListProperty
+from kivy.properties import OptionProperty, StringProperty
+from kivy.uix.tabbedpanel import TabbedPanelHeader
+from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, \
+                        Clock, partial
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.treeview import TreeViewLabel
-from designer.uix.py_code_input import PyCodeInput, PyScrollView
+from designer.buildozer_spec_editor import BuildozerSpecEditor
+from designer.uix.py_code_input import PyScrollView
 
 
 class DesignerContent(FloatLayout):
@@ -49,17 +52,52 @@ class DesignerContent(FloatLayout):
        :data:`tab_pannel` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
+    in_find = BooleanProperty(False)
+    '''This property indicates if the find menu is activated
+        :data:`in_find` is a :class:`~kivy.properties.BooleanProperty` and
+        defaults to False
+    '''
+
+    current_codeinput = ObjectProperty(None, allownone=True)
+    '''Instance of the current PythonCodeInput
+        :data:`current_codeinput` is a :class:`~kivy.properties.ObjectProperty`
+        and defaults to None
+    '''
+
+    find_tool = ObjectProperty(None)
+    '''Instance of  :class:`~designer.uix.py_code_input.PyCodeInputFind`.
+        :data:`find_tool` is a :class:`~kivy.properties.ObjectProperty`
+        and defaults to None
+    '''
+
+    def __init__(self, **kwargs):
+        super(DesignerContent, self).__init__(**kwargs)
+        self.find_tool.bind(on_close=partial(self.show_findmenu, False))
+        self.find_tool.bind(on_next=self.find_tool_next)
+        self.find_tool.bind(on_prev=self.find_tool_prev)
+        self.focus_code_input = Clock.create_trigger(self._focus_input)
+
     def update_tree_view(self, proj_loader):
         '''This function is used to insert all the py files detected.
            as a node in the Project Tree.
         '''
 
         self.proj_loader = proj_loader
+        self.proj_loader.update_file_list()
 
         # Fill nodes with file and directories
         self._root_node = self.tree_view.root
-        for _file in proj_loader.file_list:
+        self.clear_tree_view()
+        for _file in sorted(proj_loader.file_list):
             self.add_file_to_tree_view(_file)
+
+    def clear_tree_view(self):
+        '''
+        Clear the TreeView
+        '''
+        temp = list(self.tree_view.iterate_all_nodes())
+        for node in temp:
+            self.tree_view.remove_node(node)
 
     def add_file_to_tree_view(self, _file):
         '''This function is used to insert py file given by it's path argument
@@ -131,7 +169,58 @@ class DesignerContent(FloatLayout):
             parent = parent.parent_node
 
         full_path = os.path.join(self.proj_loader.proj_dir, path)
-        self.tab_pannel.open_file(full_path, path)
+        if os.path.basename(full_path) == 'buildozer.spec':
+            self.tab_pannel.show_buildozer_spec_editor(
+                                                    full_path, self.proj_loader)
+        else:
+            self.tab_pannel.open_file(full_path, path)
+
+    def show_findmenu(self, visible, *args):
+        '''Makes find menu visible/invisible
+        '''
+        self.in_find = visible
+        if visible:
+            Clock.schedule_once(self._focus_find)
+
+    def _focus_find(self, *args):
+        '''Focus on the find tool
+        '''
+        self.find_tool.txt_query.focus = True
+
+    def on_current_tab(self, tabbed_panel, *args):
+        '''Event handler to tab selection changes
+        '''
+        self.show_findmenu(False)
+        Clock.schedule_once(partial(self._selected_content, tabbed_panel))
+
+    def _selected_content(self, tabbed_panel, *args):
+        '''Called after updating tab content
+        '''
+        if not tabbed_panel.content.children:
+            return
+        content = tabbed_panel.content.children[0]
+
+        if isinstance(content, PyScrollView):
+            self.current_codeinput = content.code_input
+        else:
+            self.current_codeinput = None
+
+    def find_tool_prev(self, instance, *args):
+        if self.current_codeinput:
+            self.current_codeinput.focus = True
+            self.current_codeinput.find_prev(instance.query,
+                                             instance.use_regex,
+                                             instance.case_sensitive)
+
+    def find_tool_next(self, instance, *args):
+        if self.current_codeinput:
+            self.current_codeinput.focus = True
+            self.current_codeinput.find_next(instance.query,
+                                             instance.use_regex,
+                                             instance.case_sensitive)
+
+    def _focus_input(self, *args):
+        self.current_codeinput.focus = True
 
 
 class DesignerTabbedPanel(TabbedPanel):
@@ -154,7 +243,8 @@ class DesignerTabbedPanel(TabbedPanel):
                 self.switch_to(self.tab_list[len(self.tab_list) - i - 2])
                 return
 
-        panel_item = DesignerTabbedPanelItem(text=os.path.basename(path))
+        panel_item = DesignerCloseableTab(title=os.path.basename(path))
+        panel_item.bind(on_close=self.on_close_tab)
         f = open(path, 'r')
         scroll = PyScrollView()
         _py_code_input = scroll.code_input
@@ -169,6 +259,88 @@ class DesignerTabbedPanel(TabbedPanel):
         if switch_to:
             self.switch_to(self.tab_list[0])
 
+    def show_buildozer_spec_editor(self, spec_path, proj_loader):
+        for i, child in enumerate(self.list_py_code_inputs):
+            if isinstance(child, BuildozerSpecEditor):
+                self.switch_to(self.tab_list[len(self.tab_list) - i - 2])
+                return
+
+        spec_editor = App.get_running_app().root.spec_editor
+        spec_editor.load_settings(proj_loader.proj_dir)
+
+        panel_spec_item = DesignerCloseableTab(title="Spec Editor")
+        panel_spec_item.bind(on_close=self.on_close_tab)
+        panel_spec_item.content = spec_editor
+        self.add_widget(panel_spec_item)
+        self.switch_to(self.tab_list[0])
+        spec_editor.rel_file_path = 'buildozer.spec'
+        self.list_py_code_inputs.append(spec_editor)
+
+    def on_close_tab(self, instance, *args):
+        '''Event handler to close icon
+        '''
+        if instance.has_modification:
+            # TODO implement modification listener
+            pass
+        else:
+            self._perform_close_tab(instance)
+
+    def _perform_close_tab(self, tab):
+        content = tab.content
+        if isinstance(content, PyScrollView):
+            self.list_py_code_inputs.remove(content.code_input)
+        elif content in self.list_py_code_inputs:
+            self.list_py_code_inputs.remove(content)
+        self.remove_widget(tab)
+        if self.tab_list:
+            self.switch_to(self.tab_list[0])
+
+    def cleanup(self):
+        '''Remove all open tabs
+        '''
+        self.list_py_code_inputs = []
+        for child in self.tab_list[:-1]:
+            self.remove_widget(child)
+        self.switch_to(self.tab_list[0])
+
 
 class DesignerTabbedPanelItem(TabbedPanelItem):
     pass
+
+
+class DesignerCloseableTab(TabbedPanelHeader):
+    '''Custom TabbedPanelHeader with close button
+    '''
+    # TODO implement modification/error/git status listener to change label
+    # style. Eg. red label to file with wrong python syntax
+
+    has_modification = BooleanProperty(False)
+    '''Indicates if this tab has unsaved content
+        :data:`has_modification` is a :class:`~kivy.properties.BooleanProperty`
+    '''
+
+    style = OptionProperty('default',
+                           options=['default', 'modificated', 'error'])
+    '''Available tab custom styles
+    :data:`style` is a :class:`~kivy.properties.OptionProperty`
+    '''
+
+    title = StringProperty('')
+    '''Tab header title
+    :data:`title` is a :class:`~kivy.properties.StringProperty`
+    '''
+
+    __events__ = ('on_close', )
+
+    def on_close(self, *args):
+        pass
+
+    def on_style(self, instance, style, *args):
+        '''Update the tab style
+        '''
+        if style == 'default':
+            self.text = self.title
+        elif style == 'modificated':
+            self.text = '[i]%s[i]' % self.title
+        elif style == 'error':
+            self.text = '[color=#e51919]%s[/color]' % self.title

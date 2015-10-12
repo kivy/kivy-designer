@@ -13,6 +13,41 @@ from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.uix.scrollview import ScrollView
 from kivy.clock import Clock
+from kivy.uix.actionbar import ActionItem, ActionView
+
+
+class DesignerActionView(ActionView):
+    '''Custom ActionView to support custom action group
+    '''
+
+    def _layout_random(self):
+        '''Handle custom action group
+        '''
+        self.overflow_group.show_group = self.show_group
+        super(DesignerActionView, self)._layout_random()
+
+    def show_group(self, *l):
+        '''Show custom groups
+        '''
+        over = self.overflow_group
+        over.clear_widgets()
+        for item in over._list_overflow_items + over.list_action_item:
+            item.inside_group = True
+            if item.parent is not None:
+                item.parent.remove_widget(item)
+            group = self.get_group(item)
+            if group is not None and group.disabled:
+                continue
+            if not isinstance(item, ContextSubMenu):
+                over._dropdown.add_widget(item)
+
+    def get_group(self, item):
+        '''Get the ActionGroup of an item
+        '''
+        for group in self._list_action_group:
+            if item in group.list_action_item:
+                return group
+        return None
 
 
 class MenuBubble(Bubble):
@@ -149,6 +184,10 @@ class ContextMenu(TabbedPanel):
            the height of the dropdown, the placement might be
            lower or higher off that widget.
         '''
+        # if trying to open a non-visible widget
+        if widget.parent is None:
+            return
+
         # ensure we are not already attached
         if self.attach_to is not None:
             self.dismiss()
@@ -179,7 +218,7 @@ class ContextMenu(TabbedPanel):
         pass
 
     def dismiss(self, *largs):
-        '''Remove the dropdown widget from the iwndow, and detach itself from
+        '''Remove the dropdown widget from the window, and detach itself from
         the attached widget.
         '''
         if self.bubble.parent:
@@ -239,22 +278,40 @@ class ContextMenu(TabbedPanel):
         Clock.schedule_once(self._set_width_to_bubble, 0.01)
         # ensure the dropdown list doesn't get out on the X axis, with a
         # preference to 0 in case the list is too wide.
-        x = wx
+        # try to center bubble with parent position
+        x = wx - self.bubble.width / 4
         if x + self.bubble.width > win.width:
             x = win.width - self.bubble.width
         if x < 0:
             x = 0
         self.bubble.x = x
+        # bubble position relative with the parent center
+        x_relative = x - (wx - self.bubble.width / 4)
+        x_range = self.bubble.width / 4  # consider 25% as the range
 
         # determine if we display the dropdown upper or lower to the widget
         h_bottom = wy - self.bubble.height
         h_top = win.height - (wtop + self.bubble.height)
+
+        def _get_hpos():
+            '''Compare the position of the widget with the parent
+            to display the arrow in the correct position
+            '''
+            _pos = 'mid'
+            if x_relative == 0:
+                _pos = 'mid'
+            elif x_relative < -x_range:
+                _pos = 'right'
+            elif x_relative > x_range:
+                _pos = 'left'
+            return _pos
+
         if h_bottom > 0:
             self.bubble.top = wy
-            self.bubble.arrow_pos = 'top_mid'
+            self.bubble.arrow_pos = 'top_' + _get_hpos()
         elif h_top > 0:
             self.bubble.y = wtop
-            self.bubble.arrow_pos = 'bottom_mid'
+            self.bubble.arrow_pos = 'bottom_' + _get_hpos()
         else:
             # none of both top/bottom have enough place to display the widget at
             # the current size. Take the best side, and fit to it.
@@ -262,11 +319,11 @@ class ContextMenu(TabbedPanel):
             if height == h_bottom:
                 self.bubble.top = wy
                 self.bubble.height = wy
-                self.bubble.arrow_pos = 'top_mid'
+                self.bubble.arrow_pos = 'top_' + _get_hpos()
             else:
                 self.bubble.y = wtop
                 self.bubble.height = win.height - wtop
-                self.bubble.arrow_pos = 'bottom_mid'
+                self.bubble.arrow_pos = 'bottom_' + _get_hpos()
 
     def on_touch_down(self, touch):
         '''Default Handler for 'on_touch_down'
@@ -288,6 +345,12 @@ class ContextMenu(TabbedPanel):
     def add_widget(self, widget, index=0):
         '''Add a widget.
         '''
+        if self.content is None:
+            return
+
+        if widget.parent is not None:
+            widget.parent.remove_widget(widget)
+
         if self.tab_list and widget == self.tab_list[0].content or\
                 widget == self._current_tab.content or \
                 self.content == widget or\
@@ -420,6 +483,13 @@ class ContextSubMenu(MenuButton):
         if hasattr(widget, 'cont_menu'):
             widget.cont_menu = self.cont_menu
 
+    def remove_children(self):
+        '''Clear _list_children[]
+        '''
+        for child, index in self._list_children:
+            self.container.remove_widget(child)
+        self._list_children = []
+
     def on_cont_menu(self, *args):
         '''Default handler for cont_menu.
         '''
@@ -447,13 +517,13 @@ class ContextSubMenu(MenuButton):
     def on_scroll_height(self, *args):
         '''Handler for scrollview's height.
         '''
-        self.container.height = max(self.container.height,
+        self.container.height = max(self.container.minimum_height,
                                     self.attached_menu.content.height)
 
     def on_container_height(self, *args):
         '''Handler for container's height.
         '''
-        self.container.height = max(self.container.height,
+        self.container.height = max(self.container.minimum_height,
                                     self.attached_menu.content.height)
 
     def on_child_height(self, *args):
@@ -481,6 +551,8 @@ class ContextSubMenu(MenuButton):
                 tab.show_arrow = False
 
         except:
+            if not self.cont_menu.current_tab in self.cont_menu.tab_list:
+                return
             curr_index = self.cont_menu.tab_list.index(
                 self.cont_menu.current_tab)
             for i in range(curr_index - 1, -1, -1):
@@ -512,8 +584,6 @@ class ContextSubMenu(MenuButton):
 if __name__ == '__main__':
     from kivy.app import App
 
-    from kivy.uix.actionbar import ActionItem
-
     class ActionContext(ContextSubMenu, ActionItem):
         pass
 
@@ -521,10 +591,11 @@ if __name__ == '__main__':
 #:import ContextMenu contextual.ContextMenu
 
 <ContextMenu>:
+<DesignerActionView>:
 <Test>:
     ActionBar:
         pos_hint: {'top':1}
-        ActionView:
+        DesignerActionView:
             use_separator: True
             ActionPrevious:
                 title: 'Action Bar'

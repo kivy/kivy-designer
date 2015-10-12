@@ -1,0 +1,211 @@
+[
+  {
+    "type": "title",
+    "title": "Android Application settings"
+  },
+  {
+    "type": "list",
+    "title": "Android Permissions",
+    "section": "app",
+    "desc": "Application required permissions.",
+    "key": "android.permissions",
+    "items": ["ACCESS_CHECKIN_PROPERTIES", "ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "ACCESS_LOCATION_EXTRA_COMMANDS", "ACCESS_MOCK_LOCATION", "ACCESS_NETWORK_STATE", "ACCESS_SURFACE_FLINGER", "ACCESS_WIFI_STATE", "ACCOUNT_MANAGER", "ADD_VOICEMAIL", "AUTHENTICATE_ACCOUNTS", "BATTERY_STATS", "BIND_ACCESSIBILITY_SERVICE", "BIND_APPWIDGET", "BIND_CARRIER_MESSAGING_SERVICE", "BIND_DEVICE_ADMIN", "BIND_DREAM_SERVICE", "BIND_INPUT_METHOD", "BIND_NFC_SERVICE", "BIND_NOTIFICATION_LISTENER_SERVICE", "BIND_PRINT_SERVICE", "BIND_REMOTEVIEWS", "BIND_TEXT_SERVICE", "BIND_TV_INPUT", "BIND_VOICE_INTERACTION", "BIND_VPN_SERVICE", "BIND_WALLPAPER", "BLUETOOTH", "BLUETOOTH_ADMIN", "BLUETOOTH_PRIVILEGED", "BODY_SENSORS", "BRICK", "BROADCAST_PACKAGE_REMOVED", "BROADCAST_SMS", "BROADCAST_STICKY", "BROADCAST_WAP_PUSH", "CALL_PHONE", "CALL_PRIVILEGED", "CAMERA", "CAPTURE_AUDIO_OUTPUT", "CAPTURE_SECURE_VIDEO_OUTPUT", "CAPTURE_VIDEO_OUTPUT", "CHANGE_COMPONENT_ENABLED_STATE", "CHANGE_CONFIGURATION", "CHANGE_NETWORK_STATE", "CHANGE_WIFI_MULTICAST_STATE", "CHANGE_WIFI_STATE", "CLEAR_APP_CACHE", "CLEAR_APP_USER_DATA", "CONTROL_LOCATION_UPDATES", "DELETE_CACHE_FILES", "DELETE_PACKAGES", "DEVICE_POWER", "DIAGNOSTIC", "DISABLE_KEYGUARD", "DUMP", "EXPAND_STATUS_BAR", "FACTORY_TEST", "FLASHLIGHT", "FORCE_BACK", "GET_ACCOUNTS", "GET_PACKAGE_SIZE", "GET_TASKS", "GET_TOP_ACTIVITY_INFO", "GLOBAL_SEARCH", "HARDWARE_TEST", "INJECT_EVENTS", "INSTALL_LOCATION_PROVIDER", "INSTALL_PACKAGES", "INSTALL_SHORTCUT", "INTERNAL_SYSTEM_WINDOW", "INTERNET", "KILL_BACKGROUND_PROCESSES", "LOCATION_HARDWARE", "MANAGE_ACCOUNTS", "MANAGE_APP_TOKENS", "MANAGE_DOCUMENTS", "MASTER_CLEAR", "MEDIA_CONTENT_CONTROL", "MODIFY_AUDIO_SETTINGS", "MODIFY_PHONE_STATE", "MOUNT_FORMAT_FILESYSTEMS", "MOUNT_UNMOUNT_FILESYSTEMS", "NFC", "PERSISTENT_ACTIVITY", "PROCESS_OUTGOING_CALLS", "READ_CALENDAR", "READ_CALL_LOG", "READ_CONTACTS", "READ_EXTERNAL_STORAGE", "READ_FRAME_BUFFER", "READ_HISTORY_BOOKMARKS", "READ_INPUT_STATE", "READ_LOGS", "READ_PHONE_STATE", "READ_PROFILE", "READ_SMS", "READ_SOCIAL_STREAM", "READ_SYNC_SETTINGS", "READ_SYNC_STATS", "READ_USER_DICTIONARY", "READ_VOICEMAIL", "REBOOT", "RECEIVE_BOOT_COMPLETED", "RECEIVE_MMS", "RECEIVE_SMS", "RECEIVE_WAP_PUSH", "RECORD_AUDIO", "REORDER_TASKS", "RESTART_PACKAGES", "SEND_RESPOND_VIA_MESSAGE", "SEND_SMS", "SET_ACTIVITY_WATCHER", "SET_ALARM", "SET_ALWAYS_FINISH", "SET_ANIMATION_SCALE", "SET_DEBUG_APP", "SET_ORIENTATION", "SET_POINTER_SPEED", "SET_PREFERRED_APPLICATIONS", "SET_PROCESS_LIMIT", "SET_TIME", "SET_TIME_ZONE", "SET_WALLPAPER", "SET_WALLPAPER_HINTS", "SIGNAL_PERSISTENT_PROCESSES", "STATUS_BAR", "SUBSCRIBED_FEEDS_READ", "SUBSCRIBED_FEEDS_WRITE", "SYSTEM_ALERT_WINDOW", "TRANSMIT_IR", "UNINSTALL_SHORTCUT", "UPDATE_DEVICE_STATS", "USE_CREDENTIALS", "USE_SIP", "VIBRATE", "WAKE_LOCK", "WRITE_APN_SETTINGS", "WRITE_CALENDAR", "WRITE_CALL_LOG", "WRITE_CONTACTS", "WRITE_EXTERNAL_STORAGE", "WRITE_GSERVICES", "WRITE_HISTORY_BOOKMARKS", "WRITE_PROFILE", "WRITE_SECURE_SETTINGS", "WRITE_SETTINGS", "WRITE_SMS", "WRITE_SOCIAL_STREAM", "WRITE_SYNC_SETTINGS", "WRITE_USER_DICTIONARY", "WRITE_VOICEMAIL"]
+  },
+  {
+    "type": "dict",
+    "title": "Android Storage",
+    "section": "app",
+    "desc": "Use Android private/public storage",
+    "key": "android.private_storage",
+    "options": {"False": "Public", "True": "Private"}
+  },
+  {
+    "type": "string",
+    "title": "Android entry point",
+    "section": "app",
+    "desc": "Main activity of your app. Default is ok for Kivy-based app",
+    "key": "android.entrypoint"
+  },
+  {
+    "type": "dict",
+    "title": "Screen wake lock",
+    "section": "app",
+    "desc": "Indicate whether the screen should stay on. Don't forget to add the WAKE_LOCK permission if you set this to True",
+    "key": "android.wakelock",
+    "options": {"False": "Disabled", "True": "Enabled"}
+  },
+  {
+    "type": "list",
+    "title": "Application meta-data",
+    "section": "app",
+    "desc": "Application meta-data to set.\nCreate each item with in key=value format",
+    "key": "android.meta_data",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "string",
+    "title": "Extra XMLs",
+    "section": "app",
+    "desc": "Extra XML file to include as an intent filters in <activity> tag",
+    "key": "android.manifest.intent_filters"
+  },
+  {
+    "type": "title",
+    "title": "Android Development tools"
+  },
+  {
+    "type": "numeric",
+    "title": "Android API",
+    "section": "app",
+    "desc": "Android API Level",
+    "key": "android.api"
+  },
+  {
+    "type": "numeric",
+    "title": "Android Minimum API",
+    "section": "app",
+    "desc": "Android Minimum API Level",
+    "key": "android.mimapi"
+  },
+  {
+    "type": "numeric",
+    "title": "Android SDK",
+    "section": "app",
+    "desc": "Android SDK version to use",
+    "key": "android.sdk"
+  },
+  {
+    "type": "string",
+    "title": "Android NDK",
+    "section": "app",
+    "desc": "Android NDK to use",
+    "key": "android.ndk"
+  },
+  {
+    "type": "path",
+    "title": "Android SDK Path",
+    "section": "app",
+    "desc": "Custom Android SDK path. If empty, it will be automatically downloaded",
+    "key": "android.sdk_path"
+  },
+  {
+    "type": "path",
+    "title": "Android NDK Path",
+    "section": "app",
+    "desc": "Custom Android NDK path. If empty, it will be automatically downloaded",
+    "key": "android.ndk_path"
+  },
+  {
+    "type": "title",
+    "title": "OUYA"
+  },
+  {
+    "type": "string",
+    "title": "OUYA Console category",
+    "section": "app",
+    "desc": "OUYA Console category. Should be one of GAME or APP. If you leave this blank, OUYA support will not be enabled",
+    "key": "android.ouya.category"
+  },
+  {
+    "type": "string",
+    "title": "OUYA Console icon",
+    "section": "app",
+    "desc": "Filename of OUYA Console icon. It must be a 732x412 png image.\nExample: %(source.dir)s/data/ouya_icon.png",
+    "key": "android.ouya.icon.filename"
+  },
+  {
+    "type": "title",
+    "title": "Android Libraries"
+  },
+  {
+    "type": "list",
+    "title": "External libraries",
+    "section": "app",
+    "desc": "List of extra Java .jar files to add to the libs.\nExample: foo.jar,bar.jar,path/to/more/*.jar",
+    "key": "android.add_jars",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "list",
+    "title": "External Java files",
+    "section": "app",
+    "desc": "List of Java files to add to the android project (can be .java or a  directory containing the files)",
+    "key": "android.add_src",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "list",
+    "title": "Android additional libraries to copy into libs/armeabi - armeabi",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi.\nExample: libs/android/*.so",
+    "key": "android.add_libs_armeabi",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "list",
+    "title": "Android additional libraries to copy into libs/armeabi - armeabi v7a",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi.\nExample: libs/android-v7/*.so",
+    "key": "android.add_libs_armeabi_v7a",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "list",
+    "title": "Android additional libraries to copy into libs/armeabi - x86",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi.\nExample: libs/android-x86/*.so",
+    "key": "android.add_libs_x86",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "list",
+    "title": "Android additional libraries to copy into libs/armeabi - mips",
+    "section": "app",
+    "desc": "Android additional libraries to copy into libs/armeabi.\nExample: libs/android-mips/*.so",
+    "key": "android.add_libs_mips",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "list",
+    "title": "Add library project",
+    "section": "app",
+    "desc": "Android library project to add (will be added in the project.properties automatically.)",
+    "key": "android.library_references",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "title",
+    "title": "python-for-android"
+  },
+  {
+    "type": "path",
+    "title": "python-for-android git clone path",
+    "section": "app",
+    "desc": "python-for-android git clone path (if empty, it will be automatically cloned from Github)",
+    "key": "android.p4a_dir"
+  },
+  {
+    "type": "list",
+    "title": "python-for-android whitelist",
+    "section": "app",
+    "desc": "python-for-android whitelist",
+    "key": "android.p4a_whitelist",
+    "allow_custom": true,
+    "items": []
+  },
+  {
+    "type": "string",
+    "title": "python-for-android branch",
+    "section": "app",
+    "desc": "Set a custom python-for-android branch",
+    "key": "android.branch"
+  }
+]
