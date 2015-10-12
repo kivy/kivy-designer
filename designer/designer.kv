@@ -55,8 +55,9 @@
     lbl_error: lbl_error
     Label:
         text: root.message
-        size_hint_x: None
         halign: 'left'
+        text_size: self.size
+        valign: 'middle'
     Label:
         id: lbl_error
         text: ""
@@ -443,6 +444,7 @@
     valign: 'middle'
     size_hint_y: None
     height: '40sp'
+    minimum_width: 200
 
 <InfoBubble>:
     size_hint: None, None
@@ -913,6 +915,14 @@
     ActionButton:
         text: 'Web Debugger'
         on_release: root.on_webdebugger(self)
+
+<DesignerSubActionButton>:
+    size_hint: 1, None
+    minimum_width: 200
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+    height: sp(48)
+    text_size: (self.width - sp(24), self.size[1])
+    valign: 'middle'
 
 <EditContView>:
     ActionPrevious:
@@ -1590,6 +1600,7 @@
     actionbar: actionbar
     start_page: start_page.__self__
     select_profile_cont_menu: select_profile_cont_menu
+    designer_git: git_tools
 
     ActionBar:
         id: actionbar
@@ -1735,9 +1746,6 @@
             DesignerActionGroup:
                 id: actn_menu_tools
                 text: 'Tools'
-                mode: 'spinner'
-                size_hint_x: None
-                dropdown_cls: ContextMenu
                 disabled: True
                 DesignerActionButton:
                     id: actn_btn_buildozer_init
@@ -1759,7 +1767,9 @@
                     id: actn_btn_create_gitignore
                     text: 'Create .gitignore'
                     on_release: root.designer_tools.create_gitignore()
-
+                DesignerGit:
+                    id: git_tools
+                    text: 'Git'
 
             DesignerActionGroup:
                 id: actn_menu_help

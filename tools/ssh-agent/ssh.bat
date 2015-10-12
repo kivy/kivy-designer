@@ -1,0 +1,1 @@
+start %~dp0ssh_cmd.bat

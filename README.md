@@ -16,6 +16,7 @@ Prerequisites
     - [pygments](http://pygments.org/)
     - [docutils](http://docutils.sourceforge.net/)
     - [jedi](http://jedi.jedidjah.ch/en/latest/)
+    - [gitpython](http://gitpython.readthedocs.org)
 - The FileBrowser widget from the [Kivy garden](http://kivy.org/docs/api-kivy.garden.html)
 
 
