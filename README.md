@@ -1,36 +1,32 @@
 Kivy Designer
 =============
 
-**WARNING:: This software was part of GSOC 2013, and is searching for a maintainer.**
-
-Kivy Designer is Kivy's tool for designing Graphical User Interfaces
+Kivy Designer is Kivy's tool for designing graphical user interfaces
 (GUIs) from Kivy Widgets. You can compose and customize widgets, and
 test them. It is completely written in Python using Kivy.
 
 Prerequisites
 -------------
 
-- [Kivy 1.8+](http://kivy.org/#download)
-- The following Python modules (available via pip)
-    - [watchdog](http://pythonhosted.org/watchdog/)
-    - [Pygments](http://pygments.org/)
+- [Kivy 1.9+](http://kivy.org/#download)
+- The following Python modules (available via pip):
+    - [watchdog](https://pythonhosted.org/watchdog/)
+    - [pygments](http://pygments.org/)
     - [docutils](http://docutils.sourceforge.net/)
+    - [jedi](http://jedi.jedidjah.ch/en/latest/)
 - The FileBrowser widget from the [Kivy garden](http://kivy.org/docs/api-kivy.garden.html)
-
 
 
 Installation
 ------------
 
-To install the prerequisites, enter a console (on windows use kivy.bat in the kivy folder):
+To install the prerequisites, enter a console (on Windows use kivy.bat in the kivy folder):
 
-    pip install watchdog
-    pip install pygments
-    pip install docutils
+    pip install -U watchdog, pygments, docutils, jedi
 
-To install the FileBrowser, enter a console (on windows use kivy.bat in the kivy folder):
+To install the FileBrowser, enter a console (on Windows use kivy.bat in the kivy folder):
 
-    pip install kivy-garden
+    pip install -U kivy-garden
     garden install filebrowser
 
 With the prerequisites installed, you can use the designer:
@@ -39,11 +35,11 @@ With the prerequisites installed, you can use the designer:
     cd kivy-designer
     python main.py
 
-without git download, extract and execute main.py:
+Without git, download, extract and execute main.py:
 https://github.com/kivy/kivy-designer/archive/master.zip
 
 
-On OS X you might need to use `kivy` command instead of `Python` if you are using our portable package.
+On OS X you might need to use the `kivy` command instead of `python` if you are using our portable package.
 
 If you're successful, you'll see something like this:
 
