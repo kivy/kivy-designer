@@ -1,7 +1,8 @@
 language: python
 
 python:
-  - 3.4
+  - 2.7
+  - 3.5
 
 install:
     yes | sudo add-apt-repository ppa:zoogie/sdl2-snapshots;
