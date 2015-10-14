@@ -63,7 +63,7 @@ class ActionCheckButton(ActionItem, FloatLayout):
         if not self.disabled and self.collide_point(*touch.pos):
             self.checkbox._toggle_active()
 
-    def on_active(self, *args):
+    def on_active(self, instance, value, *args):
         '''Default handler for 'on_active' event.
         '''
-        self.checkbox_active = args[1]
+        self.checkbox_active = value

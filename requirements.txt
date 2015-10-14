@@ -1,6 +1,8 @@
-kivy => 1.9
+kivy >= 1.9
 pygments
 docutils
 watchdog
 jedi
 gitpython
+six
+kivy-garden

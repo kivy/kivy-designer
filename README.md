@@ -17,6 +17,8 @@ Prerequisites
     - [docutils](http://docutils.sourceforge.net/)
     - [jedi](http://jedi.jedidjah.ch/en/latest/)
     - [gitpython](http://gitpython.readthedocs.org)
+    - [six](https://pythonhosted.org/six/)
+    - [kivy-garden](http://kivy.org/docs/api-kivy.garden.html)
 - The FileBrowser widget from the [Kivy garden](http://kivy.org/docs/api-kivy.garden.html)
 
 
@@ -25,11 +27,14 @@ Installation
 
 To install the prerequisites, enter a console (on Windows use kivy.bat in the kivy folder):
 
-    pip install -U watchdog, pygments, docutils, jedi
+    pip install -U watchdog pygments docutils jedi gitpython six kivy-garden
+
+or simple run:
+
+    pip install -r requirements.txt
 
 To install the FileBrowser, enter a console (on Windows use kivy.bat in the kivy folder):
 
-    pip install -U kivy-garden
     garden install filebrowser
 
 With the prerequisites installed, you can use the designer:

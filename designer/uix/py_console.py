@@ -23,7 +23,6 @@ Builder.load_string('''
         InteractiveShellInput:
             id: interactive_text_input
             size_hint: (1, None)
-            font_name: root.font_name
             font_size: root.font_size
             foreground_color: root.foreground_color
             background_color: root.background_color
@@ -281,13 +280,6 @@ class PythonConsole(BoxLayout):
 
     :data:`foreground_color` is an :class:`~kivy.properties.ListProperty`,
     Default to '(0, 0, 0, 1)'''
-
-    font_name = StringProperty('data/fonts/Roboto-Regular.ttf')
-    '''Indicates the font Style used in the console
-
-    :data:`font` is a :class:`~kivy.properties.StringProperty`,
-    Default to 'Roboto'
-    '''
 
     font_size = NumericProperty(14)
     '''Indicates the size of the font used for the console

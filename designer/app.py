@@ -1619,6 +1619,10 @@ class DesignerApp(App):
     '''Currently focused widget
     '''
 
+    started = BooleanProperty(False)
+    '''Indicates if has finished the build()
+    '''
+
     title = 'Kivy Designer'
 
     def on_stop(self, *args):
@@ -1713,6 +1717,7 @@ class DesignerApp(App):
             self.root.recent_manager.list_files)
 
         self.root.fill_select_profile_menu()
+        self.started = True
 
     def create_kivy_designer_dir(self):
         '''To create the ~/.kivy-designer dir
