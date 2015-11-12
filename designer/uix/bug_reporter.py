@@ -5,7 +5,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.core.clipboard import Clipboard
 import webbrowser
 import six.moves.urllib
-
+import os
 
 Builder.load_string('''
 <BugReporter>:
@@ -89,7 +89,41 @@ class BugReporterApp(App):
 
     def build(self):
         rep = BugReporter()
-        rep.txt_traceback.text = self.traceback
+        template = '''
+## Environment Info
+
+%s
+
+## Traceback
+
+%s
+
+'''
+        env_info = 'Pip is not installed'
+        try:
+            from pip.req import parse_requirements
+            from pip.download import PipSession
+            import platform
+
+            requirements = parse_requirements(os.path.join(
+                os.path.dirname(os.path.realpath(__file__)),
+                '..',
+                '..',
+                'requirements.txt'),
+                session=PipSession()
+            )
+            env_info = ''
+            for req in requirements:
+                version = req.installed_version
+                if version is None:
+                    version = 'Not installed'
+                env_info += req.name + ': ' + version + '\n'
+            env_info += '\nPlatform: ' + platform.platform()
+            env_info += '\nPython: ' + platform.python_version()
+
+        except ImportError:
+            pass
+        rep.txt_traceback.text = template % (env_info, self.traceback)
 
         return rep
 
