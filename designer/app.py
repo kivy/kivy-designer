@@ -1602,13 +1602,20 @@ class Designer(FloatLayout):
 
 class DesignerException(ExceptionHandler):
 
+    raised_exception = False
+    '''Indicates if the BugReporter has already raised some exception
+    '''
+
     def handle_exception(self, inst):
+        if self.raised_exception:
+            return ExceptionManager.PASS
         App.get_running_app().stop()
         if isinstance(inst, KeyboardInterrupt):
             return ExceptionManager.PASS
         else:
             for child in Window.children:
                 Window.remove_widget(child)
+            self.raised_exception = True
             BugReporterApp(traceback.format_exc()).run()
             return ExceptionManager.PASS
 
