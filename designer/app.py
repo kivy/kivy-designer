@@ -1616,6 +1616,7 @@ class DesignerException(ExceptionHandler):
             for child in Window.children:
                 Window.remove_widget(child)
             self.raised_exception = True
+            Window.fullscreen = False
             BugReporterApp(traceback.format_exc()).run()
             return ExceptionManager.PASS
 

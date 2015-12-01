@@ -46,10 +46,10 @@ Builder.load_string('''
                 foreground_color: 1, 1, 1, 1
                 readonly: True
         BoxLayout:
-            size_hint: 0.5, None
+            size_hint: 0.6, None
             padding: 10, 10
             height: 50
-            pos_hint: {'x':0.25}
+            pos_hint: {'x':0.2}
             spacing: 5
             Button:
                 text: 'Copy to clipboard'
@@ -57,6 +57,9 @@ Builder.load_string('''
             Button:
                 text: 'Report Bug'
                 on_press: root.on_report()
+            Button:
+                text: 'Close'
+                on_press: root.on_close()
 ''')
 
 
@@ -76,6 +79,11 @@ class BugReporter(FloatLayout):
         txt = six.moves.urllib.parse.quote(self.txt_traceback.text)
         url = 'https://github.com/kivy/kivy-designer/issues/new?body=' + txt
         webbrowser.open(url)
+
+    def on_close(self, *args):
+        '''Event handler to "Close" button
+        '''
+        App.get_running_app().stop()
 
 
 class BugReporterApp(App):
