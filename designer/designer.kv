@@ -666,6 +666,25 @@
             text: 'No'
             on_press: root.dispatch('on_cancel')
 
+<ConfirmationDialogSave>:
+    orientation: 'vertical'
+    padding: '5sp'
+    Label:
+        text: root.message
+    
+    BoxLayout:
+        size_hint_y: None
+        height: '25pt'
+        Button:
+            text: 'Save and exit'
+            on_press: root.dispatch('on_save')
+        Button:
+            text: 'Don\'t Save'
+            on_press: root.dispatch('on_dont_save')
+        Button:
+            text: 'Cancel'
+            on_press: root.dispatch('on_cancel')
+
 <ActionCheckButton>:
     btn_layout: btn_layout
     _label: _label
@@ -719,9 +738,9 @@
 <SpecCodeInput>:
     text_input: text_input
     lbl_error: lbl_error
-	orientation: 'vertical'
-	spacing: 10
-	padding: 10
+    orientation: 'vertical'
+    spacing: 10
+    padding: 10
     Label:
         text: "Edit the buildozer.spec file"
         size_hint_y: None
