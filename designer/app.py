@@ -1144,6 +1144,7 @@ class Designer(FloatLayout):
             return False
 
         self.check_quit()
+        return True
 
     def action_btn_quit_pressed(self, *args):
         '''Event Handler when ActionButton "Quit" is pressed.
