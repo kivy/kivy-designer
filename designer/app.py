@@ -44,7 +44,8 @@ from designer.uix.kv_lang_area import KVLangArea
 from designer.undo_manager import WidgetOperation, UndoManager
 from designer.project_loader import ProjectLoader, ProjectLoaderException
 from designer.select_class import SelectClass
-from designer.confirmation_dialog import ConfirmationDialog
+from designer.confirmation_dialog import ConfirmationDialog, \
+    ConfirmationDialogSave
 from designer.proj_watcher import ProjectWatcher
 from designer.recent_manager import RecentManager, RecentDialog
 from designer.add_file import AddFileDialog
@@ -673,6 +674,7 @@ class Designer(FloatLayout):
 
                 self.designer_content.toolbox.add_custom()
 
+        self._curr_proj_changed = True
         self.ui_creator.playground.sandbox.error_active = False
         self.statusbar.show_message('Project created successfully', 5)
 
@@ -923,14 +925,17 @@ class Designer(FloatLayout):
 
         self._popup.dismiss()
 
-    def action_btn_save_pressed(self, *args):
+    def action_btn_save_pressed(self, exit_on_save=False, *args):
         '''Event Handler when ActionButton "Save" is pressed.
         '''
+
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
 
         if self.project_loader.root_rule:
             try:
                 if self.project_loader.new_project:
-                    self.action_btn_save_as_pressed()
+                    self.action_btn_save_as_pressed(exit_on_save=exit_on_save)
                     return
 
                 else:
@@ -943,17 +948,18 @@ class Designer(FloatLayout):
                     self.ui_creator.playground.add_widget_to_parent(
                         root_wigdet, None, from_undo=True, from_kv=True)
                 self._curr_proj_changed = False
+                if exit_on_save:
+                    self._perform_quit()
                 self.statusbar.show_message('Project saved successfully')
 
             except:
                 self.statusbar.show_message('Cannot save project')
 
-    def action_btn_save_as_pressed(self, *args):
+    def action_btn_save_as_pressed(self, exit_on_save=False, *args):
         '''Event Handler when ActionButton "Save As" is pressed.
         '''
 
         if self.project_loader.root_rule:
-            self._curr_proj_changed = False
 
             self._save_as_browser = FileBrowser(select_string='Save')
 
@@ -968,7 +974,8 @@ class Designer(FloatLayout):
             else:
                 self._save_as_browser.ids.icon_view.path = def_path
 
-            self._save_as_browser.bind(on_success=self._perform_save_as,
+            self._save_as_browser.bind(on_success=partial(self._perform_save_as,
+                                       exit_on_save=exit_on_save),
                                        on_canceled=self._cancel_popup)
 
             self._popup = Popup(title="Enter Folder Name",
@@ -976,7 +983,7 @@ class Designer(FloatLayout):
                                 size_hint=(0.9, 0.9), auto_dismiss=False)
             self._popup.open()
 
-    def _perform_save_as(self, instance):
+    def _perform_save_as(self, instance, exit_on_save=False):
         '''Event handler for 'on_success' event of self._save_as_browser
         '''
 
@@ -1001,7 +1008,10 @@ class Designer(FloatLayout):
             self.ui_creator.playground.add_widget_to_parent(root_wigdet,
                                                             None,
                                                             from_undo=True)
+            self._curr_proj_changed = False
             self.statusbar.show_message('Project saved successfully')
+            if exit_on_save:
+                self._perform_quit()
 
         except:
             self.statusbar.show_message('Cannot save project')
@@ -1108,6 +1118,23 @@ class Designer(FloatLayout):
         self._perform_open(instance.get_selected_project())
         self._cancel_popup(instance, args)
 
+    def check_quit(self, *args):
+
+        if self.project_loader.new_project or self._curr_proj_changed:
+            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+                                                       'not saved.\nWhat '
+                                                       'would you like to do?')
+            self._confirm_dlg_save.bind(on_dont_save=self._perform_quit,
+                            on_save=partial(self.action_btn_save_pressed,
+                                True),
+                            on_cancel=self._cancel_popup)
+
+            self._popup = Popup(title='Quit', content=self._confirm_dlg_save,
+                                size_hint=(None, None), size=('300pt', '150pt'),
+                                auto_dismiss=False)
+            self._popup.open()
+            return True
+
     def on_request_close(self, *args):
         '''Event Handler for 'on_request_close' event of Window.
            Check if the project was saved before exit
@@ -1115,16 +1142,8 @@ class Designer(FloatLayout):
         if not self._curr_proj_changed:
             self._perform_quit()
             return False
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
-                                               ' lost.\n'
-                                               'Do you want to quit?')
-        self._confirm_dlg.bind(on_ok=self._perform_quit,
-                               on_cancel=self._cancel_popup)
 
-        self._popup = Popup(title='Quit', content=self._confirm_dlg,
-                            size_hint=(None, None), size=('200pt', '150pt'),
-                            auto_dismiss=False)
-        self._popup.open()
+        self.check_quit()
         return True
 
     def action_btn_quit_pressed(self, *args):
@@ -1133,16 +1152,8 @@ class Designer(FloatLayout):
         if not self._curr_proj_changed:
             self._perform_quit()
             return
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
-                                               ' lost.\n'
-                                               'Do you want to quit?')
-        self._confirm_dlg.bind(on_ok=self._perform_quit,
-                               on_cancel=self._cancel_popup)
 
-        self._popup = Popup(title='Quit', content=self._confirm_dlg,
-                            size_hint=(None, None), size=('200pt', '150pt'),
-                            auto_dismiss=False)
-        self._popup.open()
+        self.check_quit()
 
     def _perform_quit(self, *args):
         '''Perform Application qui.Application
