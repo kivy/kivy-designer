@@ -462,7 +462,8 @@ class Designer(FloatLayout):
         '''Event Handler called when Project is modified outside Kivy Designer
         '''
 
-        # To dispatch modified event only once for all files/folders of proj_dir
+        # To dispatch modified event only once for all files/folders
+        # of proj_dir
         if self._proj_modified_outside:
             return
 
@@ -640,16 +641,24 @@ class Designer(FloatLayout):
             self._show_new_dialog()
             return
 
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be'
-                                               ' lost.\n'
-                                               'Do you want to continue?')
-        self._confirm_dlg.bind(on_ok=self._show_new_dialog,
-                               on_cancel=self._cancel_popup)
+        if self.project_loader.new_project or self._curr_proj_changed:
 
-        self._popup = Popup(title='New', content=self._confirm_dlg,
-                            size_hint=(None, None), size=('200pt', '150pt'),
+            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+                                                       'not saved.\nWhat '
+                                                       'would you like to do?')
+
+            def save_and_open(*args):
+                self.action_btn_save_pressed(False)
+                self._show_new_dialog()
+
+            self._confirm_dlg_save.bind(on_dont_save=self._show_new_dialog,
+                            on_save=save_and_open,
+                            on_cancel=self._cancel_popup)
+
+            self._popup = Popup(title='New', content=self._confirm_dlg_save,
+                            size_hint=(None, None), size=('300pt', '150pt'),
                             auto_dismiss=False)
-        self._popup.open()
+            self._popup.open()
 
     def _show_new_dialog(self, *args):
         if hasattr(self, '_popup'):
@@ -748,17 +757,20 @@ class Designer(FloatLayout):
             self._show_open_dialog()
             return
 
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be '
-                                               'lost.\n'
-                                               'Do you want to continue?')
+        if self.project_loader.new_project or self._curr_proj_changed:
 
-        self._confirm_dlg.bind(on_ok=self._show_open_dialog,
-                               on_cancel=self._cancel_popup)
+            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+                                                       'not saved.\nWhat '
+                                                       'would you like to do?')
+            self._confirm_dlg_save.bind(on_dont_save=self._show_open_dialog,
+                            on_save=partial(self.action_btn_save_pressed,
+                                    False),
+                            on_cancel=self._cancel_popup)
 
-        self._popup = Popup(title='Kivy Designer', content=self._confirm_dlg,
-                            size_hint=(None, None), size=('200pt', '150pt'),
-                            auto_dismiss=False)
-        self._popup.open()
+            self._popup = Popup(title='Kivy Designer', auto_dismiss=False,
+                            content=self._confirm_dlg_save,
+                            size_hint=(None, None), size=('300pt', '150pt'))
+            self._popup.open()
 
     def action_btn_close_proj_pressed(self, *args):
         '''
@@ -768,17 +780,23 @@ class Designer(FloatLayout):
             self._perform_close_project()
             return
 
-        self._confirm_dlg = ConfirmationDialog('All unsaved changes will be '
-                                               'lost.\n'
-                                               'Do you want to continue?')
+        if self.project_loader.new_project or self._curr_proj_changed:
+            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+                                                       'not saved.\nWhat '
+                                                       'would you like to do?')
 
-        self._confirm_dlg.bind(on_ok=self._perform_close_project,
-                               on_cancel=self._cancel_popup)
+            def save_and_close(*args):
+                self.action_btn_save_pressed(False)
+                self._perform_close_project()
 
-        self._popup = Popup(title='Kivy Designer', content=self._confirm_dlg,
-                            size_hint=(None, None), size=('200pt', '150pt'),
-                            auto_dismiss=False)
-        self._popup.open()
+            self._confirm_dlg_save.bind(on_cancel=self._cancel_popup,
+                        on_dont_save=self._perform_close_project,
+                        on_save=save_and_close)
+
+            self._popup = Popup(title='Kivy Designer', auto_dismiss=False,
+                            content=self._confirm_dlg_save,
+                            size_hint=(None, None), size=('300pt', '150pt'))
+            self._popup.open()
 
     def _perform_close_project(self, *args):
         '''
@@ -1359,8 +1377,8 @@ class Designer(FloatLayout):
         '''Event Handler when ActionCheckButton "Toolbox" is activated.
         '''
         self.designer_settings.config_parser.set('view',
-                                                    'actn_chk_proj_tree',
-                                                    chk_btn.checkbox.active)
+                                                 'actn_chk_proj_tree',
+                                                 chk_btn.checkbox.active)
         self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
@@ -1379,8 +1397,8 @@ class Designer(FloatLayout):
         '''Event Handler when ActionCheckButton "Property Viewer" is activated.
         '''
         self.designer_settings.config_parser.set('view',
-                                                    'actn_chk_prop_event',
-                                                    chk_btn.checkbox.active)
+                                                'actn_chk_prop_event',
+                                                chk_btn.checkbox.active)
         self.designer_settings.config_parser.write()
 
         if chk_btn.checkbox.active:
