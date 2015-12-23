@@ -101,7 +101,6 @@ class KVLangArea(DesignerCodeInput):
     '''Reference to :class:`~designer.project_manager.Project`
        :data:`project` is a :class:`~kivy.properties.ObjectProperty`
     '''
-    statusbar = ObjectProperty()
 
     __events__ = ('on_reload_kv', )
 

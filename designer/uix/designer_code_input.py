@@ -76,7 +76,7 @@ class DesignerCodeInput(CodeInput):
 
         return super(DesignerCodeInput, self).on_touch_down(touch)
 
-    def _do_focus(self, *args):
+    def do_focus(self, *args):
         '''Force the focus on this widget
         '''
         self.focus = True

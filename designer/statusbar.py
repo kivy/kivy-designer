@@ -208,6 +208,9 @@ class StatusBar(BoxLayout):
     def show_message(self, message, duration=5, notification_type=None, *args):
         '''Shows a message. Use type to change the icon and the duration
         in seconds. Set duration = -1 to undefined time
+        :param notification_type: types: info, error, loading
+        :param duration: notification duration in seconds
+        :param message: message to display
         '''
         self.status_message.show_message(message, duration, notification_type)
 

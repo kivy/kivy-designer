@@ -546,6 +546,7 @@ class Playground(ScatterPlane):
 
     def _perform_select_root_widget(self, instance, selected_item, *args):
         '''On Playground edit item selection
+        :type selected_item: instance of selected array
         '''
         self._popup.dismiss()
         name = selected_item[0]
@@ -573,6 +574,7 @@ class Playground(ScatterPlane):
             kv lang text
         '''
         widgets = get_current_project().app_widgets
+        # if not displaying the widget
         if self.root is None or self.root_app_widget is None or \
                 widget_name not in widgets:
             self._perform_load_widget(widget_name)
@@ -603,6 +605,9 @@ class Playground(ScatterPlane):
 
     def _perform_load_widget(self, widget_name, update_kv_lang=True):
         '''Loads the widget if everything is ok
+        :param widget_name name of the widget to display
+        :param update_kv_lang if True, reloads the kv file. If False, keep the
+            kv lang text
         '''
         if self._popup:
             self._popup.dismiss()

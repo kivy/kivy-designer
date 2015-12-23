@@ -7,6 +7,8 @@ from kivy.uix.settings import Settings, SettingTitle
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 
+from designer.helper_functions import ignore_proj_watcher
+
 PROJ_DESIGNER = '.designer'
 PROJ_CONFIG = os.path.join(PROJ_DESIGNER, 'config.ini')
 
@@ -60,6 +62,7 @@ env =
                             os.path.join(settings_dir,
                                          'proj_settings_proj_prop.json'))
 
+    @ignore_proj_watcher
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.
         '''

@@ -89,6 +89,7 @@ class DesignerGit(DesignerActionSubMenu):
 
     def load_repo(self, path):
         '''Load a git/non-git repo from path
+        :param path: project path
         '''
         self.path = path
         try:
@@ -110,7 +111,7 @@ class DesignerGit(DesignerActionSubMenu):
         Is not a git repo, git init is available.
         '''
         self.remove_children()
-        d = App.get_running_app().root
+        d = get_designer()
         loader = None
         if d:
             loader = get_current_project().path

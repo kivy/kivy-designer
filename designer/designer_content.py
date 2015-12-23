@@ -1,15 +1,16 @@
-import mimetypes
 import os
 
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import OptionProperty, StringProperty
+from kivy.uix.popup import Popup
 from kivy.uix.tabbedpanel import TabbedPanelHeader
 from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, \
                         Clock, partial
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.treeview import TreeViewLabel
 from designer.buildozer_spec_editor import BuildozerSpecEditor
+from designer.confirmation_dialog import ConfirmationDialog
 from designer.helper_functions import get_designer, show_message
 from designer.uix.py_code_input import PyScrollView
 
@@ -116,6 +117,7 @@ class DesignerContent(FloatLayout):
     def add_file_to_tree_view(self, _file):
         '''This function is used to insert project files given by it's path
         argument _file. It will also insert any directory node if not present.
+        :param _file: path of the file to be inserted
         '''
 
         self.tree_view.root_options = dict(text='')
@@ -285,14 +287,17 @@ class DesignerTabbedPanel(TabbedPanel):
     def show_buildozer_spec_editor(self, project):
         '''Loads the buildozer.spec file and adds a new tab with the
         Buildozer Spec Editor
+        :param project: instance of the current project
         '''
         for i, child in enumerate(self.tab_list):
             if isinstance(child.content, BuildozerSpecEditor):
                 self.switch_to(child)
                 return child
 
-        spec_editor = App.get_running_app().root.spec_editor
-        spec_editor.load_settings(project.path)
+        spec_editor = get_designer().spec_editor
+        if spec_editor.SPEC_PATH != \
+                os.path.join(project.path, 'buildozer.spec'):
+            spec_editor.load_settings(project.path)
 
         panel_spec_item = DesignerCloseableTab(title="Spec Editor")
         panel_spec_item.bind(on_close=self.on_close_tab)
@@ -303,23 +308,37 @@ class DesignerTabbedPanel(TabbedPanel):
 
     def on_close_tab(self, instance, *args):
         '''Event handler to close icon
+        :param instance: tab instance
         '''
+        self.switch_to(instance)
         if instance.has_modification:
-            # TODO implement modification listener
-            pass
+            # show a dialog to ask if can close
+            confirm_dlg = ConfirmationDialog(
+                    'All unsaved changes will be lost.\n'
+                    'Do you want to continue?')
+            self._popup = Popup(
+                    title='New',
+                    content=confirm_dlg,
+                    size_hint=(None, None),
+                    size=('200pt', '150pt'),
+                    auto_dismiss=False)
+            confirm_dlg.bind(
+                    on_ok=partial(self._perform_close_tab, instance),
+                    on_cancel=self._popup.dismiss)
+            self._popup.open()
         else:
-            self.switch_to(instance)
-
-            # remove code_input from list
-            if hasattr(instance.content, 'code_input'):
-                code = instance.content.code_input
-                d = get_designer()
-                if code in d.code_inputs:
-                    d.code_inputs.remove(code)
-
             Clock.schedule_once(partial(self._perform_close_tab, instance))
 
     def _perform_close_tab(self, tab, *args):
+        if hasattr(self, '_popup'):
+            self._popup.dismiss()
+        # remove code_input from list
+        if hasattr(tab.content, 'code_input'):
+            code = tab.content.code_input
+            d = get_designer()
+            if code in d.code_inputs:
+                d.code_inputs.remove(code)
+        # remove tab
         self.remove_widget(tab)
         if self.tab_list:
             self.switch_to(self.tab_list[0])

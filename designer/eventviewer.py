@@ -165,11 +165,6 @@ class EventViewer(PropertyViewer):
        :class:`~kivy.properties.ObjectProperty`
     '''
 
-    statusbar = ObjectProperty(None)
-    '''Reference to Statusbar
-       :data:`statusbar` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
     def on_widget(self, instance, value):
         '''Default handler for change of 'widget' property
         '''
@@ -300,8 +295,7 @@ class EventViewer(PropertyViewer):
                     '    def %s(self, *args):\n        pass\n' % \
                     (txt.text, txt.text) +\
                     py_code_input.text[pos:]
-            self.statusbar.show_message('New Event Created you must save '
-                                        'project for changes to take effect')
+            show_message('New event created!', 5, 'info')
 
     def build_for(self, name):
         '''To create :class:`~designer.propertyviewer.PropertyBoolean`/

@@ -398,7 +398,7 @@ class Designer(FloatLayout):
     def on_profiler_message(self, instance, message, duration=0):
         '''Display a message in the status bar
         '''
-        self.statusbar.show_message(message, duration, 'info')
+        show_message(message, duration, 'info')
 
     def on_profiler_run(self, *args):
         '''When a new process starts
@@ -490,8 +490,14 @@ class Designer(FloatLayout):
         self._popup.dismiss()
         self._perform_open(self.project_manager.current_project.path)
         self._proj_modified_outside = False
-        self.spec_editor.load_settings(
-            self.project_manager.current_project.path)
+
+        # buildozer may have changed, reload it
+        proj_path = self.project_manager.current_project.path
+
+        def reload_spec_editor(*args):
+            self.spec_editor.load_settings(proj_path)
+        if os.path.exists(os.path.join(proj_path, 'buildozer.spec')):
+            Clock.schedule_once(reload_spec_editor, 1)
 
     def on_show_edit(self, *args):
         '''Event Handler of 'on_show_edit' event. This will show EditContView
@@ -547,8 +553,10 @@ class Designer(FloatLayout):
         if self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    Clock.schedule_once(tab_item._do_focus)
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    Clock.schedule_once(
+                            tab_item.content.code_input.do_focus)
                     return True
         return self.editcontview.on_touch_up(touch)
 
@@ -614,6 +622,7 @@ class Designer(FloatLayout):
                             auto_dimiss=False)
         self._popup.open()
 
+    @ignore_proj_watcher
     def _perform_new_file(self, *args):
         '''
         Create a new file in the project folder
@@ -627,9 +636,7 @@ class Designer(FloatLayout):
             self._input_dialog.lbl_error.text = 'File exists'
             return
 
-        self.project_watcher.pause_watching()
         open(new_file, 'a').close()
-        self.project_watcher.resume_watching()
         self.designer_content.update_tree_view(
             self.project_manager.current_project)
 
@@ -706,7 +713,7 @@ class Designer(FloatLayout):
 
         self._perform_open(new_proj_dir)
         self.project_manager.current_project.new_project = True
-        self.statusbar.show_message('Project created successfully', 5, 'info')
+        show_message('Project created successfully', 5, 'info')
 
     def cleanup(self):
         '''To cleanup everything loaded by the current project before loading
@@ -844,12 +851,12 @@ class Designer(FloatLayout):
             error = 'Cannot load empty file type'
 
         if error:
-            self.statusbar.show_message(error, type='error')
+            show_message(error, 5, 'error')
 
     def _perform_open(self, file_path):
         '''To open a project given by file_path
         '''
-        self.statusbar.show_message('Project loaded successfully', 5, 'info')
+        show_message('Project loaded successfully', 5, 'info')
 
         self.cleanup()
 
@@ -1112,8 +1119,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    tab_item.do_undo()
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    tab_item.content.code_input.do_undo()
                     break
 
     def action_btn_redo_pressed(self, *args):
@@ -1127,8 +1135,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    tab_item.do_redo()
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    tab_item.content.code_input.do_redo()
                     break
 
     def action_btn_cut_pressed(self, *args):
@@ -1144,8 +1153,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    tab_item.cut()
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    tab_item.content.code_input.cut()
                     break
 
     def action_btn_copy_pressed(self, *args):
@@ -1161,8 +1171,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    tab_item.copy()
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    tab_item.content.code_input.copy()
                     break
 
     def action_btn_paste_pressed(self, *args):
@@ -1178,8 +1189,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    tab_item.paste()
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    tab_item.content.code_input.paste()
                     break
 
     def action_btn_delete_pressed(self, *args):
@@ -1195,8 +1207,9 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    tab_item.delete_selection()
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    tab_item.content.code_input.delete_selection()
                     break
 
     def action_btn_select_all_pressed(self, *args):
@@ -1212,8 +1225,10 @@ class Designer(FloatLayout):
         elif self._edit_selected == 'Py':
             tab_list = self.designer_content.tab_pannel.tab_list
             for tab_item in tab_list:
-                if hasattr(tab_item, 'clicked') and tab_item.clicked:
-                    Clock.schedule_once(tab_item.do_select_all)
+                if hasattr(tab_item.content, 'code_input') \
+                        and tab_item.content.code_input.clicked:
+                    Clock.schedule_once(
+                            tab_item.content.code_input.do_select_all)
                     break
 
     def action_chk_btn_toolbox_active(self, chk_btn):
@@ -1367,14 +1382,14 @@ class Designer(FloatLayout):
         '''Event Handler for 'on_error' event of self._add_file_dlg
         '''
 
-        self.statusbar.show_message('Error while adding file to project')
+        show_message('Error while adding file to project')
         self._popup.dismiss()
 
     def _added_file(self, *args):
         '''Event Handler for 'on_added' event of self._add_file_dlg
         '''
 
-        self.statusbar.show_message('File successfully added to project',
+        show_message('File successfully added to project',
                                     5,
                                     'info')
         self._popup.dismiss()
@@ -1599,10 +1614,8 @@ class DesignerApp(App):
         self.root.ui_creator = self.root.designer_content.ui_creator
         self.root.statusbar.playground = self.root.ui_creator.playground
         self.root.ui_creator.playground.undo_manager = self.root.undo_manager
-        self.root.ui_creator.kv_code_input.statusbar = self.root.statusbar
         self.root.ui_creator.eventviewer.designer_tabbed_panel = \
             self.root.designer_content.tab_pannel
-        self.root.ui_creator.eventviewer.statusbar = self.root.statusbar
         self.root.statusbar.bind(height=self.root.on_statusbar_height)
         self.root.actionbar.bind(height=self.root.on_actionbar_height)
         self.root.ui_creator.playground.sandbox = DesignerSandbox()

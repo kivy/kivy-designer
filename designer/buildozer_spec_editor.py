@@ -144,6 +144,7 @@ class BuildozerSpecEditor(Settings):
 
     def load_settings(self, proj_dir):
         '''This function loads project settings
+        :param proj_dir: project directory with buildozer.spec
         '''
         self.interface.menu.buttons_layout.clear_widgets()
         self.proj_dir = proj_dir

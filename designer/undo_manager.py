@@ -143,7 +143,6 @@ class UndoManager(object):
     def push_operation(self, op):
         '''To push an operation into _undo_stack.
         '''
-        d = get_designer()
         get_current_project().saved = False
         self._undo_stack_operation.append(op)
 
