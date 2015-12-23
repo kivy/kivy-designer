@@ -538,7 +538,7 @@ class Playground(ScatterPlane):
                      on_cancel=self._popup.dismiss)
 
         content.selected_items = [self.root_name]
-        if self.root_app_widget.is_root:
+        if self.root_app_widget and self.root_app_widget.is_root:
             content.selected_items = ['Root - ' + self.root_name]
         content.show_items()
 
@@ -574,12 +574,12 @@ class Playground(ScatterPlane):
             kv lang text
         '''
         widgets = get_current_project().app_widgets
-        # if not displaying the widget
+        # if displaying no widget or this widget is not know
         if self.root is None or self.root_app_widget is None or \
                 widget_name not in widgets:
-            self._perform_load_widget(widget_name)
+            self._perform_load_widget(widget_name, update_kv_lang)
             return
-
+        # if a know widget, continue
         target = widgets[widget_name]
 
         # check if we are switching kv files
@@ -618,12 +618,8 @@ class Playground(ScatterPlane):
         widgets = get_current_project().app_widgets
         try:
             target = widgets[widget_name]
-            self.root_app_widget = target
-            wdg = get_app_widget(target)
-            self.add_widget_to_parent(wdg, None, from_undo=True, from_kv=True)
-            self.kv_code_input.path = target.kv_path
-
             if update_kv_lang:
+                # updates kv lang text with file
                 kv_path = target.kv_path
                 if kv_path:
                     self.kv_code_input.text = open(kv_path).read()
@@ -633,6 +629,10 @@ class Playground(ScatterPlane):
                         ' widget' % widget_name, 5, 'error'
                     )
                     self.kv_code_input.text = ''
+            self.root_app_widget = target
+            wdg = get_app_widget(target)
+            self.add_widget_to_parent(wdg, None, from_undo=True, from_kv=True)
+            self.kv_code_input.path = target.kv_path
         except (KeyError, AttributeError):
             show_message(
                 'Failed to load %s widget' % widget_name, 5, 'error')
@@ -646,18 +646,28 @@ class Playground(ScatterPlane):
         :param kv_lang_area: instance of kivy lang area
         '''
         proj = get_current_project()
-        widgets = proj.app_widgets
+        # copy of initial widgets
+        widgets = dict(proj.app_widgets)
         try:
-            wdg = widgets[self.root_name]
             if force:
                 proj.parse()
-            proj.parse_kv(text, wdg.kv_path)
-            if self.root_name not in proj.app_widgets:
+            if self.root_name:
+                kv_path = widgets[self.root_name].kv_path
+            else:
+                kv_path = self.kv_code_input.path
+            proj.parse_kv(text, kv_path)
+            # if was displaying one widget, but it was removed
+            if self.root_name and self.root_name not in proj.app_widgets:
                     self.load_widget_from_file(self.root_app_widget.kv_path)
                     show_message(
                         'The %s is not available. Displaying another widget'
                         % self.root_name, 5, 'info'
                     )
+            elif not self.root_name and not widgets and proj.app_widgets:
+                # if was not displaying a widget because there was no widget
+                # and now a widget is available
+                first_wdg = proj.app_widgets[list(proj.app_widgets.keys())[-1]]
+                self.load_widget(first_wdg.name, update_kv_lang=False)
             else:
                 self.load_widget(self.root_name, update_kv_lang=False)
         except KeyError:
@@ -671,6 +681,11 @@ class Playground(ScatterPlane):
         self.sandbox.clear_widgets()
         proj = get_current_project()
         widgets = proj.app_widgets
+        if not os.path.exists(kv_path):
+            show_message(kv_path + ' not exists', 5, 'error')
+            return
+        self.kv_code_input.text = open(kv_path, 'r').read()
+        self.kv_code_input.path = kv_path
         for key in widgets:
             wd = widgets[key]
             if wd.kv_path == kv_path:

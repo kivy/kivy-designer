@@ -96,7 +96,7 @@ class DesignerTools(EventDispatcher):
         if wdg.id:
             name = wdg.id + '_' + name
         wdg.export_to_png(os.path.join(proj_dir, name))
-        status.show_message('Image saved at ' + name, 5)
+        status.show_message('Image saved at ' + name, 5, 'info')
 
     def check_pep8(self):
         '''Check the PEP8 from current project
@@ -170,7 +170,7 @@ bin/
 __pycache__/'''
 
         f = open(gitignore_path, 'w').write(gitignore)
-        status.show_message('.gitignore created successfully', 5)
+        status.show_message('.gitignore created successfully', 5, 'info')
 
     def buildozer_init(self):
         '''Checks if the .spec exists or not; and when possible, calls

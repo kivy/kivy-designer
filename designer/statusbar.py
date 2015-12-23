@@ -41,35 +41,33 @@ class StatusMessage(BoxLayout):
        :class:`~kivy.properties.StringProperty` and defaults to ''
     '''
 
-    notification_type = OptionProperty(None,
-                                    options=['info', 'error', 'loading'],
-                                    allownone=True)
-    '''Shortcut to usual message icons
-       :data:`type` is an
+    img = ObjectProperty(None)
+    '''Instance of notification type icon
+        :data:`img` is an
        :class:`~kivy.properties.ObjectProperty` and defaults to None
     '''
 
     def show_message(self, message, duration=5, notification_type=None):
         self.message = message
-        self.notification_type = notification_type
+        icon = ''
+        if notification_type == 'info':
+            icon = 'icons/info.png'
+        elif notification_type == 'error':
+            icon = 'icons/error.png'
+        elif notification_type == 'loading':
+            icon = 'icons/loading.gif'
 
+        if icon:
+            self.img.opacity = 1
+            self.img.source = icon
+        else:
+            self.img.opacity = 0
         if duration > 0:
             Clock.schedule_once(self.clear_message, duration)
 
     def clear_message(self, *args):
-        self.notification_type = None
+        self.img.opacity = 0
         self.message = ''
-
-    def on_notification_type(self, *args):
-        icon = ''
-        type = self.notification_type
-        if type == 'info':
-            icon = 'icons/info.png'
-        elif type == 'error':
-            icon = 'icons/error.png'
-        elif type == 'loading':
-            icon = 'icons/loading.gif'
-        self.icon = icon
 
 
 class StatusInfo(BoxLayout):
@@ -185,7 +183,7 @@ class StatusBar(BoxLayout):
                 child.state = 'down'
 
     def on_app(self, instance, app, *args):
-        app.bind(widget_focused=self.update_navbar)
+        app.bind(widget_focused=self._update_navbar)
 
     def _update_content_width(self, *args):
         '''Updates the statusbar's children sizes to save space

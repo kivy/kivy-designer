@@ -23,7 +23,7 @@ from designer.helper_functions import get_app_widget, show_error_console, \
 
 IGNORED_PATHS = ('.designer', '.buildozer', '.git', '__pycache__', 'bin',)
 IGNORED_EXTS = ('.pyc',)
-KV_EVENT_RE = r'(\s+on_\w+\s*:.+)|([\s\w\d]+:[\.\s\w]+\(.*)'
+KV_EVENT_RE = r'(\s+on_\w+\s*:.+)|(^[\s\w\d]+:[\.]+[\s\w]+\(.*)'
 KV_ROOT_WIDGET = r'^([\w\d_]+)\:'
 KV_APP_WIDGET = r'^<([\w\d_@]+)>\:'
 
@@ -261,9 +261,9 @@ class Project(EventDispatcher):
             self.parse_py(py)
         # find and load root widgets
         for kv in self.kv_list:
-            src = open(kv).read()
+            src = open(kv, 'r').read()
             # removes events
-            src = re.sub(KV_EVENT_RE, '', src)
+            src = re.sub(KV_EVENT_RE, '', src, flags=re.MULTILINE)
             self.parse_kv(src, kv)
 
         self.show_errors()
@@ -445,6 +445,8 @@ class Project(EventDispatcher):
         try:
             for code in code_inputs:
                 fname = code.path
+                if not fname:
+                    continue
                 content = code.text
                 open(fname, 'w').write(content)
                 code.saved = True

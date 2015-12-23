@@ -1092,17 +1092,18 @@
 
     StatusMessage:
         id: status_message
+        img: img
         size_hint: 0.9, None
         height: '20pt'
         spacing: 10
         on_message: root._update_content_width()
         on_touch_down: if self.collide_point(*args[1].pos): root.dispatch('on_message_press')
         Image:
+            id: img
             size_hint: None, None
             width: '20pt'
             height: '20pt'
-            source: status_message.icon
-            opacity: 0 if not status_message.icon else 1
+            opacity: 0
         Label:
             size_hint_x: 1
             text: status_message.message

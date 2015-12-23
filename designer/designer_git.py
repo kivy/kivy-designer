@@ -9,7 +9,7 @@ from kivy.uix.popup import Popup
 import os
 from pygments.lexers.diff import DiffLexer
 import designer
-from designer.designer_content import DesignerTabbedPanelItem
+from designer.designer_content import DesignerCloseableTab
 from designer.helper_functions import ignore_proj_watcher, show_alert, \
     show_message, get_designer, FakeSettingList, get_current_project
 from designer.input_dialog import InputDialog
@@ -83,6 +83,8 @@ class DesignerGit(DesignerActionSubMenu):
         defaults to None.
     '''
 
+    __events__ = ('on_branch', )
+
     def __init__(self, **kwargs):
         super(DesignerGit, self).__init__(**kwargs)
         self._update_menu()
@@ -95,6 +97,8 @@ class DesignerGit(DesignerActionSubMenu):
         try:
             self.repo = Repo(path)
             self.is_repo = True
+            branch_name = self.repo.active_branch.name
+            self.dispatch('on_branch', branch_name)
 
             _dir = os.path.dirname(designer.__file__)
             _dir = os.path.split(_dir)[0]
@@ -181,7 +185,7 @@ class DesignerGit(DesignerActionSubMenu):
             self.repo.index.commit('Init commit')
             self.is_repo = True
             self._update_menu()
-            show_message('Git repo initialized', 5)
+            show_message('Git repo initialized', 5, 'info')
         except:
             show_alert('Git Init', 'Failted to initialize repo!')
 
@@ -204,7 +208,7 @@ class DesignerGit(DesignerActionSubMenu):
         if self.repo.is_dirty():
             try:
                 self.repo.git.commit('-am', message)
-                show_message('Commit: ' + message, 5)
+                show_message('Commit: ' + message, 5, 'info')
             except GitCommandError as e:
                 show_alert('Git Commit', 'Failed to commit!\n' + str(e))
         else:
@@ -246,7 +250,7 @@ class DesignerGit(DesignerActionSubMenu):
         try:
             self.repo.index.add(selected_files)
             show_message('%d file(s) added to Git index' %
-                         len(selected_files), 5)
+                         len(selected_files), 5, 'info')
             self._popup.dismiss()
         except GitCommandError as e:
             show_alert('Git Add', 'Failed to add files to Git!\n' + str(e))
@@ -290,8 +294,9 @@ class DesignerGit(DesignerActionSubMenu):
         self._popup.dismiss()
 
         if self.repo.is_dirty():
-            show_alert('Git checkout', 'Please, commit your changes before '
-                                                    + 'switch branches.')
+            show_alert('Git checkout',
+                       'Please, commit your changes before '
+                       'switch branches.')
             return
 
         if not branches:
@@ -304,42 +309,53 @@ class DesignerGit(DesignerActionSubMenu):
             else:
                 self.repo.create_head(branch)
                 self.repo.heads[branch].checkout()
+            branch_name = self.repo.active_branch.name
+            self.dispatch('on_branch', branch_name)
         except GitCommandError as e:
             show_alert('Git Branches', 'Failed to switch branch!\n' + str(e))
+
+    def on_branch(self, *args):
+        '''Dispatch the branch name
+        '''
+        pass
 
     def do_diff(self, *args):
         '''Open a CodeInput with git diff
         '''
         diff = self.repo.git.diff()
+        if not diff:
+            diff = 'Empty diff'
 
-        designer = get_designer()
-        designer_content = designer.designer_content
-        tabs = designer_content.tab_pannel
+        d = get_designer()
+        panel = d.designer_content.tab_pannel
+        inputs = d.code_inputs
 
         # check if diff is visible on tabbed panel.
         # if so, update the text content
-        for i, code_input in enumerate(tabs.list_py_code_inputs):
+        for i, code_input in enumerate(panel.tab_list):
             if code_input == self.diff_code_input:
-                tabs.switch_to(tabs.tab_list[len(tabs.tab_list) - i - 2])
-                code_input.text = diff
+                panel.switch_to(panel.tab_list[len(panel.tab_list) - i - 2])
+                code_input.content.code_input.text = diff
                 return
 
         # if not displayed, create or add it to the screen
         if self.diff_code_input is None:
-            panel_item = DesignerTabbedPanelItem(text='Git diff')
+            panel_item = DesignerCloseableTab(title='Git diff')
+            panel_item.bind(on_close=panel.on_close_tab)
             scroll = PyScrollView()
             _py_code_input = scroll.code_input
-            _py_code_input.rel_file_path = 'designer.DesigerGit.diff_code_input'
             _py_code_input.text = diff
+            _py_code_input.path = ''
             _py_code_input.readonly = True
             _py_code_input.lexer = DiffLexer()
-            tabs.list_py_code_inputs.append(_py_code_input)
+            _py_code_input.saved = True
             panel_item.content = scroll
+            panel_item.rel_path = ''
             self.diff_code_input = panel_item
         else:
             self.diff_code_input.content.code_input.text = diff
-        tabs.add_widget(self.diff_code_input)
-        tabs.switch_to(tabs.tab_list[0])
+        panel.add_widget(self.diff_code_input)
+        panel.switch_to(panel.tab_list[0])
 
     def do_push(self, *args):
         '''Open a list of remotes to push repository data.
@@ -404,9 +420,10 @@ class DesignerGit(DesignerActionSubMenu):
 
                 Clock.schedule_once(set_progress_done, 1)
                 progress.stop()
-                show_message('Git remote push completed!', 5)
+                show_message('Git remote push completed!', 5, 'info')
             except GitCommandError as e:
                 progress.label.text = 'Failed to push!\n' + str(e)
+                show_message('Failed to push', 5, 'error')
             self._popup.dismiss()
 
         progress.start()

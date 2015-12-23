@@ -104,7 +104,7 @@ class Shell(code.InteractiveConsole):
         except SystemExit:
             show_message(
                 'It\'s not possible to exit from Kivy Designer Python console',
-                5, 'info'
+                5, 'error'
             )
         except:
             self.showtraceback()

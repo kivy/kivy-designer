@@ -142,6 +142,13 @@ def show_message(*args, **kwargs):
     d.statusbar.show_message(*args, **kwargs)
 
 
+def update_info(*args, **kwargs):
+    '''Shortcut to display an update on status info
+    '''
+    d = get_designer()
+    d.statusbar.update_info(*args, **kwargs)
+
+
 def show_error_console(text, append=False):
     '''Shows a text on Error Console.
     :param append appends the new text at the bottom of console

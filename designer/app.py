@@ -54,7 +54,7 @@ from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
 from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_kivy_designer_dir, show_alert, \
-    ignore_proj_watcher, show_message
+    ignore_proj_watcher, show_message, update_info
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton, \
@@ -219,6 +219,9 @@ class Designer(FloatLayout):
         self.designer_content = DesignerContent(size_hint=(1, None))
         self.designer_content = self.designer_content.__self__
 
+        self.designer_git.bind(on_branch=self.on_git_branch)
+        self.statusbar.bind(on_info_press=self.on_info_press)
+
         Clock.schedule_interval(
             self.save_project,
             int(self.designer_settings.config_parser.getdefault(
@@ -327,6 +330,19 @@ class Designer(FloatLayout):
             'internal', 'window_height', 600
         ))
         Window.size = max(width, 800), max(height, 600)
+
+    def on_git_branch(self, instance, branch_name, *args):
+        '''Bing git changes
+        :param branch_name: name of the selected branch
+        '''
+        update_info('Git', branch_name)
+
+    def on_info_press(self, *args):
+        '''Callback to git statusbar info press
+        '''
+        # open switch branch if git repo
+        if self.designer_git.is_repo:
+            self.designer_git.do_branches()
 
     def open_repo(self, *args):
         '''
@@ -1382,16 +1398,14 @@ class Designer(FloatLayout):
         '''Event Handler for 'on_error' event of self._add_file_dlg
         '''
 
-        show_message('Error while adding file to project')
+        show_message('Error while adding file to project', 5, 'error')
         self._popup.dismiss()
 
     def _added_file(self, *args):
         '''Event Handler for 'on_added' event of self._add_file_dlg
         '''
 
-        show_message('File successfully added to project',
-                                    5,
-                                    'info')
+        show_message('File successfully added to project', 5, 'info')
         self._popup.dismiss()
         self.designer_content.update_tree_view(
             self.project_manager.current_project)
@@ -1683,7 +1697,7 @@ class DesignerApp(App):
         if container:
             self.root.add_widget(container)
         else:
-            self.root.statusbar.show_message("Cannot create %s" % widgetname)
+            show_message("Cannot create %s" % widgetname, 5, 'error')
 
         container.widgettree = self.root.ui_creator.widgettree
         return container
