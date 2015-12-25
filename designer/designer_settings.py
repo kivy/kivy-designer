@@ -12,7 +12,7 @@ from kivy.config import ConfigParser
 from kivy.uix.settings import Settings
 
 from designer.helper_functions import get_kivy_designer_dir
-from designer.uix.settings import SettingList
+from designer.uix.settings import SettingList, SettingShortcut
 
 DESIGNER_CONFIG_FILE_NAME = 'config.ini'
 
@@ -49,6 +49,7 @@ class DesignerSettings(Settings):
     def __init__(self, **kwargs):
         super(DesignerSettings, self).__init__(*kwargs)
         self.register_type('list', SettingList)
+        self.register_type('shortcut', SettingShortcut)
 
     def load_settings(self):
         '''This function loads project settings
@@ -108,6 +109,9 @@ class DesignerSettings(Settings):
         self.add_json_panel('Hanga', self.config_parser,
                             os.path.join(_dir, 'designer', 'settings',
                                          'hanga_settings.json'))
+        self.add_json_panel('Keyboard Shortcuts', self.config_parser,
+                            os.path.join(_dir, 'designer', 'settings',
+                                         'shortcuts.json'))
 
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.
