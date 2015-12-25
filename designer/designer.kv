@@ -1569,10 +1569,14 @@
             do_default_tab: False
             DesignerTabbedPanelItem:
                 text: 'Project Tree'
-                TreeView:
-                    id: tree_view
-                    size_hint: 1, 1
-            
+                ScrollView:
+                    id: tree_scroll
+                    bar_width: 10
+                    scroll_type: ['bars', 'content']
+                    TreeView:
+                        id: tree_view
+                        size_hint: 1, None
+                        height: max(tree_scroll.height, self.minimum_height)
             DesignerTabbedPanelItem:
                 text: 'Toolbox'
                 Toolbox:
