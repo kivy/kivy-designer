@@ -117,7 +117,7 @@ Builder.load_string('''
 
 <SettingShortcut>:
     Label:
-        text: root.value or ''
+        text: root.hint or ''
         pos: root.pos
         font_size: '15sp'
 
@@ -537,7 +537,7 @@ class SettingShortcutContent(BoxLayout):
             modifier.append('shift')
         if self.has_alt:
             modifier.append('alt')
-
+        modifier.sort()
         value = str(modifier) + ' + ' + self.key
         # check if shortcut exist
         d = get_designer()
@@ -569,7 +569,9 @@ class SettingShortcutContent(BoxLayout):
     def _on_key_down(self, keyboard, key, codepoint, text, modifier, **kwargs):
         '''Listen keyboard to create shortcuts. Update class properties
         '''
-        self.key = Keyboard.keycode_to_string(None, key)
+        self.key = Keyboard.keycode_to_string(Window._system_keyboard, key)
+        if self.key in ['ctrl', 'shift', 'alt']:
+            self.key = ''
         if modifier is None:
             modifier = []
         self.has_ctrl = 'ctrl' in modifier
@@ -624,7 +626,7 @@ class SettingShortcut(SettingItem):
         [Modifiers, ...] + keycode(string)
     eg
         [ctrl] + q
-        [ctrl,shift] + a
+        [ctrl, shift] + a
         [] + f1
     '''
 
@@ -634,6 +636,12 @@ class SettingShortcut(SettingItem):
     :attr:`popup` is an :class:`~kivy.properties.ObjectProperty` and defaults
     to None.
     '''
+
+    hint = StringProperty('')
+    '''Readable shortcut. Parses value to display on settings panel
+    :attr:`hint` is an :class:`~kivy.properties.StringProperty` and defaults
+    to ''.
+     '''
 
     def on_panel(self, instance, value):
         if value is None:
@@ -678,3 +686,11 @@ class SettingShortcut(SettingItem):
         '''
         instance.listen_key = False
         self._dismiss()
+
+    def on_value(self, instance, value):
+        super(SettingShortcut, self).on_value(instance, value)
+        mod, key = self.value.split('+')
+        key = key.strip()
+        modifier = eval(mod)
+        hint = ' + '.join(modifier) + ' + ' + key
+        self.hint = hint.title()

@@ -429,15 +429,14 @@
         text: root.text
     Label:
         id: info
-        text: root.desc
+        text: root.hint
         pos: root.pos
         size: root.size
-        opacity: 0.3
+        opacity: 0.5
         text_size: self.size
         valign: 'bottom'
         halign: 'right'
         padding: 5, 5
-
 
 <DesignerActionSubMenu>:
     text_size: (self.width - sp(24), self.size[1])
@@ -1667,6 +1666,7 @@
                     text: 'Settings'
                     on_release: root.action_btn_settings_pressed()
                 DesignerActionButton:
+                    id: actn_btn_quit
                     text: 'Quit'
                     on_release: root.action_btn_quit_pressed()
 
