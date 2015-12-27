@@ -1,4 +1,4 @@
-from kivy.core.window import Window
+from kivy.core.window import Window, Keyboard
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, \
@@ -9,6 +9,8 @@ from kivy.uix.popup import Popup
 from kivy.uix.settings import SettingItem, SettingSpacer
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
+
+from designer.helper_functions import get_designer
 
 Builder.load_string('''
 <SettingDict>:
@@ -186,7 +188,7 @@ Builder.load_string('''
         opacity: 1 if self.text else 0
     BoxLayout:
         size_hint_y: None
-        height: 30
+        height: '24pt'
         Button:
             text: 'Cancel'
             on_press: root.dispatch('on_cancel')
@@ -448,6 +450,7 @@ class SettingList(SettingItem):
 
 
 class SettingShortcutContent(BoxLayout):
+
     has_ctrl = BooleanProperty(False)
     '''Indicates if should listen the Ctrl key
     :attr:`has_ctrl` is a :class:`~kivy.properties.BooleanProperty`
@@ -484,6 +487,12 @@ class SettingShortcutContent(BoxLayout):
     and defaults to ''
     '''
 
+    config_name = StringProperty('')
+    '''Indicates the field key on shortcuts.json
+    :attr:`config_name` is a :class:`~kivy.properties.StringProperty`
+    and defaults to ''
+    '''
+
     value = StringProperty('')
     '''Indicates the shortcut in the String format
     :attr:`value` is a :class:`~kivy.properties.StringProperty`
@@ -500,7 +509,6 @@ class SettingShortcutContent(BoxLayout):
 
     def __init__(self, **kwargs):
         super(SettingShortcutContent, self).__init__(**kwargs)
-        self._keyboard = None
         self.bind(has_ctrl=self.validate_shortcut)
         self.bind(has_shift=self.validate_shortcut)
         self.bind(has_alt=self.validate_shortcut)
@@ -510,6 +518,10 @@ class SettingShortcutContent(BoxLayout):
         '''Check if it's a valid shortcut and if it's being used somewhere else
         Updates the error label and return a boolean
         '''
+        # restore default values
+        self.valid = True
+        self.error = ''
+
         valid = False
         if (self.has_ctrl or self.has_shift or self.has_alt) and self.key:
             valid = True
@@ -517,8 +529,6 @@ class SettingShortcutContent(BoxLayout):
         if self.key in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9'
                         'f10', 'f11', 'f12']:
             valid = True
-
-        # TODO check if this shortcut already exists
 
         modifier = []
         if self.has_ctrl:
@@ -528,12 +538,22 @@ class SettingShortcutContent(BoxLayout):
         if self.has_alt:
             modifier.append('alt')
 
+        value = str(modifier) + ' + ' + self.key
+        # check if shortcut exist
+        d = get_designer()
+        if value and value in d.shortcuts.map:
+            shortcut = d.shortcuts.map[value]
+            if shortcut[1] != self.config_name:
+                valid = False
+                self.error = 'Shortcut already being used at ' + shortcut[1]
+
         if valid:
-            self.value = str(modifier) + ' + ' + self.key
+            self.value = value
             self.error = ''
         else:
             self.value = ''
-            self.error = 'Invalid shortcut!'
+            if not self.error:
+                self.error = 'This shortcut is not valid'
 
         self.valid = valid
         return valid
@@ -542,17 +562,14 @@ class SettingShortcutContent(BoxLayout):
         '''Enable/disable keyboard listener
         '''
         if value:
-            if self._keyboard is None:
-                self._keyboard = Window.request_keyboard(
-                        self._keyboard_closed, self, 'text')
-            self._keyboard.bind(on_key_down=self._on_key_down)
+            Window.bind(on_key_down=self._on_key_down)
         else:
-            self._keyboard.unbind(on_key_down=self._on_key_down)
+            Window.unbind(on_key_down=self._on_key_down)
 
-    def _on_key_down(self, keyboard, key, codepoint, modifier, **kwargs):
+    def _on_key_down(self, keyboard, key, codepoint, text, modifier, **kwargs):
         '''Listen keyboard to create shortcuts. Update class properties
         '''
-        self.key = key[1]
+        self.key = Keyboard.keycode_to_string(None, key)
         if modifier is None:
             modifier = []
         self.has_ctrl = 'ctrl' in modifier
@@ -560,11 +577,6 @@ class SettingShortcutContent(BoxLayout):
         self.has_alt = 'alt' in modifier
 
         return True
-
-    def _keyboard_closed(self, *args):
-        '''Callback to keyboard closed
-        '''
-        self._keyboard = None
 
     def parse_value(self, value, *args):
         '''Parse the value string and update shortcut parameters.
@@ -597,6 +609,8 @@ class SettingShortcutContent(BoxLayout):
         self.has_shift = False
         self.has_ctrl = False
         self.value = ''
+        self.error = ''
+        self.valid = True
 
     def on_confirm(self, *args):
         '''Event handler to confirm button
@@ -635,6 +649,7 @@ class SettingShortcut(SettingItem):
         # create popup layout
         content = SettingShortcutContent()
         content.listen_key = True
+        content.config_name = self.key
         if self.value:
             content.parse_value(self.value)
         content.bind(on_confirm=self.on_confirm)
@@ -650,7 +665,16 @@ class SettingShortcut(SettingItem):
 
     def on_confirm(self, instance, value, *args):
         '''Callback to shortcut editor confirm
+        :param instance: instance of shortcut editor(content)
         :param value: string with the formatted shortcut
         '''
+        instance.listen_key = False
         self.value = value
+        self._dismiss()
+
+    def on_cancel(self, instance, *args):
+        '''Callback to shortcut editor cancel
+        :param instance: instance of shortcut editor(content)
+        '''
+        instance.listen_key = False
         self._dismiss()

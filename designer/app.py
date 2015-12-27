@@ -5,6 +5,7 @@ from designer.input_dialog import InputDialog
 from designer.profile_settings import ProfileSettings
 from designer.profiler import Profiler
 from designer.uix.modules_contview import ModulesContView
+from designer.shortcuts import Shortcuts
 
 __all__ = ('DesignerApp', )
 
@@ -201,6 +202,11 @@ class Designer(FloatLayout):
         self.designer_settings.load_settings()
         self.designer_settings.bind(on_close=self._cancel_popup)
 
+        self.shortcuts = Shortcuts()
+        self.shortcuts.map_shortcuts(self.designer_settings.config_parser)
+        self.designer_settings.config_parser.add_callback(
+                self.on_designer_settings)
+
         self.prof_settings = ProfileSettings()
         self.prof_settings.bind(on_close=self._cancel_popup)
         self.prof_settings.bind(on_changed=self.on_profiles_changed)
@@ -271,6 +277,12 @@ class Designer(FloatLayout):
         )
         if kv_lang_area == 'False':
             self.ids.actn_chk_kv_lang_area.checkbox.active = False
+
+    def on_designer_settings(self, section, *args):
+        '''Callback to designer settings modifications
+        '''
+        if section == 'shortcuts':
+            self.shortcuts.map_shortcuts(self.designer_settings.config_parser)
 
     def toggle_fullscreen(self, check, **kwargs):
         '''

@@ -4,5 +4,11 @@
     "title": "Exit",
     "section": "shortcuts",
     "key": "exit"
+  },
+  {
+    "type": "shortcut",
+    "title": "Close Project",
+    "section": "shortcuts",
+    "key": "close"
   }
 ]
