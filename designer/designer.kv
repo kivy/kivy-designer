@@ -1005,6 +1005,8 @@
     title: self.title[0].upper() + self.title[1:]
     ScrollView:
         pos: root.pos
+        bar_width: 10
+        scroll_type: ['bars', 'content']
         GridLayout:
             id: gridlayout
             cols: 1
@@ -1012,7 +1014,6 @@
             padding: '5sp'
             spacing: '3sp'
             size_hint_y: None
-            size: root.size
             height: max(self.parent.height, self.minimum_height)
     
 <ToolboxButton>:
