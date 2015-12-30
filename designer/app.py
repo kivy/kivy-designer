@@ -304,6 +304,12 @@ class Designer(FloatLayout):
         '''
         webbrowser.open("http://kivy.org/docs/")
 
+    def open_kd_docs(self, *args):
+        '''
+        Open the Kivy Designer documentation
+        '''
+        webbrowser.open("http://kivy-designer.readthedocs.org")
+
     def show_help(self, *args):
         '''Event handler for 'on_help' event of self.start_page
         '''
