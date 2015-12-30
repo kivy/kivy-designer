@@ -119,16 +119,6 @@
             pos_hint: {'right': 1}
             on_release: root.dispatch('on_cancel')
 
-<AboutDialog>:
-    Label:
-        text: 'Kivy Designer'
-        
-    Button:
-        text: 'Close'
-        size_hint: None, None
-        size: '44pt', '22pt'
-        on_release: root.dispatch('on_cancel')
-
 #
 # Profile Settings
 #
@@ -1804,13 +1794,18 @@
                     on_release: root.open_docs()
 
                 DesignerActionButton:
+                    id: actn_btn_doc
+                    text: 'Kivy Designer Docs'
+                    on_release: root.open_kd_docs()
+
+                DesignerActionButton:
                     id: actn_btn_page
                     text: 'Kivy Designer repo'
                     on_release: root.open_repo()
 
                 DesignerActionButton:
                     id: actn_btn_about
-                    text: 'About...'
+                    text: 'About ...'
                     on_release: root.action_btn_about_pressed()
 
     DesignerStartPage:
