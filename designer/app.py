@@ -5,6 +5,7 @@ from designer.input_dialog import InputDialog
 from designer.profile_settings import ProfileSettings
 from designer.profiler import Profiler
 from designer.uix.modules_contview import ModulesContView
+from designer.shortcuts import Shortcuts
 
 __all__ = ('DesignerApp', )
 
@@ -201,6 +202,12 @@ class Designer(FloatLayout):
         self.designer_settings.load_settings()
         self.designer_settings.bind(on_close=self._cancel_popup)
 
+        self.shortcuts = Shortcuts()
+        self.shortcuts.map_shortcuts(self.designer_settings.config_parser)
+        self.designer_settings.config_parser.add_callback(
+                self.on_designer_settings)
+        self.display_shortcuts()
+
         self.prof_settings = ProfileSettings()
         self.prof_settings.bind(on_close=self._cancel_popup)
         self.prof_settings.bind(on_changed=self.on_profiles_changed)
@@ -271,6 +278,34 @@ class Designer(FloatLayout):
         )
         if kv_lang_area == 'False':
             self.ids.actn_chk_kv_lang_area.checkbox.active = False
+
+    def on_designer_settings(self, section, *args):
+        '''Callback to designer settings modifications
+        :param section: modified section name
+        '''
+        if section == 'shortcuts':
+            # update the shortcuts
+            self.shortcuts.map_shortcuts(self.designer_settings.config_parser)
+            self.display_shortcuts()
+
+    def display_shortcuts(self, *args):
+        '''Reads shortcus and update shortcut hints in KD
+        '''
+        m = self.shortcuts.map
+
+        def get_hint(name):
+            for short in m:
+                shortcut = m[short]
+                # if shortcut key is the searched
+                if shortcut[1] == name:
+                    mod, key = short.split('+')
+                    key = key.strip()
+                    modifier = eval(mod)
+                    short = '+'.join(modifier) + '+' + key
+                    return short.title()
+            return ''
+
+        self.ids.actn_btn_quit.hint = get_hint('exit')
 
     def toggle_fullscreen(self, check, **kwargs):
         '''

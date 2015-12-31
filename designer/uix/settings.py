@@ -1,4 +1,4 @@
-from kivy.core.window import Window
+from kivy.core.window import Window, Keyboard
 from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, \
@@ -9,6 +9,8 @@ from kivy.uix.popup import Popup
 from kivy.uix.settings import SettingItem, SettingSpacer
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
+
+from designer.helper_functions import get_designer
 
 Builder.load_string('''
 <SettingDict>:
@@ -112,6 +114,91 @@ Builder.load_string('''
         Button:
             text: 'Cancel'
             on_press: root.dispatch('on_cancel')
+
+<SettingShortcut>:
+    Label:
+        text: root.hint or ''
+        pos: root.pos
+        font_size: '15sp'
+
+<SettingShortcutContent>:
+    orientation: 'vertical'
+    BoxLayout:
+        GridLayout:
+            cols: 2
+            canvas.after:
+                Color:
+                    rgb: .3, .3, .3
+                Rectangle:
+                    pos: self.right - 1, self.y
+                    size: 1, self.height - 30
+            Label:
+                size_hint: None, None
+                size: 0, 0
+            Label:
+                size_hint_y: None
+                height: 30
+                text: 'Modifiers'
+                text_size: self.size
+                halign: 'center'
+            CheckBox:
+                active: root.has_ctrl
+                on_active: root.has_ctrl = self.active
+                size_hint_x: 0.2
+            Label:
+                text: 'Ctrl'
+                text_size: self.size
+                valign: 'middle'
+            CheckBox:
+                active: root.has_shift
+                on_active: root.has_shift = self.active
+                size_hint_x: 0.2
+            Label:
+                text: 'Shift'
+                text_size: self.size
+                valign: 'middle'
+            CheckBox:
+                active: root.has_alt
+                on_active: root.has_alt = self.active
+                size_hint_x: 0.2
+            Label:
+                text: 'Alt'
+                text_size: self.size
+                valign: 'middle'
+
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint_y: None
+                height: 30
+                text: 'Key'
+                text_size: self.size
+                halign: 'center'
+            Label:
+                text: root.key
+                font_size: '20pt'
+                text_size: self.size
+                valign: 'middle'
+                halign: 'center'
+    Label:
+        text: root.error
+        size_hint_y: None
+        height: 30
+        color: [1, 0, 0, 1]
+        opacity: 1 if self.text else 0
+    BoxLayout:
+        size_hint_y: None
+        height: '24pt'
+        Button:
+            text: 'Cancel'
+            on_press: root.dispatch('on_cancel')
+        Button:
+            text: 'Disable'
+            on_press: root.dispatch('on_disable')
+        Button:
+            text: 'Confirm'
+            on_press: root.dispatch('on_confirm', root.value)
+            disabled: not root.valid
 ''')
 
 
@@ -151,8 +238,8 @@ class SettingDict(SettingItem):
         content = BoxLayout(orientation='vertical', spacing='5dp')
         popup_width = min(0.95 * Window.width, dp(500))
         self.popup = popup = Popup(
-            content=content, title=self.title, size_hint=(None, None),
-            size=(popup_width, '400dp'))
+                content=content, title=self.title, size_hint=(None, None),
+                size=(popup_width, '400dp'))
         popup.height = len(self.options) * dp(55) + dp(150)
 
         # add all the options
@@ -238,7 +325,7 @@ class SettingListContent(BoxLayout):
     defaults to []
     '''
 
-    __events__ = ('on_apply', 'on_cancel', )
+    __events__ = ('on_apply', 'on_cancel',)
 
     def __init__(self, **kwargs):
         super(SettingListContent, self).__init__(**kwargs)
@@ -338,8 +425,8 @@ class SettingList(SettingItem):
         popup_width = min(0.95 * Window.width, 500)
         popup_height = min(0.95 * Window.height, 500)
         self.popup = popup = Popup(
-            content=content, title=self.title, size_hint=(None, None),
-            size=(popup_width, popup_height), auto_dismiss=False)
+                content=content, title=self.title, size_hint=(None, None),
+                size=(popup_width, popup_height), auto_dismiss=False)
 
         content.bind(on_apply=self._set_values, on_cancel=self.popup.dismiss)
         selected_items = self.value.split(',')
@@ -360,3 +447,250 @@ class SettingList(SettingItem):
         selected_items = args[1]
         self.value = ','.join(selected_items)
         self.popup.dismiss()
+
+
+class SettingShortcutContent(BoxLayout):
+
+    has_ctrl = BooleanProperty(False)
+    '''Indicates if should listen the Ctrl key
+    :attr:`has_ctrl` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to False
+    '''
+
+    has_shift = BooleanProperty(False)
+    '''Indicates if should listen the Shift key
+    :attr:`has_shift` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to False
+    '''
+
+    has_alt = BooleanProperty(False)
+    '''Indicates if should listen the Alt key
+    :attr:`has_alt` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to False
+    '''
+
+    listen_key = BooleanProperty(False)
+    '''Indicates if should listen the keyboard
+    :attr:`listen_key` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to False
+    '''
+
+    valid = BooleanProperty(True)
+    '''(internal) Indicates if the shortcut is valid
+    :attr:`valid` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to True
+    '''
+
+    key = StringProperty('')
+    '''Indicates the shortcut key
+    :attr:`key` is a :class:`~kivy.properties.StringProperty`
+    and defaults to ''
+    '''
+
+    config_name = StringProperty('')
+    '''Indicates the field key on shortcuts.json
+    :attr:`config_name` is a :class:`~kivy.properties.StringProperty`
+    and defaults to ''
+    '''
+
+    value = StringProperty('')
+    '''Indicates the shortcut in the String format
+    :attr:`value` is a :class:`~kivy.properties.StringProperty`
+    and defaults to ''
+    '''
+
+    error = StringProperty('')
+    '''Error message
+    :attr:`error` is a :class:`~kivy.properties.StringProperty`
+    and defaults to ''
+    '''
+
+    __events__ = ('on_confirm', 'on_disable', 'on_cancel',)
+
+    def __init__(self, **kwargs):
+        super(SettingShortcutContent, self).__init__(**kwargs)
+        self.bind(has_ctrl=self.validate_shortcut)
+        self.bind(has_shift=self.validate_shortcut)
+        self.bind(has_alt=self.validate_shortcut)
+        self.bind(key=self.validate_shortcut)
+
+    def validate_shortcut(self, *args):
+        '''Check if it's a valid shortcut and if it's being used somewhere else
+        Updates the error label and return a boolean
+        '''
+        # restore default values
+        self.valid = True
+        self.error = ''
+
+        valid = False
+        if (self.has_ctrl or self.has_shift or self.has_alt) and self.key:
+            valid = True
+
+        if self.key in ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9'
+                        'f10', 'f11', 'f12']:
+            valid = True
+
+        modifier = []
+        if self.has_ctrl:
+            modifier.append('ctrl')
+        if self.has_shift:
+            modifier.append('shift')
+        if self.has_alt:
+            modifier.append('alt')
+        modifier.sort()
+        value = str(modifier) + ' + ' + self.key
+        # check if shortcut exist
+        d = get_designer()
+        if value and value in d.shortcuts.map:
+            shortcut = d.shortcuts.map[value]
+            if shortcut[1] != self.config_name:
+                valid = False
+                self.error = 'Shortcut already being used at ' + shortcut[1]
+
+        if valid:
+            self.value = value
+            self.error = ''
+        else:
+            self.value = ''
+            if not self.error:
+                self.error = 'This shortcut is not valid'
+
+        self.valid = valid
+        return valid
+
+    def on_listen_key(self, instance, value, *args):
+        '''Enable/disable keyboard listener
+        '''
+        if value:
+            Window.bind(on_key_down=self._on_key_down)
+        else:
+            Window.unbind(on_key_down=self._on_key_down)
+
+    def _on_key_down(self, keyboard, key, codepoint, text, modifier, **kwargs):
+        '''Listen keyboard to create shortcuts. Update class properties
+        '''
+        self.key = Keyboard.keycode_to_string(Window._system_keyboard, key)
+        if self.key in ['ctrl', 'shift', 'alt']:
+            self.key = ''
+        if modifier is None:
+            modifier = []
+        self.has_ctrl = 'ctrl' in modifier
+        self.has_shift = 'shift' in modifier
+        self.has_alt = 'alt' in modifier
+
+        return True
+
+    def parse_value(self, value, *args):
+        '''Parse the value string and update shortcut parameters.
+        If value is invalid, returns False and set a clean shortcut
+        :param value: string with formatted shortcut
+        '''
+        try:
+            mod, key = value.split('+')
+            key = key.strip()
+            self.key = key
+            modifier = eval(mod)
+            self.has_ctrl = 'ctrl' in modifier
+            self.has_shift = 'shift' in modifier
+            self.has_alt = 'alt' in modifier
+            self.value = value
+            return True
+        except:
+            return False
+
+    def on_cancel(self, *args):
+        '''Event handler to cancel button
+        '''
+        pass
+
+    def on_disable(self, *args):
+        '''Event handler to disable button
+        '''
+        self.key = ''
+        self.has_alt = False
+        self.has_shift = False
+        self.has_ctrl = False
+        self.value = ''
+        self.error = ''
+        self.valid = True
+
+    def on_confirm(self, *args):
+        '''Event handler to confirm button
+        '''
+        pass
+
+
+class SettingShortcut(SettingItem):
+    '''Implementation of a shortcut listener.
+    Setting will be stored in the format:
+        [Modifiers, ...] + keycode(string)
+    eg
+        [ctrl] + q
+        [ctrl, shift] + a
+        [] + f1
+    '''
+
+    popup = ObjectProperty(None, allownone=True)
+    '''(internal) Used to store the current popup when it's shown.
+
+    :attr:`popup` is an :class:`~kivy.properties.ObjectProperty` and defaults
+    to None.
+    '''
+
+    hint = StringProperty('')
+    '''Readable shortcut. Parses value to display on settings panel
+    :attr:`hint` is an :class:`~kivy.properties.StringProperty` and defaults
+    to ''.
+     '''
+
+    def on_panel(self, instance, value):
+        if value is None:
+            return
+        self.bind(on_release=self._create_popup)
+
+    def _dismiss(self, *largs):
+        if self.popup:
+            self.popup.dismiss()
+        self.popup = None
+
+    def _create_popup(self, instance):
+        # create popup layout
+        content = SettingShortcutContent()
+        content.listen_key = True
+        content.config_name = self.key
+        if self.value:
+            content.parse_value(self.value)
+        content.bind(on_confirm=self.on_confirm)
+        content.bind(on_cancel=self._dismiss)
+        popup_width = min(0.95 * Window.width, dp(500))
+        self.popup = popup = Popup(
+                title='Shortcut - ' + self.title,
+                content=content,
+                size_hint=(None, None),
+                size=(popup_width, '250dp'))
+
+        popup.open()
+
+    def on_confirm(self, instance, value, *args):
+        '''Callback to shortcut editor confirm
+        :param instance: instance of shortcut editor(content)
+        :param value: string with the formatted shortcut
+        '''
+        instance.listen_key = False
+        self.value = value
+        self._dismiss()
+
+    def on_cancel(self, instance, *args):
+        '''Callback to shortcut editor cancel
+        :param instance: instance of shortcut editor(content)
+        '''
+        instance.listen_key = False
+        self._dismiss()
+
+    def on_value(self, instance, value):
+        super(SettingShortcut, self).on_value(instance, value)
+        mod, key = self.value.split('+')
+        key = key.strip()
+        modifier = eval(mod)
+        hint = ' + '.join(modifier) + ' + ' + key
+        self.hint = hint.title()

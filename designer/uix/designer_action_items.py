@@ -59,9 +59,9 @@ class DesignerActionButton(ActionItem, ButtonBehavior, FloatLayout):
        to 'Button'
     '''
 
-    desc = StringProperty('')
+    hint = StringProperty('')
     '''text which is displayed as description to DesignerActionButton.
-       :data:`desc` is a :class:`~kivy.properties.StringProperty` and defaults
+       :data:`hint` is a :class:`~kivy.properties.StringProperty` and defaults
        to ''
     '''
     cont_menu = ObjectProperty(None)
