@@ -382,7 +382,7 @@ class Designer(FloatLayout):
 
         self.recent_manager.max_recent_files = \
             int(self.designer_settings.config_parser.getdefault(
-                'global', 'num_recent_files', 5))
+                'global', 'num_recent_files', 10))
 
         if self.save_window_size:
             self._write_window_size()
@@ -943,7 +943,7 @@ class Designer(FloatLayout):
                     self.ui_creator.kv_code_input.text = \
                         self.project_loader.get_full_str()
 
-                self.recent_manager.add_file(file_path)
+                self.recent_manager.add_path(file_path)
                 # Record everything for later use
                 self.project_loader.record()
                 self.designer_content.update_tree_view(self.project_loader)
@@ -1040,7 +1040,7 @@ class Designer(FloatLayout):
         proj_dir = os.path.join(proj_dir, instance.filename)
         try:
             self.project_loader.save_project(proj_dir)
-            self.recent_manager.add_file(proj_dir)
+            self.recent_manager.add_path(proj_dir)
             projdir = self.project_loader.proj_dir
             self.project_loader.cleanup()
             self.ui_creator.playground.cleanup()
@@ -1146,7 +1146,7 @@ class Designer(FloatLayout):
     def action_btn_recent_files_pressed(self, *args):
         '''Event Handler when ActionButton "Recent Projects" is pressed.
         '''
-        self._recent_dlg = RecentDialog(self.recent_manager.list_files)
+        self._recent_dlg = RecentDialog(self.recent_manager.list_projects)
         self._recent_dlg.bind(on_cancel=self._cancel_popup,
                               on_select=self._recent_file_release)
         self._popup = Popup(title='Recent Projects', content=self._recent_dlg,
@@ -1758,7 +1758,6 @@ class DesignerApp(App):
             self.root.ui_creator.playground.pos
         self.root.ui_creator.playground.sandbox.size = \
             self.root.ui_creator.playground.size
-        self.root.start_page.recent_files_box.root = self.root
 
         self.root.ui_creator.playground.sandbox.bind(
             on_getting_exception=self.root.on_sandbox_getting_exception)
@@ -1774,7 +1773,7 @@ class DesignerApp(App):
 
         self.create_kivy_designer_dir()
         self.root.start_page.recent_files_box.add_recent(
-            self.root.recent_manager.list_files)
+            self.root.recent_manager.list_projects)
 
         self.root.fill_select_profile_menu()
         self.started = True

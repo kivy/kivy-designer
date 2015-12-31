@@ -1,14 +1,11 @@
 import webbrowser
 
-from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
-from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, ObjectProperty
-from kivy.metrics import pt
-from kivy.clock import Clock
+
+from designer.helper_functions import get_designer
 
 
 class DesignerLinkLabel(Button):
@@ -28,6 +25,19 @@ class DesignerLinkLabel(Button):
             webbrowser.open(self.link)
 
 
+class RecentItem(BoxLayout):
+    path = StringProperty('')
+    '''Contains the application path
+       :data:`path` is a :class:`~kivy.properties.StringProperty`
+    '''
+
+    __events__ = ('on_press', )
+
+    def on_press(self, *args):
+        '''Item pressed
+        '''
+
+
 class RecentFilesBox(ScrollView):
     '''Container consistings of buttons, with their names specifying
        the recent files.
@@ -39,82 +49,34 @@ class RecentFilesBox(ScrollView):
        :data:`grid` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    root = ObjectProperty(None)
-    '''Reference to :class:`~designer.app.Designer`
-       :data:`root` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
     def __init__(self, **kwargs):
         super(RecentFilesBox, self).__init__(**kwargs)
 
-    def _setup_width(self, *args):
-        '''To set appropriate width of RecentFilesBox.
-        '''
-        max_width = -1
-        for child in self.grid.children:
-            max_width = max(child.texture_size[0], max_width)
-
-        self.width = max_width + pt(20)
-
     def add_recent(self, list_files):
         '''To add buttons representing Recent Files.
+        :param list_files: array of paths
         '''
-        for i in list_files:
-            btn = Button(text=i, size_hint_y=None, height=pt(22))
-            self.grid.add_widget(btn)
-            btn.bind(size=self._btn_size_changed)
-            btn.bind(on_release=self.btn_release)
-            btn.valign = 'middle'
-            self.grid.height += btn.height
+        for p in list_files:
+            recent_item = RecentItem(path=p)
+            self.grid.add_widget(recent_item)
+            recent_item.bind(on_press=self.btn_release)
+            self.grid.height += recent_item.height
 
         self.grid.height = max(self.grid.height, self.height)
-        Clock.schedule_once(self._setup_width, 0.01)
-
-    def _btn_size_changed(self, instance, value):
-        '''Event Handler for 'on_size' of buttons added.
-        '''
-        instance.text_size = value
 
     def btn_release(self, instance):
         '''Event Handler for 'on_release' of an event.
         '''
-        self.root._perform_open(instance.text)
+        d = get_designer()
+        d._perform_open(instance.path)
 
 
-class DesignerStartPage(GridLayout):
-    '''This is the start page of the Designer. It will contain two buttons
-       'Open Project' and 'New Project', two DesignerLinkLabel
-       'Kivy' and 'Kivy Designer Help' and a RecentFilesBox. It emits two
-       events 'on_open_down' when 'Open Project' is clicked and
-       'on_new_down' when 'New Project' is clicked.
-    '''
-
-    btn_open = ObjectProperty(None)
-    '''The 'Open Project' Button.
-       This property is an instance of :class:`~kivy.uix.button`
-       :data:`btn_open` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
-    btn_new = ObjectProperty(None)
-    '''The 'New Project' Button.
-       This property is an instance of :class:`~kivy.uix.button`
-       :data:`btn_new` is a :class:`~kivy.properties.ObjectProperty`
-    '''
+class DesignerStartPage(BoxLayout):
 
     recent_files_box = ObjectProperty(None)
     '''This property is an instance
         of :class:`~designer.start_page.RecentFilesBox`
        :data:`recent_files_box` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
-    kivy_link = ObjectProperty(None)
-    '''The 'Kivy' DesignerLinkLabel.
-       :data:`kivy_link` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
-    designer_link = ObjectProperty(None)
-    '''The 'Kivy Designer Help' DesignerLinkLabel.
-       :data:`designer_link` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     __events__ = ('on_open_down', 'on_new_down', 'on_help')
