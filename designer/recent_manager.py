@@ -2,10 +2,8 @@ import os
 from functools import partial
 
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.popup import Popup
-from kivy.uix.listview import ListView, ListItemButton
-from kivy.properties import ObjectProperty, NumericProperty
+from kivy.uix.listview import ListItemButton
+from kivy.properties import ObjectProperty
 from kivy.adapters.listadapter import ListAdapter
 
 from designer.helper_functions import get_kivy_designer_dir
@@ -20,29 +18,30 @@ class RecentManager(object):
 
     def __init__(self):
         super(RecentManager, self).__init__()
-        self.list_files = []
-        self.max_recent_files = 5
+        self.list_projects = []
+        self.max_recent_files = 10
         self.load_files()
 
-    def add_file(self, _file):
+    def add_path(self, path):
         '''To add file to RecentManager.
+        :param path: path of project
         '''
 
         _file_index = 0
         try:
-            _file_index = self.list_files.index(_file)
+            _file_index = self.list_projects.index(path)
         except:
             _file_index = -1
 
         if _file_index != -1:
             # If _file is already present in list_files, then move it to 0 index
-            self.list_files.remove(_file)
+            self.list_projects.remove(path)
 
-        self.list_files.insert(0, _file)
+        self.list_projects.insert(0, path)
 
         # Recent files should not be greater than max_recent_files
-        while len(self.list_files) > self.max_recent_files:
-            self.list_files.pop()
+        while len(self.list_projects) > self.max_recent_files:
+            self.list_projects.pop()
 
         self.store_files()
 
@@ -51,7 +50,7 @@ class RecentManager(object):
         '''
 
         _string = ''
-        for _file in self.list_files:
+        for _file in self.list_projects:
             _string += _file + '\n'
 
         recent_file_path = os.path.join(get_kivy_designer_dir(),
@@ -71,14 +70,14 @@ class RecentManager(object):
             return
 
         f = open(recent_file_path, 'r')
-        _file = f.readline()
+        path = f.readline()
 
-        while _file != '':
-            file_path = _file.strip()
+        while path != '':
+            file_path = path.strip()
             if os.path.exists(file_path):
-                self.list_files.append(file_path)
+                self.list_projects.append(file_path)
 
-            _file = f.readline()
+            path = f.readline()
 
         f.close()
 
@@ -120,11 +119,19 @@ class RecentDialog(BoxLayout):
         self.item_strings = file_list
         self.list_items = RecentItemButton
 
-        self.adapter = ListAdapter(cls=self.list_items, data=self.item_strings,
-                              selection_mode='single',
-                              allow_empty_selection=False)
+        self.adapter = ListAdapter(
+                cls=self.list_items,
+                data=self.item_strings,
+                selection_mode='single',
+                allow_empty_selection=False,
+                args_converter=self._args_converter)
 
         self.listview.adapter = self.adapter
+
+    def _args_converter(self, index, path):
+        '''Convert the item to listview
+        '''
+        return {'text': path, 'size_hint_y': None, 'height': 40}
 
     def get_selected_project(self, *args):
         '''

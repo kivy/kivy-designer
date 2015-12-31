@@ -101,7 +101,7 @@
         Label:
             id: subtitle
             markup: True
-            text: '[i]Innovative User Interfaces, Desktop and Mobile Development Made Easy.[/i]'
+            text: '[i]Innovative User Interfaces, Desktop, and Mobile Development Made Easy.[/i]'
             font_size: '10pt'
             halign: 'center'
             size_hint_y: None
@@ -358,7 +358,7 @@
         height: '40pt'
     Label:
         markup: True
-        text: '[i]Innovative User Interfaces, Desktop and Mobile Development Made Easy.[/i]'
+        text: '[i]Innovative User Interfaces, Desktop, and Mobile Development Made Easy.[/i]'
         font_size: '12pt'
         halign: 'center'
         size_hint_y: None
@@ -667,6 +667,7 @@
         padding: 0, 15
         ListView:
             id: listview
+            row_height: 40
 
     BoxLayout:
         size_hint_y: None
@@ -679,12 +680,18 @@
             text: 'Cancel'
 
 <RecentItemButton>:
-    height: '30sp'
-    text_size: self.width - 50, None
+    selected_color: 1, 1, 1, 0.5
+    deselected_color: 0, 0, 0, 0
+    text_size: self.size
+    valign: 'middle'
     shorten: True
-    size_hint_x: 1
-    selected_color: .4, 1.5, 2., 1.
-    deselected_color: 1, 1, 1, 1
+    padding_x: 20
+    canvas.after:
+        Color:
+            rgba: (47 / 255., 167 / 255., 212 / 255., 1.) if self.is_selected else (.2, .2, .2, 1)
+        Rectangle:
+            pos: self.x + 25, self.y
+            size: self.width - 50, 1
 
 <ConfirmationDialog>:
     orientation: 'vertical'

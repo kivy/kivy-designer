@@ -1,14 +1,11 @@
 import webbrowser
 
-from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
-from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, ObjectProperty
-from kivy.metrics import pt
-from kivy.clock import Clock
+
+from designer.helper_functions import get_designer
 
 
 class DesignerLinkLabel(Button):
@@ -52,11 +49,6 @@ class RecentFilesBox(ScrollView):
        :data:`grid` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    root = ObjectProperty(None)
-    '''Reference to :class:`~designer.app.Designer`
-       :data:`root` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
     def __init__(self, **kwargs):
         super(RecentFilesBox, self).__init__(**kwargs)
 
@@ -75,10 +67,17 @@ class RecentFilesBox(ScrollView):
     def btn_release(self, instance):
         '''Event Handler for 'on_release' of an event.
         '''
-        self.root._perform_open(instance.path)
+        d = get_designer()
+        d._perform_open(instance.path)
 
 
 class DesignerStartPage(BoxLayout):
+
+    recent_files_box = ObjectProperty(None)
+    '''This property is an instance
+        of :class:`~designer.start_page.RecentFilesBox`
+       :data:`recent_files_box` is a :class:`~kivy.properties.ObjectProperty`
+    '''
 
     __events__ = ('on_open_down', 'on_new_down', 'on_help')
 
