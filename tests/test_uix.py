@@ -6,6 +6,7 @@ import unittest
 from nose.tools import assert_equal
 from nose.tools import assert_not_equal
 from designer.uix.actioncheckbutton import ActionCheckButton
+from designer.uix.kivy_console import KivyConsole
 from designer.uix.settings import SettingListCheckItem
 
 
@@ -46,3 +47,18 @@ class UIXTest(unittest.TestCase):
         assert_not_equal(check1.active, check2.active)
         check2.item_check._toggle_active()
         assert_not_equal(check1.active, check2.active)
+
+    def test_KivyConsole(self):
+        kc = KivyConsole()
+        h = kc.txtinput_history_box
+        i = kc.txtinput_command_line
+
+        # check the kc initialization
+        assert_equal(h.text, '')
+        assert_equal(i.text, '')
+        assert_equal(kc.command_status, 'closed')
+        assert_not_equal(kc.prompt(), '')
+
+        # running commands
+        kc.run_command('echo 1')
+        kc.run_command(['echo 1', 'echo 2', 'echo 3'])

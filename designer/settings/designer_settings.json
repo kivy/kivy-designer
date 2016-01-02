@@ -19,6 +19,12 @@
     },
     {
         "type": "numeric",
+        "title": "Maximum number of lines on Kivy Console",
+        "section": "global",
+        "key": "num_max_kivy_console"
+    },
+    {
+        "type": "numeric",
         "title": "Auto Save current Project after every (in mins)",
         "section": "global",
         "key": "auto_save_time"
