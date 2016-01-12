@@ -380,6 +380,10 @@ class Designer(FloatLayout):
             bool(self.designer_settings.config_parser.getdefault(
                  'global', 'reload_kv', True))
 
+        max_lines = int(self.designer_settings.config_parser.getdefault(
+                'global', 'num_max_kivy_console', 200))
+        self.ui_creator.kivy_console.cached_history = max_lines
+
         self.recent_manager.max_recent_files = \
             int(self.designer_settings.config_parser.getdefault(
                 'global', 'num_recent_files', 10))
@@ -1776,6 +1780,11 @@ class DesignerApp(App):
             self.root.ui_creator.playground.pos
         self.root.ui_creator.playground.sandbox.size = \
             self.root.ui_creator.playground.size
+
+        max_lines = int(self.root.designer_settings.config_parser.getdefault(
+            'global', 'num_max_kivy_console', 200
+        ))
+        self.root.ui_creator.kivy_console.cached_history = max_lines
 
         self.root.ui_creator.playground.sandbox.bind(
             on_getting_exception=self.root.on_sandbox_getting_exception)
