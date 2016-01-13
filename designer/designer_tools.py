@@ -8,7 +8,8 @@ from kivy.properties import ObjectProperty, StringProperty
 from designer.confirmation_dialog import ConfirmationDialog
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
-from designer.helper_functions import ignore_proj_watcher, show_alert
+from designer.helper_functions import ignore_proj_watcher, show_alert, \
+    get_current_project
 
 
 #### UIs ####
@@ -84,7 +85,7 @@ class DesignerTools(EventDispatcher):
         If not, export the root widget
         '''
         playground = self.designer.ui_creator.playground
-        proj_dir = self.designer.project_loader.proj_dir
+        proj_dir = get_current_project().path
         status = self.designer.statusbar
 
         wdg = playground.selected_widget
@@ -95,12 +96,12 @@ class DesignerTools(EventDispatcher):
         if wdg.id:
             name = wdg.id + '_' + name
         wdg.export_to_png(os.path.join(proj_dir, name))
-        status.show_message('Image saved at ' + name, 5)
+        status.show_message('Image saved at ' + name, 5, 'info')
 
     def check_pep8(self):
         '''Check the PEP8 from current project
         '''
-        proj_dir = self.designer.project_loader.proj_dir
+        proj_dir = get_current_project().path
         kd_dir = os.path.dirname(designer.__file__)
         kd_dir = os.path.split(kd_dir)[0]
         pep8_dir = os.path.join(kd_dir, 'tools', 'pep8checker',
@@ -127,8 +128,7 @@ class DesignerTools(EventDispatcher):
     def create_setup_py(self):
         '''Runs the GUI to create a setup.py file
         '''
-        proj_loader = self.designer.project_loader
-        proj_dir = proj_loader.proj_dir
+        proj_dir = get_current_project().path
         designer_content = self.designer.designer_content
 
         setup_path = os.path.join(proj_dir, 'setup.py')
@@ -143,7 +143,7 @@ class DesignerTools(EventDispatcher):
         content.bind(on_cancel=self._popup.dismiss)
 
         def on_create(*args):
-            designer_content.update_tree_view(proj_loader)
+            designer_content.update_tree_view(get_current_project())
             self._popup.dismiss()
 
         content.bind(on_create=on_create)
@@ -153,8 +153,7 @@ class DesignerTools(EventDispatcher):
     def create_gitignore(self):
         '''Create .gitignore
         '''
-        proj_loader = self.designer.project_loader
-        proj_dir = proj_loader.proj_dir
+        proj_dir = get_current_project().path
         status = self.designer.statusbar
 
         gitignore_path = os.path.join(proj_dir, '.gitignore')
@@ -171,15 +170,14 @@ bin/
 __pycache__/'''
 
         f = open(gitignore_path, 'w').write(gitignore)
-        status.show_message('.gitignore created successfully', 5)
+        status.show_message('.gitignore created successfully', 5, 'info')
 
     def buildozer_init(self):
         '''Checks if the .spec exists or not; and when possible, calls
             _perform_buildozer_init
         '''
 
-        proj_loader = self.designer.project_loader
-        proj_dir = proj_loader.proj_dir
+        proj_dir = get_current_project().path
         spec_file = os.path.join(proj_dir, 'buildozer.spec')
 
         if os.path.exists(spec_file):
@@ -204,8 +202,7 @@ __pycache__/'''
         '''
         self._popup.dismiss()
 
-        proj_loader = self.designer.project_loader
-        proj_dir = proj_loader.proj_dir
+        proj_dir = get_current_project().path
         spec_file = os.path.join(proj_dir, 'buildozer.spec')
 
         _dir = os.path.dirname(designer.__file__)
@@ -213,5 +210,4 @@ __pycache__/'''
         templates_dir = os.path.join(_dir, 'new_templates')
         shutil.copy(os.path.join(templates_dir, 'default.spec'), spec_file)
 
-        self.designer.designer_content.update_tree_view(
-            self.designer.project_loader)
+        self.designer.designer_content.update_tree_view(get_current_project())

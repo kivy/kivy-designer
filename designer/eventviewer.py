@@ -4,6 +4,8 @@ from kivy.clock import Clock
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 
+from designer.helper_functions import get_designer, get_current_project, \
+    show_message
 from designer.uix.info_bubble import InfoBubble
 from designer.propertyviewer import PropertyViewer, PropertyLabel
 
@@ -33,11 +35,6 @@ class EventHandlerTextInput(TextInput):
     text_inserted = BooleanProperty(None)
     '''Specifies whether text has been inserted or not
        :data:`text_inserted` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
-    project_loader = ObjectProperty(None)
-    '''Reference to ProjectLoader
-       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     info_message = StringProperty(None)
@@ -91,20 +88,21 @@ class EventHandlerTextInput(TextInput):
         if not self.kv_code_input:
             return
 
+        d = get_designer()
+        playground = d.ui_creator.playground
         self.kv_code_input.set_event_handler(self.eventwidget,
                                              self.eventname,
                                              self.text)
         if self.text and self.text[-1] == '.':
             if self.text == 'self.':
                 self.show_drop_down_for_widget(self.eventwidget)
-
+            ## TODO recursively call eventwidget.parent to get the root widget
             elif self.text == 'root.':
-                self.show_drop_down_for_widget(
-                    self.project_loader.root_rule.widget)
+                self.show_drop_down_for_widget(playground.root)
 
             else:
                 _id = self.text.replace('.', '')
-                root = self.project_loader.root_rule.widget
+                root = playground.root
                 widget = None
 
                 if _id in root.ids:
@@ -161,20 +159,10 @@ class EventViewer(PropertyViewer):
        event handler.
     '''
 
-    project_loader = ObjectProperty(None)
-    '''Reference to ProjectLoader
-       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
     designer_tabbed_panel = ObjectProperty(None)
     '''Reference to DesignerTabbedPanel
        :data:`designer_tabbed_panel` is a
        :class:`~kivy.properties.ObjectProperty`
-    '''
-
-    statusbar = ObjectProperty(None)
-    '''Reference to Statusbar
-       :data:`statusbar` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     def on_widget(self, instance, value):
@@ -206,7 +194,19 @@ class EventViewer(PropertyViewer):
             add(EventLabel(text=event))
             add(ip)
 
-        if self.project_loader.is_widget_custom(self.widget):
+        # check if widget has a class to add custom events
+        is_custom_widget = False
+        app_widgets = get_current_project().app_widgets
+        wdg_name = type(self.widget).__name__
+        for wdg in app_widgets:
+            if wdg == wdg_name:
+                widget = app_widgets[wdg]
+                # if has a python file
+                if widget.py_path:
+                    is_custom_widget = True
+                break
+
+        if is_custom_widget:
             # Allow adding a new event only if current widget is a custom rule
             add(EventLabel(text='Type and press enter to \n'
                            'create a new event'))
@@ -221,13 +221,14 @@ class EventViewer(PropertyViewer):
         '''
         # Find the python file of widget
         py_file = None
-        for rule in self.project_loader.class_rules:
-            if self.widget.__class__.__name__ == rule.name:
-                py_file = rule.file
+        app_widgets = get_current_project().app_widgets
+        for rule_name in app_widgets:
+            if self.widget.__class__.__name__ == rule_name:
+                py_file = app_widgets[rule_name].py_path
                 break
 
         # Open it in DesignerTabbedPannel
-        rel_path = py_file.replace(self.project_loader.proj_dir, '')
+        rel_path = py_file.replace(get_current_project().path, '')
         if rel_path[0] == '/' or rel_path[0] == '\\':
             rel_path = rel_path[1:]
 
@@ -244,11 +245,17 @@ class EventViewer(PropertyViewer):
         py_code_input = None
         txt = self.txt
         rel_path = self.rel_path
-        for code_input in self.designer_tabbed_panel.list_py_code_inputs:
-            if code_input.rel_file_path == rel_path:
-                py_code_input = code_input
-                break
+        for tab_item in self.designer_tabbed_panel.tab_list:
+            if not hasattr(tab_item, 'rel_path'):
+                continue
+            if tab_item.rel_path == rel_path:
+                if hasattr(tab_item.content, 'code_input'):
+                    py_code_input = tab_item.content.code_input
+                    break
 
+        if py_code_input is None:
+            show_message('Failed to create a custom event', 5, 'error')
+            return
         pos = -1
         for searchiter in re.finditer(r'class\s+%s\(.+\):' %
                                       type(self.widget).__name__,
@@ -288,8 +295,7 @@ class EventViewer(PropertyViewer):
                     '    def %s(self, *args):\n        pass\n' % \
                     (txt.text, txt.text) +\
                     py_code_input.text[pos:]
-            self.statusbar.show_message('New Event Created you must save '
-                                        'project for changes to take effect')
+            show_message('New event created!', 5, 'info')
 
     def build_for(self, name):
         '''To create :class:`~designer.propertyviewer.PropertyBoolean`/
@@ -300,5 +306,4 @@ class EventViewer(PropertyViewer):
         return EventHandlerTextInput(
             kv_code_input=self.kv_code_input, eventname=name,
             eventwidget=self.widget, multiline=False, text=text,
-            project_loader=self.project_loader,
             info_message="Set event handler for event %s" % (name))

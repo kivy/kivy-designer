@@ -3,6 +3,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.app import App
 
+from designer.helper_functions import get_designer, get_current_project
+
 
 class OperationBase(object):
     '''UndoOperationBase class, Abstract class for all Undo Operations
@@ -141,7 +143,7 @@ class UndoManager(object):
     def push_operation(self, op):
         '''To push an operation into _undo_stack.
         '''
-        App.get_running_app().root._curr_proj_changed = True
+        get_current_project().saved = False
         self._undo_stack_operation.append(op)
 
     def do_undo(self):

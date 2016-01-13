@@ -7,6 +7,8 @@ from kivy.uix.settings import Settings, SettingTitle
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 
+from designer.helper_functions import ignore_proj_watcher
+
 PROJ_DESIGNER = '.designer'
 PROJ_CONFIG = os.path.join(PROJ_DESIGNER, 'config.ini')
 
@@ -16,8 +18,8 @@ class ProjectSettings(Settings):
        showing settings of project.
     '''
 
-    proj_loader = ObjectProperty(None)
-    '''Reference to :class:`desginer.project_loader.ProjectLoader`
+    project = ObjectProperty(None)
+    '''Reference to :class:`desginer.project_manager.Project`
     '''
 
     config_parser = ObjectProperty(None)
@@ -29,7 +31,7 @@ class ProjectSettings(Settings):
         '''This function loads project settings
         '''
         self.config_parser = ConfigParser()
-        file_path = os.path.join(self.proj_loader.proj_dir, PROJ_CONFIG)
+        file_path = os.path.join(self.project.path, PROJ_CONFIG)
         if not os.path.exists(file_path):
             if not os.path.exists(os.path.dirname(file_path)):
                 os.makedirs(os.path.dirname(file_path))
@@ -60,6 +62,7 @@ env =
                             os.path.join(settings_dir,
                                          'proj_settings_proj_prop.json'))
 
+    @ignore_proj_watcher
     def on_config_change(self, *args):
         '''This function is default handler of on_config_change event.
         '''

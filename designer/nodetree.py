@@ -6,6 +6,7 @@ from kivy.clock import Clock
 from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets
+from designer.helper_functions import get_designer, get_current_project
 
 
 class WidgetTreeElement(TreeViewLabel):
@@ -27,11 +28,6 @@ class WidgetsTree(ScrollView):
     '''This property is an instance of :class:`~kivy.uix.treeview.TreeView`.
        This TreeView is responsible for showing Root Widget's Tree.
        :data:`tree` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
-    project_loader = ObjectProperty()
-    '''Reference to :class:`~designer.project_loader.ProjectLoader` instance.
-       :data:`project_loader` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     dragging = BooleanProperty(False)
@@ -58,13 +54,14 @@ class WidgetsTree(ScrollView):
             return
 
         b = self._get_widget(node)
+        d = get_designer()
         self.tree.add_node(b, treenode)
-        class_rules = self.project_loader.class_rules
-        root_widget = self.project_loader.root_rule.widget
+        class_rules = get_current_project().app_widgets
+        root_widget = self.playground.root
 
         is_child_custom = False
-        for rule in class_rules:
-            if rule.name == type(node).__name__:
+        for rule_name in class_rules:
+            if rule_name == type(node).__name__:
                 is_child_custom = True
                 break
 

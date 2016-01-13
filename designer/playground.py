@@ -1,11 +1,14 @@
+import os
 import re
 import functools
+from kivy.core.window import Window
+from kivy.uix.popup import Popup
 
 from kivy.uix.scatter import ScatterPlane
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.layout import Layout
-from kivy.properties import ObjectProperty, BooleanProperty,\
-    OptionProperty, ListProperty
+from kivy.properties import ObjectProperty, BooleanProperty, \
+    OptionProperty, ListProperty, StringProperty, partial
 from kivy.app import App
 from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.floatlayout import FloatLayout
@@ -25,7 +28,11 @@ from kivy.graphics import Color, Line
 from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets
+from designer.confirmation_dialog import ConfirmationDialog
+from designer.helper_functions import FakeSettingList, get_designer, \
+    get_app_widget, show_message, get_current_project
 from designer.tree import Tree
+from designer.uix.settings import SettingListContent
 from designer.undo_manager import WidgetOperation, WidgetDragOperation
 from designer.uix.designer_sandbox import DesignerSandbox
 
@@ -136,7 +143,7 @@ class PlaygroundDragElement(BoxLayout):
         '''Remove lines from canvas of child.
         '''
         if hasattr(self, '_canvas_instr') and \
-                self._canvas_instr[1].points[0] != -1:
+                        self._canvas_instr[1].points[0] != -1:
             try:
                 self.child.canvas.after.remove(self._canvas_instr[0])
                 self.child.canvas.after.remove(self._canvas_instr[1])
@@ -152,8 +159,8 @@ class PlaygroundDragElement(BoxLayout):
         if not self.playground:
             return False
 
-        if self.playground.x <= x <= self.playground.right and\
-                self.playground.y <= y <= self.playground.top:
+        if self.playground.x <= x <= self.playground.right and \
+                                self.playground.y <= y <= self.playground.top:
             return True
 
         return False
@@ -164,8 +171,8 @@ class PlaygroundDragElement(BoxLayout):
         if not self.widgettree:
             return False
 
-        if self.widgettree.x <= x <= self.widgettree.right and\
-                self.widgettree.y <= y <= self.widgettree.top:
+        if self.widgettree.x <= x <= self.widgettree.right and \
+                                self.widgettree.y <= y <= self.widgettree.top:
             return True
 
         return False
@@ -333,10 +340,10 @@ class PlaygroundDragElement(BoxLayout):
 
                 if self.drag_type == 'dragndrop':
                     self.can_place = target == self.drag_parent and \
-                        parent is not None
+                                     parent is not None
                 else:
                     self.can_place = target is not None and \
-                        parent is not None
+                                     parent is not None
 
                 if self.target:
                     try:
@@ -400,9 +407,19 @@ class Playground(ScatterPlane):
        Playground is clicked.
     '''
 
-    root = ObjectProperty(allownone=True)
+    root = ObjectProperty(None, allownone=True)
     '''This property represents the root widget.
        :data:`root` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    root_name = StringProperty('')
+    '''Specifies the current widget under modification on Playground
+       :data:`root_name` is a :class:`~kivy.properties.StringProperty`
+    '''
+
+    root_app_widget = ObjectProperty(None, allownone=True)
+    '''This property represents the root widget as a ProjectManager.AppWidget
+       :data:`root_app_widget` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     selection_mode = BooleanProperty(True)
@@ -470,6 +487,7 @@ class Playground(ScatterPlane):
         self._widget_x = -1
         self._widget_y = -1
         self.widget_to_paste = None
+        self._popup = None
 
     def on_pos(self, *args):
         '''Default handler for 'on_pos'
@@ -487,6 +505,198 @@ class Playground(ScatterPlane):
         '''Default handler for 'on_show_edit'
         '''
         pass
+
+    def on_widget_select_pressed(self, *args):
+        '''Event handler to playground widget selector press
+        '''
+        widgets = get_current_project().app_widgets
+        app_widgets = []
+        for name in widgets.keys():
+            widget = widgets[name]
+            if widget.is_root:
+                name = 'Root - ' + name
+            app_widgets.append(name)
+
+        fake_setting = FakeSettingList()
+        fake_setting.allow_custom = False
+        fake_setting.items = app_widgets
+        fake_setting.desc = 'Select the Widget to edit on Playground'
+        fake_setting.group = 'playground_widget'
+
+        content = SettingListContent(setting=fake_setting)
+        popup_width = min(0.95 * Window.width, 500)
+        popup_height = min(0.95 * Window.height, 500)
+        self._popup = popup = Popup(
+            content=content,
+            title='Playground - Edit Widget',
+            size_hint=(None, None),
+            size=(popup_width, popup_height),
+            auto_dismiss=False
+        )
+
+        content.bind(on_apply=self._perform_select_root_widget,
+                     on_cancel=self._popup.dismiss)
+
+        content.selected_items = [self.root_name]
+        if self.root_app_widget and self.root_app_widget.is_root:
+            content.selected_items = ['Root - ' + self.root_name]
+        content.show_items()
+
+        popup.open()
+
+    def _perform_select_root_widget(self, instance, selected_item, *args):
+        '''On Playground edit item selection
+        :type selected_item: instance of selected array
+        '''
+        self._popup.dismiss()
+        name = selected_item[0]
+        # remove Root label from widget name
+        if name.startswith('Root - '):
+            name = name.replace('Root - ', '')
+        self.load_widget(name)
+
+    def no_widget(self, *args):
+        '''Remove any reamining sandbox content and shows an message
+        '''
+        self.root = None
+        show_message('No widget found!', 5, 'error')
+        self.sandbox.clear_widgets()
+
+    def _close_popup(self, *args):
+        self._popup.dismiss()
+
+    def load_widget(self, widget_name, update_kv_lang=True):
+        '''Load and display and widget given its name.
+        If widget is not found, shows information on status bar and clear
+        the playground
+        :param widget_name name of the widget to display
+        :param update_kv_lang if True, reloads the kv file. If False, keep the
+            kv lang text
+        '''
+        widgets = get_current_project().app_widgets
+        # if displaying no widget or this widget is not know
+        if self.root is None or self.root_app_widget is None or \
+                widget_name not in widgets:
+            self._perform_load_widget(widget_name, update_kv_lang)
+            return
+        # if a know widget, continue
+        target = widgets[widget_name]
+
+        # check if we are switching kv files
+        if target.kv_path != self.root_app_widget.kv_path and \
+                not self.kv_code_input.saved:
+
+            file_name = os.path.basename(self.root_app_widget.kv_path)
+            _confirm_dlg = ConfirmationDialog(
+                'The %s was not saved. \n'
+                'If you continue, your modifications will be lost.\n'
+                'Do you want to continue?' % file_name
+            )
+            _confirm_dlg.bind(
+                on_ok=lambda dt: self._perform_load_widget(widget_name, True),
+                on_cancel=self._close_popup)
+
+            self._popup = Popup(title='Change Widget', content=_confirm_dlg,
+                                size_hint=(None, None), size=('400pt', '150pt'),
+                                auto_dismiss=False)
+            self._popup.open()
+            return
+        self._perform_load_widget(widget_name, update_kv_lang)
+
+    def _perform_load_widget(self, widget_name, update_kv_lang=True):
+        '''Loads the widget if everything is ok
+        :param widget_name name of the widget to display
+        :param update_kv_lang if True, reloads the kv file. If False, keep the
+            kv lang text
+        '''
+        if self._popup:
+            self._popup.dismiss()
+        self.root_name = widget_name
+        if self.root:
+            self.root = None
+        self.sandbox.clear_widgets()
+        widgets = get_current_project().app_widgets
+        try:
+            target = widgets[widget_name]
+            if update_kv_lang:
+                # updates kv lang text with file
+                kv_path = target.kv_path
+                if kv_path:
+                    self.kv_code_input.text = open(kv_path).read()
+                else:
+                    show_message(
+                        'Could not found the associated .kv file with %s'
+                        ' widget' % widget_name, 5, 'error'
+                    )
+                    self.kv_code_input.text = ''
+            self.root_app_widget = target
+            wdg = get_app_widget(target)
+            self.add_widget_to_parent(wdg, None, from_undo=True, from_kv=True)
+            self.kv_code_input.path = target.kv_path
+        except (KeyError, AttributeError):
+            show_message(
+                'Failed to load %s widget' % widget_name, 5, 'error')
+
+    def on_reload_kv(self, kv_lang_area, text, force):
+        '''Reloads widgets from kv lang input and update the
+        visible widget.
+        if force is True, all widgets must be reloaded before parsing the new kv
+        :param force: if True, will parse the project again
+        :param text: kv source
+        :param kv_lang_area: instance of kivy lang area
+        '''
+        proj = get_current_project()
+        # copy of initial widgets
+        widgets = dict(proj.app_widgets)
+        try:
+            if force:
+                proj.parse()
+            if self.root_name:
+                kv_path = widgets[self.root_name].kv_path
+            else:
+                kv_path = self.kv_code_input.path
+            proj.parse_kv(text, kv_path)
+            # if was displaying one widget, but it was removed
+            if self.root_name and self.root_name not in proj.app_widgets:
+                    self.load_widget_from_file(self.root_app_widget.kv_path)
+                    show_message(
+                        'The %s is not available. Displaying another widget'
+                        % self.root_name, 5, 'info'
+                    )
+            elif not self.root_name and not widgets and proj.app_widgets:
+                # if was not displaying a widget because there was no widget
+                # and now a widget is available
+                first_wdg = proj.app_widgets[list(proj.app_widgets.keys())[-1]]
+                self.load_widget(first_wdg.name, update_kv_lang=False)
+            else:
+                self.load_widget(self.root_name, update_kv_lang=False)
+        except KeyError:
+            show_message(
+                'Failed to load %s widget' % self.root_name, 5, 'error')
+
+    def load_widget_from_file(self, kv_path):
+        '''Loads first widget from a file
+        :param kv_path: absolute kv path
+        '''
+        self.sandbox.clear_widgets()
+        proj = get_current_project()
+        widgets = proj.app_widgets
+        if not os.path.exists(kv_path):
+            show_message(kv_path + ' not exists', 5, 'error')
+            return
+        self.kv_code_input.text = open(kv_path, 'r').read()
+        self.kv_code_input.path = kv_path
+        for key in widgets:
+            wd = widgets[key]
+            if wd.kv_path == kv_path:
+                self.load_widget(wd.name, update_kv_lang=False)
+                return
+        # if not found a widget in the path, open the first one
+        if len(widgets):
+            first_wdg = widgets[list(widgets.keys())[-1]]
+            self.load_widget(first_wdg.name, update_kv_lang=False)
+            return
+        show_message('No widget was found', 5, 'error')
 
     def try_place_widget(self, widget, x, y):
         '''This function is used to determine where to add the widget
@@ -583,7 +793,6 @@ class Playground(ScatterPlane):
                 else:
                     target.add_widget(widget)
                     added = True
-
         if not added:
             return False
 
@@ -601,15 +810,18 @@ class Playground(ScatterPlane):
     def get_widget(self, widgetname, **default_args):
         '''This function is used to get the instance of class of name,
            widgetname.
+           :param widgetname: name of the widget to be instantiated
         '''
-
         widget = None
         with self.sandbox:
             custom = False
             for _widget in widgets:
                 if _widget[0] == widgetname and _widget[1] == 'custom':
-                    widget = App.get_running_app().root\
-                        .project_loader.get_widget_of_class(widgetname)
+                    app_widgets = get_current_project().app_widgets
+                    for widget_name in app_widgets:
+                        if widget_name == widgetname:
+                            widget = get_app_widget(app_widgets[widget_name])
+                            break
                     custom = True
             if not custom:
                 try:
@@ -689,19 +901,20 @@ class Playground(ScatterPlane):
             return None
 
         x, y = target.to_local(x, y)
-        class_rules = App.get_running_app().root.project_loader.class_rules
+        d = get_designer()
+        class_rules = get_current_project().app_widgets
 
         for child in target.children:
             is_child_custom = False
-            for rule in class_rules:
-                if rule.name == type(child).__name__:
+            for rule_name in class_rules:
+                if rule_name == type(child).__name__:
                     is_child_custom = True
                     break
 
             is_child_complex = False
             for _widget in widgets:
-                if _widget[0] == type(child).__name__ and\
-                        _widget[1] == 'complex':
+                if _widget[0] == type(child).__name__ and \
+                                _widget[1] == 'complex':
                     is_child_complex = True
                     break
 
@@ -728,7 +941,7 @@ class Playground(ScatterPlane):
                 if not child.collide_point(x, y):
                     continue
 
-                if not self.allowed_target_for(child, widget) and not\
+                if not self.allowed_target_for(child, widget) and not \
                         child.children:
                     continue
 
@@ -762,12 +975,6 @@ class Playground(ScatterPlane):
             return False
         if isinstance(t, FileChooserIconView):
             return False
-
-        # stop on custom widget but not root widget
-        class_rules = App.get_running_app().root.\
-            project_loader.class_rules
-        root_widget = App.get_running_app().root.\
-            project_loader.root_rule.widget
 
         # if we don't have widget, always return true
         if widget is None:
@@ -839,7 +1046,7 @@ class Playground(ScatterPlane):
                         getattr(base_widget, prop))
 
             self.widget_to_paste.parent = None
-            widget_str = self.kv_code_input.\
+            widget_str = self.kv_code_input. \
                 get_widget_text_from_kv(base_widget, None)
 
             if not for_drag:
@@ -851,13 +1058,12 @@ class Playground(ScatterPlane):
         '''
         parent = self.selected_widget
         if parent and self.widget_to_paste:
-            class_rules = App.get_running_app().root.\
-                project_loader.class_rules
-            root_widget = App.get_running_app().root.\
-                project_loader.root_rule.widget
+            d = get_current_project()
+            class_rules = d.app_widgets
+            root_widget = self.root
             is_child_custom = False
-            for rule in class_rules:
-                if rule.name == type(parent).__name__:
+            for rule_name in class_rules:
+                if rule_name == type(parent).__name__:
                     is_child_custom = True
                     break
 
@@ -869,8 +1075,8 @@ class Playground(ScatterPlane):
 
                 parent = parent.parent
                 is_child_custom = False
-                for rule in class_rules:
-                    if rule.name == type(parent).__name__:
+                for rule_name in class_rules:
+                    if rule_name == type(parent).__name__:
                         is_child_custom = True
                         break
 
@@ -887,7 +1093,7 @@ class Playground(ScatterPlane):
 
         if base_widget and base_widget.parent:
             self.widget_to_paste = base_widget
-            self._widget_str_to_paste = self.kv_code_input.\
+            self._widget_str_to_paste = self.kv_code_input. \
                 get_widget_text_from_kv(base_widget, None)
 
             self.remove_widget_from_parent(base_widget)
@@ -935,15 +1141,15 @@ class Playground(ScatterPlane):
         self.drag_operation[1].add_widget(self.drag_operation[0],
                                           self.drag_operation[2])
         Clock.schedule_once(functools.partial(
-                            App.get_running_app().focus_widget,
-                            self.drag_operation[0]), 0.01)
+            App.get_running_app().focus_widget,
+            self.drag_operation[0]), 0.01)
         self.drag_operation = []
 
     def start_widget_dragging(self, *args):
         '''This function will create PlaygroundDragElement
            which will start dragging currently selected widget.
         '''
-        if not self.dragging and not self.drag_operation and\
+        if not self.dragging and not self.drag_operation and \
                 self.selected_widget:
             # x, y = self.to_local(*touch.pos)
             # target = self.find_target(x, y, self.root)

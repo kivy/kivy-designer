@@ -3,9 +3,10 @@ import re
 from kivy import Config
 from kivy.utils import get_color_from_hex
 from pygments import styles, highlight
-from designer.helper_functions import show_alert
+from designer.helper_functions import show_alert, get_designer, \
+    get_current_project
 from kivy.uix.codeinput import CodeInput
-from kivy.properties import BooleanProperty, Clock, partial
+from kivy.properties import BooleanProperty, Clock, partial, StringProperty
 
 
 class DesignerCodeInput(CodeInput):
@@ -17,6 +18,24 @@ class DesignerCodeInput(CodeInput):
     '''
 
     __events__ = ('on_show_edit',)
+
+    saved = BooleanProperty(True)
+    '''Indicates if the current file is saved or not
+        :data:`saved` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to True
+    '''
+
+    error = BooleanProperty(False)
+    '''Indicates if the current file contains any type of error
+        :data:`error` is a :class:`~kivy.properties.BooleanProperty`
+    and defaults to False
+    '''
+
+    path = StringProperty('')
+    '''Path of the current file
+        :data:`path` is a :class:`~kivy.properties.StringProperty`
+    and defaults to ''
+    '''
 
     clicked = BooleanProperty(False)
     '''If clicked is True, then it confirms that this widget has been clicked.
@@ -57,7 +76,7 @@ class DesignerCodeInput(CodeInput):
 
         return super(DesignerCodeInput, self).on_touch_down(touch)
 
-    def _do_focus(self, *args):
+    def do_focus(self, *args):
         '''Force the focus on this widget
         '''
         self.focus = True
@@ -66,6 +85,14 @@ class DesignerCodeInput(CodeInput):
         '''Function to select all text
         '''
         self.select_all()
+
+    def on_text(self, *args):
+        '''Listen text changes
+        '''
+        if self.focus:
+            self.saved = False
+            d = get_designer()
+            get_current_project().saved = False
 
     def find_next(self, search, use_regex=False, case=False):
         '''Find the next occurrence of the string according to the cursor
