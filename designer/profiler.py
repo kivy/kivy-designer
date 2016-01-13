@@ -18,7 +18,7 @@ class Builder(EventDispatcher):
         self.profiler = profiler
         self.designer = self.profiler.designer
         self.designer_settings = self.designer.designer_settings
-        self.proj_watcher = self.designer.project_watcher
+        self.project_watcher = self.designer.project_watcher
         self.proj_settings = self.designer.proj_settings
         self.ui_creator = self.designer.ui_creator
         self.run_command = self.ui_creator.kivy_console.run_command
@@ -99,7 +99,7 @@ class Buildozer(Builder):
     def _create_command(self, extra):
         '''Generate the buildozer command
         '''
-        self.proj_watcher.stop()
+        self.project_watcher.pause_watching()
         self._initialize()
         self.ui_creator.tab_pannel.switch_to(
             self.ui_creator.tab_pannel.tab_list[2])
@@ -200,7 +200,7 @@ class Buildozer(Builder):
         '''
         self.ui_creator.kivy_console.unbind(on_command_list_done=self.on_clean)
 
-        self.proj_watcher.start_watching(self.profiler.project_path)
+        self.project_watcher.resume_watching(delay=0)
 
         self.profiler.dispatch('on_message', 'Project clean', 5)
         self.profiler.dispatch('on_clean')
@@ -210,7 +210,7 @@ class Buildozer(Builder):
         '''
         self.ui_creator.kivy_console.unbind(on_command_list_done=self.on_build)
 
-        self.proj_watcher.start_watching(self.profiler.project_path)
+        self.project_watcher.resume_watching(delay=0)
 
         self.profiler.dispatch('on_message', 'Build complete', 5)
         self.profiler.dispatch('on_build')
@@ -223,7 +223,7 @@ class Buildozer(Builder):
         '''
         self.ui_creator.kivy_console.unbind(on_command_list_done=self.on_deploy)
 
-        self.proj_watcher.start_watching(self.profiler.project_path)
+        self.project_watcher.resume_watching(delay=0)
 
         self.profiler.dispatch('on_message', 'Installed on device', 5)
         self.profiler.dispatch('on_deploy')
@@ -240,7 +240,7 @@ class Buildozer(Builder):
         '''
         self.ui_creator.kivy_console.unbind(on_command_list_done=self.on_run)
 
-        self.proj_watcher.start_watching(self.profiler.project_path)
+        self.project_watcher.resume_watching(delay=0)
 
         self.profiler.dispatch('on_message', '', 1)
         self.profiler.dispatch('on_run')
@@ -370,7 +370,7 @@ class Desktop(Builder):
         '''
         # here it's necessary to stop the listener as long as the
         # python is managing files
-        self.proj_watcher.stop()
+        self.project_watcher.pause_watching()
         for _file in os.listdir(self.profiler.project_path):
             ext = _file.split('.')[-1]
             if ext == 'pyc':
@@ -379,7 +379,7 @@ class Desktop(Builder):
         if os.path.exists(__pycache__):
             shutil.rmtree(__pycache__)
 
-        self.proj_watcher.start_watching(self.profiler.project_path)
+        self.project_watcher.resume_watching(delay=0)
         self.profiler.dispatch('on_message', 'Project cleaned', 5)
 
     def build(self, *args):
@@ -389,7 +389,7 @@ class Desktop(Builder):
         if not self.can_run:
             return
 
-        self.proj_watcher.stop()
+        self.project_watcher.pause_watching()
         proj_path = self.profiler.project_path
 
         self.run_command(
@@ -410,7 +410,7 @@ class Desktop(Builder):
     def on_build(self, *args):
         '''on_build event handler
         '''
-        self.proj_watcher.start_watching(self.profiler.project_path)
+        self.project_watcher.resume_watching(delay=0)
         self.profiler.dispatch('on_message', 'Build complete', 5)
         self.profiler.dispatch('on_build')
 

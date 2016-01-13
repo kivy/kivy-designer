@@ -15,7 +15,7 @@ import os
 import shutil
 import traceback
 
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
@@ -238,6 +238,7 @@ class Designer(FloatLayout):
 
         Window.bind(on_resize=self._write_window_size)
         Window.bind(on_request_close=self.on_request_close)
+        self._popup = None
 
     def _write_window_size(self, *_):
         '''Write updated window size to config
@@ -503,7 +504,7 @@ class Designer(FloatLayout):
         '''
 
         # Perform reload of project after it is modified
-        self._popup.dismiss()
+        self._cancel_popup()
         self._perform_open(self.project_manager.current_project.path)
         self._proj_modified_outside = False
 
@@ -635,7 +636,7 @@ class Designer(FloatLayout):
                                 on_cancel=self._cancel_popup)
         self._popup = Popup(title="Add new File", content=self._input_dialog,
                             size_hint=(None, None), size=('200pt', '150pt'),
-                            auto_dimiss=False)
+                            auto_dismiss=False)
         self._popup.open()
 
     @ignore_proj_watcher
@@ -664,30 +665,26 @@ class Designer(FloatLayout):
 
         if self.project_manager.current_project.saved:
             self._show_new_dialog()
-            return
-
-        if self.project_loader.new_project or self._curr_proj_changed:
-
-            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+        else:
+            _confirm_dlg_save = ConfirmationDialogSave('Your project is '
                                                        'not saved.\nWhat '
                                                        'would you like to do?')
 
             def save_and_open(*args):
-                self.action_btn_save_pressed(False)
+                self.action_btn_save_pressed()
                 self._show_new_dialog()
 
-            self._confirm_dlg_save.bind(on_dont_save=self._show_new_dialog,
+            _confirm_dlg_save.bind(on_dont_save=self._show_new_dialog,
                             on_save=save_and_open,
                             on_cancel=self._cancel_popup)
 
-            self._popup = Popup(title='New', content=self._confirm_dlg_save,
+            self._popup = Popup(title='New', content=_confirm_dlg_save,
                             size_hint=(None, None), size=('300pt', '150pt'),
                             auto_dismiss=False)
             self._popup.open()
 
     def _show_new_dialog(self, *args):
-        if hasattr(self, '_popup'):
-            self._popup.dismiss()
+        self._cancel_popup()
 
         self._new_dialog = NewProjectDialog()
         self._new_dialog.bind(on_select=self._perform_new,
@@ -701,8 +698,7 @@ class Designer(FloatLayout):
         '''To load new project
         '''
 
-        if hasattr(self, '_popup'):
-            self._popup.dismiss()
+        self._cancel_popup()
 
         new_proj_dir = os.path.join(get_kivy_designer_dir(),
                                     NEW_PROJECT_DIR_NAME)
@@ -729,6 +725,7 @@ class Designer(FloatLayout):
 
         self._perform_open(new_proj_dir)
         self.project_manager.current_project.new_project = True
+        self.project_manager.current_project.saved = False
         show_message('Project created successfully', 5, 'info')
 
     def cleanup(self):
@@ -755,20 +752,21 @@ class Designer(FloatLayout):
 
         if self.project_manager.current_project.saved:
             self._show_open_dialog()
-            return
-
-        if self.project_loader.new_project or self._curr_proj_changed:
-
-            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+        else:
+            _confirm_dlg_save = ConfirmationDialogSave('Your project is '
                                                        'not saved.\nWhat '
                                                        'would you like to do?')
-            self._confirm_dlg_save.bind(on_dont_save=self._show_open_dialog,
-                            on_save=partial(self.action_btn_save_pressed,
-                                    False),
+
+            def save_and_open(*args):
+                self.action_btn_save_pressed()
+                self._show_open_dialog()
+
+            _confirm_dlg_save.bind(on_dont_save=self._show_open_dialog,
+                            on_save=save_and_open,
                             on_cancel=self._cancel_popup)
 
             self._popup = Popup(title='Kivy Designer', auto_dismiss=False,
-                            content=self._confirm_dlg_save,
+                            content=_confirm_dlg_save,
                             size_hint=(None, None), size=('300pt', '150pt'))
             self._popup.open()
 
@@ -778,23 +776,21 @@ class Designer(FloatLayout):
         '''
         if self.project_manager.current_project.saved:
             self._perform_close_project()
-            return
-
-        if self.project_loader.new_project or self._curr_proj_changed:
-            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+        else:
+            _confirm_dlg_save = ConfirmationDialogSave('Your project is '
                                                        'not saved.\nWhat '
                                                        'would you like to do?')
 
             def save_and_close(*args):
-                self.action_btn_save_pressed(False)
+                self.action_btn_save_pressed()
                 self._perform_close_project()
 
-            self._confirm_dlg_save.bind(on_cancel=self._cancel_popup,
+            _confirm_dlg_save.bind(on_cancel=self._cancel_popup,
                         on_dont_save=self._perform_close_project,
                         on_save=save_and_close)
 
             self._popup = Popup(title='Kivy Designer', auto_dismiss=False,
-                            content=self._confirm_dlg_save,
+                            content=_confirm_dlg_save,
                             size_hint=(None, None), size=('300pt', '150pt'))
             self._popup.open()
 
@@ -802,8 +798,7 @@ class Designer(FloatLayout):
         '''
         Close the current project and go to the start page
         '''
-        if hasattr(self, '_popup'):
-            self._popup.dismiss()
+        self._cancel_popup()
 
         self.remove_widget(self.designer_content)
         self.designer_content.parent = None
@@ -817,15 +812,14 @@ class Designer(FloatLayout):
         self.ids['actn_menu_proj'].disabled = True
         self.ids['actn_menu_run'].disabled = True
         self.ids['actn_menu_tools'].disabled = True
-
+        self.project_manager.close_current_project()
         self.project_watcher.stop_watching()
 
     def _show_open_dialog(self, *args):
         '''To show FileBrowser to "Open" a project
         '''
 
-        if hasattr(self, '_popup'):
-            self._popup.dismiss()
+        self._cancel_popup()
 
         self._fbrowser = FileBrowser(select_string='Open')
 
@@ -855,7 +849,7 @@ class Designer(FloatLayout):
         file_path = instance.selection[0]
         file_extension = instance.selection[0].split('.')
 
-        self._popup.dismiss()
+        self._cancel_popup()
         error = None
         try:
             if file_extension[1] == 'py':
@@ -912,8 +906,9 @@ class Designer(FloatLayout):
         '''EventHandler for all self._popup when self._popup.content
            emits 'on_cancel' or equivalent.
         '''
-
-        self._popup.dismiss()
+        if self._popup:
+            self._popup.dismiss()
+            self._popup = None
 
     @ignore_proj_watcher
     def save_project(self, *args):
@@ -929,6 +924,7 @@ class Designer(FloatLayout):
 
     def action_btn_save_pressed(self, exit_on_save=False, *args):
         '''Event Handler when ActionButton "Save" is pressed.
+        :param exit_on_save: if True, closes the KD after saving the project
         '''
         proj = self.project_manager.current_project
         if proj.new_project:
@@ -968,8 +964,7 @@ class Designer(FloatLayout):
         '''Event handler for 'on_success' event of self._save_as_browser
         '''
 
-        if hasattr(self, '_popup'):
-            self._popup.dismiss()
+        self._cancel_popup()
 
         if instance.ids.tabbed_browser.current_tab.text == 'List View':
             proj_dir = instance.ids.list_view.path
@@ -1073,10 +1068,11 @@ class Designer(FloatLayout):
     def action_btn_recent_files_pressed(self, *args):
         '''Event Handler when ActionButton "Recent Projects" is pressed.
         '''
-        self._recent_dlg = RecentDialog(self.recent_manager.list_projects)
-        self._recent_dlg.bind(on_cancel=self._cancel_popup,
-                              on_select=self._recent_file_release)
-        self._popup = Popup(title='Recent Projects', content=self._recent_dlg,
+        self._cancel_popup()
+        _recent_dlg = RecentDialog(self.recent_manager.list_projects)
+        _recent_dlg.bind(on_cancel=self._cancel_popup,
+                         on_select=self._recent_file_release)
+        self._popup = Popup(title='Recent Projects', content=_recent_dlg,
                             size_hint=(0.5, 0.5), auto_dismiss=False)
         self._popup.open()
 
@@ -1090,17 +1086,18 @@ class Designer(FloatLayout):
         '''Check if the KD can be closed.
         If the project is modified, show an alert. Otherwise closes it.
         '''
+        self._cancel_popup()
         proj = self.project_manager.current_project
         if proj.new_project or not proj.saved:
-            self._confirm_dlg_save = ConfirmationDialogSave('Your project is '
+            _confirm_dlg_save = ConfirmationDialogSave('Your project is '
                                                        'not saved.\nWhat '
                                                        'would you like to do?')
-            self._confirm_dlg_save.bind(on_dont_save=self._perform_quit,
+            _confirm_dlg_save.bind(on_dont_save=self._perform_quit,
                             on_save=partial(self.action_btn_save_pressed,
                                 True),
                             on_cancel=self._cancel_popup)
 
-            self._popup = Popup(title='Quit', content=self._confirm_dlg_save,
+            self._popup = Popup(title='Quit', content=_confirm_dlg_save,
                                 size_hint=(None, None), size=('300pt', '150pt'),
                                 auto_dismiss=False)
             self._popup.open()
@@ -1399,14 +1396,14 @@ class Designer(FloatLayout):
         '''
 
         show_message('Error while adding file to project', 5, 'error')
-        self._popup.dismiss()
+        self._cancel_popup()
 
     def _added_file(self, *args):
         '''Event Handler for 'on_added' event of self._add_file_dlg
         '''
 
         show_message('File successfully added to project', 5, 'info')
-        self._popup.dismiss()
+        self._cancel_popup()
         self.designer_content.update_tree_view(
             self.project_manager.current_project)
 
@@ -1536,13 +1533,13 @@ class Designer(FloatLayout):
         '''Event handler for 'on_release' event of DesignerActionButton
            "About Kivy Designer"
         '''
-        self.about_dlg = AboutDialog()
+        about_dlg = AboutDialog()
         self._popup = Popup(title='About Kivy Designer',
-                            content=self.about_dlg,
+                            content=about_dlg,
                             size_hint=(None, None), size=(600, 400),
                             auto_dismiss=False)
         self._popup.open()
-        self.about_dlg.bind(on_cancel=self._cancel_popup)
+        about_dlg.bind(on_close=self._cancel_popup)
 
 
 class DesignerException(ExceptionHandler):

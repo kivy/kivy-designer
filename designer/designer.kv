@@ -117,7 +117,7 @@
             size_hint: None, None
             size: '60pt', '30pt'
             pos_hint: {'right': 1}
-            on_release: root.dispatch('on_cancel')
+            on_release: root.dispatch('on_close')
 
 #
 # Profile Settings
@@ -691,10 +691,10 @@
         height: '25pt'
         Button:
             text: 'Yes'
-            on_press: root.dispatch('on_ok')
+            on_release: root.dispatch('on_ok')
         Button:
             text: 'No'
-            on_press: root.dispatch('on_cancel')
+            on_release: root.dispatch('on_cancel')
 
 <ConfirmationDialogSave>:
     orientation: 'vertical'
@@ -707,13 +707,13 @@
         height: '25pt'
         Button:
             text: 'Save'
-            on_press: root.dispatch('on_save')
+            on_release: root.dispatch('on_save')
         Button:
             text: 'Don\'t Save'
-            on_press: root.dispatch('on_dont_save')
+            on_release: root.dispatch('on_dont_save')
         Button:
             text: 'Cancel'
-            on_press: root.dispatch('on_cancel')
+            on_release: root.dispatch('on_cancel')
 
 <ActionCheckButton>:
     btn_layout: btn_layout

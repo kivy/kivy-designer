@@ -10,7 +10,7 @@ test them. It is completely written in Python using Kivy.
 Prerequisites
 -------------
 
-- [Kivy 1.9+](http://kivy.org/#download)
+- [Kivy >= 1.9.1](http://kivy.org/#download)
 - The following Python modules (available via pip):
     - [watchdog](https://pythonhosted.org/watchdog/)
     - [pygments](http://pygments.org/)
@@ -20,8 +20,6 @@ Prerequisites
     - [six](https://pythonhosted.org/six/)
     - [kivy-garden](http://kivy.org/docs/api-kivy.garden.html)
 - The FileBrowser widget from the [Kivy garden](http://kivy.org/docs/api-kivy.garden.html)
-
-Kivy Designer is not yet fully compatible with Python 3.
 
 Installation
 ------------

@@ -89,10 +89,11 @@ class ProjectWatcher(EventDispatcher):
         '''
         self._active = False
 
-    def resume_watching(self):
+    def resume_watching(self, delay=1):
         '''Resume the watcher
+        :param delay: seconds to start the watching
         '''
-        Clock.schedule_once(self._resume_watching, 1)
+        Clock.schedule_once(self._resume_watching, delay)
 
     def _resume_watching(self, *args):
         if self._observer:
@@ -494,3 +495,12 @@ class ProjectManager(EventDispatcher):
         self.projects[path] = p
         self.current_project = p
         return self.projects[path]
+
+    def close_current_project(self):
+        '''Closes a project, setting saved as True and new_project as False,
+        and removing it from current_project
+        :param project: instance of pro
+        '''
+        self.current_project.saved = True
+        self.current_project.new_project = False
+        self.current_project = Project()

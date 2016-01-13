@@ -26,9 +26,9 @@ class AboutDialog(FloatLayout):
        It emits 'on_cancel' event when 'Cancel' button is released.
     '''
 
-    __events__ = ('on_cancel',)
+    __events__ = ('on_close',)
 
-    def on_cancel(self, *args):
-        '''Default handler for 'on_cancel' event
+    def on_close(self, *args):
+        '''Default handler for 'on_close' event
         '''
         pass
