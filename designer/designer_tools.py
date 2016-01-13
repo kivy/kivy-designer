@@ -138,7 +138,7 @@ class DesignerTools(EventDispatcher):
 
         content = ToolSetupPy(path=setup_path)
         self._popup = Popup(title='Create setup.py', content=content,
-                            size_hint=(None, None), size=(550, 400),
+                            size_hint=(None, None), size=(550, 350),
                             auto_dismiss=False)
         content.bind(on_cancel=self._popup.dismiss)
 

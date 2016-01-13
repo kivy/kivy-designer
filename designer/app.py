@@ -36,14 +36,13 @@ from kivy.config import Config
 from kivy.base import ExceptionHandler, ExceptionManager
 
 import designer
-from designer.uix.actioncheckbutton import ActionCheckButton
+from designer.uix.designer_action_items import ActionCheckButton
 from designer.playground import PlaygroundDragElement
 from designer.common import widgets
 from designer.uix.editcontview import EditContView
 from designer.uix.modules_contview import ModulesContView
 from designer.uix.kv_lang_area import KVLangArea
 from designer.undo_manager import WidgetOperation, UndoManager
-from designer.select_class import SelectClass
 from designer.confirmation_dialog import ConfirmationDialog, \
     ConfirmationDialogSave
 from designer.recent_manager import RecentManager, RecentDialog
@@ -1077,7 +1076,7 @@ class Designer(FloatLayout):
         self._popup.open()
 
     def _recent_file_release(self, instance, *args):
-        '''Event Handler for 'on_select' event of self._recent_dlg.
+        '''Event Handler for 'on_select' event of RecentDialog.
         '''
         self._perform_open(instance.get_selected_project())
         self._cancel_popup(instance, args)
@@ -1420,7 +1419,7 @@ class Designer(FloatLayout):
         self._popup = Popup(title="Add File",
                             content=self._add_file_dlg,
                             size_hint=(None, None),
-                            size=(480, 260), auto_dismiss=False)
+                            size=(480, 350), auto_dismiss=False)
 
         self._popup.open()
 
@@ -1594,8 +1593,6 @@ class DesignerApp(App):
         Factory.register('DesignerContent',
                          module='designer.uix.designer_sandbox')
         Factory.register('EventDropDown', module='designer.eventviewer')
-        Factory.register('DesignerActionPrevious',
-                         module='designer.uix.designer_action_items')
         Factory.register('DesignerActionGroup',
                          module='designer.uix.designer_action_items')
         Factory.register('DesignerActionButton',

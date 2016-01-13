@@ -27,7 +27,7 @@ class InputDialog(BoxLayout):
         :data:`lbl_error` is a :class:`~kivy.uix.label.Label`
     '''
 
-    __events__ = ('on_confirm', 'on_cancel')
+    __events__ = ('on_confirm', 'on_cancel',)
 
     def __init__(self, message):
         super(InputDialog, self).__init__()
