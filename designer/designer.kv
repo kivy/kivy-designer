@@ -1,4 +1,4 @@
-#:kivy 1.4.1
+#:kivy 1.9.1
 #:set bgcolor (.06, .07, .08)
 #:set bordercolor (.54, .59, .60)
 #:set titlecolor (.34, .39, .40)
@@ -6,16 +6,25 @@
 #:import ContextMenu designer.uix.contextual.ContextMenu
 
 #
-# Helper for keeping a consistency accross the whole designer UI
+# Helper for keeping a consistency across the whole designer UI
 #
 # Rules:
 # - rows height are 48sp
 # - padding is 4sp
 # - spacing is 4sp
 # - button / label / widget are 40sp height
+# - TextInput with a single line is 30sp height
+# - modal with just one button(close, cancel, etc). The button must be in the left
+# - menu item width is 250
+# - in conditional modals, more positive action in the right
+#:set designer_height               '40sp'
+#:set designer_spacing              '4sp'
+#:set designer_padding              '4sp'
+#:set designer_text_input_height    '30sp'
+#:set designer_action_width         200
 <DesignerButton@Button,DesignerLabel@Label>:
     size_hint_y: None
-    height: '40sp'
+    height: designer_height
 
 <DesignerButtonFit@DesignerButton>
     size_hint_x: None
@@ -26,10 +35,14 @@
 
 <DesignerListItemButton@ListItemButton>:
     size_hint: None, None
-    size: self.texture_size[0] + sp(32), '40sp'
+    size: self.texture_size[0] + sp(32), designer_height
     selected_color: 1, 1, 1, 1
     deselected_color: .8, .8, .8, .5
 
+<DesignerTextInput@TextInput>:
+    size_hint_y: None
+    height: designer_text_input_height
+    multiline: False
 
 #
 # Dialogs
@@ -38,10 +51,11 @@
 <HelpDialog>:
     orientation: 'vertical'
     rst: rst
-    padding: '2sp'
+    padding: designer_padding
+    spacing: designer_spacing
     RstDocument:
         id: rst
-    Button:
+    DesignerButton:
         text: 'Close'
         size_hint: None, None
         size: '60pt', '30pt'
@@ -53,6 +67,8 @@
     user_input: user_input
     btn_confirm: btn_confirm
     lbl_error: lbl_error
+    padding: designer_padding
+    spacing: designer_spacing
     Label:
         text: root.message
         halign: 'left'
@@ -67,19 +83,24 @@
     UserTextInput:
         id: user_input
         focus: True
-    Widget:
-
-    BoxLayout:
+    GridLayout:
+        cols: 2
         size_hint_y: None
-        height: '25pt'
-        Button:
+        spacing: designer_spacing
+        padding: designer_padding
+        height: self.minimum_height
+        DesignerButton:
             id: btn_confirm
             text: 'Confirm'
             disabled: True
             on_press: root.dispatch('on_confirm')
-        Button:
+        DesignerButton:
             text: 'Cancel'
             on_press: root.dispatch('on_cancel')
+
+<UserTextInput>:
+    size_hint_y: None
+    height: designer_text_input_height
 
 <AboutDialog>:
     Image:
@@ -90,7 +111,7 @@
         orientation: 'vertical'
         pos: root.pos
         background_color: 0, 1, 0
-        padding: 10
+        padding: designer_padding
         Label:
             id: title
             text: 'Kivy Designer'
@@ -112,12 +133,94 @@
             text: '    Kivy Designer is Kivy\'s tool for designing Graphical User Interfaces (GUIs) from Kivy Widgets. \nYou can compose and customize widgets, and test them. It is completely written in Python using Kivy. \nKivy Designer is integrated with Buildozer and Hanga, so you can easily develop and publish your applications to Desktop and Mobile devices.'
             font_size: '12pt'
             valign: 'top'
-        Button:
+        DesignerButton:
             text: 'Close'
-            size_hint: None, None
-            size: '60pt', '30pt'
-            pos_hint: {'right': 1}
             on_release: root.dispatch('on_close')
+
+<AddFileDialog>:
+    text_file: text_file
+    text_folder: text_folder
+    lbl_error: lbl_error
+    orientation: 'vertical'
+    padding: designer_padding
+    spacing: designer_spacing
+    Label:
+        id: lbl_error
+        size_hint_x: 1
+        color: [1, 0, 0, 1]
+    Label:
+        text: 'Select the File:'
+        size_hint_x: None
+    BoxLayout:
+        size_hint_y: None
+        height: '24pt'
+        TextInput:
+            id: text_file
+            multiline: False
+        Button:
+            size_hint_x: None
+            text: 'Open File'
+            on_press: root.open_file_btn_pressed()
+    Label:
+        text: 'Target Folder:'
+        size_hint_x: None
+    BoxLayout:
+        size_hint_y: None
+        height: '24pt'
+        TextInput:
+            id: text_folder
+            multiline: False
+            focus: True
+        Button:
+            size_hint_x: None
+            text: 'Open Folder'
+            on_press: root.open_folder_btn_pressed()
+    BoxLayout:
+        padding: designer_padding
+        spacing: designer_spacing
+        DesignerButton:
+            text: 'Add'
+            on_press: root._perform_add_file()
+        DesignerButton:
+            text: 'Cancel'
+            on_press: root.dispatch('on_cancel')
+
+<ConfirmationDialog>:
+    orientation: 'vertical'
+    padding: designer_padding
+    spacing: designer_spacing
+    Label:
+        text: root.message
+    GridLayout:
+        cols: 2
+        size_hint_y: None
+        height: self.minimum_height
+        DesignerButton:
+            text: 'Yes'
+            on_release: root.dispatch('on_ok')
+        DesignerButton:
+            text: 'No'
+            on_release: root.dispatch('on_cancel')
+
+<ConfirmationDialogSave>:
+    orientation: 'vertical'
+    padding: designer_padding
+    spacing: designer_spacing
+    Label:
+        text: root.message
+    GridLayout:
+        cols: 3
+        size_hint_y: None
+        height: self.minimum_height
+        DesignerButton:
+            text: 'Save'
+            on_release: root.dispatch('on_save')
+        DesignerButton:
+            text: 'Don\'t Save'
+            on_release: root.dispatch('on_dont_save')
+        DesignerButton:
+            text: 'Cancel'
+            on_release: root.dispatch('on_cancel')
 
 #
 # Profile Settings
@@ -144,17 +247,15 @@
             height: 50
             spacing: 5
             padding: 5
-            Button:
+            DesignerButton:
                 id: btn_select_prof
                 text: 'Use this Profile'
-                size_hint: 0.5, None
-                height: 40
-            Button:
+                size_hint_x: 0.5
+            DesignerButton:
                 id: btn_delete_prof
                 disabled: True
-                text: 'Delete Profile'
-                size_hint: 0.5, None
-                height: 40
+                text: 'Delete this Profile'
+                size_hint_x: 0.5
         ProfileContentPanel:
             id: content
             current_uid: menu.selected_uid
@@ -186,20 +287,18 @@
                 Rectangle:
                     pos: self.right - 1, self.y
                     size: 1, self.height
-    Button:
+    DesignerButton:
         text: 'New'
         id: button_new
-        size_hint: None, None
+        size_hint_x: None
         width: root.width - dp(20)
-        height: 30
-        pos: root.x + dp(10), root.y + 40
+        pos: root.x + dp(10), root.y + sp(49)
         font_size: '15sp'
-    Button:
+    DesignerButton:
         text: 'Close'
         id: button_close
-        size_hint: None, None
+        size_hint_x: None
         width: root.width - dp(20)
-        height: 30
         pos: root.x + dp(10), root.y + 5
         font_size: '15sp'
 
@@ -213,13 +312,17 @@
     text_size: self.size
     valign: 'middle'
     halign: 'left'
+    size_hint_y: None
+    height: '30sp'
 
 <ToolSetupPy>:
     orientation: 'vertical'
-    padding: 10
-    spacing: 15
+    padding: designer_padding
+    spacing: designer_spacing
     BoxLayout:
         BoxLayout:
+            spacing: designer_spacing
+            padding: designer_padding
             size_hint_x: 0.3
             orientation: 'vertical'
             SetupPyLabel:
@@ -239,37 +342,38 @@
         BoxLayout:
             size_hint_x: 0.7
             orientation: 'vertical'
-            TextInput:
+            spacing: designer_spacing
+            padding: designer_padding
+            DesignerTextInput:
                 id: package_name
-                multiline: False
-            TextInput:
+            DesignerTextInput:
                 id: version
-                multiline: False
-            TextInput:
+            DesignerTextInput:
                 id: url
-                multiline: False
-            TextInput:
+            DesignerTextInput:
                 id: license
-                multiline: False
-            TextInput:
+            DesignerTextInput:
                 id: author
-                multiline: False
-            TextInput:
+            DesignerTextInput:
                 id: author_email
-                multiline: False
-            TextInput:
+            DesignerTextInput:
                 id: description
-                multiline: False
     GridLayout:
         cols: 2
         size_hint_y: None
         height: self.minimum_height
+        spacing: designer_spacing
+
         DesignerButton:
             text: 'Create'
             on_press: root.create()
         DesignerButton:
-            text: 'cancel'
+            text: 'Cancel'
             on_press: root.dispatch('on_cancel')
+
+#
+# Menu
+#
 
 <MenuHeader>
     color: (1, 1, 1, 1) if self.state == 'normal' else (0, 0, 0, 1)
@@ -291,7 +395,7 @@
     arrow_image: 'atlas://data/images/defaulttheme/tree_closed'
     Image:
         source: root.arrow_image
-        size: (20, 20) if root.attached_menu and len(root._list_children) > 0 else (0,0)
+        size: (20, 20) if root.show_arrow else (0,0)
         y: self.parent.y + (self.parent.height/2) - (self.height/2)
         x: self.parent.x + (self.parent.width - self.width)
 
@@ -309,10 +413,107 @@
     background_image: 'atlas://data/images/defaulttheme/action_item'
     background_color: 3, 3, 3, 1
 
-<DesignerLinkLabel>:
-    color: 0, 0, 1, 1
-    background_normal: 'atlas://data/images/defaulttheme/action_item'
-    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item_disabled'
+#
+# Menu - Action Items
+#
+
+<DesignerActionButton>:
+    info: info
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+    size_hint_x: None
+    width: designer_action_width
+    canvas.before:
+        Color:
+            rgba: [1, 1, 1, .5] if self.disabled else [1, 1, 1, 1]
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: self.background_normal
+    Label:
+        pos: root.pos
+        text_size: (self.width - sp(24), self.size[1])
+        valign: 'middle'
+        size_hint_y: None
+        height: '40sp'
+        text: root.text
+    Label:
+        id: info
+        text: root.hint
+        pos: root.pos
+        size: root.size
+        opacity: 0.5
+        text_size: self.size
+        valign: 'bottom'
+        halign: 'right'
+        padding: 5, 5
+
+<DesignerActionSubMenu>:
+    text_size: (self.width - sp(24), self.size[1])
+    valign: 'middle'
+    size_hint_y: None
+    height: '40sp'
+    width: designer_action_width
+
+<ActionCheckButton>:
+    btn_layout: btn_layout
+    _label: _label
+    checkbox: checkbox
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+    size_hint: None, None
+    height: sp(49)
+    width: designer_action_width
+    canvas.before:
+        Color:
+            rgba: 1,1,1,1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            source: self.background_normal
+    BoxLayout:
+        id: btn_layout
+        pos: root.pos
+        padding: 5, 0, 5, 0
+        spacing: 10
+        CheckBox:
+            id: checkbox
+            size_hint_x: None
+            width: '20sp'
+            pos: root.x + 2, root.y
+            active: root.checkbox_active
+            group: root.group
+            allow_no_selection: root.allow_no_selection
+            on_active: root.dispatch('on_active', *args)
+        Label:
+            id: _label
+            text_size: self.size
+            valign: 'middle'
+            text: root.text
+    Label:
+        id: info
+        text: root.desc
+        pos: root.pos
+        size: root.size
+        opacity: 0.3
+        text_size: self.size
+        valign: 'bottom'
+        halign: 'right'
+        padding: 5, 5
+
+<DesignerSubActionButton>:
+    size_hint: 1, None
+    width: designer_action_width
+    height: sp(48)
+    background_normal: 'atlas://data/images/defaulttheme/action_bar'
+    text_size: (self.width - sp(24), self.size[1])
+    valign: 'middle'
+
+<DesignerActionGroup>:
+    mode: 'spinner'
+    size_hint_x: None
+    dropdown_cls: ContextMenu
+#
+# Start Page
+#
 
 <RecentItem>:
     orientation: 'vertical'
@@ -344,6 +545,12 @@
         cols: 1
         size_hint_y: None
         height: 1
+
+<DesignerLinkLabel>:
+    color: 0, 0, 1, 1
+    background_normal: 'atlas://data/images/defaulttheme/action_item'
+    background_disabled_normal: 'atlas://data/images/defaulttheme/action_item_disabled'
+    text_size: self.width, None
 
 <DesignerStartPage>:
     btn_open: btn_open
@@ -402,25 +609,21 @@
         DesignerLinkLabel:
             id: kivy_label
             text: ' Kivy'
-            text_size: self.width, None
             link: 'http://kivy.org'
 
         DesignerLinkLabel:
             text: ' Kivy Designer Help'
             size_hint_y: None
-            text_size: self.width, None
             on_release: root.dispatch('on_help')
 
         DesignerLinkLabel:
             id: kivy_label
             text: ' Kivy Documentation'
-            text_size: self.width, None
             link: 'http://kivy.org/docs'
 
         DesignerLinkLabel:
             text: ' Kivy Designer Documentation'
             size_hint_y: None
-            text_size: self.width, None
             link: 'http://kivy-designer.readthedocs.org/'
 
     Label:
@@ -441,50 +644,11 @@
             Rectangle:
                 pos: self.pos
                 size: self.size
-<DesignerActionPrevious>:
-    text_size: (self.width - sp(24), self.size[1])
-    valign: 'middle'
-
-<DesignerActionButton>:
-    info: info
-    background_normal: 'atlas://data/images/defaulttheme/action_bar'
-
-    canvas.before:
-        Color:
-            rgba: [1, 1, 1, .5] if self.disabled else [1, 1, 1, 1]
-        Rectangle:
-            pos: self.pos
-            size: self.size
-            source: self.background_normal
-    Label:
-        pos: root.pos
-        text_size: (self.width - sp(24), self.size[1])
-        valign: 'middle'
-        size_hint_y: None
-        height: '40sp'
-        text: root.text
-    Label:
-        id: info
-        text: root.hint
-        pos: root.pos
-        size: root.size
-        opacity: 0.5
-        text_size: self.size
-        valign: 'bottom'
-        halign: 'right'
-        padding: 5, 5
-
-<DesignerActionSubMenu>:
-    text_size: (self.width - sp(24), self.size[1])
-    valign: 'middle'
-    size_hint_y: None
-    height: '40sp'
-    minimum_width: 200
 
 <InfoBubble>:
     size_hint: None, None
     width: '270dp'
-    height: lbl.texture_size[1] + dp(20)
+    height: lbl.texture_size[1] + dp(30)
     on_touch_down: self.hide()
     BoxLayout:
         orientation: 'vertical'
@@ -509,6 +673,8 @@
     id: scroll
     code_input: code_input
     line_number: line_number
+    bar_width: 10
+    scroll_type: ['bars', 'content']
     GridLayout:
         cols: 2
         size_hint: 1, None
@@ -525,57 +691,6 @@
             size_hint_y: None
             height: max(self.minimum_height, scroll.height)
 
-<AddFileDialog>:
-    text_file: text_file
-    text_folder: text_folder
-    lbl_error: lbl_error
-    orientation: 'vertical'
-
-    Label:
-        id: lbl_error
-        size_hint_x: 1
-        color: [1, 0, 0, 1]
-
-    Label:
-        text: 'Select the File:'
-        size_hint_x: None
-
-    BoxLayout:
-        size_hint_y: None
-        height: '24pt'
-        TextInput:
-            id: text_file
-            multiline: False
-        Button:
-            size_hint_x: None
-            text: 'Open File'
-            on_press: root.open_file_btn_pressed()
-
-    Label:
-        text: 'Target Folder:'
-        size_hint_x: None
-
-    BoxLayout:
-        size_hint_y: None
-        height: '24pt'
-        TextInput:
-            id: text_folder
-            multiline: False
-            focus: True
-        Button:
-            size_hint_x: None
-            text: 'Open Folder'
-            on_press: root.open_folder_btn_pressed()
-
-    BoxLayout:
-        padding: '2sp'
-        Button:
-            text: 'Add'
-            on_press: root._perform_add_file()
-        Button:
-            text: 'Cancel'
-            on_press: root.dispatch('on_cancel')
-
 <KVLangArea>:
     auto_indent: True
     lexer: KivyLexer()
@@ -587,59 +702,34 @@
             close: True
             width: 2
 
-<SelectClass>:
-    select_button: select
-    cancel_button: cancel
-    orientation: 'vertical'
-    padding: '2sp'
-
-    GridLayout:
-        rows: 1
-        size_hint_y: None
-        height: '25pt'
-        padding: '4sp'
-        Button:
-            id: select
-            text: 'Select Class'
-            size_hint_x: None
-            width: '90pt'
-        Button:
-            id: cancel
-            text: 'Cancel'
-            size_hint_x: None
-            width: '90pt'
-
 <NewProjectDialog>:
     image: image
     list_parent: list_parent
     select_button: select
     cancel_button: cancel
     orientation: 'vertical'
-    padding: '2sp'
-
+    padding: designer_padding
     Label:
         size_hint: None, None
         pos_hint: {'x': 0.1}
         height: '22pt'
         text: 'Select one of the following templates:'
-
     BoxLayout:
         id: list_parent
         orientation: 'horizontal'
-        padding: '2sp'
+        padding: designer_padding
         Image:
             id: image
-
     GridLayout:
         rows: 1
         size_hint_y: None
         height: '48sp'
-        padding: '4sp'
-        spacing: '4sp'
-        DesignerButtonFit:
+        padding: designer_padding
+        spacing: designer_spacing
+        DesignerButton:
             id: select
             text: 'Create New Project'
-        DesignerButtonFit:
+        DesignerButton:
             id: cancel
             text: 'Cancel'
 
@@ -648,7 +738,7 @@
     cancel_button: cancel
     listview: listview
     orientation: 'vertical'
-    padding: '5sp'
+    padding: designer_padding
 
     BoxLayout:
         padding: 0, 15
@@ -656,13 +746,15 @@
             id: listview
             row_height: 40
 
-    BoxLayout:
+    GridLayout:
+        cols: 2
         size_hint_y: None
-        height: 35
-        Button:
+        height: self.minimum_height
+        spacing: designer_spacing
+        DesignerButton:
             id: select
             text: 'Open Selected'
-        Button:
+        DesignerButton:
             id: cancel
             text: 'Cancel'
 
@@ -680,87 +772,6 @@
             pos: self.x + 25, self.y
             size: self.width - 50, 1
 
-<ConfirmationDialog>:
-    orientation: 'vertical'
-    padding: '5sp'
-    Label:
-        text: root.message
-
-    BoxLayout:
-        size_hint_y: None
-        height: '25pt'
-        Button:
-            text: 'Yes'
-            on_release: root.dispatch('on_ok')
-        Button:
-            text: 'No'
-            on_release: root.dispatch('on_cancel')
-
-<ConfirmationDialogSave>:
-    orientation: 'vertical'
-    padding: '5sp'
-    Label:
-        text: root.message
-    
-    BoxLayout:
-        size_hint_y: None
-        height: '25pt'
-        Button:
-            text: 'Save'
-            on_release: root.dispatch('on_save')
-        Button:
-            text: 'Don\'t Save'
-            on_release: root.dispatch('on_dont_save')
-        Button:
-            text: 'Cancel'
-            on_release: root.dispatch('on_cancel')
-
-<ActionCheckButton>:
-    btn_layout: btn_layout
-    _label: _label
-    checkbox: checkbox
-    background_normal: 'atlas://data/images/defaulttheme/action_bar'
-    minimum_width: 200
-    size_hint_y: None
-    height: sp(50)
-    canvas.before:
-        Color:
-            rgba: 1,1,1,1
-        Rectangle:
-            pos: self.pos
-            size: self.size
-            source: self.background_normal
-    BoxLayout:
-        id: btn_layout
-        pos: root.pos
-        padding: 5, 0, 5, 0
-        spacing: 10
-        CheckBox:
-            id: checkbox
-            size_hint_x: None
-            width: '20sp'
-            pos: root.x + 2, root.y
-            active: root.checkbox_active
-            group: root.group
-            allow_no_selection: root.allow_no_selection
-            on_active: root.dispatch('on_active', *args)
-        Label:
-            id: _label
-            text_size: self.size
-            valign: 'middle'
-            text: root.text
-    Label:
-        id: info
-        text: root.desc
-        pos: root.pos
-        size: root.size
-        opacity: 0.3
-        text_size: self.size
-        valign: 'bottom'
-        halign: 'right'
-        padding: 5, 5
-
-
 #
 # Buildozer Spec Editor
 #
@@ -769,8 +780,8 @@
     text_input: text_input
     lbl_error: lbl_error
     orientation: 'vertical'
-    spacing: 10
-    padding: 10
+    spacing: designer_spacing
+    padding: designer_padding
     Label:
         text: "Edit the buildozer.spec file"
         size_hint_y: None
@@ -787,18 +798,21 @@
         height: '0pt'
     ScrollView:
         id: spec_scroll
+        bar_width: 10
+        scroll_type: ['bars', 'content']
         CodeInput:
             id: text_input
             size_hint_y: None
             height: max(spec_scroll.height, self.minimum_height)
-    BoxLayout:
+    GridLayout:
+        cols: 2
         size_hint_y: None
-        height: '40dp'
-        Button:
-            text: 'Apply modifications'
+        height: self.minimum_height
+        DesignerButton:
+            text: 'Apply Modifications'
             on_press: root._save_spec()
-        Button:
-            text: 'Cancel modifications'
+        DesignerButton:
+            text: 'Cancel Modifications'
             on_press: root.load_spec()
 
 <BuildozerSpecEditor>:
@@ -846,7 +860,6 @@
         id: menu
         orientation: 'vertical'
         padding: 5
-
         canvas.after:
             Color:
                 rgb: .2, .2, .2
@@ -864,11 +877,6 @@
         cols: 1
         size_hint_y: None
         height: max(self.minimum_height, root.height)
-
-<DesignerActionGroup>:
-    mode: 'spinner'
-    size_hint_x: None
-    dropdown_cls: ContextMenu
 
 <ModScreenContView>:
     ActionPrevious:
@@ -953,7 +961,7 @@
         text: 'Screen Emulation'
         on_release: root.on_screen()
     ActionButton:
-        text: 'Touchring'
+        text: 'Touch Ring'
         on_release: root.dispatch('on_module', mod='touchring', data=[])
     ActionButton:
         text: 'Monitor'
@@ -964,14 +972,6 @@
     ActionButton:
         text: 'Web Debugger'
         on_release: root.on_webdebugger(self)
-
-<DesignerSubActionButton>:
-    size_hint: 1, None
-    minimum_width: 200
-    background_normal: 'atlas://data/images/defaulttheme/action_bar'
-    height: sp(48)
-    text_size: (self.width - sp(24), self.size[1])
-    valign: 'middle'
 
 <EditContView>:
     ActionPrevious:
@@ -1000,6 +1000,10 @@
     ActionButton:
         text: 'Delete'
         on_press: root.dispatch('on_delete')
+
+#
+# UI Creator
+#
 
 <Playground>:
     do_scale: False
@@ -1325,10 +1329,8 @@
                                         size_hint_y: None
                                         height: max(scroll.height, self.minimum_height)
                                         on_show_edit: root.on_show_edit()
-                            Button:
-                                size_hint_y: None
+                            DesignerButton:
                                 size_hint_x: 0.2
-                                height: '24pt'
                                 text: 'Reload Widgets'
                                 pos_hint: {'x': 0.8}
                                 on_release: root.reload_btn_pressed()
@@ -1353,7 +1355,6 @@
                                 size_hint_y: None
                                 height: max(e_scroll.height, self.minimum_height)
                                 text: ''
-
 
             Splitter:
                 id: splitter_widget_tree
@@ -1494,10 +1495,16 @@
                             size_hint_y: None
                             height: 300
                             max_size: 500
+                            canvas.before:
+                                Color:
+                                    rgb: bgcolor
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
                             DesignerTabbedPanel:
                                 do_default_tab: False
                                 DesignerTabbedPanelItem:
-                                    text: '   Properties'
+                                    text: 'Properties'
                                     PropertyViewer:
                                         id: propertyviewer
 
@@ -1540,7 +1547,7 @@
 <PyCodeInputFind>:
     txt_query: txt_query
     size_hint_y: None
-    height: 30
+    height: designer_height
     canvas.before:
         Color:
             rgb: bgcolor
@@ -1596,7 +1603,7 @@
     Image:
         source: 'atlas://data/images/defaulttheme/close'
         size_hint: None, None
-        size: 30, 30
+        size: designer_height, designer_height
         on_touch_down: if self.collide_point(*args[1].pos): root.dispatch('on_close')
 
 <DesignerContent>:
@@ -1855,6 +1862,7 @@
                 DesignerGit:
                     id: git_tools
                     text: 'Git'
+                    show_arrow: True
 
             DesignerActionGroup:
                 id: actn_menu_help

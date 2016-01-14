@@ -14,9 +14,13 @@ class DesignerSandbox(Sandbox):
 
     __events__ = ('on_getting_exception',)
     error_active = BooleanProperty(False)
+    '''If True, automatically show the error tab on getting an Exception
+    '''
 
     def __init__(self, **kwargs):
         super(DesignerSandbox, self).__init__(**kwargs)
+        self.exception = None
+        self.tb = None
         self._context['Builder'] = object.__getattribute__(Builder, '_obj')
         self._context['Clock'] = object.__getattribute__(Clock, '_obj')
         Clock.unschedule(self._clock_sandbox)
@@ -26,7 +30,6 @@ class DesignerSandbox(Sandbox):
         '''Override of __exit__
         '''
         self._context.pop()
-        # print 'EXITING THE SANDBOX', (self, _type, value, tb)
         if _type is not None:
             return self.on_exception(value, tb=tb)
 
