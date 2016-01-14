@@ -151,6 +151,7 @@ def update_info(*args, **kwargs):
 
 def show_error_console(text, append=False):
     '''Shows a text on Error Console.
+    :param text: error message
     :param append appends the new text at the bottom of console
     '''
     d = get_designer()
@@ -185,15 +186,14 @@ def ignore_proj_watcher(f):
     return wrapper
 
 
-def get_app_widget(target):
+def get_app_widget(target, **default_args):
     '''Creates a widget instance by it's name and module
     '''
+    d = get_designer()
     if target.is_dynamic:
         name = target.name.split('@')[0]
-        try:
-            return Factory.get(name)()
-        except:
-            return None
+        with d.ui_creator.playground.sandbox:
+            return Factory.get(name)(**default_args)
     elif target.is_root:
         return target.instance
     else:
@@ -201,6 +201,7 @@ def get_app_widget(target):
                                      inspect.isclass)
         for klass_name, klass in classes:
             if issubclass(klass, Widget) and klass_name == target.name:
-                return klass()
+                with d.ui_creator.playground.sandbox:
+                    return klass(**default_args)
 
         return None

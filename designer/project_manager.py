@@ -328,8 +328,7 @@ class Project(EventDispatcher):
         root = None
         try:
             root = Builder.load_string(src, filename=os.path.basename(path))
-        except (SyntaxError, AttributeError, BuilderException,
-                ParserException, FactoryException) as e:
+        except Exception as e:
             self._errors.append(str(e))
             d = get_designer()
             d.ui_creator.kv_code_input.have_error = True
