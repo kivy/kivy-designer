@@ -827,9 +827,9 @@ class Playground(ScatterPlane):
         widget = None
         for _widget in widgets:
             if _widget[0] == widgetname and _widget[1] == 'custom':
-                    app_widgets = get_current_project().app_widgets
-                    widget = get_app_widget(app_widgets[widgetname])
-                    break
+                app_widgets = get_current_project().app_widgets
+                widget = get_app_widget(app_widgets[widgetname])
+                break
         if not widget:
             try:
                 widget = getattr(Factory, widgetname)(**default_args)
