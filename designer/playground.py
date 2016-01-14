@@ -28,9 +28,9 @@ from kivy.graphics import Color, Line
 from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets
-from designer.confirmation_dialog import ConfirmationDialog
+from designer.confirmation_dialog import ConfirmationDialogSave
 from designer.helper_functions import FakeSettingList, get_designer, \
-    get_app_widget, show_message, get_current_project
+    get_app_widget, show_message, get_current_project, ignore_proj_watcher
 from designer.tree import Tree
 from designer.uix.settings import SettingListContent
 from designer.undo_manager import WidgetOperation, WidgetDragOperation
@@ -587,13 +587,21 @@ class Playground(ScatterPlane):
                 not self.kv_code_input.saved:
 
             file_name = os.path.basename(self.root_app_widget.kv_path)
-            _confirm_dlg = ConfirmationDialog(
+            _confirm_dlg = ConfirmationDialogSave(
                 'The %s was not saved. \n'
                 'If you continue, your modifications will be lost.\n'
-                'Do you want to continue?' % file_name
+                'Do you want to save and continue?' % file_name
             )
+
+            @ignore_proj_watcher
+            def save_and_load(*args):
+                get_current_project().save()
+                self._perform_load_widget(widget_name, True)
+
             _confirm_dlg.bind(
-                on_ok=lambda dt: self._perform_load_widget(widget_name, True),
+                on_save=save_and_load,
+                on_dont_save=lambda dt:
+                            self._perform_load_widget(widget_name, True),
                 on_cancel=self._close_popup)
 
             self._popup = Popup(title='Change Widget', content=_confirm_dlg,
@@ -612,8 +620,7 @@ class Playground(ScatterPlane):
         if self._popup:
             self._popup.dismiss()
         self.root_name = widget_name
-        if self.root:
-            self.root = None
+        self.root = None
         self.sandbox.clear_widgets()
         widgets = get_current_project().app_widgets
         try:
@@ -631,6 +638,8 @@ class Playground(ScatterPlane):
                     self.kv_code_input.text = ''
             self.root_app_widget = target
             wdg = get_app_widget(target)
+            if wdg is None:
+                self.kv_code_input.have_error = True
             self.add_widget_to_parent(wdg, None, from_undo=True, from_kv=True)
             self.kv_code_input.path = target.kv_path
         except (KeyError, AttributeError):
@@ -669,6 +678,7 @@ class Playground(ScatterPlane):
                 first_wdg = proj.app_widgets[list(proj.app_widgets.keys())[-1]]
                 self.load_widget(first_wdg.name, update_kv_lang=False)
             else:
+                # displaying an usual widget
                 self.load_widget(self.root_name, update_kv_lang=False)
         except KeyError:
             show_message(
@@ -778,18 +788,20 @@ class Playground(ScatterPlane):
         '''This function is used to add the widget to the target.
         '''
         added = False
+        if widget is None:
+            self.sandbox.clear_widgets()
+            return False
+
         if target is None:
             with self.sandbox:
                 self.root = widget
                 self.sandbox.add_widget(widget)
                 widget.size = self.sandbox.size
                 added = True
-
         else:
             with self.sandbox:
                 if extra_args and self.from_drag:
                     self.drag_wigdet(widget, target, extra_args=extra_args)
-
                 else:
                     target.add_widget(widget)
                     added = True
@@ -814,21 +826,7 @@ class Playground(ScatterPlane):
         '''
         widget = None
         with self.sandbox:
-            custom = False
-            for _widget in widgets:
-                if _widget[0] == widgetname and _widget[1] == 'custom':
-                    app_widgets = get_current_project().app_widgets
-                    for widget_name in app_widgets:
-                        if widget_name == widgetname:
-                            widget = get_app_widget(app_widgets[widget_name])
-                            break
-                    custom = True
-            if not custom:
-                try:
-                    widget = getattr(Factory, widgetname)(**default_args)
-                except:
-                    pass
-
+            widget = get_app_widget(widgetname, **default_args)
         return widget
 
     def get_playground_drag_element(self, widgetname, touch, **default_args):

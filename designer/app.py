@@ -53,7 +53,7 @@ from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
 from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_kivy_designer_dir, show_alert, \
-    ignore_proj_watcher, show_message, update_info
+    ignore_proj_watcher, show_message, update_info, show_error_console
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton, \
@@ -1514,14 +1514,7 @@ class Designer(FloatLayout):
            on_getting_exception event. This function will add exception
            string in error_console.
         '''
-
-        s = traceback.format_list(traceback.extract_tb(
-            self.ui_creator.playground.sandbox.tb))
-        s = '\n'.join(s)
-        to_insert = "Exception:\n" + s + '\n' + \
-            "{!r}".format(self.ui_creator.playground.sandbox.exception)
-        text = self.ui_creator.error_console.text + to_insert + '\n\n'
-        self.ui_creator.error_console.text = text
+        show_error_console(traceback.format_exc(), append=False)
         if self.ui_creator.playground.sandbox.error_active:
             self.ui_creator.tab_pannel.switch_to(
                 self.ui_creator.tab_pannel.tab_list[0])
