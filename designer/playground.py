@@ -825,8 +825,16 @@ class Playground(ScatterPlane):
            :param widgetname: name of the widget to be instantiated
         '''
         widget = None
-        with self.sandbox:
-            widget = get_app_widget(widgetname, **default_args)
+        for _widget in widgets:
+            if _widget[0] == widgetname and _widget[1] == 'custom':
+                    app_widgets = get_current_project().app_widgets
+                    widget = get_app_widget(app_widgets[widgetname])
+                    break
+        if not widget:
+            try:
+                widget = getattr(Factory, widgetname)(**default_args)
+            except:
+                pass
         return widget
 
     def get_playground_drag_element(self, widgetname, touch, **default_args):
