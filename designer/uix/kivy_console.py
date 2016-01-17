@@ -106,7 +106,7 @@ from kivy.core.window import Window
 from kivy.utils import platform
 from kivy.compat import PY2
 
-from pygments.lexers.shell import ShellSessionLexer
+from pygments.lexers.shell import BashSessionLexer
 
 
 Builder.load_string('''
@@ -304,7 +304,7 @@ class KivyConsole(GridLayout):
     def _initialize(self, dt):
         '''Set console default variable values
         '''
-        self.txtinput_history_box.lexer = ShellSessionLexer()
+        self.txtinput_history_box.lexer = BashSessionLexer()
         self.txtinput_history_box.text = ''.join(self.textcache)
         self.txtinput_command_line.text = self.prompt()
         self.txtinput_command_line.bind(focus=self.on_focus)
