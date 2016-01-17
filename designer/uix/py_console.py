@@ -2,13 +2,15 @@ import code
 import sys
 import threading
 
-from kivy.uix.textinput import TextInput
+from kivy.uix.codeinput import CodeInput
 from kivy.uix.boxlayout import BoxLayout
 from kivy.base import runTouchApp
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty, ListProperty,\
-    StringProperty, NumericProperty, partial
+    NumericProperty, partial
 from kivy.lang import Builder
+from pygments.lexers.python import PythonConsoleLexer
+
 from designer.helper_functions import show_message
 
 try:
@@ -184,10 +186,14 @@ class InteractiveThread(threading.Thread):
         self._sh.interact()
 
 
-class InteractiveShellInput(TextInput):
+class InteractiveShellInput(CodeInput):
     '''Displays Output and sends input to Shell. Emits 'on_ready_to_input'
        when it is ready to get input from user.
     '''
+
+    def __init__(self, **kw):
+        super(InteractiveShellInput, self).__init__(**kw)
+        self.lexer = PythonConsoleLexer()
 
     sh = ObjectProperty(None)
     '''Instance of :class:`~designer.uix.py_console.Shell`

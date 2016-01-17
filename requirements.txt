@@ -1,5 +1,5 @@
 kivy >= 1.9.1
-pygments >= 2.0
+pygments >= 2.1
 docutils >= 0.12
 watchdog >= 0.8
 jedi >= 0.9
