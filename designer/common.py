@@ -4,10 +4,12 @@
 #: designer. The base is a list, because python dict don't preserve the order.
 #: The first field is the name used for Factory.<name>
 #: The second field represent a category name
+#: The third field represents initial widget values
+#: The fourth field are extra parameters used to display the widget while dragging
 
 widgets = [
-    ('Label', 'base', {'text': 'A label'}),
-    ('Button', 'base', {'text': 'A button'}),
+    ('Label', 'base', {'text': 'Label'}),
+    ('Button', 'base', {'text': 'Button'}, {'size_hint': (None, None), 'size': ('150sp', '40sp')}),
     ('CheckBox', 'base'),
     ('Image', 'base'),
     ('Slider', 'base'),

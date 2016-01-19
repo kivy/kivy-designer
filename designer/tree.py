@@ -91,6 +91,7 @@ class Tree(object):
     def delete(self, widget):
         '''deletes a node of widget from the Tree.
            Returns that node on deletion
+           :param widget: widget to be removed
         '''
         if not isinstance(widget, Widget):
             TreeException('Tree accepts only Widget to be deleted')

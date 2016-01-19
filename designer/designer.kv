@@ -659,16 +659,6 @@
             text: root.message
             text_size: self.width, None
 
-<Placeholder>:
-    canvas:
-        Color:
-            rgb: 1, 0.5, 0.8
-
-        Line:
-            points: self.x - 2, self.y - 2, self.right - 2, self.y - 2, self.right - 2, self.top - 2, self.x - 2, self.top - 2
-            width: 2.
-            close: True
-
 <PyScrollView>:
     id: scroll
     code_input: code_input
@@ -1029,7 +1019,7 @@
         Line:
             points: [self.x, self.y, self.center_x - 20, self.y, self.center_x, self.y - 20, self.center_x + 20, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
             close: True
-            width: 2.
+            width: 1.5
 
     on_target: app.focus_widget(args[1])
 
@@ -1064,7 +1054,7 @@
     size_hint_y: None
     height: '22pt'
     font_size: '10pt'
-    on_press_and_touch: app.create_draggable_element(self.text, args[1])
+    on_press_and_touch: app.create_draggable_element(self, self.text, args[1])
 
 <StatusBar>:
     app: app
@@ -1225,6 +1215,7 @@
         size_hint_y: None
         hide_root: True
         on_selected_node: args[1] and app.focus_widget(args[1].node)
+        #on_touch_down: print(self.to_window(*args[1].pos))
 
 <WidgetTreeElement>:
     is_open: True

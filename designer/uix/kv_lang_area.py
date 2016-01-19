@@ -337,13 +337,17 @@ class KVLangArea(DesignerCodeInput):
 
             self.playground.load_widget(type_name)
 
-    def get_widget_text_pos_from_kv(self, widget, parent, path_to_widget=[]):
+    def get_widget_text_pos_from_kv(self, widget, parent, path_to_widget=None):
         '''To get start and end pos of widget's rule in kv text
+        :param parent: parent of widget
+        :param widget: widget to find the kv text
         '''
-
+        print(1)
         if not path_to_widget:
+            path_to_widget = []
             path_to_widget = self._get_widget_path(widget)
             path_to_widget.reverse()
+            print(path_to_widget)
 
         # Go to widget's rule's line and determines all its rule's
         # and it's child if any. Then delete them

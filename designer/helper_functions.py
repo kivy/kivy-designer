@@ -188,6 +188,7 @@ def ignore_proj_watcher(f):
 
 def get_app_widget(target, **default_args):
     '''Creates a widget instance by it's name and module
+    :param target: instance of designer.project_manager.AppWidget
     '''
     d = get_designer()
     if target.is_dynamic:
@@ -205,3 +206,16 @@ def get_app_widget(target, **default_args):
                     return klass(**default_args)
 
         return None
+
+
+def widget_contains(container, child):
+    '''Search recursively for child in container
+    :param container: container widget
+    :param child: item to search
+    '''
+    if container == child:
+        return True
+    for w in container.children:
+        if widget_contains(w, child):
+            return True
+    return False

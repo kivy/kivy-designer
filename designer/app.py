@@ -1658,33 +1658,45 @@ class DesignerApp(App):
         if not os.path.exists(get_kivy_designer_dir()):
             os.mkdir(get_kivy_designer_dir())
 
-    def create_draggable_element(self, widgetname, touch, widget=None):
+    def create_draggable_element(self, instance, widget_name, touch,
+                                 widget=None):
         '''Create PlagroundDragElement and make it draggable
            until the touch is released also search default args if exist
+           :param widget: instance of widget.
+                            If set, widget_name will be ignored
+           :param touch: instance of the current touch
+           :param instance: if from toolbox, ToolboxButton instance.
+                    None otherwise
+           :param widget_name: name of the widget that will be dragged
         '''
         container = None
-        if not widget:
-            default_args = {}
-            for options in widgets:
-                if len(options) > 2:
-                    default_args = options[2]
-
-            container = self.root.ui_creator.playground.\
-                get_playground_drag_element(widgetname, touch, **default_args)
-
-        else:
+        if widget:
             container = PlaygroundDragElement(
-                playground=self.root.ui_creator.playground, child=widget)
+                    playground=self.root.ui_creator.playground,
+                    child=widget,
+                    widget=widget)
             touch.grab(container)
             touch.grab_current = container
             container.on_touch_move(touch)
             container.center_x = touch.x
             container.y = touch.y + 20
-
+        else:
+            default_args = {}
+            extra_args = {}
+            for options in widgets:
+                if widget_name == options[0]:
+                    if len(options) > 2:
+                        default_args = options[2].copy()
+                    if len(options) > 3:
+                        extra_args = options[3].copy()
+                    break
+            container = self.root.ui_creator.playground.\
+                get_playground_drag_element(instance, widget_name,
+                                            touch, default_args, extra_args)
         if container:
             self.root.add_widget(container)
         else:
-            show_message("Cannot create %s" % widgetname, 5, 'error')
+            show_message("Cannot create %s" % widget_name, 5, 'error')
 
         container.widgettree = self.root.ui_creator.widgettree
         return container
