@@ -303,9 +303,11 @@ class KVLangArea(DesignerCodeInput):
             if insert_after_line == total_lines - 1:
                 # if inserting at the last line
                 _line_pos = len(self.text) - 1
-
-                self.text = self.text[:_line_pos + 1] + '\n' + \
-                    get_indent_str(indent + 4) + to_insert
+                indent = get_indent_str(indent + 4)
+                to_add = ''
+                for line in to_insert.splitlines():
+                    to_add += '\n' + indent + line
+                self.text = self.text[:_line_pos + 1] + to_add
             else:
                 # inserting somewhere else
                 insert_after_line -= 1
@@ -342,12 +344,9 @@ class KVLangArea(DesignerCodeInput):
         :param parent: parent of widget
         :param widget: widget to find the kv text
         '''
-        print(1)
         if not path_to_widget:
-            path_to_widget = []
             path_to_widget = self._get_widget_path(widget)
             path_to_widget.reverse()
-            print(path_to_widget)
 
         # Go to widget's rule's line and determines all its rule's
         # and it's child if any. Then delete them

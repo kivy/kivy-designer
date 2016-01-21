@@ -1020,6 +1020,11 @@
             points: [self.x, self.y, self.center_x - 20, self.y, self.center_x, self.y - 20, self.center_x + 20, self.y, self.right, self.y, self.right, self.top, self.x, self.top]
             close: True
             width: 1.5
+        Color:
+            rgb: bgcolor
+        Rectangle:
+            size: self.size
+            pos: self.pos
 
     on_target: app.focus_widget(args[1])
 

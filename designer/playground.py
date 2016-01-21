@@ -351,6 +351,7 @@ class PlaygroundDragElement(BoxLayout):
         if self.parent:
             self.parent.remove_widget(self)
 
+        self.playground.from_drag = False
         return True
 
     def fit_child(self, *args):
@@ -771,6 +772,9 @@ class Playground(ScatterPlane):
         self.widgettree.refresh()
 
         if not from_kv:
+            if not kv_str and hasattr(widget, '_KD_KV_STR'):
+                kv_str = widget._KD_KV_STR
+                del widget._KD_KV_STR
             self.kv_code_input.add_widget_to_parent(widget, target,
                                                     kv_str=kv_str)
         if not from_undo:
@@ -797,6 +801,27 @@ class Playground(ScatterPlane):
                 pass
         return widget
 
+    def generate_kv_from_args(self, widget_name, kv_dict, *args):
+        '''Converts a dictionary to kv string
+        :param widget_name: name of the widget
+        :param kv_dict: dict with widget rules
+        '''
+        kv = widget_name + ':'
+        indent = '\n' + ' ' * 4
+
+        try:  # check whether python knows about 'basestring'
+            basestring
+        except NameError:  # no, it doesn't (it's Python3); use 'str' instead
+            basestring = str
+
+        for key in kv_dict.keys():
+            value = kv_dict[key]
+            if isinstance(value, basestring):
+                value = "'" + value + "'"
+            kv += indent + key + ': ' + str(value)
+
+        return kv
+
     def get_playground_drag_element(self, instance, widget_name, touch,
                                     default_args, extra_args, *args):
         '''This function will return the desired playground element
@@ -811,6 +836,8 @@ class Playground(ScatterPlane):
 
         # create default widget that will be added and the custom to display
         widget = self.get_widget(widget_name, **default_args)
+        widget._KD_KV_STR = self.generate_kv_from_args(widget_name,
+                                                       default_args)
         values = default_args.copy()
         values.update(extra_args)
         child = self.get_widget(widget_name, **values)
@@ -898,11 +925,13 @@ class Playground(ScatterPlane):
             return None
 
         x, y = target.to_local(x, y)
-        d = get_designer()
         class_rules = get_current_project().app_widgets
 
         for child in target.children:
             is_child_custom = False
+            if child == widget:
+                continue
+
             for rule_name in class_rules:
                 if rule_name == type(child).__name__:
                     is_child_custom = True
@@ -1118,12 +1147,14 @@ class Playground(ScatterPlane):
         return False
 
     def on_touch_up(self, touch):
-        '''Default handler for 'on_touch_move'
+        '''Default handler for 'on_touch_up'
         '''
         if super(ScatterPlane, self).collide_point(*touch.pos):
             self.dragging = False
             Clock.unschedule(self.start_widget_dragging)
 
+        self.dragging = False
+        self.drag_operation = []
         return super(Playground, self).on_touch_up(touch)
 
     def undo_dragging(self):
@@ -1146,8 +1177,8 @@ class Playground(ScatterPlane):
         '''This function will create PlaygroundDragElement
            which will start dragging currently selected widget.
         '''
-        if not self.dragging and not self.drag_operation and \
-                self.selected_widget:
+        if not self.dragging and not self.drag_operation \
+                and self.selected_widget and self.selected_widget != self.root:
             # x, y = self.to_local(*touch.pos)
             # target = self.find_target(x, y, self.root)
             drag_widget = self.selected_widget
@@ -1180,7 +1211,7 @@ class Playground(ScatterPlane):
         if super(ScatterPlane, self).collide_point(*touch.pos):
             if not self.dragging:
                 self.touch = touch
-                Clock.schedule_once(self.start_widget_dragging, 1)
+                Clock.schedule_once(self.start_widget_dragging, 0.5)
 
             x, y = self.to_local(*touch.pos)
             target = self.find_target(x, y, self.root)
