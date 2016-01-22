@@ -1,6 +1,8 @@
 from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.uix.actionbar import ActionGroup, ActionPrevious, ActionButton, \
     ActionItem
+from kivy.core.window import Window
+import weakref
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.floatlayout import FloatLayout
 from designer.uix.contextual import ContextSubMenu
@@ -81,13 +83,56 @@ class DesignerActionProfileCheck(ActionCheckButton):
 
     config_key = StringProperty('')
     '''Dict key to the profile config_parser
-       :data:`config_key` is a :class:`~kivy.properties.StringProperty`, default
-       to ''.
+       :data:`config_key` is a :class:`~kivy.properties.StringProperty`,
+       default to ''.
     '''
 
 
 class DesignerActionGroup(ActionGroup):
-    pass
+
+    to_open = BooleanProperty(False)
+    hovered = BooleanProperty(False)
+    instances = []
+
+    def __init__(self, **kwargs):
+        super(DesignerActionGroup, self).__init__(**kwargs)
+        self.__class__.instances.append(weakref.proxy(self))
+        self.register_event_type('on_enter')
+        Window.bind(mouse_pos=self.on_mouse_pos)
+
+    def on_mouse_pos(self, *args):
+        try:
+            pos = args[1]
+            inside_actionbar = self.parent.parent.collide_point(*pos)
+            inside_actionbutton = self.collide_point(*pos)
+            if self.hovered == inside_actionbutton:
+                return
+            self.hovered = inside_actionbutton
+            if not inside_actionbar:
+                return
+            if inside_actionbar and inside_actionbutton:
+                self.dispatch('on_enter')
+        except:
+            return
+
+    def on_touch_down(self, touch):
+        if self.collide_point(touch.x, touch.y):
+            DesignerActionGroup.to_open = True
+            return super(DesignerActionGroup, self).on_touch_down(touch)
+
+        if not self.is_open:
+            DesignerActionGroup.to_open = False
+
+    def on_enter(self):
+        '''Event handler for on_enter event
+        '''
+        if not self.disabled:
+            for instance in DesignerActionGroup.instances:
+                if instance.is_open:
+                    instance._dropdown.dismiss()
+            if DesignerActionGroup.to_open is True:
+                self.is_open = True
+                self._toggle_dropdown()
 
 
 class DesignerSubActionButton(ActionButton):
