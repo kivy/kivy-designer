@@ -91,31 +91,42 @@ class DesignerActionProfileCheck(ActionCheckButton):
 class DesignerActionGroup(ActionGroup):
 
     to_open = BooleanProperty(False)
+    '''To keep check of whether to open the dropdown list or not.
+    :attr:`to_open` is a :class:`~kivy.properties.BooleanProperty`,
+    defaults to False.
+    '''
     hovered = BooleanProperty(False)
+    '''To keep check of hover over each instance of DesignerActionGroup.
+    :attr:`hovered` is a :class:`~kivy.properties.BooleanProperty`,
+    defaults to False.
+    '''
     instances = []
+    '''List to keep the instances of DesignerActionGroup.
+    '''
 
     def __init__(self, **kwargs):
         super(DesignerActionGroup, self).__init__(**kwargs)
         self.__class__.instances.append(weakref.proxy(self))
-        self.register_event_type('on_enter')
+        self.register_event_type('on_enter')  # Registering the event
         Window.bind(mouse_pos=self.on_mouse_pos)
 
     def on_mouse_pos(self, *args):
         try:
             pos = args[1]
-            inside_actionbar = self.parent.parent.collide_point(*pos)
             inside_actionbutton = self.collide_point(*pos)
             if self.hovered == inside_actionbutton:
+                # If mouse is hovering inside the group then return.
                 return
             self.hovered = inside_actionbutton
-            if not inside_actionbar:
-                return
-            if inside_actionbar and inside_actionbutton:
+            if inside_actionbutton:
                 self.dispatch('on_enter')
         except:
             return
 
     def on_touch_down(self, touch):
+        '''Used to determine where touch is down and to change values
+        of to_open.
+        '''
         if self.collide_point(touch.x, touch.y):
             DesignerActionGroup.to_open = True
             return super(DesignerActionGroup, self).on_touch_down(touch)
