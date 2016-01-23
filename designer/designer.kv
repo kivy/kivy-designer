@@ -1202,7 +1202,13 @@
 <PropertyOptions>:
     valign: 'middle'
     halign: 'left'
-    on_text: self.set_value(args[1])
+    shorten: True
+    shorten_from: 'right'
+    Image:
+        source: 'atlas://data/images/defaulttheme/tree_opened'
+        size_hint: None, None
+        size: root.height, root.height
+        pos: root.x + root.width - root.height, root.y
 
 <WidgetsTree>:
     do_scroll_x: False
@@ -1220,7 +1226,6 @@
         size_hint_y: None
         hide_root: True
         on_selected_node: args[1] and app.focus_widget(args[1].node)
-        #on_touch_down: print(self.to_window(*args[1].pos))
 
 <WidgetTreeElement>:
     is_open: True

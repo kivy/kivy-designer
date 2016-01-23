@@ -1,12 +1,15 @@
+from kivy.core.window import Window
+from kivy.uix.popup import Popup
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty,\
-    BoundedNumericProperty, BooleanProperty, OptionProperty
+    BooleanProperty, OptionProperty, ListProperty
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.checkbox import CheckBox
 from kivy.uix.spinner import Spinner
-from kivy.app import App
 
+from designer.helper_functions import get_designer, FakeSettingList
+from designer.uix.settings import SettingListContent
 from designer.undo_manager import PropOperation
 
 
@@ -87,7 +90,7 @@ class PropertyBase(object):
         except Exception:
             conversion_err = True
 
-        root = App.get_running_app().root
+        designer = get_designer()
         if not conversion_err:
             try:
                 setattr(self.propwidget, self.propname, value)
@@ -95,7 +98,7 @@ class PropertyBase(object):
                                                       self.propname, value,
                                                       self.proptype)
                 if self.record_to_undo:
-                    root.undo_manager.push_operation(
+                    designer.undo_manager.push_operation(
                         PropOperation(self, oldvalue, value))
                 self.record_to_undo = True
             except Exception:
@@ -103,18 +106,65 @@ class PropertyBase(object):
                 setattr(self.propwidget, self.propname, oldvalue)
 
 
-class PropertyOptions(PropertyBase, Spinner):
+class PropertyOptions(PropertyBase, Label):
     '''PropertyOptions to show/set/get options for an OptionProperty
     '''
 
     def __init__(self, prop, **kwargs):
-        PropertyBase.__init__(self)
-        Spinner.__init__(self, values=prop.options, **kwargs)
+        super(PropertyOptions, self).__init__(**kwargs)
+        self._chooser = None
+        self._options = prop.options
+        self._popup = None
 
     def on_propvalue(self, *args):
         '''Default handler for 'on_propvalue'.
         '''
-        self.text = self.propvalue
+        if not self.propvalue or not isinstance(self.propvalue, list):
+            self.propvalue = [self.propvalue]
+        if self.propvalue:
+            self.text = ','.join(self.propvalue)
+        else:
+            self.text = ''
+
+    def on_touch_down(self, touch):
+        '''Display the option chooser
+        '''
+        if self.collide_point(*touch.pos):
+            if self._chooser is None:
+                fake_setting = FakeSettingList()
+                fake_setting.allow_custom = False
+                fake_setting.items = self._options
+                fake_setting.desc = 'Property Options'
+                fake_setting.group = 'property_options'
+                content = SettingListContent(setting=fake_setting)
+                self._chooser = content
+
+            self._chooser.parent = None
+            self._chooser.selected_items = self.propvalue
+            self._chooser.show_items()
+
+            popup_width = min(0.95 * Window.width, 500)
+            popup_height = min(0.95 * Window.height, 500)
+            self._popup = Popup(
+                content=self._chooser,
+                title='Property Options - ' + self.propname,
+                size_hint=(None, None),
+                size=(popup_width, popup_height),
+                auto_dismiss=False
+            )
+
+            self._chooser.bind(
+                    on_apply=self._on_options,
+                    on_cancel=self._popup.dismiss)
+
+            self._popup.open()
+            return True
+
+        return False
+
+    def _on_options(self, instance, selected_items):
+        self.propvalue = selected_items
+        self._popup.dismis()
 
 
 class PropertyTextInput(PropertyBase, TextInput):
@@ -122,6 +172,10 @@ class PropertyTextInput(PropertyBase, TextInput):
        :class:`~kivy.properties.StringProperty` and
        :class:`~kivy.properties.NumericProperty`.
     '''
+
+    def on_text(self, instance, value, *args):
+        if value != str(getattr(self.propwidget, self.propname)):
+            self.set_value(value)
 
     def insert_text(self, substring, from_undo=False):
         '''Override of :class:`~kivy.uix.textinput.TextInput`.insert_text,
@@ -172,12 +226,12 @@ class PropertyViewer(ScrollView):
         super(PropertyViewer, self).__init__(**kwargs)
         self._label_cache = {}
 
-    def on_widget(self, instance, value):
+    def on_widget(self, instance, new_widget):
         '''Default handler for 'on_widget'.
         '''
         self.clear()
-        if value is not None:
-            self.discover(value)
+        if new_widget is not None:
+            self.discover(new_widget)
 
     def clear(self):
         '''To clear :data:`prop_list`.
@@ -196,6 +250,7 @@ class PropertyViewer(ScrollView):
         get_label = self._get_label
         props = list(value.properties().keys())
         props.sort()
+
         for prop in props:
             ip = self.build_for(prop)
             if not ip:
@@ -227,6 +282,11 @@ class PropertyViewer(ScrollView):
                                      proptype='StringProperty',
                                      kv_code_input=self.kv_code_input)
 
+        elif isinstance(prop, ListProperty):
+            return PropertyTextInput(propwidget=self.widget, propname=name,
+                                     proptype='ListProperty',
+                                     kv_code_input=self.kv_code_input)
+
         elif isinstance(prop, BooleanProperty):
             ip = PropertyBoolean(propwidget=self.widget, propname=name,
                                  proptype='BooleanProperty',
@@ -236,7 +296,7 @@ class PropertyViewer(ScrollView):
 
         elif isinstance(prop, OptionProperty):
             ip = PropertyOptions(prop, propwidget=self.widget, propname=name,
-                                 proptype='StringProperty',
+                                 proptype='OptionProperty',
                                  kv_code_input=self.kv_code_input)
             return ip
 

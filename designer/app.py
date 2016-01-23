@@ -1,6 +1,9 @@
 import webbrowser
 from distutils.dir_util import copy_tree
 
+from kivy.graphics.context_instructions import Color
+from kivy.graphics.vertex_instructions import Line
+
 from designer.designer_tools import DesignerTools
 from designer.input_dialog import InputDialog
 from designer.profile_settings import ProfileSettings
@@ -1568,7 +1571,8 @@ class DesignerApp(App):
     title = 'Kivy Designer'
 
     def on_stop(self, *args):
-        self.root.ui_creator.py_console.exit()
+        if hasattr(self.root, 'ui_creator'):
+            self.root.ui_creator.py_console.exit()
 
     def build(self):
         ExceptionManager.add_handler(DesignerException())
@@ -1701,9 +1705,10 @@ class DesignerApp(App):
         container.widgettree = self.root.ui_creator.widgettree
         return container
 
-    def focus_widget(self, widget, *largs):
+    def focus_widget(self, widget, *args):
         '''Called when a widget is select in Playground. It will also draw
            lines around focussed widget.
+           :param widget: widget to receive focus
         '''
 
         if self._widget_focused and (widget is None or
@@ -1714,7 +1719,6 @@ class DesignerApp(App):
             self._widget_focused = []
 
         self.widget_focused = widget
-        self.root.ui_creator.widgettree.refresh()
 
         if not widget:
             return
@@ -1726,7 +1730,6 @@ class DesignerApp(App):
             line = self._widget_focused[2]
             line.points = points
         else:
-            from kivy.graphics import Color, Line
             with widget.canvas.after:
                 color = Color(.42, .62, .65)
                 line = Line(points=points, close=True, width=2.)

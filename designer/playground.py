@@ -8,11 +8,10 @@ from kivy.uix.scatter import ScatterPlane
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.layout import Layout
 from kivy.properties import ObjectProperty, BooleanProperty, \
-    OptionProperty, ListProperty, StringProperty, partial
+    OptionProperty, ListProperty, StringProperty
 from kivy.app import App
 from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.sandbox import Sandbox
 from kivy.factory import Factory
 from kivy.base import EventLoop
 from kivy.clock import Clock
@@ -21,21 +20,17 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.carousel import Carousel
-from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.actionbar import ActionBar
 from kivy.graphics import Color, Line
 from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets
 from designer.confirmation_dialog import ConfirmationDialogSave
 from designer.helper_functions import FakeSettingList, get_designer, \
-    get_app_widget, show_message, get_current_project, ignore_proj_watcher, \
-    widget_contains
+    get_app_widget, show_message, get_current_project, ignore_proj_watcher
 from designer.tree import Tree
 from designer.uix.settings import SettingListContent
 from designer.undo_manager import WidgetOperation, WidgetDragOperation
-from designer.uix.designer_sandbox import DesignerSandbox
 
 
 class PlaygroundDragElement(BoxLayout):
