@@ -138,6 +138,9 @@ class DesignerActionGroup(ActionGroup):
         '''Event handler for on_enter event
         '''
         if not self.disabled:
+            if all(instance.is_open is False for instance in
+                DesignerActionGroup.instances):
+                DesignerActionGroup.to_open = False
             for instance in DesignerActionGroup.instances:
                 if instance.is_open:
                     instance._dropdown.dismiss()
