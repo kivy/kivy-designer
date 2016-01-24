@@ -139,7 +139,7 @@ class DesignerActionGroup(ActionGroup):
         '''
         if not self.disabled:
             if all(instance.is_open is False for instance in
-                DesignerActionGroup.instances):
+                    DesignerActionGroup.instances):
                 DesignerActionGroup.to_open = False
             for instance in DesignerActionGroup.instances:
                 if instance.is_open:
