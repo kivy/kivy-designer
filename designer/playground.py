@@ -98,6 +98,15 @@ class PlaygroundDragElement(BoxLayout):
         '''
         Clock.schedule_once(self._show_lines_on_child)
 
+    def on_widget(self, *args):
+        def update_parent(*largs):
+            p = self.widget.parent
+            if p:
+                self.widget.KD__last_parent = p
+        self.widget.unbind(parent=update_parent)
+        self.widget.bind(parent=update_parent)
+        update_parent()
+
     def _show_lines_on_child(self, *args):
         '''To show boundaries around the child.
         '''
@@ -320,8 +329,6 @@ class PlaygroundDragElement(BoxLayout):
                             self.playground.place_widget(
                                     self.widget, touch.x, touch.y,
                                     index=index, target=target)
-
-                    self.playground.drag_operation = []
                 else:
                     # adding by playground
                     if widget_from == 'playground':
@@ -345,7 +352,7 @@ class PlaygroundDragElement(BoxLayout):
         self.target = None
         if self.parent:
             self.parent.remove_widget(self)
-
+        self.playground.drag_operation = []
         self.playground.from_drag = False
         return True
 
@@ -438,6 +445,11 @@ class Playground(ScatterPlane):
         self._widget_y = -1
         self.widget_to_paste = None
         self._popup = None
+        self._last_root = None
+
+    def on_root(self, *args):
+        if self.root:
+            self._last_root = self.root
 
     def on_pos(self, *args):
         '''Default handler for 'on_pos'
@@ -885,11 +897,12 @@ class Playground(ScatterPlane):
 
         removed_str = ''
         if not from_kv:
-            removed_str = self.kv_code_input.remove_widget_from_parent(widget,
-                                                                       parent)
+            removed_str = self.kv_code_input.remove_widget_from_parent(widget)
         if widget != self.root:
             parent = widget.parent
-            if parent is not None and isinstance(parent.parent, Carousel):
+            if parent is None and hasattr(widget, 'KD__last_parent'):
+                parent = widget.KD__last_parent
+            if isinstance(parent.parent, Carousel):
                 parent.parent.remove_widget(widget)
             elif isinstance(parent, ScreenManager):
                 if isinstance(widget, Screen):
@@ -1149,7 +1162,6 @@ class Playground(ScatterPlane):
             Clock.unschedule(self.start_widget_dragging)
 
         self.dragging = False
-        self.drag_operation = []
         return super(Playground, self).on_touch_up(touch)
 
     def undo_dragging(self):

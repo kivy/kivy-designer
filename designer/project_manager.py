@@ -296,7 +296,11 @@ class Project(EventDispatcher):
                 continue
             wdg = get_app_widget(wd)
             if wdg is None:
-                continue
+                p = get_designer().ui_creator.playground
+                if p.root_name == wd.name:
+                    wdg = p._last_root
+                if not wdg:
+                    continue
             if wd.is_dynamic:
                 del self.app_widgets[key]
 

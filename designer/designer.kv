@@ -1193,7 +1193,7 @@
 <PropertyTextInput>:
     border: 8, 8, 8, 8
     text: str(getattr(self.propwidget, self.propname))
-    on_text: self.set_value(args[1])
+    on_text: self.value_changed(args[1])
 
 <PropertyBoolean>:
     on_active: self.set_value(args[1])
@@ -1335,7 +1335,6 @@
                                 text: 'Reload Widgets'
                                 pos_hint: {'x': 0.8}
                                 on_release: root.reload_btn_pressed()
-                                disabled: code_input.have_error
 
                     DesignerTabbedPanelItem:
                         text: 'Kivy Console'

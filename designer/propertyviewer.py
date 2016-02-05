@@ -113,16 +113,25 @@ class PropertyOptions(PropertyBase, Label):
     def __init__(self, prop, **kwargs):
         super(PropertyOptions, self).__init__(**kwargs)
         self._chooser = None
+        self._original_options = prop.options
         self._options = prop.options
+        if self._options and isinstance(self._options[0], list):
+            # handler to list option properties
+            opts = []
+            for op in self._options:
+                opts.append(str(op))
+            self._options = opts
         self._popup = None
 
     def on_propvalue(self, *args):
         '''Default handler for 'on_propvalue'.
         '''
-        if not self.propvalue or not isinstance(self.propvalue, list):
-            self.propvalue = [self.propvalue]
+
         if self.propvalue:
-            self.text = ','.join(self.propvalue)
+            if isinstance(self.propvalue, list):
+                self.text = str(self.propvalue)
+            else:
+                self.text = self.propvalue
         else:
             self.text = ''
 
@@ -140,7 +149,7 @@ class PropertyOptions(PropertyBase, Label):
                 self._chooser = content
 
             self._chooser.parent = None
-            self._chooser.selected_items = self.propvalue
+            self._chooser.selected_items = [self.text]
             self._chooser.show_items()
 
             popup_width = min(0.95 * Window.width, 500)
@@ -163,8 +172,13 @@ class PropertyOptions(PropertyBase, Label):
         return False
 
     def _on_options(self, instance, selected_items):
-        self.propvalue = selected_items
-        self._popup.dismis()
+        if isinstance(self._original_options[0], list):
+            new_value = eval(selected_items[0])
+        else:
+            new_value = selected_items[0]
+        self.propvalue = new_value
+        self.set_value(new_value)
+        self._popup.dismiss()
 
 
 class PropertyTextInput(PropertyBase, TextInput):
@@ -173,7 +187,7 @@ class PropertyTextInput(PropertyBase, TextInput):
        :class:`~kivy.properties.NumericProperty`.
     '''
 
-    def on_text(self, instance, value, *args):
+    def value_changed(self, value, *args):
         if value != str(getattr(self.propwidget, self.propname)):
             self.set_value(value)
 
