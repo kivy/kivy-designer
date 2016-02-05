@@ -1,6 +1,9 @@
 import webbrowser
 from distutils.dir_util import copy_tree
 
+from kivy.graphics.context_instructions import Color
+from kivy.graphics.vertex_instructions import Line
+
 from designer.designer_tools import DesignerTools
 from designer.input_dialog import InputDialog
 from designer.profile_settings import ProfileSettings
@@ -1568,7 +1571,8 @@ class DesignerApp(App):
     title = 'Kivy Designer'
 
     def on_stop(self, *args):
-        self.root.ui_creator.py_console.exit()
+        if hasattr(self.root, 'ui_creator'):
+            self.root.ui_creator.py_console.exit()
 
     def build(self):
         ExceptionManager.add_handler(DesignerException())
@@ -1658,40 +1662,53 @@ class DesignerApp(App):
         if not os.path.exists(get_kivy_designer_dir()):
             os.mkdir(get_kivy_designer_dir())
 
-    def create_draggable_element(self, widgetname, touch, widget=None):
+    def create_draggable_element(self, instance, widget_name, touch,
+                                 widget=None):
         '''Create PlagroundDragElement and make it draggable
            until the touch is released also search default args if exist
+           :param widget: instance of widget.
+                            If set, widget_name will be ignored
+           :param touch: instance of the current touch
+           :param instance: if from toolbox, ToolboxButton instance.
+                    None otherwise
+           :param widget_name: name of the widget that will be dragged
         '''
         container = None
-        if not widget:
-            default_args = {}
-            for options in widgets:
-                if len(options) > 2:
-                    default_args = options[2]
-
-            container = self.root.ui_creator.playground.\
-                get_playground_drag_element(widgetname, touch, **default_args)
-
-        else:
+        if widget:
             container = PlaygroundDragElement(
-                playground=self.root.ui_creator.playground, child=widget)
+                    playground=self.root.ui_creator.playground,
+                    child=widget,
+                    widget=widget)
             touch.grab(container)
             touch.grab_current = container
             container.on_touch_move(touch)
             container.center_x = touch.x
             container.y = touch.y + 20
-
+        else:
+            default_args = {}
+            extra_args = {}
+            for options in widgets:
+                if widget_name == options[0]:
+                    if len(options) > 2:
+                        default_args = options[2].copy()
+                    if len(options) > 3:
+                        extra_args = options[3].copy()
+                    break
+            container = self.root.ui_creator.playground.\
+                get_playground_drag_element(instance, widget_name,
+                                            touch, default_args, extra_args)
         if container:
             self.root.add_widget(container)
         else:
-            show_message("Cannot create %s" % widgetname, 5, 'error')
+            show_message("Cannot create %s" % widget_name, 5, 'error')
 
         container.widgettree = self.root.ui_creator.widgettree
         return container
 
-    def focus_widget(self, widget, *largs):
+    def focus_widget(self, widget, *args):
         '''Called when a widget is select in Playground. It will also draw
            lines around focussed widget.
+           :param widget: widget to receive focus
         '''
 
         if self._widget_focused and (widget is None or
@@ -1702,7 +1719,6 @@ class DesignerApp(App):
             self._widget_focused = []
 
         self.widget_focused = widget
-        self.root.ui_creator.widgettree.refresh()
 
         if not widget:
             return
@@ -1714,7 +1730,6 @@ class DesignerApp(App):
             line = self._widget_focused[2]
             line.points = points
         else:
-            from kivy.graphics import Color, Line
             with widget.canvas.after:
                 color = Color(.42, .62, .65)
                 line = Line(points=points, close=True, width=2.)

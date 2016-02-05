@@ -1,11 +1,6 @@
 import re
 
-from kivy.uix.codeinput import CodeInput
-from kivy.properties import BooleanProperty, StringProperty,\
-    NumericProperty, OptionProperty, ObjectProperty
-from kivy.app import App
-from kivy.lang import Builder, Parser, ParserException
-from kivy.factory import Factory, FactoryException
+from kivy.properties import BooleanProperty, StringProperty, ObjectProperty
 from kivy.clock import Clock
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
@@ -14,8 +9,7 @@ from kivy.uix.tabbedpanel import TabbedPanelContent, \
     TabbedPanel, TabbedPanelHeader
 
 from designer.helper_functions import get_indent_str, get_line_end_pos,\
-    get_line_start_pos, get_indentation, show_error_console, \
-    get_current_project
+    get_line_start_pos, get_indentation, get_current_project
 from designer.uix.designer_code_input import DesignerCodeInput
 
 
@@ -44,12 +38,15 @@ class KVLangAreaScroll(ScrollView):
     def __init__(self, **kwargs):
         super(KVLangAreaScroll, self).__init__(**kwargs)
 
+        # the maximum number of lines achieved in this scroller
         self._max_num_of_lines = 0
         # identify if the line number binding is already running
         self._line_number_handled = False
 
     def on_width(self, *args):
+        # runs on width, when it's added to the uicreator
         if not self._line_number_handled:
+            # just handle it once
             if self.show_line_number:
                 self.kv_lang_area.bind(_lines=self.on_lines_changed)
             else:
@@ -69,8 +66,9 @@ class KVLangAreaScroll(ScrollView):
         to update the text input
         '''
         self._max_num_of_lines = new
-        self.line_number.text += \
-                    '\n'.join([str(i) for i in range(old + 1, new + 1)]) + '\n'
+        # generate the new line labels
+        self.line_number.text += '\n'.join(
+                [str(i) for i in range(old + 1, new + 1)]) + '\n'
         self.line_number.width = self.line_number._label_cached.get_extents(
             str(self._max_num_of_lines))[0] + (self.line_number.padding[0] * 2)
         # not removing lines, as long as extra lines will not be visible
@@ -109,7 +107,7 @@ class KVLangArea(DesignerCodeInput):
         self._reload_trigger = Clock.create_trigger(self.func_reload_kv, 1)
         self.bind(text=self._reload_trigger)
 
-    def _get_widget_path(self, widget):
+    def get_widget_path(self, widget):
         '''To get path of a widget, path of a widget is a list containing
            the index of it in its parent's children list. For example,
            Widget1:
@@ -118,6 +116,8 @@ class KVLangArea(DesignerCodeInput):
                    Widget4:
 
            path of Widget4 is [0, 1, 0]
+           see `tests/test_kv_lang_area` for more examples
+           :param widget: widget to get its path
         '''
 
         path_to_widget = []
@@ -180,12 +180,16 @@ class KVLangArea(DesignerCodeInput):
     def shift_widget(self, widget, from_index):
         '''This function will shift widget's kv str from one position
            to another.
+           :param from_index: original index of widget before moving
+           :param widget: shifted widget
         '''
         self._reload = False
 
-        path = self._get_widget_path(widget)
+        path = self.get_widget_path(widget)
         path.reverse()
-        prev_path = [x for x in path]
+        # copies the original path
+        prev_path = list(path)
+        # get the path before shifting the widget
         prev_path[-1] = len(widget.parent.children) - from_index - 1
         start_pos, end_pos = self.get_widget_text_pos_from_kv(
             widget, widget.parent, path_to_widget=prev_path)
@@ -233,7 +237,7 @@ class KVLangArea(DesignerCodeInput):
 
         # If target is not none then widget is not root widget
         if target:
-            path_to_widget = self._get_widget_path(target)
+            path_to_widget = self.get_widget_path(target)
 
             path_to_widget.reverse()
 
@@ -295,17 +299,21 @@ class KVLangArea(DesignerCodeInput):
                     line = lines[insert_after_line]
 
             to_insert = ''
+            # counts indentation in the beginning of the string
+            extra_indent = len(kv_str) - len(kv_str.lstrip())
             if kv_str == '':
                 to_insert = type(widget).__name__ + ':'
             else:
-                to_insert = kv_str.strip()
+                to_insert = kv_str
 
             if insert_after_line == total_lines - 1:
                 # if inserting at the last line
                 _line_pos = len(self.text) - 1
-
-                self.text = self.text[:_line_pos + 1] + '\n' + \
-                    get_indent_str(indent + 4) + to_insert
+                indent = get_indent_str(indent + 4 - extra_indent)
+                to_add = ''
+                for line in to_insert.splitlines():
+                    to_add += '\n' + indent + line
+                self.text = self.text[:_line_pos + 1] + to_add
             else:
                 # inserting somewhere else
                 insert_after_line -= 1
@@ -337,12 +345,15 @@ class KVLangArea(DesignerCodeInput):
 
             self.playground.load_widget(type_name)
 
-    def get_widget_text_pos_from_kv(self, widget, parent, path_to_widget=[]):
+    def get_widget_text_pos_from_kv(self, widget, parent=None,
+                                    path_to_widget=None):
         '''To get start and end pos of widget's rule in kv text
+        :param path_to_widget: array with widget path
+        :param parent: parent of widget
+        :param widget: widget to find the kv text
         '''
-
         if not path_to_widget:
-            path_to_widget = self._get_widget_path(widget)
+            path_to_widget = self.get_widget_path(widget)
             path_to_widget.reverse()
 
         # Go to widget's rule's line and determines all its rule's
@@ -365,7 +376,7 @@ class KVLangArea(DesignerCodeInput):
         lineno = widget_lineno
         _indent = indent + 1
         line = widget_line
-        while (line.strip() == '' or _indent > indent):
+        while line.strip() == '' or _indent > indent:
             lineno += 1
             if lineno >= total_lines:
                 break
@@ -401,7 +412,7 @@ class KVLangArea(DesignerCodeInput):
 
         return text
 
-    def remove_widget_from_parent(self, widget, parent):
+    def remove_widget_from_parent(self, widget):
         '''This function is called when widget is removed from parent.
            It will delete widget's rule from parent's rule
         '''
@@ -410,8 +421,7 @@ class KVLangArea(DesignerCodeInput):
 
         self._reload = False
 
-        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget,
-                                                              parent)
+        start_pos, end_pos = self.get_widget_text_pos_from_kv(widget)
         text = self.text[start_pos:end_pos]
         self.text = self.text[:start_pos] + self.text[end_pos:]
         return text
@@ -523,7 +533,7 @@ class KVLangArea(DesignerCodeInput):
                 value == '':
             return
 
-        path_to_widget = self._get_widget_path(widget)
+        path_to_widget = self.get_widget_path(widget)
         path_to_widget.reverse()
 
         # Go to the line where widget is declared
@@ -581,12 +591,12 @@ class KVLangArea(DesignerCodeInput):
 
             return self.text[_pos_prop_value:_line_end_pos]
 
-        return ""
+        return ''
 
     def set_event_handler(self, widget, prop, value):
         self._reload = False
 
-        path_to_widget = self._get_widget_path(widget)
+        path_to_widget = self.get_widget_path(widget)
         path_to_widget.reverse()
 
         # Go to the line where widget is declared
@@ -688,7 +698,7 @@ class KVLangArea(DesignerCodeInput):
                 value == '':
             return
 
-        path_to_widget = self._get_widget_path(widget)
+        path_to_widget = self.get_widget_path(widget)
         path_to_widget.reverse()
 
         # Go to the line where widget is declared
@@ -754,7 +764,9 @@ class KVLangArea(DesignerCodeInput):
             else:
                 _line_end_pos = get_line_end_pos(self.text, lineno)
 
-            if proptype == 'StringProperty':
+            if proptype == 'StringProperty' or \
+                    (proptype == 'OptionProperty' and
+                         not isinstance(value, list)):
                 value = "'{}'".format(value.replace("'", "\\'"))
 
             self.text = self.text[:_pos_prop_value] + ' ' + str(value) + \
@@ -766,7 +778,9 @@ class KVLangArea(DesignerCodeInput):
             # if not found then add property after the widgets line
             _line_start_pos = get_line_start_pos(self.text, widget_lineno)
             _line_end_pos = get_line_end_pos(self.text, widget_lineno)
-            if proptype == 'StringProperty':
+            if proptype == 'StringProperty' or \
+                    (proptype == 'OptionProperty' and
+                         not isinstance(value, list)):
                 value = "'{}'".format(value.replace("'", "\\'"))
 
             indent_str = '\n'
