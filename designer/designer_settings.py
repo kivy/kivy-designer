@@ -11,7 +11,7 @@ from kivy.properties import ObjectProperty
 from kivy.config import ConfigParser
 from kivy.uix.settings import Settings
 
-from designer.helper_functions import get_kivy_designer_dir
+from designer.helper_functions import get_config_dir
 from designer.uix.settings import SettingList, SettingShortcut
 
 DESIGNER_CONFIG_FILE_NAME = 'config.ini'
@@ -55,7 +55,7 @@ class DesignerSettings(Settings):
         '''This function loads project settings
         '''
         self.config_parser = ConfigParser(name='DesignerSettings')
-        DESIGNER_CONFIG = os.path.join(get_kivy_designer_dir(),
+        DESIGNER_CONFIG = os.path.join(get_config_dir(),
                                        DESIGNER_CONFIG_FILE_NAME)
 
         _dir = os.path.dirname(designer.__file__)

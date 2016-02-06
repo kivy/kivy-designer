@@ -5,7 +5,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.properties import OptionProperty, StringProperty
 from kivy.uix.popup import Popup
 from kivy.uix.tabbedpanel import TabbedPanelHeader
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, \
+from kivy.properties import ObjectProperty, BooleanProperty, \
                         Clock, partial
 from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
 from kivy.uix.treeview import TreeViewLabel
@@ -310,28 +310,36 @@ class DesignerTabbedPanel(TabbedPanel):
         '''Event handler to close icon
         :param instance: tab instance
         '''
+        d = get_designer()
+        if d.popup:
+            return False
+
         self.switch_to(instance)
         if instance.has_modification:
             # show a dialog to ask if can close
             confirm_dlg = ConfirmationDialog(
                     'All unsaved changes will be lost.\n'
                     'Do you want to continue?')
-            self._popup = Popup(
+            popup = Popup(
                     title='New',
                     content=confirm_dlg,
                     size_hint=(None, None),
                     size=('200pt', '150pt'),
                     auto_dismiss=False)
+
+            def close_tab(*args):
+                d.close_popup()
+                self._perform_close_tab(instance)
+
             confirm_dlg.bind(
-                    on_ok=partial(self._perform_close_tab, instance),
-                    on_cancel=self._popup.dismiss)
-            self._popup.open()
+                    on_ok=close_tab,
+                    on_cancel=d.close_popup)
+            popup.open()
+            d.popup = popup
         else:
             Clock.schedule_once(partial(self._perform_close_tab, instance))
 
     def _perform_close_tab(self, tab, *args):
-        if hasattr(self, '_popup'):
-            self._popup.dismiss()
         # remove code_input from list
         if hasattr(tab.content, 'code_input'):
             code = tab.content.code_input

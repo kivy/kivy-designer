@@ -16,6 +16,8 @@ from kivy.uix.popup import Popup
 import sys
 from kivy.uix.widget import Widget
 
+import designer
+
 
 class FakeSettingList(EventDispatcher):
     '''Fake Kivy Setting to use SettingList
@@ -115,7 +117,7 @@ def get_indentation(string):
     return count
 
 
-def get_kivy_designer_dir():
+def get_config_dir():
     '''This function returns kivy-designer's config dir
     '''
     user_dir = os.path.join(App.get_running_app().user_data_dir,
@@ -125,13 +127,21 @@ def get_kivy_designer_dir():
     return user_dir
 
 
+def get_kd_dir():
+    '''Return kivy designer source/binaries folder
+    '''
+    _dir = os.path.dirname(designer.__file__)
+    _dir = os.path.split(_dir)[0]
+    return _dir
+
+
 def show_alert(title, msg, width=500, height=200):
     lbl_message = Label(text=msg)
     lbl_message.padding = [10, 10]
     popup = Popup(title=title,
-                        content=lbl_message,
-                        size_hint=(None, None),
-                        size=(width, height))
+                  content=lbl_message,
+                  size_hint=(None, None),
+                  size=(width, height))
     popup.open()
 
 

@@ -10,7 +10,7 @@ from kivy.uix.settings import Settings, InterfaceWithSidebar, \
 
 import designer
 from designer.confirmation_dialog import ConfirmationDialog
-from designer.helper_functions import get_kivy_designer_dir
+from designer.helper_functions import get_config_dir
 
 
 class ProfileContentPanel(ContentPanel):
@@ -126,7 +126,7 @@ class ProfileSettings(Settings):
         '''This function loads project settings
         '''
         self.settings_changed = False
-        self.PROFILES_PATH = os.path.join(get_kivy_designer_dir(),
+        self.PROFILES_PATH = os.path.join(get_config_dir(),
             'profiles')
 
         _dir = os.path.dirname(designer.__file__)
@@ -209,15 +209,15 @@ class ProfileSettings(Settings):
     def on_delete(self, *args):
         '''Handler to "Delete profile" button
         '''
-        self._confirm_dlg = ConfirmationDialog(
+        confirm_dlg = ConfirmationDialog(
             message="Do you want to delete this profile?")
         self._popup = Popup(title='Delete Profile',
-                            content=self._confirm_dlg,
+                            content=confirm_dlg,
                             size_hint=(None, None),
                             size=('200pt', '150pt'),
                             auto_dismiss=False)
-        self._confirm_dlg.bind(on_ok=self._perform_delete_prof,
-                               on_cancel=self._popup.dismiss)
+        confirm_dlg.bind(on_ok=self._perform_delete_prof,
+                         on_cancel=self._popup.dismiss)
         self._popup.open()
 
     def _perform_delete_prof(self, *args):

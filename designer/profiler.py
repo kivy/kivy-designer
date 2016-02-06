@@ -50,7 +50,7 @@ class Buildozer(Builder):
 
         if self.buildozer_path == '':
             self.profiler.dispatch('on_error', 'Buildozer Path not specified.'
-                                '\n\nUpdate it on \'File\' -> \'Settings\'')
+                                               "\n\nUpdate it on File -> Settings")
             self.can_run = False
             return
 
@@ -63,7 +63,7 @@ class Buildozer(Builder):
         for env in envs.split(' '):
             self.ui_creator.kivy_console.environment[
                 env[:env.find('=')]] = env[env.find('=') + 1:]
-
+        # TODO check here
         # check if buildozer.spec exists
         if not os.path.isfile(os.path.join(self.profiler.project_path,
                                            'buildozer.spec')):

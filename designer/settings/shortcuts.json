@@ -1,5 +1,57 @@
 [
   {
+    "type": "title",
+    "title": "File"
+  },
+  {
+    "type": "shortcut",
+    "title": "New File",
+    "section": "shortcuts",
+    "key": "new_file"
+  },
+  {
+    "type": "shortcut",
+    "title": "New Project",
+    "section": "shortcuts",
+    "key": "new_project"
+  },
+  {
+    "type": "shortcut",
+    "title": "Open Project",
+    "section": "shortcuts",
+    "key": "open_project"
+  },
+  {
+    "type": "shortcut",
+    "title": "Save",
+    "section": "shortcuts",
+    "key": "save"
+  },
+  {
+    "type": "shortcut",
+    "title": "Save as",
+    "section": "shortcuts",
+    "key": "save_as"
+  },
+  {
+    "type": "shortcut",
+    "title": "Close Project",
+    "section": "shortcuts",
+    "key": "close_project"
+  },
+  {
+    "type": "shortcut",
+    "title": "Recent Projects",
+    "section": "shortcuts",
+    "key": "recent"
+  },
+  {
+    "type": "shortcut",
+    "title": "Settings",
+    "section": "shortcuts",
+    "key": "settings"
+  },
+  {
     "type": "shortcut",
     "title": "Exit",
     "section": "shortcuts",

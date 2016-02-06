@@ -24,7 +24,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.graphics import Color, Line
 from kivy.uix.tabbedpanel import TabbedPanel
 
-from designer.common import widgets
+from designer.common import widgets as widgets_common
 from designer.confirmation_dialog import ConfirmationDialogSave
 from designer.helper_functions import FakeSettingList, get_designer, \
     get_app_widget, show_message, get_current_project, ignore_proj_watcher
@@ -471,6 +471,9 @@ class Playground(ScatterPlane):
     def on_widget_select_pressed(self, *args):
         '''Event handler to playground widget selector press
         '''
+        d = get_designer()
+        if d.popup:
+            return False
         widgets = get_current_project().app_widgets
         app_widgets = []
         for name in widgets.keys():
@@ -488,7 +491,7 @@ class Playground(ScatterPlane):
         content = SettingListContent(setting=fake_setting)
         popup_width = min(0.95 * Window.width, 500)
         popup_height = min(0.95 * Window.height, 500)
-        self._popup = popup = Popup(
+        d.popup = Popup(
             content=content,
             title='Playground - Edit Widget',
             size_hint=(None, None),
@@ -497,20 +500,20 @@ class Playground(ScatterPlane):
         )
 
         content.bind(on_apply=self._perform_select_root_widget,
-                     on_cancel=self._popup.dismiss)
+                     on_cancel=d.close_popup)
 
         content.selected_items = [self.root_name]
         if self.root_app_widget and self.root_app_widget.is_root:
             content.selected_items = ['Root - ' + self.root_name]
         content.show_items()
 
-        popup.open()
+        d.popup.open()
 
     def _perform_select_root_widget(self, instance, selected_item, *args):
         '''On Playground edit item selection
         :type selected_item: instance of selected array
         '''
-        self._popup.dismiss()
+        get_designer().close_popup()
         name = selected_item[0]
         # remove Root label from widget name
         if name.startswith('Root - '):
@@ -524,9 +527,6 @@ class Playground(ScatterPlane):
         show_message('No widget found!', 5, 'error')
         self.sandbox.clear_widgets()
 
-    def _close_popup(self, *args):
-        self._popup.dismiss()
-
     def load_widget(self, widget_name, update_kv_lang=True):
         '''Load and display and widget given its name.
         If widget is not found, shows information on status bar and clear
@@ -535,6 +535,10 @@ class Playground(ScatterPlane):
         :param update_kv_lang if True, reloads the kv file. If False, keep the
             kv lang text
         '''
+        d = get_designer()
+        if d.popup:
+            # if has a popup, it's not using playground
+            return False
         widgets = get_current_project().app_widgets
         # if displaying no widget or this widget is not know
         if self.root is None or self.root_app_widget is None or \
@@ -560,16 +564,19 @@ class Playground(ScatterPlane):
                 get_current_project().save()
                 self._perform_load_widget(widget_name, True)
 
+            def dont_save(*args):
+                d.close_popup()
+                self._perform_load_widget(widget_name, True)
+
             _confirm_dlg.bind(
                 on_save=save_and_load,
-                on_dont_save=lambda dt:
-                            self._perform_load_widget(widget_name, True),
-                on_cancel=self._close_popup)
+                on_dont_save=dont_save,
+                on_cancel=d.close_popup)
 
-            self._popup = Popup(title='Change Widget', content=_confirm_dlg,
-                                size_hint=(None, None), size=('400pt', '150pt'),
-                                auto_dismiss=False)
-            self._popup.open()
+            d.popup = Popup(title='Change Widget', content=_confirm_dlg,
+                            size_hint=(None, None), size=('400pt', '150pt'),
+                            auto_dismiss=False)
+            d.popup.open()
             return
         self._perform_load_widget(widget_name, update_kv_lang)
 
@@ -579,8 +586,6 @@ class Playground(ScatterPlane):
         :param update_kv_lang if True, reloads the kv file. If False, keep the
             kv lang text
         '''
-        if self._popup:
-            self._popup.dismiss()
         self.root_name = widget_name
         self.root = None
         self.sandbox.clear_widgets()
@@ -796,7 +801,7 @@ class Playground(ScatterPlane):
            :param widget_name: name of the widget to be instantiated
         '''
         widget = None
-        for _widget in widgets:
+        for _widget in widgets_common:
             if _widget[0] == widget_name and _widget[1] == 'custom':
                 app_widgets = get_current_project().app_widgets
                 widget = get_app_widget(app_widgets[widget_name])
@@ -849,7 +854,7 @@ class Playground(ScatterPlane):
         values.update(extra_args)
         child = self.get_widget(widget_name, **values)
         custom = False
-        for op in widgets:
+        for op in widgets_common:
             if op[0] == widget_name:
                 if op[1] == 'custom':
                     custom = True
@@ -946,7 +951,7 @@ class Playground(ScatterPlane):
                     break
 
             is_child_complex = False
-            for _widget in widgets:
+            for _widget in widgets_common:
                 if _widget[0] == type(child).__name__ and \
                                 _widget[1] == 'complex':
                     is_child_complex = True
