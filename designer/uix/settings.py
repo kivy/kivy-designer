@@ -631,9 +631,11 @@ class SettingShortcut(SettingItem):
     '''Implementation of a shortcut listener.
     Setting will be stored in the format:
         [Modifiers, ...] + keycode(string)
+    The modifiers are in alphabetical order and separated with a space
+    All chars is in lowercase
     eg
-        [ctrl] + q
-        [ctrl, shift] + a
+        ['ctrl'] + q
+        ['ctrl', 'shift'] + a
         [] + f1
     '''
 

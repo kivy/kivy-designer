@@ -9,7 +9,7 @@ from designer.confirmation_dialog import ConfirmationDialog
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 from designer.helper_functions import ignore_proj_watcher, show_alert, \
-    get_current_project
+    get_current_project, get_designer
 
 
 #### UIs ####
@@ -128,6 +128,9 @@ class DesignerTools(EventDispatcher):
     def create_setup_py(self):
         '''Runs the GUI to create a setup.py file
         '''
+        d = get_designer()
+        if d.popup:
+            return False
         proj_dir = get_current_project().path
         designer_content = self.designer.designer_content
 
@@ -137,17 +140,17 @@ class DesignerTools(EventDispatcher):
             return False
 
         content = ToolSetupPy(path=setup_path)
-        self._popup = Popup(title='Create setup.py', content=content,
-                            size_hint=(None, None), size=(550, 350),
-                            auto_dismiss=False)
-        content.bind(on_cancel=self._popup.dismiss)
+        d.popup = Popup(title='Create setup.py', content=content,
+                        size_hint=(None, None), size=(550, 350),
+                        auto_dismiss=False)
+        content.bind(on_cancel=d.close_popup)
 
         def on_create(*args):
             designer_content.update_tree_view(get_current_project())
-            self._popup.dismiss()
+            d.close_popup()
 
         content.bind(on_create=on_create)
-        self._popup.open()
+        d.popup.open()
 
     @ignore_proj_watcher
     def create_gitignore(self):
@@ -176,22 +179,24 @@ __pycache__/'''
         '''Checks if the .spec exists or not; and when possible, calls
             _perform_buildozer_init
         '''
-
+        d = get_designer()
+        if d.popup:
+            return False
         proj_dir = get_current_project().path
         spec_file = os.path.join(proj_dir, 'buildozer.spec')
 
         if os.path.exists(spec_file):
-            self._confirm_dlg = ConfirmationDialog(
+            confirm_dlg = ConfirmationDialog(
                 message='The buildozer.spec file already exist.'
-                                        '\nDo you want to create a new spec?')
-            self._popup = Popup(title='Buildozer init',
-                                content=self._confirm_dlg,
-                                size_hint=(None, None),
-                                size=('250pt', '150pt'),
-                                auto_dismiss=False)
-            self._confirm_dlg.bind(on_ok=self._perform_buildozer_init,
-                                   on_cancel=self._popup.dismiss)
-            self._popup.open()
+                        '\nDo you want to create a new spec?')
+            d.popup = Popup(title='Buildozer init',
+                            content=confirm_dlg,
+                            size_hint=(None, None),
+                            size=('250pt', '150pt'),
+                            auto_dismiss=False)
+            confirm_dlg.bind(on_ok=self._perform_buildozer_init,
+                             on_cancel=d.close_popup)
+            d.popup.open()
         else:
             self._perform_buildozer_init()
 
@@ -200,7 +205,7 @@ __pycache__/'''
         '''Copies the spec from new_templates/default.spec to the project
         folder
         '''
-        self._popup.dismiss()
+        get_designer().close_popup()
 
         proj_dir = get_current_project().path
         spec_file = os.path.join(proj_dir, 'buildozer.spec')

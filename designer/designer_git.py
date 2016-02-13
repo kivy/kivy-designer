@@ -192,13 +192,17 @@ class DesignerGit(DesignerActionSubMenu):
     def do_commit(self, *args):
         '''Git commit
         '''
-        input = InputDialog('Commit message: ')
-        self._popup = Popup(title='Git Commit', content=input,
-                            size_hint=(None, None), size=('300pt', '150pt'),
-                            auto_dismiss=False)
-        input.bind(on_confirm=self._perform_do_commit,
-                   on_cancel=self._popup.dismiss)
-        self._popup.open()
+        d = get_designer()
+        if d.popup:
+            return False
+        input_dlg = InputDialog('Commit message: ')
+        d.popup = Popup(title='Git Commit', content=input_dlg,
+                        size_hint=(None, None), size=('300pt', '150pt'),
+                        auto_dismiss=False)
+        input_dlg.bind(on_confirm=self._perform_do_commit,
+                       on_cancel=d.close_popup)
+        d.popup.open()
+        return True
 
     @ignore_proj_watcher
     def _perform_do_commit(self, input, *args):
@@ -213,12 +217,16 @@ class DesignerGit(DesignerActionSubMenu):
                 show_alert('Git Commit', 'Failed to commit!\n' + str(e))
         else:
             show_alert('Git Commit', 'There is nothing to commit')
-        self._popup.dismiss()
+
+        get_designer().close_popup()
 
     @ignore_proj_watcher
     def do_add(self, *args):
         '''Git select files from a list to add
         '''
+        d = get_designer()
+        if d.popup:
+            return False
         files = self.repo.untracked_files
         if not files:
             show_alert('Git Add', 'All files are already indexed by Git')
@@ -233,14 +241,15 @@ class DesignerGit(DesignerActionSubMenu):
         content = SettingListContent(setting=fake_setting)
         popup_width = min(0.95 * Window.width, 500)
         popup_height = min(0.95 * Window.height, 500)
-        self._popup = popup = Popup(
+        popup = Popup(
             content=content, title='Git - Add files', size_hint=(None, None),
             size=(popup_width, popup_height), auto_dismiss=False)
 
         content.bind(on_apply=self._perform_do_add,
-                     on_cancel=self._popup.dismiss)
+                     on_cancel=d.close_popup)
 
         content.show_items()
+        d.popup = popup
         popup.open()
 
     @ignore_proj_watcher
@@ -251,13 +260,16 @@ class DesignerGit(DesignerActionSubMenu):
             self.repo.index.add(selected_files)
             show_message('%d file(s) added to Git index' %
                          len(selected_files), 5, 'info')
-            self._popup.dismiss()
+            get_designer().close_popup()
         except GitCommandError as e:
             show_alert('Git Add', 'Failed to add files to Git!\n' + str(e))
 
     def do_branches(self, *args):
         '''Shows a list of git branches and allow to change the current one
         '''
+        d = get_designer()
+        if d.popup:
+            return False
         branches = []
         for b in self.repo.heads:
             branches.append(b.name)
@@ -273,16 +285,16 @@ class DesignerGit(DesignerActionSubMenu):
         content = SettingListContent(setting=fake_setting)
         popup_width = min(0.95 * Window.width, 500)
         popup_height = min(0.95 * Window.height, 500)
-        self._popup = popup = Popup(
+        popup = Popup(
             content=content, title='Git - Branches', size_hint=(None, None),
             size=(popup_width, popup_height), auto_dismiss=False)
 
         content.bind(on_apply=self._perform_do_branches,
-                     on_cancel=self._popup.dismiss)
+                     on_cancel=d.close_popup)
 
         content.selected_items = [self.repo.active_branch.name]
         content.show_items()
-
+        d.popup = popup
         popup.open()
 
     @ignore_proj_watcher
@@ -291,7 +303,7 @@ class DesignerGit(DesignerActionSubMenu):
         the branch and checkout.
         If the code has modification, shows an alert and stops
         '''
-        self._popup.dismiss()
+        get_designer().close_popup()
 
         if self.repo.is_dirty():
             show_alert('Git checkout',
@@ -361,9 +373,12 @@ class DesignerGit(DesignerActionSubMenu):
         '''Open a list of remotes to push repository data.
         If there is not remote, shows an alert
         '''
+        d = get_designer()
+        if d.popup:
+            return False
         if not self.validate_remote():
             show_alert('Git - Remote Authentication',
-                'To use Git remote you need to enter your ssh password')
+                       'To use Git remote you need to enter your ssh password')
             return
         remotes = []
         for r in self.repo.remotes:
@@ -382,16 +397,16 @@ class DesignerGit(DesignerActionSubMenu):
         content = SettingListContent(setting=fake_setting)
         popup_width = min(0.95 * Window.width, 500)
         popup_height = min(0.95 * Window.height, 500)
-        self._popup = popup = Popup(
+        popup = Popup(
             content=content, title='Git - Push Remote', size_hint=(None, None),
             size=(popup_width, popup_height), auto_dismiss=False)
 
         content.bind(on_apply=self._perform_do_push,
-                     on_cancel=self._popup.dismiss)
+                     on_cancel=d.close_popup)
 
         content.selected_items = [remotes[0]]
         content.show_items()
-
+        d.popup = popup
         popup.open()
 
     def _perform_do_push(self, instance, remotes, *args):
@@ -402,9 +417,9 @@ class DesignerGit(DesignerActionSubMenu):
         progress = GitRemoteProgress()
 
         status = Popup(title='Git push progress',
-                            content=progress.label,
-                            size_hint=(None, None),
-                            size=(500, 200))
+                       content=progress.label,
+                       size_hint=(None, None),
+                       size=(500, 200))
         status.open()
 
         @ignore_proj_watcher
@@ -424,7 +439,7 @@ class DesignerGit(DesignerActionSubMenu):
             except GitCommandError as e:
                 progress.label.text = 'Failed to push!\n' + str(e)
                 show_message('Failed to push', 5, 'error')
-            self._popup.dismiss()
+            get_designer().close_popup()
 
         progress.start()
         threading.Thread(target=push).start()
@@ -433,9 +448,12 @@ class DesignerGit(DesignerActionSubMenu):
         '''Open a list of remotes to pull remote data.
         If there is not remote, shows an alert
         '''
+        d = get_designer()
+        if d.popup:
+            return False
         if not self.validate_remote():
             show_alert('Git - Remote Authentication',
-                'To use Git remote you need to enter your ssh password')
+                       'To use Git remote you need to enter your ssh password')
             return
         remotes = []
         for r in self.repo.remotes:
@@ -454,16 +472,16 @@ class DesignerGit(DesignerActionSubMenu):
         content = SettingListContent(setting=fake_setting)
         popup_width = min(0.95 * Window.width, 500)
         popup_height = min(0.95 * Window.height, 500)
-        self._popup = popup = Popup(
+        popup = popup = Popup(
             content=content, title='Git - Pull Remote', size_hint=(None, None),
             size=(popup_width, popup_height), auto_dismiss=False)
 
         content.bind(on_apply=self._perform_do_pull,
-                     on_cancel=self._popup.dismiss)
+                     on_cancel=d.close_popup)
 
         content.selected_items = [remotes[0]]
         content.show_items()
-
+        d.popup = popup
         popup.open()
 
     def _perform_do_pull(self, instance, remotes, *args):
@@ -474,9 +492,9 @@ class DesignerGit(DesignerActionSubMenu):
         progress = GitRemoteProgress()
 
         status = Popup(title='Git pull progress',
-                            content=progress.label,
-                            size_hint=(None, None),
-                            size=(500, 200))
+                       content=progress.label,
+                       size_hint=(None, None),
+                       size=(500, 200))
         status.open()
 
         @ignore_proj_watcher
@@ -494,7 +512,7 @@ class DesignerGit(DesignerActionSubMenu):
                 show_message('Git remote pull completed!', 5)
             except GitCommandError as e:
                 progress.label.text = 'Failed to pull!\n' + str(e)
-            self._popup.dismiss()
+            get_designer().close_popup()
 
         progress.start()
         threading.Thread(target=pull).start()

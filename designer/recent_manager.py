@@ -6,7 +6,7 @@ from kivy.uix.listview import ListItemButton
 from kivy.properties import ObjectProperty
 from kivy.adapters.listadapter import ListAdapter
 
-from designer.helper_functions import get_kivy_designer_dir
+from designer.helper_functions import get_config_dir
 
 RECENT_FILES_NAME = 'recent_files'
 
@@ -53,7 +53,7 @@ class RecentManager(object):
         for _file in self.list_projects:
             _string += _file + '\n'
 
-        recent_file_path = os.path.join(get_kivy_designer_dir(),
+        recent_file_path = os.path.join(get_config_dir(),
                                         RECENT_FILES_NAME)
         f = open(recent_file_path, 'w')
         f.write(_string)
@@ -63,7 +63,7 @@ class RecentManager(object):
         '''To load the list of files from disk
         '''
 
-        recent_file_path = os.path.join(get_kivy_designer_dir(),
+        recent_file_path = os.path.join(get_config_dir(),
                                         RECENT_FILES_NAME)
 
         if not os.path.exists(recent_file_path):

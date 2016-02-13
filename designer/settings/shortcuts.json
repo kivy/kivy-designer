@@ -1,8 +1,172 @@
 [
   {
+    "type": "title",
+    "title": "File"
+  },
+  {
+    "type": "shortcut",
+    "title": "New File",
+    "section": "shortcuts",
+    "key": "new_file"
+  },
+  {
+    "type": "shortcut",
+    "title": "New Project",
+    "section": "shortcuts",
+    "key": "new_project"
+  },
+  {
+    "type": "shortcut",
+    "title": "Open Project",
+    "section": "shortcuts",
+    "key": "open_project"
+  },
+  {
+    "type": "shortcut",
+    "title": "Save",
+    "section": "shortcuts",
+    "key": "save"
+  },
+  {
+    "type": "shortcut",
+    "title": "Save as",
+    "section": "shortcuts",
+    "key": "save_as"
+  },
+  {
+    "type": "shortcut",
+    "title": "Close Project",
+    "section": "shortcuts",
+    "key": "close_project"
+  },
+  {
+    "type": "shortcut",
+    "title": "Recent Projects",
+    "section": "shortcuts",
+    "key": "recent"
+  },
+  {
+    "type": "shortcut",
+    "title": "Settings",
+    "section": "shortcuts",
+    "key": "settings"
+  },
+  {
     "type": "shortcut",
     "title": "Exit",
     "section": "shortcuts",
     "key": "exit"
+  },
+  {
+    "type": "title",
+    "title": "View"
+  },
+  {
+    "type": "shortcut",
+    "title": "Toggle Full Screen",
+    "section": "shortcuts",
+    "key": "fullscreen"
+  },
+  {
+    "type": "title",
+    "title": "Building"
+  },
+  {
+    "type": "shortcut",
+    "title": "Run",
+    "section": "shortcuts",
+    "key": "run"
+  },
+  {
+    "type": "shortcut",
+    "title": "Stop",
+    "section": "shortcuts",
+    "key": "stop"
+  },
+  {
+    "type": "shortcut",
+    "title": "Clean",
+    "section": "shortcuts",
+    "key": "clean"
+  },
+  {
+    "type": "shortcut",
+    "title": "Build",
+    "section": "shortcuts",
+    "key": "build"
+  },
+  {
+    "type": "shortcut",
+    "title": "Rebuild",
+    "section": "shortcuts",
+    "key": "rebuild"
+  },
+  {
+    "type": "title",
+    "title": "Tools"
+  },
+  {
+    "type": "shortcut",
+    "title": "Buildozer Init",
+    "section": "shortcuts",
+    "key": "buildozer_init"
+  },
+  {
+    "type": "shortcut",
+    "title": "Export .PNG",
+    "section": "shortcuts",
+    "key": "export_png"
+  },
+  {
+    "type": "shortcut",
+    "title": "Check PEP8",
+    "section": "shortcuts",
+    "key": "check_pep8"
+  },
+  {
+    "type": "shortcut",
+    "title": "Create setup.py",
+    "section": "shortcuts",
+    "key": "create_setup_py"
+  },
+  {
+    "type": "shortcut",
+    "title": "Create .gitignore",
+    "section": "shortcuts",
+    "key": "create_gitignore"
+  },
+  {
+    "type": "title",
+    "title": "Getting Started"
+  },
+  {
+    "type": "shortcut",
+    "title": "Help",
+    "section": "shortcuts",
+    "key": "help"
+  },
+  {
+    "type": "shortcut",
+    "title": "Kivy Docs",
+    "section": "shortcuts",
+    "key": "kivy_docs"
+  },
+  {
+    "type": "shortcut",
+    "title": "Kivy Designer Docs",
+    "section": "shortcuts",
+    "key": "kd_docs"
+  },
+  {
+    "type": "shortcut",
+    "title": "Kivy Designer Repository",
+    "section": "shortcuts",
+    "key": "kd_repo"
+  },
+  {
+    "type": "shortcut",
+    "title": "About",
+    "section": "shortcuts",
+    "key": "About"
   }
 ]
