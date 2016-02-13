@@ -121,7 +121,6 @@ class PropertyOptions(PropertyBase, Label):
             for op in self._options:
                 opts.append(str(op))
             self._options = opts
-        self._popup = None
 
     def on_propvalue(self, *args):
         '''Default handler for 'on_propvalue'.
@@ -138,6 +137,9 @@ class PropertyOptions(PropertyBase, Label):
     def on_touch_down(self, touch):
         '''Display the option chooser
         '''
+        d = get_designer()
+        if d.popup:
+            return False
         if self.collide_point(*touch.pos):
             if self._chooser is None:
                 fake_setting = FakeSettingList()
@@ -154,7 +156,7 @@ class PropertyOptions(PropertyBase, Label):
 
             popup_width = min(0.95 * Window.width, 500)
             popup_height = min(0.95 * Window.height, 500)
-            self._popup = Popup(
+            d.popup = Popup(
                 content=self._chooser,
                 title='Property Options - ' + self.propname,
                 size_hint=(None, None),
@@ -164,9 +166,9 @@ class PropertyOptions(PropertyBase, Label):
 
             self._chooser.bind(
                     on_apply=self._on_options,
-                    on_cancel=self._popup.dismiss)
+                    on_cancel=d.close_popup)
 
-            self._popup.open()
+            d.popup.open()
             return True
 
         return False
@@ -178,7 +180,7 @@ class PropertyOptions(PropertyBase, Label):
             new_value = selected_items[0]
         self.propvalue = new_value
         self.set_value(new_value)
-        self._popup.dismiss()
+        get_designer().close_popup()
 
 
 class PropertyTextInput(PropertyBase, TextInput):

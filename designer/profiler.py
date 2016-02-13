@@ -40,7 +40,11 @@ class Buildozer(Builder):
         '''Try to get the buildozer path and check required variables
         If there is something wrong shows an alert.
         '''
-
+        if self.designer.popup:
+            self.can_run = False
+            self.profiler.dispatch('on_error', 'You must close all popups '
+                                               'before building your project')
+            return
         # first, check if buildozer is set
         self.buildozer_path = self.designer_settings.config_parser.getdefault(
             'buildozer',
@@ -63,19 +67,20 @@ class Buildozer(Builder):
         for env in envs.split(' '):
             self.ui_creator.kivy_console.environment[
                 env[:env.find('=')]] = env[env.find('=') + 1:]
-        # TODO check here
         # check if buildozer.spec exists
         if not os.path.isfile(os.path.join(self.profiler.project_path,
                                            'buildozer.spec')):
-            self._confirm_dlg = ConfirmationDialog(
+            confirm_dlg = ConfirmationDialog(
                 message='buildozer.spec not found.\n'
-                            'Do you want to create it now?')
-            self._popup = Popup(title='Buildozer', content=self._confirm_dlg,
-                                size_hint=(None, None), size=('200pt', '150pt'),
-                                auto_dismiss=False)
-            self._confirm_dlg.bind(on_ok=self._perform_create_spec,
-                                   on_cancel=self._popup.dismiss)
-            self._popup.open()
+                        'Do you want to create it now?')
+            self.designer.popup = Popup(title='Buildozer',
+                                        content=confirm_dlg,
+                                        size_hint=(None, None),
+                                        size=('200pt', '150pt'),
+                                        auto_dismiss=False)
+            confirm_dlg.bind(on_ok=self._perform_create_spec,
+                             on_cancel=self.designer.close_popup)
+            self.designer.popup.open()
             self.can_run = False
             return
 
@@ -93,7 +98,7 @@ class Buildozer(Builder):
                     os.path.join(self.profiler.project_path, 'buildozer.spec'))
 
         self.designer.designer_content.update_tree_view(get_current_project())
-        self._popup.dismiss()
+        self.designer.close_popup()
         self.last_command()
 
     def _create_command(self, extra):
@@ -105,8 +110,7 @@ class Buildozer(Builder):
             self.ui_creator.tab_pannel.tab_list[2])
 
         cd = 'cd ' + self.profiler.project_path
-        args = []
-        args.append(self.buildozer_path)
+        args = [self.buildozer_path]
         if self.profiler.pro_verbose:
             args.append('--verbose')
         args.append(self.profiler.pro_target.lower())  # android or ios
@@ -304,13 +308,17 @@ class Desktop(Builder):
     def _perform_kill_run(self, *args):
         '''Stop the running project/command and then run the project
         '''
-        self._popup.dismiss()
+        self.designer.close_popup()
         self.stop()
-        Clock.schedule_once(self.run)
+        Clock.schedule_once(self.run, 1)
 
     def run(self, *args, **kwargs):
         '''Run the project using Python
         '''
+        if self.designer.popup:
+            self.profiler.dispatch('on_error', 'You must close all popups '
+                                               'before building your project')
+            return
         mod = kwargs.get('mod', '')
         data = kwargs.get('data', [])
 
@@ -338,17 +346,17 @@ class Desktop(Builder):
 
         # popen busy
         if status is False:
-            self._confirm_dlg = ConfirmationDialog(
+            confirm_dlg = ConfirmationDialog(
                 message="There is another command running.\n"
                         "Do you want to stop it to run your project?")
-            self._popup = Popup(title='Kivy Designer',
-                                content=self._confirm_dlg,
-                                size_hint=(None, None),
-                                size=('300pt', '150pt'),
-                                auto_dismiss=False)
-            self._confirm_dlg.bind(on_ok=self._perform_kill_run,
-                                   on_cancel=self._popup.dismiss)
-            self._popup.open()
+            self.designer.popup = Popup(title='Kivy Designer',
+                                        content=confirm_dlg,
+                                        size_hint=(None, None),
+                                        size=('300pt', '150pt'),
+                                        auto_dismiss=False)
+            confirm_dlg.bind(on_ok=self._perform_kill_run,
+                             on_cancel=self.designer.close_popup)
+            self.designer.popup.open()
             return
 
         self.ui_creator.tab_pannel.switch_to(
