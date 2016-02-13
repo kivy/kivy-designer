@@ -966,7 +966,7 @@ class Playground(ScatterPlane):
                     if isinstance(child, TabbedPanel):
                         if child.current_tab:
                             _item = self.find_target(
-                                x, y, child.current_tab.content)
+                                x, y, child.current_tab.content, widget)
                             return _item
 
                     else:
