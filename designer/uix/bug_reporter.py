@@ -1,11 +1,14 @@
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.clipboard import Clipboard
 import webbrowser
 import six.moves.urllib
 import os
+
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
 
 Builder.load_string('''
 <BugReporter>:
@@ -60,13 +63,45 @@ Builder.load_string('''
             Button:
                 text: 'Close'
                 on_press: root.on_close()
+
+<ReportWarning>:
+    size_hint: .5, .5
+    auto_dismiss: False
+    title: 'Warning'
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text_size: self.size
+            text: root.text
+            padding: '4sp', '4sp'
+            valign: 'middle'
+        Button:
+            size_hint_y: None
+            height: '40sp'
+            on_release: root.dispatch('on_release')
+            text: 'Report'
 ''')
+
+
+class ReportWarning(Popup):
+    text = StringProperty('')
+    '''Warning Message
+    '''
+
+    __events__ = ('on_release',)
+
+    def on_release(self, *args):
+        pass
 
 
 class BugReporter(FloatLayout):
     txt_traceback = ObjectProperty(None)
     '''TextView to show the traceback message
     '''
+
+    def __init__(self, **kw):
+        super(BugReporter, self).__init__(**kw)
+        self.warning = None
 
     def on_clipboard(self, *args):
         '''Event handler to "Copy to Clipboard" button
@@ -76,6 +111,18 @@ class BugReporter(FloatLayout):
     def on_report(self, *args):
         '''Event handler to "Report Bug" button
         '''
+        warning = ReportWarning()
+        warning.text = ('Warning. Some web browsers doesn\'t post the full'
+                        ' traceback error. \n\nPlease, check if the last line'
+                        ' of your report is "End of Traceback". \n\n'
+                        'If not, use the "Copy to clipboard" button the get'
+                        'the full report and post it manually."')
+        warning.bind(on_release=self._do_report)
+        warning.open()
+        self.warning = warning
+
+    def _do_report(self, *args):
+        self.warning.dismiss()
         txt = six.moves.urllib.parse.quote(self.txt_traceback.text)
         url = 'https://github.com/kivy/kivy-designer/issues/new?body=' + txt
         webbrowser.open(url)
@@ -87,7 +134,6 @@ class BugReporter(FloatLayout):
 
 
 class BugReporterApp(App):
-
     title = "Kivy Designer - Bug reporter"
     traceback = ''
 
@@ -106,6 +152,7 @@ class BugReporterApp(App):
 
 %s
 
+End of Traceback
 '''
         env_info = 'Pip is not installed'
         try:
