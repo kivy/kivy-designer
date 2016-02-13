@@ -53,8 +53,9 @@ class Buildozer(Builder):
         )
 
         if self.buildozer_path == '':
-            self.profiler.dispatch('on_error', 'Buildozer Path not specified.'
-                                               "\n\nUpdate it on File -> Settings")
+            self.profiler.dispatch('on_error',
+                                   'Buildozer Path not specified.'
+                                   "\n\nUpdate it on File -> Settings")
             self.can_run = False
             return
 
@@ -387,7 +388,7 @@ class Desktop(Builder):
         if os.path.exists(__pycache__):
             shutil.rmtree(__pycache__)
 
-        self.project_watcher.resume_watching(delay=0)
+        self.project_watcher.resume_watching(delay=1)
         self.profiler.dispatch('on_message', 'Project cleaned', 5)
 
     def build(self, *args):
@@ -418,7 +419,7 @@ class Desktop(Builder):
     def on_build(self, *args):
         '''on_build event handler
         '''
-        self.project_watcher.resume_watching(delay=0)
+        self.project_watcher.resume_watching(delay=1)
         self.profiler.dispatch('on_message', 'Build complete', 5)
         self.profiler.dispatch('on_build')
 

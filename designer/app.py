@@ -56,7 +56,8 @@ from designer.uix.designer_sandbox import DesignerSandbox
 from designer.project_settings import ProjectSettings
 from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_config_dir, show_alert, \
-    ignore_proj_watcher, show_message, update_info, show_error_console, get_kd_dir
+    ignore_proj_watcher, show_message, update_info, show_error_console, \
+    get_kd_dir
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton, \
@@ -312,7 +313,11 @@ class Designer(FloatLayout):
                     mod, key = short.split('+')
                     key = key.strip()
                     modifier = eval(mod)
-                    short = '+'.join(modifier) + '+' + key
+                    short = '+'.join(modifier)
+                    if short:
+                        short += '+' + key
+                    else:
+                        short = key
                     return short.title()
             return ''
 
@@ -325,6 +330,21 @@ class Designer(FloatLayout):
         self.ids.actn_btn_recent.hint = get_hint('recent')
         self.ids.actn_btn_settings.hint = get_hint('settings')
         self.ids.actn_btn_quit.hint = get_hint('exit')
+        self.ids.actn_btn_run_proj.hint = get_hint('run')
+        self.ids.actn_btn_stop_proj.hint = get_hint('stop')
+        self.ids.actn_btn_clean_proj.hint = get_hint('clean')
+        self.ids.actn_btn_build_proj.hint = get_hint('build')
+        self.ids.actn_btn_rebuild_proj.hint = get_hint('rebuild')
+        self.ids.actn_btn_buildozer_init.hint = get_hint('buildozer_init')
+        self.ids.actn_btn_export_png.hint = get_hint('export_png')
+        self.ids.actn_btn_check_pep8.hint = get_hint('check_pep8')
+        self.ids.actn_btn_create_setup_py.hint = get_hint('create_setup_py')
+        self.ids.actn_btn_create_gitignore.hint = get_hint('create_gitignore')
+        self.ids.actn_btn_help.hint = get_hint('help')
+        self.ids.actn_btn_wiki.hint = get_hint('kivy_docs')
+        self.ids.actn_btn_doc.hint = get_hint('kd_docs')
+        self.ids.actn_btn_page.hint = get_hint('kd_repo')
+        self.ids.actn_btn_about.hint = get_hint('about')
 
     def toggle_fullscreen(self, check, **kwargs):
         '''
@@ -513,7 +533,8 @@ class Designer(FloatLayout):
 
         confirm_dlg = ConfirmationDialog(
             message="Current Project has been modified\n"
-                    "outside the Kivy Designer.\nDo you want to reload project?")
+                    "outside the Kivy Designer.\n"
+                    "Do you want to reload project?")
         confirm_dlg.bind(on_ok=self._perform_reload,
                          on_cancel=close)
         self.popup = Popup(title='Kivy Designer', content=confirm_dlg,

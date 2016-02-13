@@ -190,7 +190,7 @@ __pycache__/'''
                 message='The buildozer.spec file already exist.'
                         '\nDo you want to create a new spec?')
             d.popup = Popup(title='Buildozer init',
-                            content=self._confirm_dlg,
+                            content=confirm_dlg,
                             size_hint=(None, None),
                             size=('250pt', '150pt'),
                             auto_dismiss=False)
