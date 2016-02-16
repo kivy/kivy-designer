@@ -57,7 +57,7 @@ from designer.project_settings import ProjectSettings
 from designer.designer_settings import DesignerSettings
 from designer.helper_functions import get_config_dir, show_alert, \
     ignore_proj_watcher, show_message, update_info, show_error_console, \
-    get_kd_dir
+    get_kd_dir, get_fs_encoding
 from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
 from designer.eventviewer import EventViewer
 from designer.uix.designer_action_items import DesignerActionButton, \
@@ -1099,6 +1099,8 @@ class Designer(FloatLayout):
         for profile in sorted(self.prof_settings.config_parsers.keys()):
             config = self.prof_settings.config_parsers[profile]
             config_path = config.filename
+            if isinstance(config_path, bytes):
+                config_path = config_path.decode(get_fs_encoding())
 
             prof_name = config.getdefault('profile', 'name', 'PROFILE')
             if not prof_name.strip():
@@ -1129,6 +1131,8 @@ class Designer(FloatLayout):
         if value:
             _config = self.prof_settings.config_parsers[instance.config_key]
             _config_path = _config.filename
+            if isinstance(_config_path, bytes):
+                _config_path.decode(get_fs_encoding())
             self.designer_settings.config_parser.set('internal',
                                                      'default_profile',
                                                      _config_path)
@@ -1650,7 +1654,7 @@ class DesignerException(ExceptionHandler):
                 Window.remove_widget(child)
             self.raised_exception = True
             Window.fullscreen = False
-            BugReporterApp(traceback.format_exc()).run()
+            BugReporterApp(traceback=traceback.format_exc()).run()
             return ExceptionManager.PASS
 
 
@@ -1668,7 +1672,8 @@ class DesignerApp(App):
 
     def on_stop(self, *args):
         if hasattr(self.root, 'ui_creator'):
-            self.root.ui_creator.py_console.exit()
+            if hasattr(self.root.ui_creator, 'py_console'):
+                self.root.ui_creator.py_console.exit()
 
     def build(self):
         ExceptionManager.add_handler(DesignerException())

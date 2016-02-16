@@ -8,6 +8,7 @@ from kivy.uix.image import Image
 from os.path import join, dirname, split
 from functools import partial
 from kivy.factory import Factory
+from designer.helper_functions import get_kd_dir
 
 NEW_PROJECTS = {
     'FloatLayout': ('template_floatlayout_kv',
@@ -87,8 +88,7 @@ class NewProjectDialog(BoxLayout):
         name = adapter.selection[0].text.lower() + '.png'
         name = name.replace(' and ', '_')
         image_source = join(NEW_TEMPLATE_IMAGE_PATH, name)
-        _dir = dirname(designer.__file__)
-        _dir = split(_dir)[0]
+        _dir = get_kd_dir()
         image_source = join(_dir, image_source)
         parent = self.image.parent
         parent.remove_widget(self.image)

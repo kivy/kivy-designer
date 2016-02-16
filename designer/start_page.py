@@ -5,7 +5,7 @@ from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import StringProperty, ObjectProperty
 
-from designer.helper_functions import get_designer
+from designer.helper_functions import get_designer, get_fs_encoding
 
 
 class DesignerLinkLabel(Button):
@@ -57,6 +57,8 @@ class RecentFilesBox(ScrollView):
         :param list_files: array of paths
         '''
         for p in list_files:
+            if isinstance(p, bytes):
+                p = p.decode(get_fs_encoding())
             recent_item = RecentItem(path=p)
             self.grid.add_widget(recent_item)
             recent_item.bind(on_press=self.btn_release)

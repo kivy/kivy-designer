@@ -18,6 +18,6 @@ class AppsTest(unittest.TestCase):
 
     def test_bug_reporter(self):
         from designer.uix.bug_reporter import BugReporterApp
-        b = BugReporterApp('Exception message')
+        b = BugReporterApp(traceback='Exception message')
         Clock.schedule_once(b.stop, 1)
         b.run()

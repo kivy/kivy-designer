@@ -6,6 +6,8 @@ from kivy.core.clipboard import Clipboard
 import webbrowser
 import six.moves.urllib
 import os
+import sys
+
 
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
@@ -122,8 +124,8 @@ class BugReporter(FloatLayout):
         self.warning = warning
 
     def _do_report(self, *args):
-        self.warning.dismiss()
-        txt = six.moves.urllib.parse.quote(self.txt_traceback.text)
+        txt = six.moves.urllib.parse.quote(
+            self.txt_traceback.text.encode('utf-8'))
         url = 'https://github.com/kivy/kivy-designer/issues/new?body=' + txt
         webbrowser.open(url)
 
@@ -135,11 +137,11 @@ class BugReporter(FloatLayout):
 
 class BugReporterApp(App):
     title = "Kivy Designer - Bug reporter"
-    traceback = ''
+    traceback = StringProperty('')
 
-    def __init__(self, traceback):
-        self.traceback = traceback
-        super(BugReporterApp, self).__init__()
+    def __init__(self, **kw):
+        # self.traceback = traceback
+        super(BugReporterApp, self).__init__(**kw)
 
     def build(self):
         rep = BugReporter()
@@ -178,10 +180,16 @@ End of Traceback
 
         except ImportError:
             pass
+        if isinstance(self.traceback, bytes):
+            encoding = sys.getfilesystemencoding()
+            if not encoding:
+                encoding = sys.stdin.encoding
+            if encoding:
+                self.traceback = self.traceback.decode(encoding)
         rep.txt_traceback.text = template % (env_info, self.traceback)
 
         return rep
 
 
 if __name__ == '__main__':
-    BugReporterApp('Bug example').run()
+    BugReporterApp(traceback='Bug example').run()
