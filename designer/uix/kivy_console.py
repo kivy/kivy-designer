@@ -105,6 +105,7 @@ from kivy.logger import Logger
 from kivy.core.window import Window
 from kivy.utils import platform
 from kivy.compat import PY2
+from designer.helper_functions import get_fs_encoding
 
 from pygments.lexers.shell import BashSessionLexer
 
@@ -340,9 +341,12 @@ class KivyConsole(GridLayout):
     def prompt(self, *args):
         '''Returns the PS1 variable
         '''
-        return "[%s@%s %s]$ " % (
+        p = "[%s@%s %s]$ " % (
             self._username, self._hostname,
-            os.path.basename(str(self.cur_dir)))
+            os.path.basename(self.cur_dir.encode('utf-8')))
+        if isinstance(p, bytes):
+            p = p.decode(get_fs_encoding())
+        return p
 
     def _change_txtcache(self, *args):
         '''Update the Kivy Console output area
@@ -618,8 +622,12 @@ class KivyConsole(GridLayout):
                 _posix = True
                 if sys.platform[0] == 'w':
                     _posix = False
-                cmd = shlex.split(str(command), posix=_posix)\
-                    if not self.shell else command
+                cmd = command
+                if PY2 and isinstance(cmd, unicode):
+                    cmd = command.encode(get_fs_encoding())
+                if not self.shell:
+                    cmd = shlex.split(cmd, posix=_posix)
+                    map(lambda s: s.decode(get_fs_encoding()), cmd)
             except Exception as err:
                 cmd = ''
                 self.add_to_cache(''.join((str(err), ' <', command, ' >\n')))
@@ -637,8 +645,7 @@ class KivyConsole(GridLayout):
                         preexec_fn=None,
                         close_fds=False,
                         shell=self.shell,
-                        cwd=self.cur_dir,
-                        env=self.environment,
+                        cwd=self.cur_dir.encode(get_fs_encoding()),
                         universal_newlines=False,
                         startupinfo=None,
                         creationflags=0)
@@ -651,14 +658,13 @@ class KivyConsole(GridLayout):
                         if plat[0] != 'a':
                             popen_stdout_flush()
 
-                        encoding = getattr(sys.stdin, "encoding", None)
-                        if encoding and isinstance(txt, bytes):
-                            txt = txt.decode(encoding)
+                        if isinstance(txt, bytes):
+                            txt = txt.decode(get_fs_encoding())
                         add_to_cache(txt)
                         txt = popen_stdout_r()
                 except (OSError, ValueError) as err:
                     add_to_cache(''.join(
-                            (str(err.strerror),
+                            (str(err),
                              ' < ', command, ' >\n')))
                     self.command_status = 'closed'
                     self.dispatch('on_subprocess_done')
@@ -830,7 +836,9 @@ class std_in_out(object):
     def write(self, s):
         '''Write a command to the pipe
         '''
-        Logger.debug('write called with command:' + str(s))
+        if isinstance(s, bytes):
+            s = s.decode(get_fs_encoding())
+        Logger.debug('write called with command:' + s)
         if self.mode == 'stdout':
             self.obj.add_to_cache(s)
             self.flush()

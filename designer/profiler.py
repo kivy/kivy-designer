@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 from kivy.event import EventDispatcher
 from kivy.properties import StringProperty, ObjectProperty, \
@@ -7,7 +8,7 @@ from kivy.properties import StringProperty, ObjectProperty, \
 from kivy.uix.popup import Popup
 import designer
 from designer.confirmation_dialog import ConfirmationDialog
-from designer.helper_functions import get_current_project
+from designer.helper_functions import get_current_project, get_fs_encoding
 
 
 class Builder(EventDispatcher):
@@ -328,11 +329,14 @@ class Desktop(Builder):
             return
 
         py_main = os.path.join(self.profiler.project_path, 'main.py')
+        if isinstance(py_main, bytes):
+            py_main = py_main.decode(get_fs_encoding())
 
         if not os.path.isfile(py_main):
             self.profiler.dispatch('on_error', 'Cannot find main.py')
             return
-
+        if sys.platform[0] == 'w':
+            py_main = u'"' + py_main + u'"'
         cmd = ''
         if mod == '':
             cmd = '%s %s %s' % (self.python_path, py_main, self.args)
@@ -400,6 +404,8 @@ class Desktop(Builder):
 
         self.project_watcher.pause_watching()
         proj_path = self.profiler.project_path
+        if isinstance(proj_path, bytes):
+            proj_path = proj_path.decode(get_fs_encoding())
 
         self.run_command(
                     '%s -m compileall -l %s' % (self.python_path, proj_path))

@@ -6,7 +6,7 @@ from kivy.uix.listview import ListItemButton
 from kivy.properties import ObjectProperty
 from kivy.adapters.listadapter import ListAdapter
 
-from designer.helper_functions import get_config_dir
+from designer.helper_functions import get_config_dir, get_fs_encoding
 
 RECENT_FILES_NAME = 'recent_files'
 
@@ -26,6 +26,8 @@ class RecentManager(object):
         '''To add file to RecentManager.
         :param path: path of project
         '''
+        if isinstance(path, bytes):
+            path = path.decode(get_fs_encoding()).encode(get_fs_encoding())
 
         _file_index = 0
         try:
@@ -74,6 +76,9 @@ class RecentManager(object):
 
         while path != '':
             file_path = path.strip()
+            if isinstance(file_path, bytes):
+                file_path = file_path.decode(get_fs_encoding()).encode(
+                    get_fs_encoding())
             if os.path.exists(file_path):
                 self.list_projects.append(file_path)
 
@@ -116,7 +121,12 @@ class RecentDialog(BoxLayout):
 
     def __init__(self, file_list, **kwargs):
         super(RecentDialog, self).__init__(**kwargs)
-        self.item_strings = file_list
+        self.item_strings = []
+        for item in file_list:
+            if isinstance(item, bytes):
+                item = item.decode(get_fs_encoding())
+            self.item_strings.append(item)
+
         self.list_items = RecentItemButton
 
         self.adapter = ListAdapter(

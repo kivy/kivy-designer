@@ -132,6 +132,8 @@ def get_kd_dir():
     '''
     _dir = os.path.dirname(designer.__file__)
     _dir = os.path.split(_dir)[0]
+    if isinstance(_dir, bytes):
+        _dir = _dir.decode(get_fs_encoding())
     return _dir
 
 
@@ -229,3 +231,12 @@ def widget_contains(container, child):
         if widget_contains(w, child):
             return True
     return False
+
+
+def get_fs_encoding():
+    encoding = sys.getfilesystemencoding()
+    if not encoding:
+        encoding = sys.stdin.encoding
+    if not encoding:
+        encoding = sys.getdefaultencoding()
+    return encoding

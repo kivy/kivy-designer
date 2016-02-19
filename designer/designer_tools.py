@@ -2,6 +2,7 @@ import datetime
 import os
 import shutil
 import designer
+import sys
 
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty, StringProperty
@@ -9,7 +10,7 @@ from designer.confirmation_dialog import ConfirmationDialog
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 from designer.helper_functions import ignore_proj_watcher, show_alert, \
-    get_current_project, get_designer
+    get_current_project, get_designer, get_kd_dir
 
 
 #### UIs ####
@@ -102,8 +103,7 @@ class DesignerTools(EventDispatcher):
         '''Check the PEP8 from current project
         '''
         proj_dir = get_current_project().path
-        kd_dir = os.path.dirname(designer.__file__)
-        kd_dir = os.path.split(kd_dir)[0]
+        kd_dir = get_kd_dir()
         pep8_dir = os.path.join(kd_dir, 'tools', 'pep8checker',
                                 'pep8kivy.py')
 
@@ -119,6 +119,9 @@ class DesignerTools(EventDispatcher):
                                    'specified.'
                                    '\n\nUpdate it on \'File\' -> \'Settings\'')
             return
+
+        if sys.platform[0] == 'w':
+            pep8_dir = u'"' + pep8_dir + u'"'
 
         cmd = '%s %s %s' % (python_path, pep8_dir, proj_dir)
         self.designer.ui_creator.tab_pannel.switch_to(

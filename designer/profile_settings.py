@@ -153,7 +153,8 @@ class ProfileSettings(Settings):
             prof_name = config_parser.getdefault('profile', 'name', 'PROFILE')
             if not prof_name.strip():
                 prof_name = 'PROFILE'
-            self.config_parsers[prof_name + '_' + _file_path] = config_parser
+            self.config_parsers[
+                str(prof_name) + '_' + _file_path] = config_parser
 
         for _file in sorted(self.config_parsers):
             prof_name = self.config_parsers[_file].getdefault('profile',
