@@ -96,12 +96,14 @@ class NewProjectDialog(BoxLayout):
         self._keyboard = None
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        '''To detect which key is pressed
+        '''
         if keycode[1] == 'up':
-            v = self.adapter.get_view(self.prev_selection-1)
+            v = self.adapter.get_view(self.prev_selection - 1)
             if v is not None:
                 self.adapter.handle_selection(v)
         if keycode[1] == 'down':
-            v = self.adapter.get_view(self.prev_selection+1)
+            v = self.adapter.get_view(self.prev_selection + 1)
             if v is not None:
                 self.adapter.handle_selection(v)
         if keycode[1] == 'enter':
