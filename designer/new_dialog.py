@@ -1,10 +1,10 @@
 import designer
-
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.listview import ListView
 from kivy.properties import ObjectProperty, NumericProperty
 from kivy.adapters.listadapter import ListAdapter
 from kivy.uix.image import Image
+from kivy.core.window import Window
 from os.path import join, dirname, split
 from functools import partial
 from kivy.factory import Factory
@@ -77,6 +77,8 @@ class NewProjectDialog(BoxLayout):
         super(NewProjectDialog, self).__init__(**kwargs)
         item_strings = list(NEW_PROJECTS.keys())
         item_strings.sort()
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.adapter = ListAdapter(cls=Factory.DesignerListItemButton,
                                    data=item_strings,
                                    selection_mode='single',
@@ -88,6 +90,22 @@ class NewProjectDialog(BoxLayout):
         self.listview.pos_hint = {'top': 1}
         self.list_parent.add_widget(self.listview, 1)
         self.on_adapter_selection_change(self.adapter)
+
+    def _keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard = None
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        if keycode[1] == 'up':
+            v = self.adapter.get_view(self.prev_selection-1)
+            if v is not None:
+                self.adapter.handle_selection(v)
+        if keycode[1] == 'down':
+            v = self.adapter.get_view(self.prev_selection+1)
+            if v is not None:
+                self.adapter.handle_selection(v)
+        if keycode[1] == 'enter':
+            self.dispatch('on_select')
 
     def check_for_empty_selection(self, *args):
         if not self.adapter.allow_empty_selection:
