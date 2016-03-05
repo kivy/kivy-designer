@@ -4,7 +4,7 @@ from kivy.uix.listview import ListView
 from kivy.properties import ObjectProperty, NumericProperty
 from kivy.adapters.listadapter import ListAdapter
 from kivy.uix.image import Image
-from kivy.core.window import Window
+from kivy.core.window import Window, Keyboard
 from os.path import join, dirname, split
 from functools import partial
 from kivy.factory import Factory
@@ -77,8 +77,7 @@ class NewProjectDialog(BoxLayout):
         super(NewProjectDialog, self).__init__(**kwargs)
         item_strings = list(NEW_PROJECTS.keys())
         item_strings.sort()
-        self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-        self._keyboard.bind(on_key_down=self._on_keyboard_down)
+        Window.bind(on_key_down=self._on_keyboard_down)
         self.adapter = ListAdapter(cls=Factory.DesignerListItemButton,
                                    data=item_strings,
                                    selection_mode='single',
@@ -91,23 +90,23 @@ class NewProjectDialog(BoxLayout):
         self.list_parent.add_widget(self.listview, 1)
         self.on_adapter_selection_change(self.adapter)
 
-    def _keyboard_closed(self):
-        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
-        self._keyboard = None
-
-    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+    def _on_keyboard_down(self, keyboard, key, codepoint, text, modifier, *args):
         '''To detect which key is pressed
         '''
-        if keycode[1] == 'up':
+        key_str = Keyboard.keycode_to_string(Window._system_keyboard, key)
+        if key_str == 'up':
             v = self.adapter.get_view(self.prev_selection - 1)
             if v is not None:
                 self.adapter.handle_selection(v)
-        if keycode[1] == 'down':
+                return True
+        if key_str == 'down':
             v = self.adapter.get_view(self.prev_selection + 1)
             if v is not None:
                 self.adapter.handle_selection(v)
-        if keycode[1] == 'enter':
+                return True
+        if key_str == 'enter':
             self.dispatch('on_select')
+            return True
 
     def check_for_empty_selection(self, *args):
         if not self.adapter.allow_empty_selection:
