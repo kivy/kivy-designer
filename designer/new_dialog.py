@@ -90,7 +90,8 @@ class NewProjectDialog(BoxLayout):
         self.list_parent.add_widget(self.listview, 1)
         self.on_adapter_selection_change(self.adapter)
 
-    def _on_keyboard_down(self, keyboard, key, codepoint, text, modifier, *args):
+    def _on_keyboard_down(self, keyboard, key, codepoint,
+                          text, modifier, *args):
         '''To detect which key is pressed
         '''
         key_str = Keyboard.keycode_to_string(Window._system_keyboard, key)
