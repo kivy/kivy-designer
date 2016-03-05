@@ -77,7 +77,6 @@ class NewProjectDialog(BoxLayout):
         super(NewProjectDialog, self).__init__(**kwargs)
         item_strings = list(NEW_PROJECTS.keys())
         item_strings.sort()
-        Window.bind(on_key_down=self._on_keyboard_down)
         self.adapter = ListAdapter(cls=Factory.DesignerListItemButton,
                                    data=item_strings,
                                    selection_mode='single',
@@ -90,10 +89,18 @@ class NewProjectDialog(BoxLayout):
         self.list_parent.add_widget(self.listview, 1)
         self.on_adapter_selection_change(self.adapter)
 
+    def on_parent(self, *args):
+        if self.parent:
+            Window.bind(on_key_down=self._on_keyboard_down)
+        else:
+            Window.unbind(on_key_down=self._on_keyboard_down)
+
     def _on_keyboard_down(self, keyboard, key, codepoint,
                           text, modifier, *args):
         '''To detect which key is pressed
         '''
+        if modifier:
+            return False
         key_str = Keyboard.keycode_to_string(Window._system_keyboard, key)
         if key_str == 'up':
             v = self.adapter.get_view(self.prev_selection - 1)
