@@ -58,6 +58,13 @@ class ProjectWatcher(EventDispatcher):
 
     __events__ = ('on_project_modified',)
 
+    def __init__(self, **kw):
+        super(ProjectWatcher, self).__init__(**kw)
+
+        self._observer = None
+        self._handler = None
+        self._watcher = None
+
     def start_watching(self, path):
         '''To start watching project_dir.
         '''
