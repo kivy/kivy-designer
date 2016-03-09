@@ -1178,8 +1178,13 @@ class Playground(ScatterPlane):
         if self.drag_operation[0].parent:
             self.drag_operation[0].parent.remove_widget(self.drag_operation[0])
 
-        self.drag_operation[1].add_widget(self.drag_operation[0],
-                                          self.drag_operation[2])
+        try:
+            self.drag_operation[1].add_widget(self.drag_operation[0],
+                                              self.drag_operation[2])
+        except TypeError:
+            # some widgets not allow index
+            self.drag_operation[1].add_widget(self.drag_operation[0])
+
         Clock.schedule_once(functools.partial(
             App.get_running_app().focus_widget,
             self.drag_operation[0]), 0.01)

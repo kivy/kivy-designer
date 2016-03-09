@@ -22,9 +22,9 @@ class EventHandlerTextInput(TextInput):
        :data:`eventwidget` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    eventname = StringProperty(None)
+    eventname = StringProperty('')
     '''Name of current event
-       :data:`eventname` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`eventname` is a :class:`~kivy.properties.StringProperty`
     '''
 
     kv_code_input = ObjectProperty()
@@ -34,7 +34,7 @@ class EventHandlerTextInput(TextInput):
 
     text_inserted = BooleanProperty(None)
     '''Specifies whether text has been inserted or not
-       :data:`text_inserted` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`text_inserted` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     info_message = StringProperty(None)

@@ -54,7 +54,6 @@ class WidgetsTree(ScrollView):
             return
 
         b = self._get_widget(node)
-        d = get_designer()
         self.tree.add_node(b, treenode)
         class_rules = get_current_project().app_widgets
         root_widget = self.playground.root

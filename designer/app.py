@@ -3,6 +3,7 @@ from distutils.dir_util import copy_tree
 
 from kivy.graphics.context_instructions import Color
 from kivy.graphics.vertex_instructions import Line
+from kivy.uix.widget import Widget
 
 from designer.designer_tools import DesignerTools
 from designer.input_dialog import InputDialog
@@ -932,6 +933,7 @@ class Designer(FloatLayout):
     def _perform_open(self, file_path):
         '''To open a project given by file_path
         '''
+        self.project_watcher.stop_watching()
         show_message('Project loaded successfully', 5, 'info')
 
         self.cleanup()
@@ -940,6 +942,7 @@ class Designer(FloatLayout):
             file_path = os.path.dirname(file_path)
 
         project = self.project_manager.open_project(file_path)
+        self.project_watcher.start_watching(file_path)
         self.recent_manager.add_path(project.path)
         self.designer_content.update_tree_view(project)
 
@@ -948,7 +951,6 @@ class Designer(FloatLayout):
                 widgets.remove(widget)
 
         self._add_designer_content()
-        self.project_watcher.start_watching(file_path)
         app_widgets = self.project_manager.current_project.app_widgets
 
         if app_widgets:
@@ -1778,7 +1780,7 @@ class DesignerApp(App):
         if widget:
             container = PlaygroundDragElement(
                     playground=self.root.ui_creator.playground,
-                    child=widget,
+                    child=Widget(),
                     widget=widget)
             touch.grab(container)
             touch.grab_current = container

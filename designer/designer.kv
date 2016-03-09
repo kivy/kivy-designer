@@ -34,7 +34,7 @@
     text_size: self.width - sp(32), None
 
 <DesignerListItemButton@ListItemButton>:
-    size_hint: None, None
+    size_hint: 1, None
     size: self.texture_size[0] + sp(32), designer_height
     selected_color: 1, 1, 1, 1
     deselected_color: .8, .8, .8, .5
@@ -613,7 +613,6 @@
 
         DesignerLinkLabel:
             text: ' Kivy Designer Help'
-            size_hint_y: None
             on_release: root.dispatch('on_help')
 
         DesignerLinkLabel:
@@ -623,7 +622,6 @@
 
         DesignerLinkLabel:
             text: ' Kivy Designer Documentation'
-            size_hint_y: None
             link: 'http://kivy-designer.readthedocs.org/'
 
     Label:
@@ -708,6 +706,7 @@
         id: list_parent
         orientation: 'horizontal'
         padding: designer_padding
+        spacing: designer_spacing
         Image:
             id: image
     GridLayout:
@@ -1714,42 +1713,42 @@
                     id: actn_btn_new_file
                     text: 'New File'
                     disabled: True
-                    on_release: root.action_btn_new_file_pressed()
+                    on_press: root.action_btn_new_file_pressed()
                 DesignerActionButton:
                     id: actn_btn_new_project
                     text: 'New Project'
-                    on_release: root.action_btn_new_project_pressed()
+                    on_press: root.action_btn_new_project_pressed()
                 DesignerActionButton:
                     id: actn_btn_open_project
                     text: 'Open Project'
-                    on_release: root.action_btn_open_pressed()
+                    on_press: root.action_btn_open_pressed()
                 DesignerActionButton:
                     id: actn_btn_save
                     disabled: True
                     text: 'Save'
-                    on_release: root.action_btn_save_pressed()
+                    on_press: root.action_btn_save_pressed()
                 DesignerActionButton:
                     id: actn_btn_save_as
                     disabled: True
                     text: 'Save As'
-                    on_release: root.action_btn_save_as_pressed()
+                    on_press: root.action_btn_save_as_pressed()
                 DesignerActionButton:
                     id: actn_btn_close_proj
                     text: 'Close Project'
                     disabled: True
-                    on_release: root.action_btn_close_proj_pressed()
+                    on_press: root.action_btn_close_proj_pressed()
                 DesignerActionButton:
                     id: actn_btn_recent
                     text: 'Recent Projects'
-                    on_release: root.action_btn_recent_files_pressed()
+                    on_press: root.action_btn_recent_files_pressed()
                 DesignerActionButton:
                     id: actn_btn_settings
                     text: 'Settings'
-                    on_release: root.action_btn_settings_pressed()
+                    on_press: root.action_btn_settings_pressed()
                 DesignerActionButton:
                     id: actn_btn_quit
                     text: 'Quit'
-                    on_release: root.action_btn_quit_pressed()
+                    on_press: root.action_btn_quit_pressed()
 
             DesignerActionGroup:
                 id: actn_menu_view
@@ -1806,37 +1805,37 @@
                 DesignerActionButton:
                     id: actn_btn_run_proj
                     text: 'Run'
-                    on_release: root.action_btn_run_project_pressed()
+                    on_press: root.action_btn_run_project_pressed()
                 DesignerActionButton:
                     id: actn_btn_run_module
                     text: 'Run with module...'
-                    on_release: root.action_btn_run_module_pressed()
+                    on_press: root.action_btn_run_module_pressed()
                 DesignerActionButton:
                     id: actn_btn_stop_proj
                     disabled: True
                     text: 'Stop'
-                    on_release: root.action_btn_stop_project_pressed()
+                    on_press: root.action_btn_stop_project_pressed()
                 DesignerActionButton:
                     id: actn_btn_clean_proj
                     text: 'Clean'
-                    on_release: root.action_btn_clean_project_pressed()
+                    on_press: root.action_btn_clean_project_pressed()
                 DesignerActionButton:
                     id: actn_btn_build_proj
                     text: 'Build'
-                    on_release: root.action_btn_build_project_pressed()
+                    on_press: root.action_btn_build_project_pressed()
                 DesignerActionButton:
                     id: actn_btn_rebuild_proj
                     text: 'Rebuild'
-                    on_release: root.action_btn_rebuild_project_pressed()
+                    on_press: root.action_btn_rebuild_project_pressed()
                 DesignerActionSubMenu:
                     id: select_profile_cont_menu
                     text: 'Select Profile'
-                    on_release: root.action_btn_select_prof_project_pressed()
+                    on_press: root.action_btn_select_prof_project_pressed()
                     show_arrow: True
                 DesignerActionButton:
                     id: actn_btn_edit_prof_proj
                     text: 'Edit Profiles...'
-                    on_release: root.action_btn_edit_prof_project_pressed()
+                    on_press: root.action_btn_edit_prof_project_pressed()
 
             DesignerActionGroup:
                 id: actn_menu_tools
@@ -1845,23 +1844,23 @@
                 DesignerActionButton:
                     id: actn_btn_buildozer_init
                     text: 'Buildozer Init'
-                    on_release: root.designer_tools.buildozer_init()
+                    on_press: root.designer_tools.buildozer_init()
                 DesignerActionButton:
                     id: actn_btn_export_png
                     text: 'Export .png'
-                    on_release: root.designer_tools.export_png()
+                    on_press: root.designer_tools.export_png()
                 DesignerActionButton:
                     id: actn_btn_check_pep8
                     text: 'Check PEP 8'
-                    on_release: root.designer_tools.check_pep8()
+                    on_press: root.designer_tools.check_pep8()
                 DesignerActionButton:
                     id: actn_btn_create_setup_py
                     text: 'Create setup.py'
-                    on_release: root.designer_tools.create_setup_py()
+                    on_press: root.designer_tools.create_setup_py()
                 DesignerActionButton:
                     id: actn_btn_create_gitignore
                     text: 'Create .gitignore'
-                    on_release: root.designer_tools.create_gitignore()
+                    on_press: root.designer_tools.create_gitignore()
                 DesignerGit:
                     id: git_tools
                     text: 'Git'
@@ -1873,27 +1872,27 @@
                 DesignerActionButton:
                     id: actn_btn_help
                     text: 'Help'
-                    on_release: root.show_help()
+                    on_press: root.show_help()
 
                 DesignerActionButton:
                     id: actn_btn_wiki
                     text: 'Kivy Docs'
-                    on_release: root.open_docs()
+                    on_press: root.open_docs()
 
                 DesignerActionButton:
                     id: actn_btn_doc
                     text: 'Kivy Designer Docs'
-                    on_release: root.open_kd_docs()
+                    on_press: root.open_kd_docs()
 
                 DesignerActionButton:
                     id: actn_btn_page
                     text: 'Kivy Designer repo'
-                    on_release: root.open_repo()
+                    on_press: root.open_repo()
 
                 DesignerActionButton:
                     id: actn_btn_about
                     text: 'About ...'
-                    on_release: root.action_btn_about_pressed()
+                    on_press: root.action_btn_about_pressed()
 
     DesignerStartPage:
         id: start_page
