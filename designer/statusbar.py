@@ -1,10 +1,13 @@
-from kivy.properties import ObjectProperty, StringProperty
 from kivy.clock import Clock
+from kivy.properties import ObjectProperty, StringProperty
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.tabbedpanel import TabbedPanelContent, TabbedPanelHeader, \
-    TabbedPanel
+from kivy.uix.tabbedpanel import (
+    TabbedPanel,
+    TabbedPanelContent,
+    TabbedPanelHeader,
+)
 
 
 class StatusNavBarButton(Button):

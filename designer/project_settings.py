@@ -1,13 +1,11 @@
 import os
+
 import designer
-
-from kivy.properties import ObjectProperty
-from kivy.config import ConfigParser
-from kivy.uix.settings import Settings, SettingTitle
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-
 from designer.helper_functions import ignore_proj_watcher
+from kivy.config import ConfigParser
+from kivy.properties import ObjectProperty
+from kivy.uix.settings import Settings
+
 
 PROJ_DESIGNER = '.designer'
 PROJ_CONFIG = os.path.join(PROJ_DESIGNER, 'config.ini')

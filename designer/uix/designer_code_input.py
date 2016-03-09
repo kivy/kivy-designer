@@ -1,12 +1,15 @@
 import re
 
+from designer.helper_functions import (
+    get_current_project,
+    get_designer,
+    show_alert,
+)
 from kivy import Config
-from kivy.utils import get_color_from_hex
-from pygments import styles, highlight
-from designer.helper_functions import show_alert, get_designer, \
-    get_current_project
+from kivy.properties import BooleanProperty, StringProperty
 from kivy.uix.codeinput import CodeInput
-from kivy.properties import BooleanProperty, Clock, partial, StringProperty
+from kivy.utils import get_color_from_hex
+from pygments import styles
 
 
 class DesignerCodeInput(CodeInput):

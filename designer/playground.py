@@ -1,36 +1,46 @@
+import functools
 import os
 import re
-import functools
-from kivy.core.window import Window
-from kivy.uix.popup import Popup
-
-from kivy.uix.scatter import ScatterPlane
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.layout import Layout
-from kivy.properties import ObjectProperty, BooleanProperty, \
-    OptionProperty, ListProperty, StringProperty
-from kivy.app import App
-from kivy.uix.filechooser import FileChooserListView, FileChooserIconView
-from kivy.uix.floatlayout import FloatLayout
-from kivy.factory import Factory
-from kivy.base import EventLoop
-from kivy.clock import Clock
-from kivy.uix.scatterlayout import ScatterLayout
-from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.carousel import Carousel
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.graphics import Color, Line
-from kivy.uix.tabbedpanel import TabbedPanel
 
 from designer.common import widgets as widgets_common
 from designer.confirmation_dialog import ConfirmationDialogSave
-from designer.helper_functions import FakeSettingList, get_designer, \
-    get_app_widget, show_message, get_current_project, ignore_proj_watcher
+from designer.helper_functions import (
+    FakeSettingList,
+    get_app_widget,
+    get_current_project,
+    get_designer,
+    ignore_proj_watcher,
+    show_message,
+)
 from designer.tree import Tree
 from designer.uix.settings import SettingListContent
-from designer.undo_manager import WidgetOperation, WidgetDragOperation
+from designer.undo_manager import WidgetDragOperation, WidgetOperation
+from kivy.app import App
+from kivy.base import EventLoop
+from kivy.clock import Clock
+from kivy.core.window import Window
+from kivy.factory import Factory
+from kivy.graphics import Color, Line
+from kivy.properties import (
+    BooleanProperty,
+    ListProperty,
+    ObjectProperty,
+    OptionProperty,
+    StringProperty,
+)
+from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.carousel import Carousel
+from kivy.uix.filechooser import FileChooserIconView, FileChooserListView
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.layout import Layout
+from kivy.uix.popup import Popup
+from kivy.uix.relativelayout import RelativeLayout
+from kivy.uix.scatter import ScatterPlane
+from kivy.uix.scatterlayout import ScatterLayout
+from kivy.uix.screenmanager import Screen, ScreenManager
+from kivy.uix.tabbedpanel import TabbedPanel
 
 
 class PlaygroundDragElement(BoxLayout):

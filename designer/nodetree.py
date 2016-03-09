@@ -1,12 +1,10 @@
-from kivy.uix.treeview import TreeViewLabel
-from kivy.uix.scrollview import ScrollView
-from kivy.properties import ObjectProperty, BooleanProperty
-from kivy.app import App
-from kivy.clock import Clock
-from kivy.uix.tabbedpanel import TabbedPanel
-
 from designer.common import widgets
-from designer.helper_functions import get_designer, get_current_project
+from designer.helper_functions import get_current_project
+from kivy.clock import Clock
+from kivy.properties import BooleanProperty, ObjectProperty
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.tabbedpanel import TabbedPanel
+from kivy.uix.treeview import TreeViewLabel
 
 
 class WidgetTreeElement(TreeViewLabel):

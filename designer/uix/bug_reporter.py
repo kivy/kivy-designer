@@ -1,16 +1,15 @@
-from kivy.lang import Builder
-from kivy.properties import ObjectProperty, StringProperty
-from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-from kivy.core.clipboard import Clipboard
-import webbrowser
-import six.moves.urllib
 import os
 import sys
+import webbrowser
 
-
-from kivy.uix.label import Label
+import six.moves.urllib
+from kivy.app import App
+from kivy.core.clipboard import Clipboard
+from kivy.lang import Builder
+from kivy.properties import ObjectProperty, StringProperty
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.popup import Popup
+
 
 Builder.load_string('''
 <BugReporter>:

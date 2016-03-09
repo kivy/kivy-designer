@@ -1,16 +1,21 @@
 import datetime
 import os
 import shutil
-import designer
 import sys
 
+import designer
+from designer.confirmation_dialog import ConfirmationDialog
+from designer.helper_functions import (
+    get_current_project,
+    get_designer,
+    get_kd_dir,
+    ignore_proj_watcher,
+    show_alert,
+)
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty, StringProperty
-from designer.confirmation_dialog import ConfirmationDialog
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
-from designer.helper_functions import ignore_proj_watcher, show_alert, \
-    get_current_project, get_designer, get_kd_dir
 
 
 #### UIs ####

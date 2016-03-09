@@ -2,16 +2,20 @@ import code
 import sys
 import threading
 
-from kivy.uix.codeinput import CodeInput
-from kivy.uix.boxlayout import BoxLayout
+from designer.helper_functions import show_message
 from kivy.base import runTouchApp
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty, ListProperty,\
-    NumericProperty, partial
 from kivy.lang import Builder
+from kivy.properties import (
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+    partial,
+)
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.codeinput import CodeInput
 from pygments.lexers.python import PythonConsoleLexer
 
-from designer.helper_functions import show_message
 
 try:
     from rlcompleter import Completer

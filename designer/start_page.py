@@ -1,11 +1,10 @@
 import webbrowser
 
+from designer.helper_functions import get_designer, get_fs_encoding
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
-from kivy.properties import StringProperty, ObjectProperty
-
-from designer.helper_functions import get_designer, get_fs_encoding
 
 
 class DesignerLinkLabel(Button):

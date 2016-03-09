@@ -1,25 +1,32 @@
-import os
 import ast
-import sys
 import imp
 import inspect
+import os
 import re
-from kivy.factory import Factory, FactoryException
+import sys
 
-from kivy.lang import Builder, BuilderException, ParserException
-from kivy.properties import StringProperty, Clock
-from kivy.properties import ObjectProperty
-from kivy.properties import DictProperty
-from kivy.properties import BooleanProperty
-from kivy.properties import ListProperty
-from kivy.uix.widget import Widget
+from designer.helper_functions import (
+    get_app_widget,
+    get_designer,
+    show_error_console,
+    show_message,
+)
 from kivy.event import EventDispatcher
-
+from kivy.factory import Factory
+from kivy.lang import Builder
+from kivy.properties import (
+    BooleanProperty,
+    Clock,
+    DictProperty,
+    ListProperty,
+    ObjectProperty,
+    StringProperty,
+)
+from kivy.uix.widget import Widget
+from six import exec_
 from watchdog.events import RegexMatchingEventHandler
 from watchdog.observers import Observer
-from six import exec_
-from designer.helper_functions import get_app_widget, show_error_console, \
-    show_message, get_designer
+
 
 IGNORED_PATHS = ('.designer', '.buildozer', '.git', '__pycache__', 'bin',)
 IGNORED_EXTS = ('.pyc',)

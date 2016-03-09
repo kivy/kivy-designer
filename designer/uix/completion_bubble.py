@@ -1,10 +1,11 @@
 from kivy.adapters.listadapter import ListAdapter
 from kivy.core.window import Window
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
+from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
 from kivy.uix.bubble import Bubble
 from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.listview import ListView, ListItemButton
+from kivy.uix.listview import ListItemButton, ListView
+
 
 Builder.load_string('''
 
@@ -266,7 +267,6 @@ if __name__ == '__main__':
 
         def show_bubble(self):
             source = '''
-import datetime
 datetime.da'''
             script = jedi.Script(source, 3, len('datetime.da'))
             completions = script.completions()

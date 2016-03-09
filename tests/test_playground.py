@@ -16,7 +16,7 @@ class PlaygroundTest(unittest.TestCase):
             ['Test', {'size': [0.1, 0]}, 'Test:\n    size: [0.1, 0]'],
             ['Test', {}, 'Test:'],
             ['Test', {'pos_hint': {'center_x': 0}},
-                      'Test:\n    pos_hint: {\'center_x\': 0}'],
+             'Test:\n    pos_hint: {\'center_x\': 0}'],
             ['Test', {'active': True}, 'Test:\n    active: True'],
         ]
         for t in tests:

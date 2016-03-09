@@ -2,13 +2,18 @@ import os
 import shutil
 import sys
 
-from kivy.event import EventDispatcher
-from kivy.properties import StringProperty, ObjectProperty, \
-    ConfigParser, ConfigParserProperty, partial, Clock
-from kivy.uix.popup import Popup
 import designer
 from designer.confirmation_dialog import ConfirmationDialog
 from designer.helper_functions import get_current_project, get_fs_encoding
+from kivy.event import EventDispatcher
+from kivy.properties import (
+    Clock,
+    ConfigParser,
+    ConfigParserProperty,
+    ObjectProperty,
+    StringProperty,
+)
+from kivy.uix.popup import Popup
 
 
 class Builder(EventDispatcher):

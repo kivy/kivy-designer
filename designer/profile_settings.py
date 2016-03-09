@@ -2,15 +2,18 @@ import os
 import os.path
 import shutil
 
-from kivy.config import ConfigParser
-from kivy.properties import ObjectProperty, DictProperty
-from kivy.uix.popup import Popup
-from kivy.uix.settings import Settings, InterfaceWithSidebar, \
-    MenuSidebar, ContentPanel
-
 import designer
 from designer.confirmation_dialog import ConfirmationDialog
 from designer.helper_functions import get_config_dir
+from kivy.config import ConfigParser
+from kivy.properties import DictProperty, ObjectProperty
+from kivy.uix.popup import Popup
+from kivy.uix.settings import (
+    ContentPanel,
+    InterfaceWithSidebar,
+    MenuSidebar,
+    Settings,
+)
 
 
 class ProfileContentPanel(ContentPanel):

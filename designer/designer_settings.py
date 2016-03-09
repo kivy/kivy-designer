@@ -2,17 +2,16 @@ import os
 import os.path
 import shutil
 import sys
-import designer
-
 from distutils.spawn import find_executable
-from pygments import styles
 
-from kivy.properties import ObjectProperty
-from kivy.config import ConfigParser
-from kivy.uix.settings import Settings
-
+import designer
 from designer.helper_functions import get_config_dir
 from designer.uix.settings import SettingList, SettingShortcut
+from kivy.config import ConfigParser
+from kivy.properties import ObjectProperty
+from kivy.uix.settings import Settings
+from pygments import styles
+
 
 DESIGNER_CONFIG_FILE_NAME = 'config.ini'
 

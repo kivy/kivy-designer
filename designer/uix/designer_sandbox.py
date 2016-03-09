@@ -1,9 +1,7 @@
-from kivy.uix.sandbox import Sandbox, SandboxExceptionManager, sandbox
-from kivy.properties import BooleanProperty
-from kivy.lang import Builder
 from kivy.clock import Clock
-from kivy.context import Context
-from kivy.uix.floatlayout import FloatLayout
+from kivy.lang import Builder
+from kivy.properties import BooleanProperty
+from kivy.uix.sandbox import Sandbox, sandbox
 
 
 class DesignerSandbox(Sandbox):

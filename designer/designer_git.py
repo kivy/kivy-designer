@@ -1,25 +1,36 @@
-import threading
-from git.exc import InvalidGitRepositoryError
-from kivy._event import EventDispatcher
-from kivy.core.window import Window
-from kivy.properties import BooleanProperty, StringProperty, ObjectProperty, \
-    Clock, ListProperty
-from kivy.uix.label import Label
-from kivy.uix.popup import Popup
 import os
-from pygments.lexers.diff import DiffLexer
+import subprocess
+import threading
+
 import designer
 from designer.designer_content import DesignerCloseableTab
-from designer.helper_functions import ignore_proj_watcher, show_alert, \
-    show_message, get_designer, FakeSettingList, get_current_project
+from designer.helper_functions import (
+    FakeSettingList,
+    get_current_project,
+    get_designer,
+    ignore_proj_watcher,
+    show_alert,
+    show_message,
+)
 from designer.input_dialog import InputDialog
-from designer.uix.designer_action_items import DesignerActionSubMenu, \
-        DesignerSubActionButton
-from git import Repo, RemoteProgress, GitCommandError
+from designer.uix.designer_action_items import (
+    DesignerActionSubMenu,
+    DesignerSubActionButton,
+)
 from designer.uix.py_code_input import PyScrollView
 from designer.uix.settings import SettingListContent
-from kivy.app import App
-import subprocess
+from git import GitCommandError, RemoteProgress, Repo
+from git.exc import InvalidGitRepositoryError
+from kivy.core.window import Window
+from kivy.properties import (
+    BooleanProperty,
+    Clock,
+    ObjectProperty,
+    StringProperty,
+)
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from pygments.lexers.diff import DiffLexer
 
 
 class GitRemoteProgress(RemoteProgress):

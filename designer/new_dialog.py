@@ -1,14 +1,15 @@
-import designer
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.listview import ListView
-from kivy.properties import ObjectProperty, NumericProperty
-from kivy.adapters.listadapter import ListAdapter
-from kivy.uix.image import Image
-from kivy.core.window import Window, Keyboard
-from os.path import join, dirname, split
 from functools import partial
-from kivy.factory import Factory
+from os.path import join
+
 from designer.helper_functions import get_kd_dir
+from kivy.adapters.listadapter import ListAdapter
+from kivy.core.window import Keyboard, Window
+from kivy.factory import Factory
+from kivy.properties import NumericProperty, ObjectProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.image import Image
+from kivy.uix.listview import ListView
+
 
 NEW_PROJECTS = {
     'FloatLayout': ('template_floatlayout_kv',

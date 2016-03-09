@@ -1,8 +1,8 @@
-from kivy.uix.bubble import Bubble
-from kivy.properties import StringProperty
-from kivy.clock import Clock
 from kivy.animation import Animation
+from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.properties import StringProperty
+from kivy.uix.bubble import Bubble
 
 
 class InfoBubble(Bubble):

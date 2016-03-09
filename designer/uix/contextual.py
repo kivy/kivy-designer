@@ -1,19 +1,19 @@
-from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem,\
-    TabbedPanelHeader, TabbedPanelContent
-from kivy.properties import ObjectProperty, StringProperty,\
-    BooleanProperty, NumericProperty
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
-from kivy.uix.widget import Widget
-from kivy.uix.button import Button
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.image import Image
-from kivy.uix.bubble import Bubble, BubbleButton
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.uix.scrollview import ScrollView
-from kivy.clock import Clock
+from kivy.properties import BooleanProperty, NumericProperty, ObjectProperty
 from kivy.uix.actionbar import ActionItem, ActionView
+from kivy.uix.bubble import Bubble
+from kivy.uix.button import Button
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.image import Image
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.tabbedpanel import (
+    TabbedPanel,
+    TabbedPanelContent,
+    TabbedPanelHeader,
+)
 
 
 class DesignerActionView(ActionView):

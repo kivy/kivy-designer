@@ -1,7 +1,5 @@
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
 from kivy.properties import StringProperty
+from kivy.uix.boxlayout import BoxLayout
 
 
 class ConfirmationDialog(BoxLayout):

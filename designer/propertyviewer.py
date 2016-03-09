@@ -1,16 +1,20 @@
-from kivy.core.window import Window
-from kivy.uix.popup import Popup
-from kivy.uix.scrollview import ScrollView
-from kivy.properties import ObjectProperty, NumericProperty, StringProperty,\
-    BooleanProperty, OptionProperty, ListProperty
-from kivy.uix.label import Label
-from kivy.uix.textinput import TextInput
-from kivy.uix.checkbox import CheckBox
-from kivy.uix.spinner import Spinner
-
-from designer.helper_functions import get_designer, FakeSettingList
+from designer.helper_functions import FakeSettingList, get_designer
 from designer.uix.settings import SettingListContent
 from designer.undo_manager import PropOperation
+from kivy.core.window import Window
+from kivy.properties import (
+    BooleanProperty,
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+    OptionProperty,
+    StringProperty,
+)
+from kivy.uix.checkbox import CheckBox
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.textinput import TextInput
 
 
 class PropertyLabel(Label):

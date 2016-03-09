@@ -1,12 +1,12 @@
 import os
 from functools import partial
 
+from designer.helper_functions import get_config_dir, get_fs_encoding
+from kivy.adapters.listadapter import ListAdapter
+from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.listview import ListItemButton
-from kivy.properties import ObjectProperty
-from kivy.adapters.listadapter import ListAdapter
 
-from designer.helper_functions import get_config_dir, get_fs_encoding
 
 RECENT_FILES_NAME = 'recent_files'
 

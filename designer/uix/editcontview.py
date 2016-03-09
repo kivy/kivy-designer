@@ -1,7 +1,7 @@
-from kivy.uix.actionbar import ContextualActionView, ActionButton
-from kivy.properties import ObjectProperty
-
 from functools import partial
+
+from kivy.properties import ObjectProperty
+from kivy.uix.actionbar import ActionButton, ContextualActionView
 
 
 class EditContView(ContextualActionView):

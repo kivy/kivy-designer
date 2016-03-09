@@ -3,20 +3,17 @@
 '''
 import functools
 import inspect
-
 import os
-import string
-
-from kivy.app import App
-from kivy.event import EventDispatcher
-from kivy.factory import Factory, FactoryException
-from kivy.properties import ListProperty, BooleanProperty, StringProperty
-from kivy.uix.label import Label
-from kivy.uix.popup import Popup
 import sys
-from kivy.uix.widget import Widget
 
 import designer
+from kivy.app import App
+from kivy.event import EventDispatcher
+from kivy.factory import Factory
+from kivy.properties import BooleanProperty, ListProperty, StringProperty
+from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.widget import Widget
 
 
 class FakeSettingList(EventDispatcher):
