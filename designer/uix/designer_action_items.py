@@ -1,11 +1,11 @@
-from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
-from kivy.uix.actionbar import ActionGroup, ActionPrevious, ActionButton, \
-    ActionItem
-from kivy.core.window import Window
 import weakref
+
+from designer.uix.contextual import ContextSubMenu
+from kivy.core.window import Window
+from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
+from kivy.uix.actionbar import ActionButton, ActionGroup, ActionItem
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.floatlayout import FloatLayout
-from designer.uix.contextual import ContextSubMenu
 
 
 class DesignerActionSubMenu(ContextSubMenu, ActionButton):

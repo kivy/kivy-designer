@@ -1,5 +1,5 @@
+from kivy.properties import ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import StringProperty, ObjectProperty
 from kivy.uix.textinput import TextInput
 
 

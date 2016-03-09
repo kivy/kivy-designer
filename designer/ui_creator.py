@@ -1,8 +1,8 @@
-from kivy.uix.floatlayout import FloatLayout
-from kivy.properties import ObjectProperty
+from designer.helper_functions import get_designer
 from kivy.app import App
 from kivy.clock import Clock
-from designer.helper_functions import get_designer
+from kivy.properties import ObjectProperty
+from kivy.uix.floatlayout import FloatLayout
 
 
 class UICreator(FloatLayout):

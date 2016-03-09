@@ -1,13 +1,12 @@
 import jedi
-
+from designer.uix.completion_bubble import CompletionBubble
+from designer.uix.designer_code_input import DesignerCodeInput
 from kivy.app import App
 from kivy.core.window import Window
+from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
 from kivy.uix.scrollview import ScrollView
-from designer.uix.completion_bubble import CompletionBubble
 
-from designer.uix.designer_code_input import DesignerCodeInput
 
 MarkupLabel = None
 

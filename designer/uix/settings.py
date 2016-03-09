@@ -1,8 +1,14 @@
-from kivy.core.window import Window, Keyboard
+from designer.helper_functions import get_designer
+from kivy.core.window import Keyboard, Window
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.properties import ObjectProperty, ListProperty, BooleanProperty, \
-    StringProperty, DictProperty
+from kivy.properties import (
+    BooleanProperty,
+    DictProperty,
+    ListProperty,
+    ObjectProperty,
+    StringProperty,
+)
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.popup import Popup
@@ -10,7 +16,6 @@ from kivy.uix.settings import SettingItem, SettingSpacer
 from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.widget import Widget
 
-from designer.helper_functions import get_designer
 
 Builder.load_string('''
 <SettingDict>:

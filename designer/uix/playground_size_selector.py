@@ -1,5 +1,6 @@
 from functools import partial
-from kivy.properties import ObjectProperty, StringProperty, OptionProperty
+
+from kivy.properties import ObjectProperty, OptionProperty, StringProperty
 from kivy.uix.accordion import AccordionItem
 from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout

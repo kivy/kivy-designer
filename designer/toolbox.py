@@ -1,12 +1,11 @@
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.button import Button
-from kivy.properties import ObjectProperty
-from kivy.clock import Clock
 from designer.common import widgets
-from kivy.uix.accordion import Accordion, AccordionItem
-from kivy.metrics import pt
+from kivy.clock import Clock
 from kivy.factory import Factory
+from kivy.metrics import pt
+from kivy.properties import ObjectProperty
+from kivy.uix.accordion import AccordionItem
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.button import Button
 
 
 class ToolboxCategory(AccordionItem):

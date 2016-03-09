@@ -1,18 +1,23 @@
 import os
 
-from kivy.app import App
-from kivy.uix.floatlayout import FloatLayout
-from kivy.properties import OptionProperty, StringProperty
-from kivy.uix.popup import Popup
-from kivy.uix.tabbedpanel import TabbedPanelHeader
-from kivy.properties import ObjectProperty, BooleanProperty, \
-                        Clock, partial
-from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
-from kivy.uix.treeview import TreeViewLabel
 from designer.buildozer_spec_editor import BuildozerSpecEditor
 from designer.confirmation_dialog import ConfirmationDialog
 from designer.helper_functions import get_designer, show_message
 from designer.uix.py_code_input import PyScrollView
+from kivy.app import App
+from kivy.properties import (
+    BooleanProperty,
+    Clock,
+    ObjectProperty,
+    OptionProperty,
+    StringProperty,
+    partial,
+)
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.popup import Popup
+from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelHeader, TabbedPanelItem
+from kivy.uix.treeview import TreeViewLabel
+
 
 SUPPORTED_EXT = ('.py', '.py2', '.kv', '.py3', '.txt', '.diff', )
 

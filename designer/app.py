@@ -1,74 +1,75 @@
-import webbrowser
-from distutils.dir_util import copy_tree
-
-from kivy.graphics.context_instructions import Color
-from kivy.graphics.vertex_instructions import Line
-from kivy.uix.widget import Widget
-
-from designer.designer_tools import DesignerTools
-from designer.input_dialog import InputDialog
-from designer.profile_settings import ProfileSettings
-from designer.profiler import Profiler
-from designer.uix.modules_contview import ModulesContView
-from designer.shortcuts import Shortcuts
-
-__all__ = ('DesignerApp', )
-
-import kivy
 import os
 import shutil
 import traceback
+import webbrowser
+from distutils.dir_util import copy_tree
 
-kivy.require('1.9.1')
-from kivy.app import App
-from kivy.core.window import Window
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.layout import Layout
-from kivy.factory import Factory
-from kivy.properties import ObjectProperty, BooleanProperty, StringProperty, \
-    partial, ListProperty
-from kivy.clock import Clock
-from kivy.uix import actionbar
-from kivy.garden.filebrowser import FileBrowser
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from kivy.uix.tabbedpanel import TabbedPanel, TabbedPanelItem
-from kivy.lang import Builder
-from kivy.uix.carousel import Carousel
-from kivy.uix.screenmanager import ScreenManager
-from kivy.config import Config
-from kivy.base import ExceptionHandler, ExceptionManager
-
-import designer
-from designer.uix.designer_action_items import ActionCheckButton
-from designer.playground import PlaygroundDragElement
+import kivy
+from designer.add_file import AddFileDialog
+from designer.buildozer_spec_editor import BuildozerSpecEditor
 from designer.common import widgets
+from designer.confirmation_dialog import (
+    ConfirmationDialog,
+    ConfirmationDialogSave,
+)
+from designer.designer_content import DesignerContent
+from designer.designer_settings import DesignerSettings
+from designer.designer_tools import DesignerTools
+from designer.help_dialog import AboutDialog, HelpDialog
+from designer.helper_functions import (
+    get_config_dir,
+    get_fs_encoding,
+    get_kd_dir,
+    ignore_proj_watcher,
+    show_alert,
+    show_error_console,
+    show_message,
+    update_info,
+)
+from designer.input_dialog import InputDialog
+from designer.new_dialog import NEW_PROJECTS, NewProjectDialog
+from designer.playground import PlaygroundDragElement
+from designer.profile_settings import ProfileSettings
+from designer.profiler import Profiler
+from designer.project_manager import ProjectManager, ProjectWatcher
+from designer.project_settings import ProjectSettings
+from designer.recent_manager import RecentDialog, RecentManager
+from designer.shortcuts import Shortcuts
+from designer.uix.bug_reporter import BugReporterApp
+from designer.uix.designer_action_items import DesignerActionProfileCheck
+from designer.uix.designer_sandbox import DesignerSandbox
 from designer.uix.editcontview import EditContView
 from designer.uix.modules_contview import ModulesContView
-from designer.uix.kv_lang_area import KVLangArea
-from designer.undo_manager import WidgetOperation, UndoManager
-from designer.confirmation_dialog import ConfirmationDialog, \
-    ConfirmationDialogSave
-from designer.recent_manager import RecentManager, RecentDialog
-from designer.add_file import AddFileDialog
-from designer.ui_creator import UICreator
-from designer.designer_content import DesignerContent
-from designer.uix.designer_sandbox import DesignerSandbox
-from designer.project_settings import ProjectSettings
-from designer.designer_settings import DesignerSettings
-from designer.helper_functions import get_config_dir, show_alert, \
-    ignore_proj_watcher, show_message, update_info, show_error_console, \
-    get_kd_dir, get_fs_encoding
-from designer.new_dialog import NewProjectDialog, NEW_PROJECTS
-from designer.eventviewer import EventViewer
-from designer.uix.designer_action_items import DesignerActionButton, \
-    DesignerActionProfileCheck, DesignerActionSubMenu
-from designer.help_dialog import HelpDialog, AboutDialog
-from designer.uix.bug_reporter import BugReporterApp
-from designer.buildozer_spec_editor import BuildozerSpecEditor
-from designer.designer_git import DesignerGit
-from designer.project_manager import ProjectManager
-from designer.project_manager import ProjectManager, ProjectWatcher
+from designer.undo_manager import UndoManager
+from kivy.app import App
+from kivy.base import ExceptionHandler, ExceptionManager
+from kivy.clock import Clock
+from kivy.config import Config
+from kivy.core.window import Window
+from kivy.factory import Factory
+from kivy.garden.filebrowser import FileBrowser
+from kivy.graphics.context_instructions import Color
+from kivy.graphics.vertex_instructions import Line
+from kivy.properties import (
+    BooleanProperty,
+    ListProperty,
+    ObjectProperty,
+    StringProperty,
+    partial,
+)
+from kivy.uix.carousel import Carousel
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.popup import Popup
+from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.tabbedpanel import TabbedPanel
+from kivy.uix.widget import Widget
+
+
+__all__ = ('DesignerApp', )
+
+
+kivy.require('1.9.1')
+
 
 NEW_PROJECT_DIR_NAME = 'new_proj'
 NEW_TEMPLATES_DIR = 'new_templates'
@@ -1686,9 +1687,11 @@ class DesignerApp(App):
         Factory.register('EventViewer', module='designer.eventviewer')
         Factory.register('WidgetsTree', module='designer.nodetree')
         Factory.register('UICreator', module='designer.ui_creator')
+        Factory.register('DesignerGit', module='designer.designer_git')
         Factory.register('DesignerContent',
                          module='designer.designer_content')
         Factory.register('KivyConsole', module='designer.uix.kivy_console')
+        Factory.register('KVLangAreaScroll', module='designer.uix.kv_lang_area')
         Factory.register('PythonConsole', module='designer.uix.py_console')
         Factory.register('DesignerContent',
                          module='designer.uix.designer_sandbox')

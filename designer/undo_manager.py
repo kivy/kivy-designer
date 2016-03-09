@@ -1,9 +1,6 @@
-from kivy.properties import ObjectProperty, OptionProperty
-from kivy.uix.textinput import TextInput
+from designer.helper_functions import get_current_project, get_designer
 from kivy.uix.checkbox import CheckBox
-from kivy.app import App
-
-from designer.helper_functions import get_designer, get_current_project
+from kivy.uix.textinput import TextInput
 
 
 class OperationBase(object):

@@ -1,4 +1,3 @@
-
 #: Describe the widgets to show in the toolbox,
 #: and anything else needed for the
 #: designer. The base is a list, because python dict don't preserve the order.

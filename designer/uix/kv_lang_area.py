@@ -1,16 +1,23 @@
 import re
 
-from kivy.properties import BooleanProperty, StringProperty, ObjectProperty
+from designer.helper_functions import (
+    get_current_project,
+    get_indent_str,
+    get_indentation,
+    get_line_end_pos,
+    get_line_start_pos,
+)
+from designer.uix.designer_code_input import DesignerCodeInput
 from kivy.clock import Clock
+from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
 from kivy.uix.carousel import Carousel
 from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.scrollview import ScrollView
-from kivy.uix.tabbedpanel import TabbedPanelContent, \
-    TabbedPanel, TabbedPanelHeader
-
-from designer.helper_functions import get_indent_str, get_line_end_pos,\
-    get_line_start_pos, get_indentation, get_current_project
-from designer.uix.designer_code_input import DesignerCodeInput
+from kivy.uix.tabbedpanel import (
+    TabbedPanel,
+    TabbedPanelContent,
+    TabbedPanelHeader,
+)
 
 
 class KVLangAreaScroll(ScrollView):

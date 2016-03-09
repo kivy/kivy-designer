@@ -1,9 +1,10 @@
-from kivy.app import App
-from kivy.properties import ObjectProperty, Clock, partial
-from kivy.uix.actionbar import ContextualActionView
-from kivy.modules import screen
 import webbrowser
+
 from designer.uix.designer_action_items import DesignerActionProfileCheck
+from kivy.app import App
+from kivy.modules import screen
+from kivy.properties import Clock, ObjectProperty, partial
+from kivy.uix.actionbar import ContextualActionView
 
 
 class ModulesContView(ContextualActionView):

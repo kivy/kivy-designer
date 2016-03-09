@@ -1,15 +1,17 @@
-from kivy.uix.textinput import TextInput
-from kivy.properties import ObjectProperty, StringProperty, BooleanProperty
-from kivy.clock import Clock
-from kivy.uix.dropdown import DropDown
-from kivy.uix.button import Button
-
-from designer.helper_functions import get_designer, get_current_project, \
-    show_message
-from designer.uix.info_bubble import InfoBubble
-from designer.propertyviewer import PropertyViewer, PropertyLabel
-
 import re
+
+from designer.helper_functions import (
+    get_current_project,
+    get_designer,
+    show_message,
+)
+from designer.propertyviewer import PropertyLabel, PropertyViewer
+from designer.uix.info_bubble import InfoBubble
+from kivy.clock import Clock
+from kivy.properties import BooleanProperty, ObjectProperty, StringProperty
+from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
+from kivy.uix.textinput import TextInput
 
 
 class EventHandlerTextInput(TextInput):

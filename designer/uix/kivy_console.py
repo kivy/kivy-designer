@@ -81,33 +81,38 @@ Tab            If there is nothing before the cursur when tab is pressed
 '''
 __all__ = ('KivyConsole', )
 
+import os
+import re
 import shlex
 import subprocess
-import re
+import sys
+from functools import partial
+
+from designer.helper_functions import get_fs_encoding
+from kivy.app import runTouchApp
+from kivy.clock import Clock
+from kivy.compat import PY2
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.logger import Logger
+from kivy.properties import (
+    BooleanProperty,
+    DictProperty,
+    ListProperty,
+    NumericProperty,
+    ObjectProperty,
+)
+from kivy.uix.button import Button
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.textinput import TextInput
+from kivy.utils import platform
+from pygments.lexers.shell import BashSessionLexer
+
+
 try:
     import thread
 except ImportError:
     import _thread as thread
-import os
-import sys
-from functools import partial
-
-from kivy.uix.gridlayout import GridLayout
-from kivy.properties import (NumericProperty,
-                             BooleanProperty, ObjectProperty, DictProperty,
-                             ListProperty)
-from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
-from kivy.clock import Clock
-from kivy.lang import Builder
-from kivy.app import runTouchApp
-from kivy.logger import Logger
-from kivy.core.window import Window
-from kivy.utils import platform
-from kivy.compat import PY2
-from designer.helper_functions import get_fs_encoding
-
-from pygments.lexers.shell import BashSessionLexer
 
 
 Builder.load_string('''

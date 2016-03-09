@@ -1,18 +1,20 @@
-import os
 import json
+import os
 import tempfile
 import webbrowser
+
 import designer
-
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ObjectProperty, ConfigParser, StringProperty
-from kivy.uix.settings import Settings, InterfaceWithSidebar, MenuSidebar,\
-    ContentPanel, SettingsPanel
-
 from designer.helper_functions import ignore_proj_watcher
-from designer.uix.settings import SettingList, SettingDict
-
+from designer.uix.settings import SettingDict, SettingList
+from kivy.properties import ConfigParser, ObjectProperty, StringProperty
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.settings import (
+    ContentPanel,
+    InterfaceWithSidebar,
+    MenuSidebar,
+    Settings,
+    SettingsPanel,
+)
 from pygments.lexers.configs import IniLexer
 
 
