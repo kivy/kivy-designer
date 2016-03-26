@@ -76,11 +76,17 @@ Builder.load_string('''
             text: root.text
             padding: '4sp', '4sp'
             valign: 'middle'
-        Button:
-            size_hint_y: None
-            height: '40sp'
-            on_release: root.dispatch('on_release')
-            text: 'Report'
+        BoxLayout:
+            Button:
+                size_hint_y: None
+                height: '40sp'
+                on_release: root.dispatch('on_release')
+                text: 'Report'
+            Button:
+                size_hint_y: None
+                height: '40sp'
+                on_release: root.dismiss()
+                text: 'Close'
 ''')
 
 
