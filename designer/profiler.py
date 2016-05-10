@@ -341,7 +341,9 @@ class Desktop(Builder):
             self.profiler.dispatch('on_error', 'Cannot find main.py')
             return
         if sys.platform[0] == 'w':
-            py_main = u'"' + py_main + u'"'
+            py_main = py_main.replace(' ', '\x01')
+        else:
+            py_main = py_main.replace(' ', '\\ ')
         cmd = ''
         if mod == '':
             cmd = '%s %s %s' % (self.python_path, py_main, self.args)
