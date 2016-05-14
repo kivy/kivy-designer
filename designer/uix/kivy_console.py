@@ -632,6 +632,8 @@ class KivyConsole(GridLayout):
                     cmd = command.encode(get_fs_encoding())
                 if not self.shell:
                     cmd = shlex.split(cmd, posix=_posix)
+                    for i in range(len(cmd)):
+                        cmd[i] = cmd[i].replace('\x01', ' ')
                     map(lambda s: s.decode(get_fs_encoding()), cmd)
             except Exception as err:
                 cmd = ''
@@ -724,14 +726,14 @@ class KivyConsole(GridLayout):
                     if command[3] == os.sep:
                         os.chdir(command[3:])
                     else:
-                        os.chdir(self.cur_dir + os.sep + command[3:])
+                        os.chdir(os.path.join(self.cur_dir, command[3:]))
                     if sys.version_info >= (3, 0):
                         self.cur_dir = os.getcwd()
                     else:
                         self.cur_dir = os.getcwdu()
                 except OSError as err:
                     Logger.debug('Shell Console: err:' + err.strerror +
-                                 ' directory:' + command[3:])
+                                 ' directory:' + str(command[3:]))
                     add_to_cache(''.join((err.strerror, '\n')))
             txtinput_command_line.text = self.prompt()
             self.txtinput_command_line_refocus = True
