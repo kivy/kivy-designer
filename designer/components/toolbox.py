@@ -10,7 +10,7 @@ from kivy.uix.button import Button
 
 class ToolboxCategory(AccordionItem):
     '''ToolboxCategory is responsible for grouping and showing
-       :class:`~designer.toolbox.ToolboxButton`
+       :class:`~designer.components.toolbox.ToolboxButton`
        of same class into one category.
     '''
 
@@ -24,7 +24,7 @@ class ToolboxCategory(AccordionItem):
 class ToolboxButton(Button):
     '''ToolboxButton is a subclass of :class:`~kivy.uix.button.Button`,
        to display class of Widgets in
-       :class:`~designer.toolbox.ToolboxCategory`.
+       :class:`~designer.components.toolbox.ToolboxCategory`.
     '''
 
     def __init__(self, **kwargs):

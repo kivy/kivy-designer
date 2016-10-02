@@ -14,7 +14,8 @@ class InputDialog(BoxLayout):
 
     user_input = ObjectProperty()
     '''Is the UserTextInput
-        :data:`user_input` is a :class:`~designer.input_dialog.UserTextInput`
+        :data:`user_input` is a
+        :class:`~designer.uix.input_dialog.UserTextInput`
     '''
 
     btn_confirm = ObjectProperty()

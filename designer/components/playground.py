@@ -44,13 +44,13 @@ from kivy.uix.tabbedpanel import TabbedPanel
 
 class PlaygroundDragElement(BoxLayout):
     '''An instance of this class is the drag element shown when user tries to
-       add a widget to :class:`~designer.playground.Playground` by dragging
-       from :class:`~designer.toolbox.Toolbox` to
-       :class:`~designer.playground.Playground`.
+       add a widget to :class:`~designer.components.playground.Playground`
+       by dragging from :class:`~designer.components.toolbox.Toolbox` to
+       :class:`~designer.components.playground.Playground`.
     '''
 
     playground = ObjectProperty()
-    '''Reference to the :class:`~designer.playground.Playground`
+    '''Reference to the :class:`~designer.components.playground.Playground`
        :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -80,8 +80,8 @@ class PlaygroundDragElement(BoxLayout):
     '''
 
     widgettree = ObjectProperty(None)
-    '''Reference to class:`~designer.nodetree.WidgetsTree`, the widgettree of
-       Designer.
+    '''Reference to class:`~designer.nodetree.WidgetsTree`,
+        the widget_tree of Designer.
        :data:`widgettree` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -397,25 +397,26 @@ class Playground(ScatterPlane):
 
     clicked = BooleanProperty(False)
     '''This property represents whether
-       :class:`~designer.playground.Playground` has been clicked or not
+       :class:`~designer.components.playground.Playground`
+        has been clicked or not
        :data:`clicked` is a :class:`~kivy.properties.BooleanProperty`
     '''
 
     sandbox = ObjectProperty(None)
     '''This property represents the sandbox widget which is added to
-       :class:`~designer.playground.Playground`.
+       :class:`~designer.components.playground.Playground`.
        :data:`sandbox` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     kv_code_input = ObjectProperty()
     '''This property refers to the
-       :class:`~designer.ui_creator.UICreator`'s KVLangArea.
+       :class:`~designer.components.ui_creator.UICreator`'s KVLangArea.
        :data:`kv_code_input` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     widgettree = ObjectProperty()
     '''This property refers to the
-       :class:`~designer.ui_creator.UICreator`'s WidgetTree.
+       :class:`~designer.components.ui_creator.UICreator`'s WidgetTree.
        :data:`widgettree` is a :class:`~kivy.properties.ObjectProperty`
     '''
 

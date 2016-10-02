@@ -18,7 +18,8 @@ class WidgetsTree(ScrollView):
        Tree hierarchy.
     '''
     playground = ObjectProperty(None)
-    '''This property is an instance of :class:`~designer.playground.Playground`
+    '''This property is an instance of
+        :class:`~designer.components.playground.Playground`
        :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
     '''
 

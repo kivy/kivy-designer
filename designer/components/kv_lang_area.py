@@ -22,7 +22,7 @@ from kivy.uix.tabbedpanel import (
 
 class KVLangAreaScroll(ScrollView):
     '''KVLangAreaScroll used as a :class:`~kivy.scrollview.ScrollView`
-       for adding :class:`~designer.uix.kv_lang_area.KVLangArea`.
+       for adding :class:`~designer.components.kv_lang_area.KVLangArea`.
     '''
 
     kv_lang_area = ObjectProperty(None)
@@ -98,12 +98,12 @@ class KVLangArea(DesignerCodeInput):
     '''
 
     playground = ObjectProperty()
-    '''Reference to :class:`~designer.playground.Playground`
+    '''Reference to :class:`~designer.components.playground.Playground`
        :data:`playground` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     project = ObjectProperty()
-    '''Reference to :class:`~designer.project_manager.Project`
+    '''Reference to :class:`~designer.core.project_manager.Project`
        :data:`project` is a :class:`~kivy.properties.ObjectProperty`
     '''
 

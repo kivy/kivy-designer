@@ -10,24 +10,25 @@ class UICreator(FloatLayout):
     '''
 
     toolbox = ObjectProperty(None)
-    '''Reference to the :class:`~designer.toolbox.Toolbox` instance.
+    '''Reference to the :class:`~designer.components.toolbox.Toolbox` instance.
        :data:`toolbox` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     propertyviewer = ObjectProperty(None)
-    '''Reference to the :class:`~designer.propertyviewer.PropertyViewer`
+    '''Reference to the
+        :class:`~designer.components.property_viewer.PropertyViewer`
        instance. :data:`propertyviewer` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
 
     playground = ObjectProperty(None)
-    '''Reference to the :class:`~designer.playground.Playground` instance.
-       :data:`playground` is an :class:`~kivy.properties.ObjectProperty`
+    '''Reference to the :class:`~designer.components.playground.Playground`
+     instance.:data:`playground` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     widgettree = ObjectProperty(None)
-    '''Reference to the :class:`~designer.nodetree.WidgetsTree` instance.
-       :data:`widgettree` is an :class:`~kivy.properties.ObjectProperty`
+    '''Reference to the :class:`~designer.components.widgets_tree.WidgetsTree`
+     instance.:data:`widgettree` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     kv_code_input = ObjectProperty(None)
@@ -66,7 +67,7 @@ class UICreator(FloatLayout):
     '''
 
     kivy_console = ObjectProperty(None)
-    '''Instance of :class:`~designer.uix.kivy_console.KivyConsole`.
+    '''Instance of :class:`~designer.components.kivy_console.KivyConsole`.
     '''
 
     python_console = ObjectProperty(None)
@@ -74,7 +75,8 @@ class UICreator(FloatLayout):
     '''
 
     tab_pannel = ObjectProperty(None)
-    '''Instance of :class:`~designer.designer_content.DesignerTabbedPanel`
+    '''Instance of
+        :class:`~designer.components.designer_content.DesignerTabbedPanel`
        containing error_console, kivy_console and kv_lang_area
     '''
 

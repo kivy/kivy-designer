@@ -14,20 +14,21 @@ class PlaygroundSizeSelector(Button):
 
     view = ObjectProperty()
     '''This property refers to the
-       :class:`~designer.uix.playground_size_selector.PlaygroundSizeView`
+    :class:`~designer.components..playground_size_selector.PlaygroundSizeView`
        instance.
        :data:`view` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     playground = ObjectProperty()
     '''This property holds a reference to the
-       :class:`~designer.playground.Playground` instance.
+       :class:`~designer.components.playground.Playground` instance.
        :data:`playground` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
     def on_playground(self, *_):
         '''Create a
-           :class:`~designer.uix.playground_size_selector.PlaygroundSizeView`
+        :class:
+            `~designer.components.playground_size_selector.PlaygroundSizeView`
            for the current playground.
         '''
         self.view = PlaygroundSizeView(selected_size=self.playground.size)
@@ -46,7 +47,8 @@ class PlaygroundSizeSelector(Button):
 
     def on_press(self):
         '''Open the
-           :class:`~designer.uix.playground_size_selector.PlaygroundSizeView`
+        :class:
+            `~designer.components.playground_size_selector.PlaygroundSizeView`
         '''
         self.view.size_hint = None, None
         self.view.width = self.get_root_window().width / 2.
