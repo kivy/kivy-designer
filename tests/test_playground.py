@@ -1,6 +1,8 @@
 import unittest
+
 from nose.tools import assert_equal
-from designer.playground import Playground
+
+from designer.components.playground import Playground
 
 
 class PlaygroundTest(unittest.TestCase):

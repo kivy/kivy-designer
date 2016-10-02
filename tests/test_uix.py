@@ -3,10 +3,12 @@ This file is responsible for testing custom UIX from designer/uix/*
 '''
 
 import unittest
+
 from nose.tools import assert_equal
 from nose.tools import assert_not_equal
-from designer.uix.designer_action_items import ActionCheckButton
-from designer.uix.kivy_console import KivyConsole
+
+from designer.components.kivy_console import KivyConsole
+from designer.uix.action_items import ActionCheckButton
 from designer.uix.settings import SettingListCheckItem
 
 

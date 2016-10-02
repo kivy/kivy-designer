@@ -3,10 +3,11 @@ import unittest
 from kivy.uix.button import Button
 from kivy.uix.floatlayout import FloatLayout
 from nose.tools import assert_equal
-from designer.playground import Playground
-from designer.project_manager import Project
-from designer.uix.designer_sandbox import DesignerSandbox
-from designer.uix.kv_lang_area import KVLangArea
+
+from designer.components.kv_lang_area import KVLangArea
+from designer.components.playground import Playground
+from designer.core.project_manager import Project
+from designer.uix.sandbox import DesignerSandbox
 
 
 class KVLangAreaTest(unittest.TestCase):

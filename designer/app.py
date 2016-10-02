@@ -5,20 +5,42 @@ import webbrowser
 from distutils.dir_util import copy_tree
 
 import kivy
-from designer.add_file import AddFileDialog
-from designer.buildozer_spec_editor import BuildozerSpecEditor
-from designer.common import widgets
-from designer.confirmation_dialog import (
+from designer.components.buildozer_spec_editor import BuildozerSpecEditor
+from designer.components.designer_content import DesignerContent
+from designer.components.dialogs.about import AboutDialog
+from designer.components.dialogs.add_file import AddFileDialog
+from designer.components.dialogs.help import HelpDialog
+from designer.components.dialogs.new_project import (
+    NEW_PROJECTS,
+    NewProjectDialog,
+)
+from designer.components.dialogs.recent import RecentDialog
+from designer.components.edit_contextual_view import EditContView
+from designer.components.playground import PlaygroundDragElement
+from designer.components.run_contextual_view import ModulesContView
+from designer.core.builder import Profiler
+from designer.core.profile_settings import ProfileSettings
+from designer.core.project_manager import ProjectManager, ProjectWatcher
+from designer.core.project_settings import ProjectSettings
+from designer.core.recent_manager import RecentManager
+from designer.core.settings import DesignerSettings
+from designer.core.shortcuts import Shortcuts
+from designer.core.undo_manager import UndoManager
+from designer.tools.bug_reporter import BugReporterApp
+from designer.tools.tools import DesignerTools
+from designer.uix.action_items import DesignerActionProfileCheck
+from designer.uix.confirmation_dialog import (
     ConfirmationDialog,
     ConfirmationDialogSave,
 )
-from designer.designer_content import DesignerContent
-from designer.designer_settings import DesignerSettings
-from designer.designer_tools import DesignerTools
-from designer.help_dialog import AboutDialog, HelpDialog
-from designer.helper_functions import (
+from designer.uix.input_dialog import InputDialog
+from designer.uix.sandbox import DesignerSandbox
+from designer.utils import constants
+from designer.utils.toolbox_widgets import toolbox_widgets
+from designer.utils.utils import (
     get_config_dir,
     get_fs_encoding,
+    get_kd_data_dir,
     get_kd_dir,
     ignore_proj_watcher,
     show_alert,
@@ -26,21 +48,6 @@ from designer.helper_functions import (
     show_message,
     update_info,
 )
-from designer.input_dialog import InputDialog
-from designer.new_dialog import NEW_PROJECTS, NewProjectDialog
-from designer.playground import PlaygroundDragElement
-from designer.profile_settings import ProfileSettings
-from designer.profiler import Profiler
-from designer.project_manager import ProjectManager, ProjectWatcher
-from designer.project_settings import ProjectSettings
-from designer.recent_manager import RecentDialog, RecentManager
-from designer.shortcuts import Shortcuts
-from designer.uix.bug_reporter import BugReporterApp
-from designer.uix.designer_action_items import DesignerActionProfileCheck
-from designer.uix.designer_sandbox import DesignerSandbox
-from designer.uix.editcontview import EditContView
-from designer.uix.modules_contview import ModulesContView
-from designer.undo_manager import UndoManager
 from kivy.app import App
 from kivy.base import ExceptionHandler, ExceptionManager
 from kivy.clock import Clock
@@ -69,10 +76,6 @@ __all__ = ('DesignerApp', )
 
 
 kivy.require('1.9.1')
-
-
-NEW_PROJECT_DIR_NAME = 'new_proj'
-NEW_TEMPLATES_DIR = 'new_templates'
 
 
 class Designer(FloatLayout):
@@ -406,8 +409,7 @@ class Designer(FloatLayout):
             return False
         if self.help_dlg is None:
             self.help_dlg = HelpDialog()
-            d = get_kd_dir()
-            self.help_dlg.rst.source = os.path.join(d, 'help.rst')
+            self.help_dlg.rst.source = os.path.join(get_kd_dir(), 'help.rst')
 
         self.popup = Popup(title='Kivy Designer Help', content=self.help_dlg,
                            size_hint=(0.95, 0.95),
@@ -756,7 +758,7 @@ class Designer(FloatLayout):
         self.close_popup()
 
         new_proj_dir = os.path.join(get_config_dir(),
-                                    NEW_PROJECT_DIR_NAME)
+                                    constants.NEW_PROJECT_DIR_NAME)
         if os.path.exists(new_proj_dir):
             shutil.rmtree(new_proj_dir)
 
@@ -766,7 +768,8 @@ class Designer(FloatLayout):
         kv_file = NEW_PROJECTS[template][0]
         py_file = NEW_PROJECTS[template][1]
 
-        templates_dir = os.path.join(get_kd_dir(), NEW_TEMPLATES_DIR)
+        templates_dir = os.path.join(get_kd_data_dir(),
+                                     constants.DIR_NEW_TEMPLATE)
         shutil.copy(os.path.join(templates_dir, py_file),
                     os.path.join(new_proj_dir, "main.py"))
 
@@ -793,9 +796,9 @@ class Designer(FloatLayout):
         for node in self.proj_tree_view.root.nodes[:]:
             self.proj_tree_view.remove_node(node)
 
-        for widget in widgets[:]:
+        for widget in toolbox_widgets[:]:
             if widget[1] == 'custom':
-                widgets.remove(widget)
+                toolbox_widgets.remove(widget)
 
         self.ui_creator.kv_code_input.text = ''
 
@@ -947,16 +950,16 @@ class Designer(FloatLayout):
         self.recent_manager.add_path(project.path)
         self.designer_content.update_tree_view(project)
 
-        for widget in widgets[:]:
+        for widget in toolbox_widgets[:]:
             if widget[1] == 'custom':
-                widgets.remove(widget)
+                toolbox_widgets.remove(widget)
 
         self._add_designer_content()
         app_widgets = self.project_manager.current_project.app_widgets
 
         if app_widgets:
             for name in app_widgets.keys():
-                widgets.append((name, 'custom'))
+                toolbox_widgets.append((name, 'custom'))
 
             self.designer_content.toolbox.update_app_widgets()
 
@@ -1680,34 +1683,46 @@ class DesignerApp(App):
 
     def build(self):
         ExceptionManager.add_handler(DesignerException())
-        Factory.register('Playground', module='designer.playground')
-        Factory.register('Toolbox', module='designer.toolbox')
-        Factory.register('StatusBar', module='designer.statusbar')
-        Factory.register('PropertyViewer', module='designer.propertyviewer')
-        Factory.register('EventViewer', module='designer.eventviewer')
-        Factory.register('WidgetsTree', module='designer.nodetree')
-        Factory.register('UICreator', module='designer.ui_creator')
-        Factory.register('DesignerGit', module='designer.designer_git')
+        Factory.register('Playground', module='designer.components.playground')
+        Factory.register('Toolbox', module='designer.components.toolbox')
+        Factory.register('StatusBar', module='designer.components.statusbar')
+        Factory.register('PropertyViewer',
+                         module='designer.components.property_viewer')
+        Factory.register('EventViewer',
+                         module='designer.components.event_viewer')
+        Factory.register('WidgetsTree',
+                         module='designer.components.widgets_tree')
+        Factory.register('UICreator', module='designer.components.ui_creator')
+        Factory.register('DesignerGit', module='designer.tools.git_integration')
         Factory.register('DesignerContent',
-                         module='designer.designer_content')
-        Factory.register('KivyConsole', module='designer.uix.kivy_console')
-        Factory.register('KVLangAreaScroll', module='designer.uix.kv_lang_area')
+                         module='designer.components.designer_content')
+        Factory.register('KivyConsole',
+                         module='designer.components.kivy_console')
+        Factory.register('KVLangAreaScroll',
+                         module='designer.components.kv_lang_area')
         Factory.register('PythonConsole', module='designer.uix.py_console')
         Factory.register('DesignerContent',
-                         module='designer.uix.designer_sandbox')
-        Factory.register('EventDropDown', module='designer.eventviewer')
+                         module='designer.components.designer_content')
+        Factory.register('EventDropDown',
+                         module='designer.components.event_viewer')
         Factory.register('DesignerActionGroup',
-                         module='designer.uix.designer_action_items')
+                         module='designer.uix.action_items')
         Factory.register('DesignerActionButton',
-                         module='designer.uix.designer_action_items')
+                         module='designer.uix.action_items')
         Factory.register('DesignerActionSubMenu',
-                         module='designer.uix.designer_action_items')
-        Factory.register('DesignerStartPage', module='designer.start_page')
-        Factory.register('DesignerLinkLabel', module='designer.start_page')
-        Factory.register('RecentFilesBox', module='designer.start_page')
-        Factory.register('ContextMenu', module='designer.uix.contextual')
+                         module='designer.uix.action_items')
+        Factory.register('DesignerStartPage',
+                         module='designer.components.start_page')
+        Factory.register('DesignerLinkLabel',
+                         module='designer.components.start_page')
+        Factory.register('RecentFilesBox',
+                         module='designer.components.start_page')
+        Factory.register('ContextMenu',
+                         module='designer.components.edit_contextual_view')
         Factory.register('PlaygroundSizeSelector',
-                         module='designer.uix.playground_size_selector')
+                         module='designer.components.playground_size_selector')
+        Factory.register('CodeInputFind',
+                         module='designer.uix.code_find')
 
         self._widget_focused = None
         self.root = Designer()
@@ -1793,7 +1808,7 @@ class DesignerApp(App):
         else:
             default_args = {}
             extra_args = {}
-            for options in widgets:
+            for options in toolbox_widgets:
                 if widget_name == options[0]:
                     if len(options) > 2:
                         default_args = options[2].copy()

@@ -2,10 +2,11 @@
 File responsible for testing BuildozerSpecEditor
 '''
 import os
-
 import unittest
+
 from nose.tools import assert_equal
-from designer.buildozer_spec_editor import BuildozerSpecEditor
+
+from designer.components.buildozer_spec_editor import BuildozerSpecEditor
 
 
 class BuildozerSpecEditorTest(unittest.TestCase):

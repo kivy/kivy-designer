@@ -1,4 +1,4 @@
-from designer.helper_functions import get_designer
+from designer.utils.utils import get_designer
 from kivy.core.window import Keyboard, Window
 from kivy.lang import Builder
 from kivy.metrics import dp

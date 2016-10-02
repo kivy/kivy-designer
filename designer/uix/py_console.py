@@ -2,7 +2,7 @@ import code
 import sys
 import threading
 
-from designer.helper_functions import show_message
+from designer.utils.utils import show_message
 from kivy.base import runTouchApp
 from kivy.clock import Clock
 from kivy.lang import Builder

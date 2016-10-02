@@ -30,7 +30,7 @@ To install the prerequisites, enter a console (on Windows use kivy.bat in the ki
 
 or simple run:
 
-    pip install -r requirements.txt
+    pip install -Ur requirements.txt
 
 To install the FileBrowser, enter a console (on Windows use kivy.bat in the kivy folder):
 
@@ -39,13 +39,12 @@ To install the FileBrowser, enter a console (on Windows use kivy.bat in the kivy
 With the prerequisites installed, you can use the designer:
 
     git clone http://github.com/kivy/kivy-designer/
+
+or download it manually from https://github.com/kivy/kivy-designer/archive/master.zip and extract to
+`kivy-designer`, and then run:
+
     cd kivy-designer
-    python main.py
-
-Without git, download, extract and execute main.py:
-
-https://github.com/kivy/kivy-designer/archive/master.zip
-
+    python -m designer
 
 On OS X you might need to use the `kivy` command instead of `python` if you are using our portable package.
 

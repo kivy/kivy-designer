@@ -63,7 +63,7 @@ if __name__ == '__main__':
                      'kivy/tools/stub-gl-debug.py',
                      'kivy/modules/webdebugger.py',
                      'kivy/modules/_webdebugger.py',
-                     'designer/common.py']
+                     'designer/utils/toolbox_widgets.py']
     for target in targets:
         if isdir(target):
             if htmlmode:
