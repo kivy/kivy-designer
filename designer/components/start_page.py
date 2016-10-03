@@ -76,7 +76,7 @@ class DesignerStartPage(BoxLayout):
 
     recent_files_box = ObjectProperty(None)
     '''This property is an instance
-        of :class:`~designer.start_page.RecentFilesBox`
+        of :class:`~designer.components.start_page.RecentFilesBox`
        :data:`recent_files_box` is a :class:`~kivy.properties.ObjectProperty`
     '''
 

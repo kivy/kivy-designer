@@ -77,7 +77,8 @@ class MenuButton(Button):
        look and feel for a menu button.
     '''
     cont_menu = ObjectProperty(None)
-    '''Reference to :class:`~designer.uix.contextual.ContextMenu`.
+    '''Reference to
+        :class:`~designer.components.edit_contextual_view.ContextMenu`.
     '''
 
     def on_release(self, *args):

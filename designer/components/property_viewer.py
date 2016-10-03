@@ -19,7 +19,8 @@ from kivy.uix.textinput import TextInput
 
 class PropertyLabel(Label):
     '''This class represents the :class:`~kivy.label.Label` for showing
-       Property Names in :class:`~designer.propertyviewer.PropertyViewer`.
+       Property Names in
+       :class:`~designer.components.property_viewer.PropertyViewer`.
     '''
     pass
 
@@ -62,7 +63,7 @@ class PropertyBase(object):
 
     record_to_undo = BooleanProperty(False)
     '''It specifies whether the property change has to be recorded to undo.
-       It is used when :class:`~designer.undo_manager.UndoManager` undoes
+       It is used when :class:`~designer.core.undo_manager.UndoManager` undoes
        or redoes the property change.
        :data:`record_to_undo` is a :class:`~kivy.properties.BooleanProperty`
     '''
@@ -260,9 +261,9 @@ class PropertyViewer(ScrollView):
 
     def discover(self, value):
         '''To discover all properties and add their
-           :class:`~designer.propertyviewer.PropertyLabel` and
-           :class:`~designer.propertyviewer.PropertyBoolean`/
-           :class:`~designer.propertyviewer.PropertyTextInput`
+           :class:`~designer.components.property_viewer.PropertyLabel` and
+           :class:`~designer.components.property_viewer.PropertyBoolean`/
+           :class:`~designer.components.property_viewer.PropertyTextInput`
            to :data:`prop_list`.
         '''
 
@@ -286,9 +287,7 @@ class PropertyViewer(ScrollView):
             return lbl
 
     def build_for(self, name):
-        '''To create :class:`~designer.propertyviewer.PropertyBoolean`
-           :class:`~designer.propertyviewer.PropertyTextInput`
-           for Property 'name'
+        '''Creates a EventHandlerTextInput for each property given its name
         '''
 
         prop = self.widget.property(name)

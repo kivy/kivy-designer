@@ -204,7 +204,7 @@ class Project(EventDispatcher):
     '''
 
     app_widgets = DictProperty({})
-    '''List of :class:`~designer.project_manager.AppWidget`.
+    '''List of :class:`~designer.core.project_manager.AppWidget`.
     :data:`app_widgets` is a :class:`~kivy.properties.DictProperty`
     '''
 

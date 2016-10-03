@@ -28,14 +28,15 @@ class DesignerContent(FloatLayout):
     '''
 
     ui_creator = ObjectProperty(None)
-    '''This property refers to the :class:`~designer.ui_creator.UICreator`
+    '''This property refers to the
+        :class:`~designer.components.ui_creator.UICreator`
        instance. As there can only be one
        :data:`ui_creator` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     tree_toolbox_tab_panel = ObjectProperty(None)
     '''TabbedPanel containing Toolbox and Project Tree. Instance of
-       :class:`~designer.designer_content.DesignerTabbedPanel`
+       :class:`~designer.components.designer_content.DesignerTabbedPanel`
     '''
 
     splitter_tree = ObjectProperty(None)
@@ -45,7 +46,7 @@ class DesignerContent(FloatLayout):
     '''
 
     toolbox = ObjectProperty(None)
-    '''Reference to the :class:`~designer.toolbox.Toolbox` instance.
+    '''Reference to the :class:`~designer.components.toolbox.Toolbox` instance.
        :data:`toolbox` is an :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -58,7 +59,7 @@ class DesignerContent(FloatLayout):
 
     tab_pannel = ObjectProperty(None)
     '''This property refers to the instance of
-       :class:`~designer.designer_content.DesignerTabbedPanel`.
+       :class:`~designer.components.designer_content.DesignerTabbedPanel`.
        :data:`tab_pannel` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -81,8 +82,9 @@ class DesignerContent(FloatLayout):
     '''
 
     project = ObjectProperty(None)
-    '''Instance of  :class:`~designer.project_manager.Project` with the current
-        opened project.
+    '''Instance of
+        :class:`~designer.core.project_manager.Project`
+        with the current opened project.
         :data:`project` is a :class:`~kivy.properties.ObjectProperty`
         and defaults to None
     '''
@@ -250,7 +252,7 @@ class DesignerContent(FloatLayout):
 
 class DesignerTabbedPanel(TabbedPanel):
     '''DesignerTabbedPanel is used to display files opened up in tabs with
-       :class:`~designer.ui_creator.UICreator`
+       :class:`~designer.components.ui_creator.UICreator`
        Tab as a special one containing all features to edit the UI.
     '''
 

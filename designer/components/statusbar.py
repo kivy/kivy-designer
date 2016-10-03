@@ -116,19 +116,20 @@ class StatusBar(BoxLayout):
     '''
 
     navbar = ObjectProperty()
-    '''To be used as parent of :class:`~designer.statusbar.StatusNavBarButton`
-       and :class:`~designer.statusbar.StatusNavBarSeparator`.
+    '''To be used as parent of
+        :class:`~designer.components.statusbar.StatusNavBarButton`
+       and :class:`~designer.components.statusbar.StatusNavBarSeparator`.
        :data:`navbar` is an
        :class:`~kivy.properties.ObjectProperty`
     '''
 
     status_message = ObjectProperty()
-    '''Instance of :class:`~designer.statusbar.StatusMessage`
+    '''Instance of :class:`~designer.components.statusbar.StatusMessage`
        :class:`~kivy.properties.ObjectProperty`
     '''
 
     status_info = ObjectProperty()
-    '''Instance of :class:`~designer.statusbar.StatusInfo`
+    '''Instance of :class:`~designer.components.statusbar.StatusInfo`
        :class:`~kivy.properties.ObjectProperty`
     '''
 

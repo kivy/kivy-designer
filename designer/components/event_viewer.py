@@ -177,9 +177,9 @@ class EventViewer(PropertyViewer):
 
     def discover(self, value):
         '''To discover all properties and add their
-           :class:`~designer.propertyviewer.PropertyLabel` and
-           :class:`~designer.propertyviewer.PropertyBoolean`/
-           :class:`~designer.propertyviewer.PropertyTextInput`
+           :class:`~designer.components.property_viewer.PropertyLabel` and
+           :class:`~designer.components.property_viewer.PropertyBoolean`/
+           :class:`~designer.components.property_viewer.PropertyTextInput`
            to :data:`prop_list`.
         '''
 
@@ -296,9 +296,7 @@ class EventViewer(PropertyViewer):
             show_message('New event created!', 5, 'info')
 
     def build_for(self, name):
-        '''To create :class:`~designer.propertyviewer.PropertyBoolean`/
-           :class:`~designer.propertyviewer.PropertyTextInput`
-           for Property 'name'
+        '''Creates a EventHandlerTextInput for each property given its name
         '''
         text = self.kv_code_input.get_property_value(self.widget, name)
         return EventHandlerTextInput(

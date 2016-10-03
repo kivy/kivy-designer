@@ -83,34 +83,35 @@ class Designer(FloatLayout):
        :data:`message` is a :class:`~kivy.properties.StringProperty`
     '''
 
-    designer_console = ObjectProperty(None)
-    '''Instance of :class:`designer.designer_console.ConsoleDialog`
-    '''
-
     spec_editor = ObjectProperty(None)
-    '''Instance of :class:`designer.buildozer_spec_editor.BuildozerSpecEditor`
+    '''Instance of
+        :class:`~designer.components.buildozer_spec_editor.BuildozerSpecEditor`
     '''
 
     designer_tools = ObjectProperty(None)
-    '''Instance of :class:`designer.designer_tools.DesignerTools`
+    '''Instance of :class:`~designer.tools.tools.DesignerTools`
     '''
 
     designer_git = ObjectProperty(None)
-    '''Instance of :class:`designer.designer_git.DesignerGit`
+    '''Instance of :class:`~designer.tools.git_integration.DesignerGit`
     '''
 
     statusbar = ObjectProperty(None)
-    '''Reference to the :class:`~designer.statusbar.StatusBar` instance.
+    '''Reference to the
+        :class:`~designer.components.statusbar.StatusBar` instance.
        :data:`statusbar` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     editcontview = ObjectProperty(None)
-    '''Reference to the :class:`~designer.uix.EditContView` instance.
-       :data:`editcontview` is a :class:`~kivy.properties.ObjectProperty`
+    '''Reference to the
+        :class:`~designer.components.edit_contextual_view.EditContView`
+        instance. :data:`editcontview` is a
+        :class:`~kivy.properties.ObjectProperty`
     '''
 
     modulescontview = ObjectProperty(None)
-    '''Reference to the :class:`~designer.uix.modules_contview.ModulesContView`.
+    '''Reference to the
+        :class:`~designer.components.run_contextual_view.ModulesContView`.
        :data:`modulescontview` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -121,22 +122,23 @@ class Designer(FloatLayout):
     '''
 
     undo_manager = ObjectProperty(UndoManager())
-    '''Reference to the :class:`~designer.UndoManager` instance.
+    '''Reference to the
+        :class:`~designer.core.undo_manager.UndoManager` instance.
        :data:`undo_manager` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     project_watcher = ObjectProperty(None)
-    '''Reference to the :class:`~designer.project_manager.ProjectWatcher`.
+    '''Reference to the :class:`~designer.core.project_manager.ProjectWatcher`.
        :data:`project_watcher` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     project_manager = ObjectProperty(None)
-    '''Reference to the :class:`~designer.project_manager.ProjectManager`.
+    '''Reference to the :class:`~designer.core.project_manager.ProjectManager`.
        :data:`project_manager` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     proj_settings = ObjectProperty(None)
-    '''Reference of :class:`~designer.project_settings.ProjectSettings`.
+    '''Reference of :class:`~designer.core.project_settings.ProjectSettings`.
        :data:`proj_settings` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -147,13 +149,13 @@ class Designer(FloatLayout):
     '''
 
     ui_creator = ObjectProperty(None)
-    '''Reference to :class:`~designer.ui_creator.UICreator` instance.
+    '''Reference to :class:`~designer.components.ui_creator.UICreator` instance.
        :data:`ui_creator` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     designer_content = ObjectProperty(None)
     '''Reference to
-       :class:`~designer.designer_content.DesignerContent` instance.
+       :class:`~designer.components.designer_content.DesignerContent` instance.
        :data:`designer_content` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -163,7 +165,7 @@ class Designer(FloatLayout):
     '''
 
     designer_settings = ObjectProperty(None)
-    '''Reference of :class:`~designer.designer_settings.DesignerSettings`.
+    '''Reference of :class:`~designer.core.settings.DesignerSettings`.
        :data:`designer_settings` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
@@ -174,7 +176,7 @@ class Designer(FloatLayout):
 
     select_profile_cont_menu = ObjectProperty(None)
     '''Reference of
-        :class:`~designer.uix.designer_action_items.DesignerActionSubMenu`.
+        :class:`~designer.uix.action_items.DesignerActionSubMenu`.
        :data:`select_profile_cont_menu` is a
        :class:`~kivy.properties.ObjectProperty`
     '''
@@ -1616,7 +1618,7 @@ class Designer(FloatLayout):
 
     def on_sandbox_getting_exception(self, *args):
         '''Event Handler for
-           :class:`~designer.uix.designer_sandbox.DesignerSandbox`
+           :class:`~designer.uix.sandbox.DesignerSandbox`
            on_getting_exception event. This function will add exception
            string in error_console.
         '''
