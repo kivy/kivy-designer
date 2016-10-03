@@ -28,7 +28,7 @@ from watchdog.events import RegexMatchingEventHandler
 from watchdog.observers import Observer
 
 
-IGNORED_PATHS = ('.designer', '.buildozer', '.git', '__pycache__', 'bin',)
+IGNORED_PATHS = ('/.designer', '/.buildozer', '/.git', '/bin',)
 IGNORED_EXTS = ('.pyc',)
 KV_EVENT_RE = r'(\s+on_\w+\s*:.+)|(^[\s\w\d]+:[\.]+[\s\w]+\(.*)'
 KV_ROOT_WIDGET = r'^([\w\d_]+)\:'
@@ -37,8 +37,7 @@ KV_APP_WIDGET = r'^<([\w\d_@]+)>\:'
 
 class ProjectEventHandler(RegexMatchingEventHandler):
     def __init__(self, project_watcher):
-        super(ProjectEventHandler, self).__init__(
-            ignore_directories=IGNORED_PATHS)
+        super(ProjectEventHandler, self).__init__()
         self.project_watcher = project_watcher
 
     def on_any_event(self, event):
@@ -116,6 +115,19 @@ class ProjectWatcher(EventDispatcher):
 
     def on_any_event(self, event):
         if self._active:
+            # filter events
+            path = event.src_path.replace(self._path, '')
+            if not path:
+                return
+            if '__pycache__' in path:
+                return
+            for ign in IGNORED_PATHS:
+                if path.startswith(ign):
+                    return
+            for ext in IGNORED_EXTS:
+                if event.src_path.endswith(ext):
+                    return
+
             self.dispatch('on_project_modified', event)
 
 

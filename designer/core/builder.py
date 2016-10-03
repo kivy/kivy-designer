@@ -9,7 +9,7 @@ from designer.utils.utils import (
     get_current_project,
     get_fs_encoding,
     get_kd_data_dir,
-)
+    ignore_proj_watcher)
 from kivy.event import EventDispatcher
 from kivy.properties import (
     Clock,
