@@ -25,13 +25,6 @@ class AddFileDialog(BoxLayout):
        :data:`text_folder` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    always_check = ObjectProperty()
-    '''An instance to :class:`~kivy.uix.checkbox.CheckBox`, which will
-       determine whether same folder will be used for all files of
-       same type or not.
-       :data:`always_check` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
     lbl_error = ObjectProperty()
     '''An instance to Label to display errors.
        :data:`lbl_error` is a :class:`~kivy.properties.ObjectProperty`
@@ -42,6 +35,8 @@ class AddFileDialog(BoxLayout):
     def __init__(self, project, **kwargs):
         super(AddFileDialog, self).__init__(**kwargs)
         self.project = project
+        self._popup = None
+        self._fbrowser = None
 
     def on_cancel(self):
         pass
@@ -93,7 +88,7 @@ class AddFileDialog(BoxLayout):
         '''
 
         self._popup.dismiss()
-        if instance.selection != []:
+        if instance.selection:
             self.text_file.text = instance.selection[0]
 
     def open_file_btn_pressed(self, *args):

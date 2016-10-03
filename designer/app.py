@@ -372,7 +372,7 @@ class Designer(FloatLayout):
         Window.size = max(width, 800), max(height, 600)
 
     def on_git_branch(self, instance, branch_name, *args):
-        '''Bing git changes
+        '''Bind git changes
         :param branch_name: name of the selected branch
         '''
         update_info('Git', branch_name)
@@ -751,6 +751,7 @@ class Designer(FloatLayout):
                            auto_dismiss=False)
         self.popup.open()
 
+    @ignore_proj_watcher
     def _perform_new(self, *args):
         '''To load new project
         '''
@@ -779,7 +780,7 @@ class Designer(FloatLayout):
         shutil.copy(os.path.join(templates_dir, 'default.spec'),
                     os.path.join(new_proj_dir, 'buildozer.spec'))
 
-        self._perform_open(new_proj_dir)
+        self._perform_open(new_proj_dir, True)
         self.project_manager.current_project.new_project = True
         self.project_manager.current_project.saved = False
         show_message('Project created successfully', 5, 'info')
@@ -934,7 +935,7 @@ class Designer(FloatLayout):
         if error:
             show_message(error, 5, 'error')
 
-    def _perform_open(self, file_path):
+    def _perform_open(self, file_path, new_project=False):
         '''To open a project given by file_path
         '''
         self.project_watcher.stop_watching()
@@ -947,8 +948,10 @@ class Designer(FloatLayout):
 
         project = self.project_manager.open_project(file_path)
         self.project_watcher.start_watching(file_path)
-        self.recent_manager.add_path(project.path)
         self.designer_content.update_tree_view(project)
+
+        if not new_project:
+            self.recent_manager.add_path(project.path)
 
         for widget in toolbox_widgets[:]:
             if widget[1] == 'custom':
@@ -1092,8 +1095,8 @@ class Designer(FloatLayout):
         _config = instance.selected_config
         _config_path = _config.filename
         self.designer_settings.config_parser.set('internal',
-                                                'default_profile',
-                                                _config_path)
+                                                 'default_profile',
+                                                 _config_path)
         self.designer_settings.config_parser.write()
 
     def fill_select_profile_menu(self, *args):
