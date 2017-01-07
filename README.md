@@ -1,6 +1,9 @@
 Kivy Designer
 =============
 
+**WARNING:** This project is at an unstable alpha stage and is not yet 
+suitable for general use. Contributions are welcome.
+
 Kivy Designer is Kivy's tool for designing graphical user interfaces
 (GUIs) from Kivy Widgets. You can compose and customize widgets, and
 test them. It is completely written in Python using Kivy.
