@@ -897,9 +897,11 @@ class Designer(FloatLayout):
                 and not self.project_manager.current_project.new_project:
             def_path = self.project_manager.current_project.path
 
-        def open_file_browser(*args):
-            self.close_popup()
-            self._fbrowser_load(*args)
+        def open_file_browser(instance):
+            if instance.is_canceled():
+                return
+
+            self._fbrowser_load(instance)
 
         XFileOpen(title="Open", on_dismiss=open_file_browser, path=def_path)
 

@@ -14,8 +14,7 @@ Prerequisites
     - `gitpython <http://gitpython.readthedocs.org>`_
     - `six <https://pythonhosted.org/six/>`_
     - `kivy-garden <http://kivy.org/docs/api-kivy.garden.html>`_
-- The ``FileBrowser`` widget from the `Kivy Garden <http://kivy.org/docs/api-kivy.garden.html>`_
-
+- The XPopup widget from the [Kivy garden](https://github.com/kivy-garden/garden.xpopup)
 
 Installation
 ------------
@@ -36,11 +35,11 @@ Open the downloaded folder and install the required prerequisites:
     cd kivy-designer
     pip install -Ur requirements.txt
 
-To install the FileBrowser, enter a console (on windows use kivy.bat in the kivy folder):
+To install the XPopup enter a console (on Windows use kivy.bat in the kivy folder):
 
 ::
 
-    garden install filebrowser
+    garden install xpopup
 
 With the prerequisites installed, you can use the designer:
 
