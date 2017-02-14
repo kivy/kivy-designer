@@ -1,13 +1,13 @@
 [app]
 
 # (str) Title of your application
-title = My Application
+title = $app_name
 
 # (str) Package name
-package.name = myapp
+package.name = $package_name
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org.test
+package.domain = $package_domain
 
 # (str) Source code where the main.py live
 source.dir = .
@@ -28,11 +28,11 @@ source.include_exts = py,png,jpg,kv,atlas
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-# version = 0.1
+version = $package_version
 
 # (str) Application versioning (method 2)
-version.regex = __version__ = ['"](.*)['"]
-version.filename = %(source.dir)s/main.py
+# version.regex = __version__ = ['"](.*)['"]
+# version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
@@ -102,7 +102,7 @@ fullscreen = 1
 #android.p4a_dir =
 
 # (str) The directory in which python-for-android should look for your own build recipes (if any)
-#p4a.local_recipes = 
+#p4a.local_recipes =q
 
 # (list) python-for-android whitelist
 #android.p4a_whitelist =

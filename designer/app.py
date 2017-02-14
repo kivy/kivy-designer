@@ -1,3 +1,4 @@
+import io
 import os
 import shutil
 import traceback
@@ -5,6 +6,8 @@ import webbrowser
 from distutils.dir_util import copy_tree
 
 import kivy
+import sys
+
 from designer.components.buildozer_spec_editor import BuildozerSpecEditor
 from designer.components.designer_content import DesignerContent
 from designer.components.dialogs.about import AboutDialog
@@ -767,7 +770,11 @@ class Designer(FloatLayout):
 
         os.mkdir(new_proj_dir)
 
-        template = self._new_dialog.adapter.selection[0].text
+        template = self._new_dialog.template_list.text
+        app_name = self._new_dialog.app_name.text
+        package_domain, package_name = self._new_dialog.package_name.text\
+            .rsplit('.', 1)
+        package_version = self._new_dialog.package_version.text
         kv_file = NEW_PROJECTS[template][0]
         py_file = NEW_PROJECTS[template][1]
 
@@ -779,8 +786,16 @@ class Designer(FloatLayout):
         shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
 
-        shutil.copy(os.path.join(templates_dir, 'default.spec'),
-                    os.path.join(new_proj_dir, 'buildozer.spec'))
+        buildozer = io.open(os.path.join(new_proj_dir, 'buildozer.spec'), 'w')
+
+        for line in io.open(os.path.join(templates_dir, 'default.spec'), 'r'):
+            line = line.replace('$app_name', app_name)
+            line = line.replace('$package_name', package_name)
+            line = line.replace('$package_domain', package_domain)
+            line = line.replace('$package_version', package_version)
+            buildozer.write(line)
+
+        buildozer.close()
 
         self._perform_open(new_proj_dir, True)
         self.project_manager.current_project.new_project = True
