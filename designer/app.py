@@ -71,6 +71,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.widget import Widget
 
+from tempfile import mkdtemp
 
 __all__ = ('DesignerApp', )
 
@@ -253,6 +254,8 @@ class Designer(FloatLayout):
         self.popup = None
         self.help_dlg = None
         self._new_dialog = None
+
+        self.temp_proj_directories = []
 
     def _write_window_size(self, *_):
         '''Write updated window size to config
@@ -760,12 +763,10 @@ class Designer(FloatLayout):
 
         self.close_popup()
 
-        new_proj_dir = os.path.join(get_config_dir(),
-                                    constants.NEW_PROJECT_DIR_NAME)
-        if os.path.exists(new_proj_dir):
-            shutil.rmtree(new_proj_dir)
+        new_proj_dir = mkdtemp(prefix=constants.NEW_PROJECT_DIR_NAME_PREFIX,
+                               dir=get_config_dir())
 
-        os.mkdir(new_proj_dir)
+        self.temp_proj_directories.append(new_proj_dir)
 
         template = self._new_dialog.adapter.selection[0].text
         kv_file = NEW_PROJECTS[template][0]
@@ -1015,6 +1016,7 @@ class Designer(FloatLayout):
         else:
             self.save_project()
             if exit_on_save:
+                self.remove_temp_proj_directories()
                 self._perform_quit()
 
     def action_btn_save_as_pressed(self, exit_on_save=False, *args):
@@ -1060,6 +1062,7 @@ class Designer(FloatLayout):
         self.save_project()
         copy_tree(self.project_manager.current_project.path, proj_dir)
         if exit_on_save:
+            self.remove_temp_proj_directories()
             self._perform_quit()
             return
         self._perform_open(proj_dir)
@@ -1176,6 +1179,14 @@ class Designer(FloatLayout):
         self._perform_open(instance.get_selected_project())
         self.close_popup()
 
+    def remove_temp_proj_directories(self):
+        '''Before KD closes, delete temp new project directories.
+        '''
+        for temp_proj_dir in self.temp_proj_directories:
+            if os.getcwd() == temp_proj_dir:
+                os.chdir(get_config_dir())
+            shutil.rmtree(temp_proj_dir)
+
     def check_quit(self, *args):
         '''Check if the KD can be closed.
         If the project is modified, show an alert. Otherwise closes it.
@@ -1192,11 +1203,15 @@ class Designer(FloatLayout):
                                                        'not saved.\nWhat '
                                                        'would you like to do?')
 
+            def dont_save(*args):
+                self.remove_temp_proj_directories()
+                self._perform_quit()
+
             def save(*args):
                 self.close_popup()
                 self.action_btn_save_pressed(exit_on_save=True)
 
-            _confirm_dlg_save.bind(on_dont_save=self._perform_quit,
+            _confirm_dlg_save.bind(on_dont_save=dont_save,
                                    on_save=save,
                                    on_cancel=self.close_popup)
 
@@ -1205,6 +1220,7 @@ class Designer(FloatLayout):
                                auto_dismiss=False)
             self.popup.open()
             return True
+        self.remove_temp_proj_directories()
         self._perform_quit()
         return False
 
