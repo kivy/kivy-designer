@@ -209,14 +209,14 @@
     "key": "android.branch"
   },
   {
-    "type": "string",
+    "type": "path",
     "title": "ANT directory",
     "section": "app",
     "desc": "ANT directory (if empty, it will be automatically downloaded.)",
     "key": "android.ant_path"
   },
   {
-    "type": "string",
+    "type": "path",
     "title": "Own build recipes",
     "section": "app",
     "desc": "The directory in which python-for-android should look for your own build recipes (if any)",
