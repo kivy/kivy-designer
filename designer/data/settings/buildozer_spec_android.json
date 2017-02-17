@@ -137,6 +137,13 @@
     "items": []
   },
   {
+    "type": "string",
+    "title": "Android architecture",
+    "section": "app",
+    "desc": "The Android arch to build for: armeabi-v7a, arm64-v8a, x86",
+    "key": "android.arch"
+  },
+  {
     "type": "list",
     "title": "Android additional libraries to copy into libs/armeabi - armeabi",
     "section": "app",
@@ -221,6 +228,13 @@
     "section": "app",
     "desc": "The directory in which python-for-android should look for your own build recipes (if any)",
     "key": "p4a.local_recipes"
+  },
+  {
+    "type": "path",
+    "title": "python-for-android hook",
+    "section": "app",
+    "desc": "Filename to the hook for p4a",
+    "key": "p4a.hook"
   },
   {
     "type": "bool",
