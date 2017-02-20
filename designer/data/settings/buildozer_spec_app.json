@@ -106,6 +106,24 @@
     "items": ["license","images/*/*.jpg"]
   },
   {
+    "type": "list",
+    "title": "List of inclusions using pattern matching",
+    "section": "app",
+    "desc": "List of inclusions using pattern matching",
+    "key": "source.include_patterns",
+    "allow_custom": true,
+    "items": ["assets/*", "images/*.png"]
+  },
+  {
+    "type": "list",
+    "title": "List of services to declare",
+    "section": "app",
+    "desc": "List of services to declare",
+    "key": "services",
+    "allow_custom": true,
+    "items": ["NAME:ENTRYPOINT_TO_PY", "NAME2:ENTRYPOINT2_TO_PY"]
+  },
+  {
     "type": "title",
     "title": "Application Version"
   },

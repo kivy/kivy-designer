@@ -10,5 +10,19 @@
     "desc": "Buildozer Log Level",
     "key": "log_level",
     "options": {"0": "Error only", "1": "Info", "2": "debug (with command output)"}
+  },
+  {
+    "type": "string",
+    "title": "Path to build artifact storage",
+    "section": "app",
+    "desc": "Path to build artifact storage, absolute or relative to spec file",
+    "key": "build_dir"
+  },
+  {
+    "type": "string",
+    "title": "Path to build output",
+    "section": "app",
+    "desc": "Path to build output (i.e. .apk, .ipa) storage",
+    "key": "bin_dir"
   }
 ]

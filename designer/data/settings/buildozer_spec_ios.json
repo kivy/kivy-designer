@@ -16,5 +16,12 @@
     "section": "app",
     "desc": "Name of the certificate to use for signing the release version.\nGet a list of available identities: buildozer ios list_identities\nExample: 'iPhone Developer: <lastname> <firstname> (<hexstring>)'",
     "key": "ios.codesign.release"
+  },
+  {
+    "type": "path",
+    "title": "Path to a custom kivy-ios folder",
+    "section": "app",
+    "desc": "Path to a custom kivy-ios folder",
+    "key": "ios.kivy_ios_dir"
   }
 ]
