@@ -694,17 +694,17 @@ class Designer(FloatLayout):
         return True
 
     @ignore_proj_watcher
-    def _perform_new_file(self, *args):
+    def _perform_new_file(self, instance):
         '''
         Create a new file in the project folder
         '''
-        file_name = self._input_dialog.get_user_input()
+        file_name = instance.get_user_input()
         if file_name.find('.') == -1:
             file_name += '.py'
         new_file = os.path.join(self.project_manager.current_project.path,
                                 file_name)
         if os.path.exists(new_file):
-            self._input_dialog.lbl_error.text = 'File exists'
+            instance.lbl_error.text = 'File exists'
             return
 
         open(new_file, 'a').close()
