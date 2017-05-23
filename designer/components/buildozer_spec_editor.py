@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 import webbrowser
+from io import open
 
 import designer
 from designer.uix.settings import SettingDict, SettingList
@@ -97,7 +98,7 @@ class SpecCodeInput(BoxLayout):
         '''Read the buildozer.spec and update the CodeInput
         '''
         self.lbl_error.color = [0, 0, 0, 0]
-        self.text_input.text = open(self.spec_path, 'r').read()
+        self.text_input.text = open(self.spec_path, 'r', encoding='utf-8').read()
 
     @ignore_proj_watcher
     def _save_spec(self, *args):
@@ -186,7 +187,7 @@ class BuildozerSpecEditor(Settings):
         if filename is None and data is None:
             raise Exception('You must specify either the filename or data')
         if filename is not None:
-            with open(filename, 'r') as fd:
+            with open(filename, 'r', encoding='utf-8') as fd:
                 data = json.loads(fd.read())
         else:
             data = json.loads(data)

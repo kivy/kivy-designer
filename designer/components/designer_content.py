@@ -1,5 +1,5 @@
 import os
-
+from io import open
 from designer.components.buildozer_spec_editor import BuildozerSpecEditor
 from designer.uix.confirmation_dialog import ConfirmationDialog
 from designer.uix.py_code_input import PyScrollView
@@ -270,7 +270,7 @@ class DesignerTabbedPanel(TabbedPanel):
 
         panel_item = DesignerCloseableTab(title=os.path.basename(path))
         panel_item.bind(on_close=self.on_close_tab)
-        f = open(path, 'r')
+        f = open(path, 'r', encoding='utf-8')
         scroll = PyScrollView()
         _py_code_input = scroll.code_input
         _py_code_input.text = f.read()
