@@ -98,7 +98,8 @@ class SpecCodeInput(BoxLayout):
         '''Read the buildozer.spec and update the CodeInput
         '''
         self.lbl_error.color = [0, 0, 0, 0]
-        self.text_input.text = open(self.spec_path, 'r', encoding='utf-8').read()
+        self.text_input.text = open(self.spec_path, 'r',
+                                    encoding='utf-8').read()
 
     @ignore_proj_watcher
     def _save_spec(self, *args):
