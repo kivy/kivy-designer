@@ -690,37 +690,101 @@
             close: True
             width: 2
 
-<NewProjectDialog>:
-    image: image
-    list_parent: list_parent
-    select_button: select
-    cancel_button: cancel
-    orientation: 'vertical'
-    padding: designer_padding
-    Label:
-        size_hint: None, None
-        pos_hint: {'x': 0.1}
-        height: '22pt'
-        text: 'Select one of the following templates:'
-    BoxLayout:
-        id: list_parent
-        orientation: 'horizontal'
-        padding: designer_padding
-        spacing: designer_spacing
-        Image:
-            id: image
+<ProjectTemplateBox>:
+    grid: grid
+    cols: 1
+    padding: '2sp'
+    size_hint_x: None
+    bar_width: 10
+    scroll_type: ['bars', 'content']
     GridLayout:
-        rows: 1
+        id: grid
+        cols: 1
         size_hint_y: None
-        height: '48sp'
-        padding: designer_padding
-        spacing: designer_spacing
-        DesignerButton:
-            id: select
-            text: 'Create New Project'
-        DesignerButton:
-            id: cancel
-            text: 'Cancel'
+        height: 1
+
+<NewProjectDialog>:
+    template_preview: template_preview
+    cancel_button: cancel
+    select_button: select
+    template_list: template_list
+    app_name: app_name
+    package_name: package_name
+    package_version: package_version
+    orientation: 'horizontal'
+    padding: designer_padding
+    spacing: designer_spacing
+    ProjectTemplateBox:
+        id: template_list
+        pos_hint: {'center_x': 0.5}
+        size_hint_x: 0.3
+        canvas.before:
+            Color:
+                rgba: 1, 1, 1, 0.05
+            Rectangle:
+                pos: self.pos
+                size: self.size
+    BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: 0.7
+        spacing: 20
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            Label:
+                size_hint_x: 0.2
+                text_size: self.width, None
+                padding_x: 10
+                halign: 'right'
+                text: 'App Name: '
+            TextInput:
+                id: app_name
+                size_hint_x: 0.7
+                multiline: False
+                padding: [15, ( self.height - self.line_height ) / 2]
+                focus: True
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            Label:
+                size_hint_x: 0.2
+                text_size: self.width, None
+                padding_x: 10
+                halign: 'right'
+                text: 'Package Name: '
+            TextInput:
+                id: package_name
+                size_hint_x: 0.7
+                multiline: False
+                padding: [15, ( self.height - self.line_height ) / 2]
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            Label:
+                size_hint_x: 0.2
+                text_size: self.width, None
+                padding_x: 10
+                halign: 'right'
+                text: 'Version: '
+            TextInput:
+                id: package_version
+                size_hint_x: 0.7
+                multiline: False
+                padding: [15, ( self.height - self.line_height ) / 2]
+        Image:
+            id: template_preview
+        GridLayout:
+            rows: 1
+            size_hint_y: None
+            height: '48sp'
+            padding: designer_padding
+            spacing: designer_spacing
+            DesignerButton:
+                id: select
+                text: 'Create New Project'
+            DesignerButton:
+                id: cancel
+                text: 'Cancel'
 
 <RecentDialog>:
     select_button: select

@@ -1,15 +1,13 @@
 from functools import partial
 from os.path import join
 
+from kivy.uix.scrollview import ScrollView
+
 from designer.utils import constants
-from designer.utils.utils import get_kd_data_dir, get_kd_dir
-from kivy.adapters.listadapter import ListAdapter
-from kivy.core.window import Keyboard, Window
+from designer.utils.utils import get_kd_data_dir
 from kivy.factory import Factory
-from kivy.properties import NumericProperty, ObjectProperty
+from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.image import Image
-from kivy.uix.listview import ListView
 
 
 NEW_PROJECTS = {
@@ -31,13 +29,49 @@ NEW_PROJECTS = {
                                  'template_textinput_scrollview_py')}
 
 
-class NewProjectDialog(BoxLayout):
-
-    listview = ObjectProperty(None)
-    ''':class:`~kivy.uix.listview.ListView` used for showing file paths.
-       :data:`listview` is a :class:`~kivy.properties.ObjectProperty`
+class ProjectTemplateBox(ScrollView):
+    '''Container consistings of buttons, with their names specifying
+       the recent files.
     '''
 
+    grid = ObjectProperty(None)
+    '''The grid layout consisting of all buttons.
+       This property is an instance of :class:`~kivy.uix.gridlayout`
+       :data:`grid` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    text = ObjectProperty(None)
+    '''The grid layout consisting of all buttons.
+       This property is an instance of :class:`~kivy.uix.gridlayout`
+       :data:`grid` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    def __init__(self, **kwargs):
+        super(ProjectTemplateBox, self).__init__(**kwargs)
+
+    def add_template(self):
+        '''To add buttons representing Recent Files.
+        :param list_files: array of paths
+        '''
+        item_strings = list(NEW_PROJECTS.keys())
+        item_strings.sort()
+        for p in item_strings:
+            recent_item = Factory.DesignerListItemButton(text=p)
+            self.grid.add_widget(recent_item)
+            recent_item.bind(on_press=self.btn_release)
+            self.grid.height += recent_item.height
+
+        self.grid.height = max(self.grid.height, self.height)
+        self.grid.children[-1].trigger_action()
+
+    def btn_release(self, instance):
+        '''Event Handler for 'on_release' of an event.
+        '''
+        self.text = instance.text
+        self.parent.update_template_preview(instance)
+
+
+class NewProjectDialog(BoxLayout):
     select_button = ObjectProperty(None)
     ''':class:`~kivy.uix.button.Button` used to select the list item.
        :data:`select_button` is a :class:`~kivy.properties.ObjectProperty`
@@ -48,101 +82,52 @@ class NewProjectDialog(BoxLayout):
        :data:`cancel_button` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    adapter = ObjectProperty(None)
-    ''':class:`~kivy.uix.listview.ListAdapter` used for selecting files.
-       :data:`adapter` is a :class:`~kivy.properties.ObjectProperty`
-    '''
-
-    image = ObjectProperty(None)
-    '''Type of :class:`~kivy.uix.image.Image` to display image of selected
+    template_preview = ObjectProperty(None)
+    '''Type of :class:`~kivy.uix.image.Image` to display preview of selected
        new template.
-       :data:`image` is a :class:`~kivy.properties.ObjectProperty`
+       :data:`template_preview` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    list_parent = ObjectProperty(None)
-    '''Parent of listview.
-       :data:`list_parent` is a :class:`~kivy.properties.ObjectProperty`
+    template_list = ObjectProperty(None)
+    '''Type of :class:`ProjectTemplateBox` used for showing template available.
+       :data:`template_list` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
-    prev_selection = NumericProperty(0)
-    '''to memorize the previous selection.
-       :attr:`prev_selection` is a :class:
-       `~kivy.properties.NumericProperty`, defaults to (0).
+    app_name = ObjectProperty(None)
+    '''Type of :class:`ProjectTemplateBox` used for showing template available.
+       :data:`template_list` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    package_name = ObjectProperty(None)
+    '''Type of :class:`ProjectTemplateBox` used for showing template available.
+       :data:`template_list` is a :class:`~kivy.properties.ObjectProperty`
+    '''
+
+    package_version = ObjectProperty(None)
+    '''Type of :class:`ProjectTemplateBox` used for showing template available.
+       :data:`template_list` is a :class:`~kivy.properties.ObjectProperty`
     '''
 
     __events__ = ('on_select', 'on_cancel')
 
     def __init__(self, **kwargs):
         super(NewProjectDialog, self).__init__(**kwargs)
-        item_strings = list(NEW_PROJECTS.keys())
-        item_strings.sort()
-        self.adapter = ListAdapter(cls=Factory.DesignerListItemButton,
-                                   data=item_strings,
-                                   selection_mode='single',
-                                   allow_empty_selection=False)
-        self.adapter.check_for_empty_selection = self.check_for_empty_selection
-        self.adapter.bind(on_selection_change=self.on_adapter_selection_change)
-        self.listview = ListView(adapter=self.adapter)
-        self.listview.size_hint = (0.5, 1)
-        self.listview.pos_hint = {'top': 1}
-        self.list_parent.add_widget(self.listview, 1)
-        self.on_adapter_selection_change(self.adapter)
+        self.template_list.add_template()
+        self.app_name.bind(text=self.on_app_name_text)
+        self.app_name.text = "My Application"
+        self.package_version.text = "0.1.dev0"
 
-    def on_parent(self, *args):
-        if self.parent:
-            Window.bind(on_key_down=self._on_keyboard_down)
-        else:
-            Window.unbind(on_key_down=self._on_keyboard_down)
-
-    def _on_keyboard_down(self, keyboard, key, codepoint,
-                          text, modifier, *args):
-        '''To detect which key is pressed
-        '''
-        if modifier:
-            return False
-        key_str = Keyboard.keycode_to_string(Window._system_keyboard, key)
-        if key_str == 'up':
-            v = self.adapter.get_view(self.prev_selection - 1)
-            if v is not None:
-                self.adapter.handle_selection(v)
-                return True
-        if key_str == 'down':
-            v = self.adapter.get_view(self.prev_selection + 1)
-            if v is not None:
-                self.adapter.handle_selection(v)
-                return True
-        if key_str == 'enter':
-            self.dispatch('on_select')
-            return True
-
-    def check_for_empty_selection(self, *args):
-        if not self.adapter.allow_empty_selection:
-            if len(self.adapter.selection) == 0:
-                # Select the first item if we have it.
-                v = self.adapter.get_view(self.prev_selection)
-                if v is not None:
-                    self.adapter.handle_selection(v)
-
-    def on_adapter_selection_change(self, adapter):
+    def update_template_preview(self, instance):
         '''Event handler for 'on_selection_change' event of adapter.
         '''
-        name = adapter.selection[0].text.lower() + '.png'
+        name = instance.text.lower() + '.png'
         name = name.replace(' and ', '_')
-        image_source = join(constants.NEW_TEMPLATE_IMAGE_PATH, name)
-        image_source = join(get_kd_data_dir(), image_source)
-        parent = self.image.parent
-        parent.remove_widget(self.image)
-        self.image = Image(source=image_source)
-        parent.add_widget(self.image)
-        self.prev_selection = adapter.data.index(adapter.selection[0].text)
+        image_source = join(get_kd_data_dir(),
+                            constants.NEW_TEMPLATE_IMAGE_PATH, name)
+        self.template_preview.source = image_source
 
-    def on_touch_down(self, touch):
-        '''Used to determine where touch is down and to detect double
-           tap.
-        '''
-        if touch.is_double_tap:
-            self.dispatch('on_select')
-        return super(NewProjectDialog, self).on_touch_down(touch)
+    def on_app_name_text(self, instance, value):
+        self.package_name.text = 'org.test.' + value.lower().replace(' ', '_')
 
     def on_select(self, *args):
         '''Default Event Handler for 'on_select' event
