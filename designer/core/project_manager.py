@@ -26,6 +26,7 @@ from kivy.uix.widget import Widget
 from six import exec_
 from watchdog.events import RegexMatchingEventHandler
 from watchdog.observers import Observer
+from io import open
 
 
 IGNORED_PATHS = ('/.designer', '/.buildozer', '/.git', '/bin',)
@@ -288,7 +289,7 @@ class Project(EventDispatcher):
             self.parse_py(py)
         # find and load root widgets
         for kv in self.kv_list:
-            src = open(kv, 'r').read()
+            src = open(kv, 'r', encoding='utf-8').read()
             # removes events
             src = re.sub(KV_EVENT_RE, '', src, flags=re.MULTILINE)
             self.parse_kv(src, kv)
@@ -407,7 +408,7 @@ class Project(EventDispatcher):
                                             for x in rel_path.split('/')])
 
         # remove method calls to do a safe import
-        src = open(path, 'r').read()
+        src = open(path, 'r', encoding='utf-8').read()
         try:
             p = ast.parse(src, os.path.basename(path))
         except SyntaxError as e:
@@ -478,7 +479,7 @@ class Project(EventDispatcher):
                 if not fname:
                     continue
                 content = code.text
-                open(fname, 'w').write(content)
+                open(fname, 'w', encoding='utf-8').write(content)
                 code.saved = True
         except IOError as e:
             return False

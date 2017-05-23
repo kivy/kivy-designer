@@ -1,6 +1,7 @@
 import os
 import subprocess
 import threading
+from io import open
 
 from designer.components.designer_content import DesignerCloseableTab
 from designer.uix.action_items import (
@@ -174,7 +175,7 @@ class DesignerGit(DesignerActionSubMenu):
             script = os.path.join(get_kd_dir(), 'tools', 'ssh-agent', 'ssh.bat')
             status_txt = os.path.join(get_kd_dir(), 'tools', 'ssh-agent',
                                       'ssh_status.txt')
-            status = open(status_txt, 'r').read()
+            status = open(status_txt, 'r', encoding='utf-8').read()
             status = status.strip()
             if status == '1':
                 return True

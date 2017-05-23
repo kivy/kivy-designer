@@ -1,7 +1,7 @@
 import functools
 import os
 import re
-
+from io import open
 from designer.core.undo_manager import WidgetDragOperation, WidgetOperation
 from designer.uix.confirmation_dialog import ConfirmationDialogSave
 from designer.uix.settings import SettingListContent
@@ -605,7 +605,8 @@ class Playground(ScatterPlane):
                 # updates kv lang text with file
                 kv_path = target.kv_path
                 if kv_path:
-                    self.kv_code_input.text = open(kv_path).read()
+                    self.kv_code_input.text = open(kv_path,
+                                                   encoding='utf-8').read()
                 else:
                     show_message(
                         'Could not found the associated .kv file with %s'
@@ -670,7 +671,7 @@ class Playground(ScatterPlane):
         if not os.path.exists(kv_path):
             show_message(kv_path + ' not exists', 5, 'error')
             return
-        self.kv_code_input.text = open(kv_path, 'r').read()
+        self.kv_code_input.text = open(kv_path, 'r', encoding='utf-8').read()
         self.kv_code_input.path = kv_path
         for key in widgets:
             wd = widgets[key]
