@@ -52,7 +52,7 @@ Builder.load_string('''
         BoxLayout:
             size_hint: 0.6, None
             padding: 10, 10
-            height: 50
+            height: 70
             pos_hint: {'x':0.2}
             spacing: 5
             Button:
@@ -157,7 +157,9 @@ class BugReporterApp(App):
 
 ## Traceback
 
+```
 %s
+```
 
 End of Traceback
 '''
