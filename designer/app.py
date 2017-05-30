@@ -74,6 +74,7 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.uix.tabbedpanel import TabbedPanel
 from kivy.uix.widget import Widget
 
+from tempfile import mkdtemp
 
 __all__ = ('DesignerApp', )
 
@@ -256,6 +257,8 @@ class Designer(FloatLayout):
         self.popup = None
         self.help_dlg = None
         self._new_dialog = None
+
+        self.temp_proj_directories = []
 
     def _write_window_size(self, *_):
         '''Write updated window size to config
@@ -763,12 +766,9 @@ class Designer(FloatLayout):
 
         self.close_popup()
 
-        new_proj_dir = os.path.join(get_config_dir(),
-                                    constants.NEW_PROJECT_DIR_NAME)
-        if os.path.exists(new_proj_dir):
-            shutil.rmtree(new_proj_dir)
+        new_proj_dir = mkdtemp(prefix=constants.NEW_PROJECT_DIR_NAME_PREFIX)
 
-        os.mkdir(new_proj_dir)
+        self.temp_proj_directories.append(new_proj_dir)
 
         template = self._new_dialog.template_list.text
         app_name = self._new_dialog.app_name.text
@@ -1191,6 +1191,14 @@ class Designer(FloatLayout):
         self._perform_open(instance.get_selected_project())
         self.close_popup()
 
+    def remove_temp_proj_directories(self):
+        '''Before KD closes, delete temp new project directories.
+        '''
+        for temp_proj_dir in self.temp_proj_directories:
+            if os.getcwd() == temp_proj_dir:
+                os.chdir(get_config_dir())
+            shutil.rmtree(temp_proj_dir)
+
     def check_quit(self, *args):
         '''Check if the KD can be closed.
         If the project is modified, show an alert. Otherwise closes it.
@@ -1237,6 +1245,7 @@ class Designer(FloatLayout):
     def _perform_quit(self, *args):
         '''Perform Application qui.Application
         '''
+        self.remove_temp_proj_directories()
         App.get_running_app().stop()
 
     def action_btn_undo_pressed(self, *args):
