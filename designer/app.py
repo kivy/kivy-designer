@@ -763,8 +763,7 @@ class Designer(FloatLayout):
 
         self.close_popup()
 
-        new_proj_dir = mkdtemp(prefix=constants.NEW_PROJECT_DIR_NAME_PREFIX,
-                               dir=get_config_dir())
+        new_proj_dir = mkdtemp(prefix=constants.NEW_PROJECT_DIR_NAME_PREFIX)
 
         self.temp_proj_directories.append(new_proj_dir)
 
@@ -1016,7 +1015,6 @@ class Designer(FloatLayout):
         else:
             self.save_project()
             if exit_on_save:
-                self.remove_temp_proj_directories()
                 self._perform_quit()
 
     def action_btn_save_as_pressed(self, exit_on_save=False, *args):
@@ -1062,7 +1060,6 @@ class Designer(FloatLayout):
         self.save_project()
         copy_tree(self.project_manager.current_project.path, proj_dir)
         if exit_on_save:
-            self.remove_temp_proj_directories()
             self._perform_quit()
             return
         self._perform_open(proj_dir)
@@ -1203,15 +1200,11 @@ class Designer(FloatLayout):
                                                        'not saved.\nWhat '
                                                        'would you like to do?')
 
-            def dont_save(*args):
-                self.remove_temp_proj_directories()
-                self._perform_quit()
-
             def save(*args):
                 self.close_popup()
                 self.action_btn_save_pressed(exit_on_save=True)
 
-            _confirm_dlg_save.bind(on_dont_save=dont_save,
+            _confirm_dlg_save.bind(on_dont_save=self._perform_quit,
                                    on_save=save,
                                    on_cancel=self.close_popup)
 
@@ -1220,7 +1213,6 @@ class Designer(FloatLayout):
                                auto_dismiss=False)
             self.popup.open()
             return True
-        self.remove_temp_proj_directories()
         self._perform_quit()
         return False
 
@@ -1238,6 +1230,7 @@ class Designer(FloatLayout):
     def _perform_quit(self, *args):
         '''Perform Application qui.Application
         '''
+        self.remove_temp_proj_directories()
         App.get_running_app().stop()
 
     def action_btn_undo_pressed(self, *args):
