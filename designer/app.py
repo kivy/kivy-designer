@@ -916,7 +916,9 @@ class Designer(FloatLayout):
 
         error = None
         try:
-            if file_extension == '.py':
+            if file_extension in ('.py', '.kv') \
+                    or (file_name.endswith('buildozer')
+                        and file_extension == '.spec'):
                 self._perform_open(file_path)
             else:
                 error = 'Cannot load file type: .%s, Please load a .py file' % \
