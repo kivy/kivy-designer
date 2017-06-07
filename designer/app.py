@@ -786,9 +786,11 @@ class Designer(FloatLayout):
         shutil.copy(os.path.join(templates_dir, kv_file),
                     os.path.join(new_proj_dir, "main.kv"))
 
-        buildozer = io.open(os.path.join(new_proj_dir, 'buildozer.spec'), 'w')
+        buildozer = io.open(os.path.join(new_proj_dir, 'buildozer.spec'), 'w',
+                            encoding='utf-8')
 
-        for line in io.open(os.path.join(templates_dir, 'default.spec'), 'r'):
+        for line in io.open(os.path.join(templates_dir, 'default.spec'), 'r',
+                            encoding='utf-8'):
             line = line.replace('$app_name', app_name)
             line = line.replace('$package_name', package_name)
             line = line.replace('$package_domain', package_domain)
