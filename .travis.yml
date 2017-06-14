@@ -15,7 +15,7 @@ install:
     sudo apt-get install xvfb pulseaudio;
     pip install --upgrade Cython==0.25.2 pillow nose coveralls;
     pip install -r requirements.txt;
-    garden install filebrowser;
+    garden install xpopup;
 
 before_script:
     export DISPLAY=:99.0;

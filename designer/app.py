@@ -57,7 +57,7 @@ from kivy.clock import Clock
 from kivy.config import Config
 from kivy.core.window import Window
 from kivy.factory import Factory
-from kivy.garden.filebrowser import FileBrowser
+from kivy.garden.xpopup.file import XFileSave, XFileOpen
 from kivy.graphics.context_instructions import Color
 from kivy.graphics.vertex_instructions import Line
 from kivy.properties import (
@@ -909,28 +909,18 @@ class Designer(FloatLayout):
         if self.popup:
             return False
 
-        self._fbrowser = FileBrowser(select_string='Open')
-
-        def_path = os.getcwd()
+        def_path = os.path.expanduser('~')
         if self.project_manager.current_project.path \
                 and not self.project_manager.current_project.new_project:
             def_path = self.project_manager.current_project.path
 
-        if self._fbrowser.ids.tabbed_browser.current_tab.text == 'List View':
-            self._fbrowser.ids.list_view.path = def_path
-        else:
-            self._fbrowser.ids.icon_view.path = def_path
+        def open_file_browser(instance):
+            if instance.is_canceled():
+                return
 
-        def open_file_browser(*args):
-            self.close_popup()
-            self._fbrowser_load(*args)
+            self._fbrowser_load(instance)
 
-        self._fbrowser.bind(on_success=open_file_browser,
-                            on_canceled=self.close_popup)
-
-        self.popup = Popup(title="Open", content=self._fbrowser,
-                           size_hint=(0.9, 0.9), auto_dismiss=False)
-        self.popup.open()
+        XFileOpen(title="Open", on_dismiss=open_file_browser, path=def_path)
 
     def _fbrowser_load(self, instance):
         '''Event Handler for 'on_load' event of self._fbrowser
@@ -939,15 +929,17 @@ class Designer(FloatLayout):
             return
 
         file_path = instance.selection[0]
-        file_extension = instance.selection[0].split('.')
+        file_name, file_extension = os.path.splitext(instance.selection[0])
 
         error = None
         try:
-            if file_extension[1] == 'py':
+            if file_extension in ('.py', '.kv') \
+                    or (file_name.endswith('buildozer')
+                        and file_extension == '.spec'):
                 self._perform_open(file_path)
             else:
                 error = 'Cannot load file type: .%s, Please load a .py file' % \
-                    (file_extension[1])
+                        file_extension
         except:
             error = 'Cannot load empty file type'
 
@@ -1040,38 +1032,25 @@ class Designer(FloatLayout):
         if self.popup:
             return False
         proj = self.project_manager.current_project
-        save_as_browser = FileBrowser(select_string='Save')
 
         def_path = os.path.expanduser('~')
         if not proj.new_project and proj.path:
             def_path = proj.path
 
-        if save_as_browser.ids.tabbed_browser.current_tab.text == \
-                'List View':
-            save_as_browser.ids.list_view.path = def_path
-        else:
-            save_as_browser.ids.icon_view.path = def_path
+        def save_project(instance):
+            if instance.is_canceled():
+                return
 
-        def save_project(*args):
-            self.close_popup()
-            self._perform_save_as(save_as_browser, exit_on_save=exit_on_save)
+            self._perform_save_as(instance, exit_on_save=exit_on_save)
 
-        save_as_browser.bind(on_success=save_project,
-                             on_canceled=self.close_popup)
-
-        self.popup = Popup(title="Enter Folder Name",
-                           content=save_as_browser,
-                           size_hint=(0.9, 0.9), auto_dismiss=False)
-        self.popup.open()
+        XFileSave(title="Enter Folder Name", size_hint=(0.9, 0.9),
+                  on_dismiss=save_project, path=def_path)
 
     def _perform_save_as(self, instance, exit_on_save=False):
         '''Event handler for 'on_success' event of self._save_as_browser
         '''
 
-        if instance.ids.tabbed_browser.current_tab.text == 'List View':
-            proj_dir = instance.ids.list_view.path
-        else:
-            proj_dir = instance.ids.icon_view.path
+        proj_dir = instance.path + os.path.sep + instance.filename
 
         # save the project in the folder and then copy it to a new folder
         self.save_project()
