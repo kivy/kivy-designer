@@ -2,7 +2,8 @@ Kivy Designer
 =============
 
 **WARNING:** This project is at an unstable alpha stage and is not yet 
-suitable for general use. Contributions are welcome.
+suitable for general use. Also, **there is no current plan about developping
+it further**, please let us know if you are interested in contributing to it.
 
 Kivy Designer is Kivy's tool for designing graphical user interfaces
 (GUIs) from Kivy Widgets. You can compose and customize widgets, and
