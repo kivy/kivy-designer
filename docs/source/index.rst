@@ -1,3 +1,6 @@
+.. warning::
+   This project has been deprecated, it doesn't work, and is not being maintained, even when it worked, it had multiple issues, we don't advise spending time trying to make it work.
+
 .. Kivy Designer documentation master file, created by
    sphinx-quickstart on Wed Jul  8 01:52:44 2015.
    You can adapt this file completely to your liking, but it should at least
